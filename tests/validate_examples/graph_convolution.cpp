@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,17 +24,15 @@
 #include "arm_compute/graph.h"
 
 #include "tests/NEON/Accessor.h"
-#include "tests/validation/Validation.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
 #include "tests/validation/reference/Permute.h"
-
+#include "tests/validation/Validation.h"
 #include "utils/CommonGraphOptions.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
 
-#include "ValidateExample.h"
 #include "graph_validate_utils.h"
-
+#include "ValidateExample.h"
 #include <utility>
 
 using namespace arm_compute::utils;
@@ -93,29 +91,23 @@ public:
           weights_npy(parser.add_option<SimpleOption<std::string>>("weights_npy")),
           bias_npy(parser.add_option<SimpleOption<std::string>>("bias_image"))
     {
-        const std::set<ConvolutionPaddingMode> available_padding_modes
-        {
-            ConvolutionPaddingMode::Valid,
-            ConvolutionPaddingMode::Same
-        };
+        const std::set<ConvolutionPaddingMode> available_padding_modes{ConvolutionPaddingMode::Valid,
+                                                                       ConvolutionPaddingMode::Same};
 
-        const std::set<arm_compute::graph::ConvolutionMethod> supported_convolution_methods
-        {
-            arm_compute::graph::ConvolutionMethod::Default,
-            arm_compute::graph::ConvolutionMethod::GEMM,
-            arm_compute::graph::ConvolutionMethod::Winograd,
-            arm_compute::graph::ConvolutionMethod::Direct
-        };
+        const std::set<arm_compute::graph::ConvolutionMethod> supported_convolution_methods{
+            arm_compute::graph::ConvolutionMethod::Default, arm_compute::graph::ConvolutionMethod::GEMM,
+            arm_compute::graph::ConvolutionMethod::Winograd, arm_compute::graph::ConvolutionMethod::Direct};
 
-        const std::set<DataLayout> supported_data_layouts
-        {
+        const std::set<DataLayout> supported_data_layouts{
             DataLayout::NHWC,
             DataLayout::NCHW,
         };
 
-        padding_mode = parser.add_option<EnumOption<ConvolutionPaddingMode>>("padding_mode", available_padding_modes, ConvolutionPaddingMode::Valid);
-        conv_mode    = parser.add_option<EnumOption<arm_compute::graph::ConvolutionMethod>>("convolution_method", supported_convolution_methods, arm_compute::graph::ConvolutionMethod::Default);
-        data_layout  = parser.add_option<EnumOption<DataLayout>>("layout", supported_data_layouts, DataLayout::NHWC);
+        padding_mode = parser.add_option<EnumOption<ConvolutionPaddingMode>>("padding_mode", available_padding_modes,
+                                                                             ConvolutionPaddingMode::Valid);
+        conv_mode    = parser.add_option<EnumOption<arm_compute::graph::ConvolutionMethod>>(
+            "convolution_method", supported_convolution_methods, arm_compute::graph::ConvolutionMethod::Default);
+        data_layout = parser.add_option<EnumOption<DataLayout>>("layout", supported_data_layouts, DataLayout::NHWC);
 
         padding_mode->set_help("Set padding mode");
         help->set_help("Show this help message");
@@ -196,13 +188,16 @@ public:
         os << "Threads : " << common_params.common_params.threads << std::endl;
         os << "Target : " << common_params.common_params.target << std::endl;
         os << "Data type : " << common_params.data_type << std::endl;
-        os << "Input dimensions(X,Y, Channels, Batch) : (" << common_params.input.width << "," << common_params.input.height << "," << common_params.input.fm << "," << common_params.input.batch << ")"
+        os << "Input dimensions(X,Y, Channels, Batch) : (" << common_params.input.width << ","
+           << common_params.input.height << "," << common_params.input.fm << "," << common_params.input.batch << ")"
            << std::endl;
-        os << "Weight dimensions(X,Y, Channels(same as input), OFM) : (" << common_params.weights.width << "," << common_params.weights.height << "," << common_params.input.fm << "," <<
-           common_params.weights.fm << ")" << std::endl;
-        os << "Padding(top, bottom, left, right) (stride x, stride y) : (" << common_params.convolution.padding_top << "," << common_params.convolution.padding_bottom << "," <<
-           common_params.convolution.padding_left << "," << common_params.convolution.padding_right << ") (" << common_params.convolution.padding_stride_x << "," << common_params.convolution.padding_stride_y <<
-           ")" << std::endl;
+        os << "Weight dimensions(X,Y, Channels(same as input), OFM) : (" << common_params.weights.width << ","
+           << common_params.weights.height << "," << common_params.input.fm << "," << common_params.weights.fm << ")"
+           << std::endl;
+        os << "Padding(top, bottom, left, right) (stride x, stride y) : (" << common_params.convolution.padding_top
+           << "," << common_params.convolution.padding_bottom << "," << common_params.convolution.padding_left << ","
+           << common_params.convolution.padding_right << ") (" << common_params.convolution.padding_stride_x << ","
+           << common_params.convolution.padding_stride_y << ")" << std::endl;
         os << "Padding Mode: " << common_params.convolution.padding_mode << std::endl;
         os << "Convolution Method: " << common_params.convolution_method << std::endl;
     }
@@ -219,32 +214,32 @@ public:
     ~ConvolutionOptions() override = default;
 
 private:
-    SimpleOption<int>                                 *width;              /**< Input width */
-    SimpleOption<int>                                 *height;             /**< Input height */
-    SimpleOption<int>                                 *channels;           /**< Input channels */
-    SimpleOption<int>                                 *batch;              /**< Input batch */
-    SimpleOption<int>                                 *weights_width;      /**< weights width */
-    SimpleOption<int>                                 *weights_height;     /**< weights height */
-    SimpleOption<int>                                 *OFM;                /**< Output Feature Map */
-    SimpleOption<int>                                 *padding_top;        /**< Padding top */
-    SimpleOption<int>                                 *padding_left;       /**< Padding left */
-    SimpleOption<int>                                 *padding_bottom;     /**< Padding bottom */
-    SimpleOption<int>                                 *padding_right;      /**< Padding right */
-    SimpleOption<int>                                 *stride_x;           /**< Padding stride x */
-    SimpleOption<int>                                 *stride_y;           /**< Padding stride y */
-    EnumOption<ConvolutionPaddingMode>                *padding_mode;       /**< Padding mode */
-    EnumOption<arm_compute::graph::ConvolutionMethod> *conv_mode;          /**< Convolution method */
-    EnumOption<arm_compute::DataLayout>               *data_layout;        /**< Graph data layout */
-    SimpleOption<float>                               *scale;              /**< Input Quantization scale from QASYMM8 */
-    SimpleOption<int>                                 *offset;             /**< Input Quantization offset from QASYMM8 */
-    SimpleOption<float>                               *weights_scale;      /**< Weights Quantization scale from QASYMM8 */
-    SimpleOption<int>                                 *weights_offset;     /**< Weights Quantization offset from QASYMM8 */
-    SimpleOption<float>                               *output_scale;       /**< Output Quantization scale from QASYMM8 */
-    SimpleOption<int>                                 *output_offset;      /**< Output Quantization offset from QASYMM8 */
-    SimpleOption<uint64_t>                            *input_range_low;    /**< Lower bound for input randomization range */
-    SimpleOption<uint64_t>                            *input_range_high;   /**< Upper bound for input randomization range */
-    SimpleOption<uint64_t>                            *weights_range_low;  /**< Lower bound for weights randomization range */
-    SimpleOption<uint64_t>                            *weights_range_high; /**< Upper bound for weights randomization range */
+    SimpleOption<int>                                 *width;          /**< Input width */
+    SimpleOption<int>                                 *height;         /**< Input height */
+    SimpleOption<int>                                 *channels;       /**< Input channels */
+    SimpleOption<int>                                 *batch;          /**< Input batch */
+    SimpleOption<int>                                 *weights_width;  /**< weights width */
+    SimpleOption<int>                                 *weights_height; /**< weights height */
+    SimpleOption<int>                                 *OFM;            /**< Output Feature Map */
+    SimpleOption<int>                                 *padding_top;    /**< Padding top */
+    SimpleOption<int>                                 *padding_left;   /**< Padding left */
+    SimpleOption<int>                                 *padding_bottom; /**< Padding bottom */
+    SimpleOption<int>                                 *padding_right;  /**< Padding right */
+    SimpleOption<int>                                 *stride_x;       /**< Padding stride x */
+    SimpleOption<int>                                 *stride_y;       /**< Padding stride y */
+    EnumOption<ConvolutionPaddingMode>                *padding_mode;   /**< Padding mode */
+    EnumOption<arm_compute::graph::ConvolutionMethod> *conv_mode;      /**< Convolution method */
+    EnumOption<arm_compute::DataLayout>               *data_layout;    /**< Graph data layout */
+    SimpleOption<float>                               *scale;          /**< Input Quantization scale from QASYMM8 */
+    SimpleOption<int>                                 *offset;         /**< Input Quantization offset from QASYMM8 */
+    SimpleOption<float>                               *weights_scale;  /**< Weights Quantization scale from QASYMM8 */
+    SimpleOption<int>                                 *weights_offset; /**< Weights Quantization offset from QASYMM8 */
+    SimpleOption<float>                               *output_scale;   /**< Output Quantization scale from QASYMM8 */
+    SimpleOption<int>                                 *output_offset;  /**< Output Quantization offset from QASYMM8 */
+    SimpleOption<uint64_t> *input_range_low;                           /**< Lower bound for input randomization range */
+    SimpleOption<uint64_t> *input_range_high;                          /**< Upper bound for input randomization range */
+    SimpleOption<uint64_t> *weights_range_low;  /**< Lower bound for weights randomization range */
+    SimpleOption<uint64_t> *weights_range_high; /**< Upper bound for weights randomization range */
 
     SimpleOption<std::string> *input_npy;   /**< Use input .npy image */
     SimpleOption<std::string> *output_npy;  /**< Use output .npy image to verify*/
@@ -257,43 +252,33 @@ template <typename D>
 class ConvolutionVerifyAccessor final : public VerifyAccessor<D>
 {
     using BaseClassType = VerifyAccessor<D>;
-    using BaseClassType::BaseClassType;
     using BaseClassType::_params;
-    using TBias = typename std::conditional<std::is_same<typename std::decay<D>::type, uint8_t>::value, int32_t, D>::type;
+    using BaseClassType::BaseClassType;
+    using TBias =
+        typename std::conditional<std::is_same<typename std::decay<D>::type, uint8_t>::value, int32_t, D>::type;
 
-    SimpleTensor<D> reference(SimpleTensor<D> &src, SimpleTensor<D> &weights, SimpleTensor<TBias> &bias, const TensorShape &output_shape) override
+    SimpleTensor<D> reference(SimpleTensor<D>     &src,
+                              SimpleTensor<D>     &weights,
+                              SimpleTensor<TBias> &bias,
+                              const TensorShape   &output_shape) override
     {
         // Calculate padding information
         const PadStrideInfo padding_info = calculate_convolution_padding(_params);
 
         //Calculate reference
-        return reference::convolution_layer<D>(src, weights, bias, output_shape, padding_info, Size2D(1, 1),
-                                               1, _params.output.quant_info);
+        return reference::convolution_layer<D>(src, weights, bias, output_shape, padding_info, Size2D(1, 1), 1,
+                                               _params.output.quant_info);
     }
 
     float relative_tolerance() override
     {
-        const std::map<arm_compute::graph::Target, const std::map<DataType, float>> relative_tolerance
-        {
-            {
-                arm_compute::graph::Target::CL,
-                {   { DataType::F16, 0.2f },
-                    { DataType::F32, 0.5f },
-                    { DataType::QASYMM8, 1.0f }
-                }
-            },
-            {
-                arm_compute::graph::Target::NEON,
-                {   { DataType::F16, 0.2f },
-                    { DataType::F32, 0.01f },
-                    { DataType::QASYMM8, 0.0f }
-                }
-            }
-        };
+        const std::map<arm_compute::graph::Target, const std::map<DataType, float>> relative_tolerance{
+            {arm_compute::graph::Target::CL, {{DataType::F16, 0.2f}, {DataType::F32, 0.5f}, {DataType::QASYMM8, 1.0f}}},
+            {arm_compute::graph::Target::NEON,
+             {{DataType::F16, 0.2f}, {DataType::F32, 0.01f}, {DataType::QASYMM8, 0.0f}}}};
 
-        if(_params.convolution_method == arm_compute::graph::ConvolutionMethod::Winograd
-           && _params.data_type == DataType::F32
-           && _params.common_params.target == arm_compute::graph::Target::NEON)
+        if (_params.convolution_method == arm_compute::graph::ConvolutionMethod::Winograd &&
+            _params.data_type == DataType::F32 && _params.common_params.target == arm_compute::graph::Target::NEON)
         {
             return 0.05f;
         }
@@ -305,46 +290,18 @@ class ConvolutionVerifyAccessor final : public VerifyAccessor<D>
 
     float absolute_tolerance() override
     {
-        const std::map<Target, const std::map<DataType, float>> absolute_tolerance
-        {
-            {
-                Target::CL,
-                {   { DataType::F16, 0.0f },
-                    { DataType::F32, 0.0001f },
-                    { DataType::QASYMM8, 0.0f }
-                }
-            },
-            {
-                Target::NEON,
-                {   { DataType::F16, 0.2f },
-                    { DataType::F32, 0.002f },
-                    { DataType::QASYMM8, 0.0f }
-                }
-            }
-        };
+        const std::map<Target, const std::map<DataType, float>> absolute_tolerance{
+            {Target::CL, {{DataType::F16, 0.0f}, {DataType::F32, 0.0001f}, {DataType::QASYMM8, 0.0f}}},
+            {Target::NEON, {{DataType::F16, 0.2f}, {DataType::F32, 0.002f}, {DataType::QASYMM8, 0.0f}}}};
 
         return absolute_tolerance.at(_params.common_params.target).at(_params.data_type);
     }
 
     float tolerance_number() override
     {
-        const std::map<Target, const std::map<DataType, float>> absolute_tolerance
-        {
-            {
-                Target::CL,
-                {   { DataType::F16, 0.07f },
-                    { DataType::F32, 0.07f },
-                    { DataType::QASYMM8, 0.0f }
-                }
-            },
-            {
-                Target::NEON,
-                {   { DataType::F16, 0.07f },
-                    { DataType::F32, 0.0f },
-                    { DataType::QASYMM8, 0.0f }
-                }
-            }
-        };
+        const std::map<Target, const std::map<DataType, float>> absolute_tolerance{
+            {Target::CL, {{DataType::F16, 0.07f}, {DataType::F32, 0.07f}, {DataType::QASYMM8, 0.0f}}},
+            {Target::NEON, {{DataType::F16, 0.07f}, {DataType::F32, 0.0f}, {DataType::QASYMM8, 0.0f}}}};
 
         return absolute_tolerance.at(_params.common_params.target).at(_params.data_type);
     }
@@ -352,13 +309,13 @@ class ConvolutionVerifyAccessor final : public VerifyAccessor<D>
 
 } // namespace
 
-class GraphConvolutionValidateExample final : public GraphValidateExample<ConvolutionLayer, ConvolutionOptions, ConvolutionVerifyAccessor>
+class GraphConvolutionValidateExample final
+    : public GraphValidateExample<ConvolutionLayer, ConvolutionOptions, ConvolutionVerifyAccessor>
 {
     using GraphValidateExample::graph;
 
 public:
-    GraphConvolutionValidateExample()
-        : GraphValidateExample("Convolution Graph example")
+    GraphConvolutionValidateExample() : GraphValidateExample("Convolution Graph example")
     {
     }
 
@@ -367,16 +324,18 @@ public:
         const PixelValue lower = PixelValue(params.input.range_low, params.data_type, params.input.quant_info);
         const PixelValue upper = PixelValue(params.input.range_high, params.data_type, params.input.quant_info);
 
-        const PixelValue weights_lower = PixelValue(params.weights.range_low, params.data_type, params.weights.quant_info);
-        const PixelValue weights_upper = PixelValue(params.weights.range_high, params.data_type, params.weights.quant_info);
+        const PixelValue weights_lower =
+            PixelValue(params.weights.range_low, params.data_type, params.weights.quant_info);
+        const PixelValue weights_upper =
+            PixelValue(params.weights.range_high, params.data_type, params.weights.quant_info);
 
         // Calculate padding information
         const PadStrideInfo padding_info = calculate_convolution_padding(params);
 
         return ConvolutionLayer(params.weights.width, params.weights.height, params.weights.fm,
                                 get_accessor(params.weights, weights_lower, weights_upper, 1),
-                                get_accessor(params.bias, lower, upper, 2),
-                                padding_info, 1, params.weights.quant_info, params.output.quant_info);
+                                get_accessor(params.bias, lower, upper, 2), padding_info, 1, params.weights.quant_info,
+                                params.output.quant_info);
     }
 };
 

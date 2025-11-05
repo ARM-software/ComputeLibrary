@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_VGG16_ACTIVATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_VGG16_ACTIVATION_LAYER_DATASET
-
-#include "tests/framework/datasets/Datasets.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_VGG_VGG16_VGG16ACTIVATIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_VGG_VGG16_VGG16ACTIVATIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -37,27 +36,27 @@ namespace test
 {
 namespace datasets
 {
-class VGG16ActivationLayerDataset final : public
-    framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<ActivationLayerInfo>>
+class VGG16ActivationLayerDataset final
+    : public framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>,
+                                                         framework::dataset::SingletonDataset<ActivationLayerInfo>>
 {
 public:
     VGG16ActivationLayerDataset()
-        : CartesianProductDataset
-    {
-        framework::dataset::make("Shape", { // relu1_1, relu1_2
-            TensorShape(224U, 224U, 64U),
-            // relu2_1, relu2_2
-            TensorShape(112U, 112U, 128U),
-            // relu3_1, relu3_2, relu3_3
-            TensorShape(56U, 56U, 256U),
-            // relu4_1, relu4_2, relu4_3
-            TensorShape(28U, 28U, 512U),
-            // relu5_1, relu5_2, relu5_3
-            TensorShape(14U, 14U, 512U),
-            // relu6, relu7
-            TensorShape(4096U) }),
-        framework::dataset::make("Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-    }
+        : CartesianProductDataset{
+              framework::dataset::make("Shape",
+                                       {// relu1_1, relu1_2
+                                        TensorShape(224U, 224U, 64U),
+                                        // relu2_1, relu2_2
+                                        TensorShape(112U, 112U, 128U),
+                                        // relu3_1, relu3_2, relu3_3
+                                        TensorShape(56U, 56U, 256U),
+                                        // relu4_1, relu4_2, relu4_3
+                                        TensorShape(28U, 28U, 512U),
+                                        // relu5_1, relu5_2, relu5_3
+                                        TensorShape(14U, 14U, 512U),
+                                        // relu6, relu7
+                                        TensorShape(4096U)}),
+              framework::dataset::make("Info", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))}
     {
     }
     VGG16ActivationLayerDataset(VGG16ActivationLayerDataset &&) = default;
@@ -66,4 +65,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_VGG16_ACTIVATION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_VGG_VGG16_VGG16ACTIVATIONLAYERDATASET_H

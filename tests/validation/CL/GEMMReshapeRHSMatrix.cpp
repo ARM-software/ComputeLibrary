@@ -25,16 +25,17 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
+
 #include "src/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/GEMMReshapeRHSMatrixFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -168,14 +169,16 @@ DATA_TEST_CASE(ValidatePadding, framework::DatasetMode::ALL, combine(make("Input
 // *INDENT-ON*
 
 // Run S32 tests only for transpose = false
-FIXTURE_DATA_TEST_CASE(S32_NT, CLGEMMReshapeRHSMatrixFixture<int>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(S32_NT,
+                       CLGEMMReshapeRHSMatrixFixture<int>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallGEMMReshape2DShapes(),
-                                                                               b_values,
-                                                                       make("DataType", DataType::S32),
-                                                               n0_values_nt_s32,
-                                                       k0_values_nt_s32,
-                                               h0_values,
-                                       i_values,
+                               b_values,
+                               make("DataType", DataType::S32),
+                               n0_values_nt_s32,
+                               k0_values_nt_s32,
+                               h0_values,
+                               i_values,
                                make("transpose", false)))
 {
     // Validate output
@@ -183,14 +186,16 @@ FIXTURE_DATA_TEST_CASE(S32_NT, CLGEMMReshapeRHSMatrixFixture<int>, framework::Da
 }
 
 // Run S32 tests only for transpose = true
-FIXTURE_DATA_TEST_CASE(S32_T, CLGEMMReshapeRHSMatrixFixture<int>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(S32_T,
+                       CLGEMMReshapeRHSMatrixFixture<int>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallGEMMReshape2DShapes(),
-                                                                               b_values,
-                                                                       make("DataType", DataType::S32),
-                                                               n0_values_t_s32,
-                                                       k0_values_t_s32,
-                                               h0_values,
-                                       i_values,
+                               b_values,
+                               make("DataType", DataType::S32),
+                               n0_values_t_s32,
+                               k0_values_t_s32,
+                               h0_values,
+                               i_values,
                                make("transpose", true)))
 {
     // Validate output
@@ -198,14 +203,16 @@ FIXTURE_DATA_TEST_CASE(S32_T, CLGEMMReshapeRHSMatrixFixture<int>, framework::Dat
 }
 
 // Run S16 tests only for transpose = false
-FIXTURE_DATA_TEST_CASE(S16_NT, CLGEMMReshapeRHSMatrixFixture<short>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(S16_NT,
+                       CLGEMMReshapeRHSMatrixFixture<short>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallGEMMReshape2DShapes(),
-                                                                               b_values,
-                                                                       make("DataType", DataType::S16),
-                                                               n0_values_nt_s16,
-                                                       k0_values_nt_s16,
-                                               h0_values,
-                                       i_values,
+                               b_values,
+                               make("DataType", DataType::S16),
+                               n0_values_nt_s16,
+                               k0_values_nt_s16,
+                               h0_values,
+                               i_values,
                                make("transpose", false)))
 {
     // Validate output
@@ -213,14 +220,16 @@ FIXTURE_DATA_TEST_CASE(S16_NT, CLGEMMReshapeRHSMatrixFixture<short>, framework::
 }
 
 // Run S16 tests only for transpose = true
-FIXTURE_DATA_TEST_CASE(S16_T, CLGEMMReshapeRHSMatrixFixture<short>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(S16_T,
+                       CLGEMMReshapeRHSMatrixFixture<short>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallGEMMReshape2DShapes(),
-                                                                               b_values,
-                                                                       make("DataType", DataType::S16),
-                                                               n0_values_t_s16,
-                                                       k0_values_t_s16,
-                                               h0_values,
-                                       i_values,
+                               b_values,
+                               make("DataType", DataType::S16),
+                               n0_values_t_s16,
+                               k0_values_t_s16,
+                               h0_values,
+                               i_values,
                                make("transpose", true)))
 {
     // Validate output
@@ -228,14 +237,16 @@ FIXTURE_DATA_TEST_CASE(S16_T, CLGEMMReshapeRHSMatrixFixture<short>, framework::D
 }
 
 // Run S8 tests only for transpose = false
-FIXTURE_DATA_TEST_CASE(S8_NT, CLGEMMReshapeRHSMatrixFixture<char>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(S8_NT,
+                       CLGEMMReshapeRHSMatrixFixture<char>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallGEMMReshape2DShapes(),
-                                                                               b_values,
-                                                                       make("DataType", DataType::S8),
-                                                               n0_values_nt_s8,
-                                                       k0_values_nt_s8,
-                                               h0_values,
-                                       i_values,
+                               b_values,
+                               make("DataType", DataType::S8),
+                               n0_values_nt_s8,
+                               k0_values_nt_s8,
+                               h0_values,
+                               i_values,
                                make("transpose", false)))
 {
     // Validate output
@@ -243,14 +254,16 @@ FIXTURE_DATA_TEST_CASE(S8_NT, CLGEMMReshapeRHSMatrixFixture<char>, framework::Da
 }
 
 // Run S8 tests only for transpose = true
-FIXTURE_DATA_TEST_CASE(S8_T, CLGEMMReshapeRHSMatrixFixture<char>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(S8_T,
+                       CLGEMMReshapeRHSMatrixFixture<char>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallGEMMReshape2DShapes(),
-                                                                               b_values,
-                                                                       make("DataType", DataType::S8),
-                                                               n0_values_t_s8,
-                                                       k0_values_t_s8,
-                                               h0_values,
-                                       i_values,
+                               b_values,
+                               make("DataType", DataType::S8),
+                               n0_values_t_s8,
+                               k0_values_t_s8,
+                               h0_values,
+                               i_values,
                                make("transpose", true)))
 {
     // Validate output

@@ -33,8 +33,8 @@
 #include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/reference/FullyConnectedLayer.h"
 #include "tests/validation/reference/ActivationLayer.h"
+#include "tests/validation/reference/FullyConnectedLayer.h"
 
 #include <random>
 #include <type_traits>
@@ -149,7 +149,7 @@ protected:
                         const TensorShape &weights_shape,
                         const TensorShape &bias_shape,
                         const TensorShape &output_shape,
-                        bool with_bias)
+                        bool               with_bias)
     {
         TensorShape reshaped_weights_shape(weights_shape);
 
@@ -192,12 +192,11 @@ protected:
 
         const bool kernel_found =
             bool(FunctionType::has_opt_impl(computed_weight_format, src[0].info(), weights[0].info(),
-                                            with_bias? bias[0].info() : nullptr,
-                                            dst[0].info(), fc_info, wei_info));
+                                            with_bias ? bias[0].info() : nullptr, dst[0].info(), fc_info, wei_info));
         ARM_COMPUTE_ASSERT(kernel_found);
         wei_info.set_weight_format(computed_weight_format);
 
-	auto reordered_weight_info = prepare_weights(*tmp_weights.info(), computed_weight_format);
+        auto reordered_weight_info = prepare_weights(*tmp_weights.info(), computed_weight_format);
         for (int i = 0; i < _num_parallel_runs; ++i)
         {
             reordered_weights[i] = create_tensor<TensorType>(reordered_weight_info);
@@ -206,13 +205,11 @@ protected:
 
         // Create, configure and validate function.
         FunctionType fc;
-        fc.configure(src[0].info(), weights[0].info(),
-                     with_bias? bias[0].info() : nullptr,
-                     dst[0].info(), fc_info, wei_info);
+        fc.configure(src[0].info(), weights[0].info(), with_bias ? bias[0].info() : nullptr, dst[0].info(), fc_info,
+                     wei_info);
         auto const aux_mem_req = fc.workspace();
 
-        ARM_COMPUTE_ASSERT(fc.validate(src[0].info(), weights[0].info(),
-                                       with_bias? bias[0].info() : nullptr,
+        ARM_COMPUTE_ASSERT(fc.validate(src[0].info(), weights[0].info(), with_bias ? bias[0].info() : nullptr,
                                        dst[0].info(), fc_info, wei_info));
 
         for (int i = 0; i < _num_parallel_runs; ++i)
@@ -238,7 +235,7 @@ protected:
             fill(AccessorType(tmp_weights), 1 + i * 3);
 
             // Handle optional bias
-            if(with_bias)
+            if (with_bias)
             {
                 ARM_COMPUTE_ASSERT(bias[i].info()->is_resizable());
                 bias[i].allocator()->allocate();
@@ -280,7 +277,7 @@ protected:
 
                         fc.run(run_pack[i]);
 
-			_target[i] = std::move(dst[i]);
+                        _target[i] = std::move(dst[i]);
                     });
             }
 
@@ -310,7 +307,7 @@ protected:
                            const TensorShape &weights_shape,
                            const TensorShape &bias_shape,
                            const TensorShape &output_shape,
-                           bool with_bias)
+                           bool               with_bias)
     {
         // Create reference
         SimpleTensor<T>     ref_src{input_shape, _data_type, 1, _input_q_info};
@@ -323,12 +320,15 @@ protected:
             fill(ref_src, 0 + i * 3);
             fill(ref_weights, 1 + i * 3);
 
-            if(with_bias)
+            if (with_bias)
             {
                 fill(ref_bias, 2 + i * 3);
             }
 
-            _reference[i] = reference::activation_layer(reference::fully_connected_layer<T>(ref_src, ref_weights, ref_bias, output_shape, _dst_q_info, with_bias), _activation_info, _dst_q_info);
+            _reference[i] =
+                reference::activation_layer(reference::fully_connected_layer<T>(ref_src, ref_weights, ref_bias,
+                                                                                output_shape, _dst_q_info, with_bias),
+                                            _activation_info, _dst_q_info);
         }
     }
 
@@ -359,8 +359,8 @@ public:
                ActivationLayerInfo activation_info)
     {
         CpuFullyConnectedValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
-            input_shape, weights_shape, bias_shape, output_shape, data_type,
-            QuantizationInfo(), activation_info, TestType::ConfigureOnceRunOnce);
+            input_shape, weights_shape, bias_shape, output_shape, data_type, QuantizationInfo(), activation_info,
+            TestType::ConfigureOnceRunOnce);
     }
 };
 
@@ -377,8 +377,8 @@ public:
                ActivationLayerInfo activation_info)
     {
         CpuFullyConnectedValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
-            input_shape, weights_shape, bias_shape, output_shape, data_type,
-            QuantizationInfo(), activation_info, TestType::ConfigureOnceRunOnce, false);
+            input_shape, weights_shape, bias_shape, output_shape, data_type, QuantizationInfo(), activation_info,
+            TestType::ConfigureOnceRunOnce, false);
     }
 };
 
@@ -395,8 +395,8 @@ public:
                ActivationLayerInfo activation_info)
     {
         CpuFullyConnectedValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
-            input_shape, weights_shape, bias_shape, output_shape, data_type,
-            QuantizationInfo(), activation_info, TestType::ConfigureOnceRunMultiThreaded);
+            input_shape, weights_shape, bias_shape, output_shape, data_type, QuantizationInfo(), activation_info,
+            TestType::ConfigureOnceRunMultiThreaded);
     }
 };
 } // namespace validation

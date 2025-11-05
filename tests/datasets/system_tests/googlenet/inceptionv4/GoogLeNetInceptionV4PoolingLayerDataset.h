@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV4_POOLING_LAYER_DATASET
-#define ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV4_POOLING_LAYER_DATASET
-
-#include "tests/datasets/PoolingLayerDataset.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_GOOGLENET_INCEPTIONV4_GOOGLENETINCEPTIONV4POOLINGLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_GOOGLENET_INCEPTIONV4_GOOGLENETINCEPTIONV4POOLINGLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/datasets/PoolingLayerDataset.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -44,22 +43,29 @@ public:
     {
         // FIXME: Add support for global pooling layer pool_8x8_s1
         // inception_stem1_pool
-        add_config(TensorShape(147U, 147U, 64U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(147U, 147U, 64U),
+                   PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // inception_stem3_pool
-        add_config(TensorShape(71U, 71U, 192U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(71U, 71U, 192U),
+                   PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // inception_a1_pool_ave, inception_a2_pool_ave, inception_a3_pool_ave, inception_a4_pool_ave
-        add_config(TensorShape(35U, 35U, 384U), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(35U, 35U, 384U),
+                   PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)));
         // reduction_a_pool
-        add_config(TensorShape(35U, 35U, 384U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(35U, 35U, 384U),
+                   PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // inception_b1_pool_ave, inception_b2_pool_ave, inception_b3_pool_ave, inception_b4_pool_ave, inception_b5_pool_ave, inception_b6_pool_ave, inception_b7_pool_ave
-        add_config(TensorShape(17U, 17U, 1024U), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(17U, 17U, 1024U),
+                   PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)));
         // reduction_b_pool
-        add_config(TensorShape(17U, 17U, 1024U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(17U, 17U, 1024U),
+                   PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // inception_c1_pool_ave, inception_c2_pool_ave, inception_c3_pool_ave
-        add_config(TensorShape(8U, 8U, 1536U), PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(8U, 8U, 1536U),
+                   PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)));
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV4_POOLING_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_GOOGLENET_INCEPTIONV4_GOOGLENETINCEPTIONV4POOLINGLAYERDATASET_H

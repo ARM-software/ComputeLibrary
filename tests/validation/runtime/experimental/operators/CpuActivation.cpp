@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/experimental/operators/CpuActivation.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/datasets/ActivationFunctionsDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/CpuActivationFixture.h"
 #include "tests/validation/helpers/ActivationHelpers.h"
+#include "tests/validation/Validation.h"
 
 /*
  * Tests for arm_compute::experimental::op::CpuActivation which is a shallow wrapper for
@@ -48,50 +49,35 @@ namespace
 {
 
 const auto NeonActivationFunctionsDataset =
-    concat(
-        datasets::ActivationFunctions(),
-        make("ActivationFunction",
-            { ActivationLayerInfo::ActivationFunction::HARD_SWISH,
-            ActivationLayerInfo::ActivationFunction::SWISH })
-    );
+    concat(datasets::ActivationFunctions(),
+           make("ActivationFunction",
+                {ActivationLayerInfo::ActivationFunction::HARD_SWISH, ActivationLayerInfo::ActivationFunction::SWISH}));
 
 /** Input data sets. */
 const auto ActivationDataset =
-    combine(
-        make("InPlace", { false, true }),
-        NeonActivationFunctionsDataset,
-        make("AlphaBeta", { 0.5f, 1.f })
-    );
+    combine(make("InPlace", {false, true}), NeonActivationFunctionsDataset, make("AlphaBeta", {0.5f, 1.f}));
 
 // Inplace calculation is irrelevant to thread safety because different threads
 // will use different tensors. AlphaBeta value is also irrelevant as it's just
 // a change in the computation value.
 const auto FloatActivationDatasetForThreadSafetyTests =
-    combine(
-        make("InPlace", { false }),
-        NeonActivationFunctionsDataset,
-        make("AlphaBeta", { 0.5f })
-    );
+    combine(make("InPlace", {false}), NeonActivationFunctionsDataset, make("AlphaBeta", {0.5f}));
 
 const auto QuantizedActivationFunctionsDataset = make("ActivationFunction",
-{
-    ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
-    ActivationLayerInfo::ActivationFunction::RELU,
-    ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
-    ActivationLayerInfo::ActivationFunction::LOGISTIC,
-    ActivationLayerInfo::ActivationFunction::TANH,
-    ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
-});
+                                                      {
+                                                          ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                                                          ActivationLayerInfo::ActivationFunction::RELU,
+                                                          ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+                                                          ActivationLayerInfo::ActivationFunction::LOGISTIC,
+                                                          ActivationLayerInfo::ActivationFunction::TANH,
+                                                          ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
+                                                      });
 
 const auto QuantizedActivationDatasetForThreadSafetyTests =
-    combine(
-        make("InPlace", { false }),
-        concat(
-            QuantizedActivationFunctionsDataset,
-            make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH)
-        ),
-        make("AlphaBeta", { 1.f })
-    );
+    combine(make("InPlace", {false}),
+            concat(QuantizedActivationFunctionsDataset,
+                   make("ActivationFunction", ActivationLayerInfo::ActivationFunction::HARD_SWISH)),
+            make("AlphaBeta", {1.f}));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -102,26 +88,24 @@ template <typename T>
 using CpuActivationFixture = CpuActivationValidationFixture<Tensor, Accessor, experimental::op::CpuActivation, T>;
 
 template <typename T>
-using CpuActivationFloatThreadSafeFixture = CpuActivationFloatThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuActivation, T>;
+using CpuActivationFloatThreadSafeFixture =
+    CpuActivationFloatThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuActivation, T>;
 
 template <typename T>
-using CpuActivationQuantizedThreadSafeFixture = CpuActivationQuantizedThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuActivation, T>;
+using CpuActivationQuantizedThreadSafeFixture =
+    CpuActivationQuantizedThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuActivation, T>;
 
 TEST_SUITE(SmokeTest)
-FIXTURE_DATA_TEST_CASE(SmokeTest, CpuActivationFixture<float>, framework::DatasetMode::ALL,
-    combine(
-        datasets::SmallShapes(),
-        ActivationDataset,
-        make("DataType", DataType::F32)
-    ))
+FIXTURE_DATA_TEST_CASE(SmokeTest,
+                       CpuActivationFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), ActivationDataset, make("DataType", DataType::F32)))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
-        validate(Accessor(_target[i]), _reference[i],
-            helper::relative_tolerance(_data_type, _function),
-            helper::tolerance_num(_data_type, _function),
-            helper::absolute_tolerance(_data_type, _function));
+        validate(Accessor(_target[i]), _reference[i], helper::relative_tolerance(_data_type, _function),
+                 helper::tolerance_num(_data_type, _function), helper::absolute_tolerance(_data_type, _function));
     }
 }
 TEST_SUITE_END() // SmokeTest
@@ -130,44 +114,38 @@ TEST_SUITE_END() // SmokeTest
 TEST_SUITE(ThreadSafety)
 TEST_SUITE(Float)
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuActivationFloatThreadSafeFixture<float>,
-    framework::DatasetMode::ALL,
-    combine(
-        datasets::SmallShapes(),
-        FloatActivationDatasetForThreadSafetyTests,
-        make("DataType", DataType::F32)
-    ))
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
+                       CpuActivationFloatThreadSafeFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(),
+                               FloatActivationDatasetForThreadSafetyTests,
+                               make("DataType", DataType::F32)))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
-        validate(Accessor(_target[i]), _reference[i],
-            helper::relative_tolerance(_data_type, _function),
-            helper::tolerance_num(_data_type, _function),
-            helper::absolute_tolerance(_data_type, _function));
+        validate(Accessor(_target[i]), _reference[i], helper::relative_tolerance(_data_type, _function),
+                 helper::tolerance_num(_data_type, _function), helper::absolute_tolerance(_data_type, _function));
     }
 }
 TEST_SUITE_END() // F32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuActivationFloatThreadSafeFixture<half>,
-    framework::DatasetMode::ALL,
-    combine(
-        datasets::SmallShapes(),
-        FloatActivationDatasetForThreadSafetyTests,
-        make("DataType", DataType::F16)
-    ))
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
+                       CpuActivationFloatThreadSafeFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(),
+                               FloatActivationDatasetForThreadSafetyTests,
+                               make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
-        for(int i = 0; i < _num_parallel_runs; ++i)
+        for (int i = 0; i < _num_parallel_runs; ++i)
         {
-            validate(Accessor(_target[i]), _reference[i],
-                helper::relative_tolerance(_data_type, _function),
-                helper::tolerance_num(_data_type, _function),
-                helper::absolute_tolerance(_data_type, _function));
+            validate(Accessor(_target[i]), _reference[i], helper::relative_tolerance(_data_type, _function),
+                     helper::tolerance_num(_data_type, _function), helper::absolute_tolerance(_data_type, _function));
         }
     }
     else
@@ -177,7 +155,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuActivationFloatT
     }
 }
 TEST_SUITE_END() // F16
-#endif // ARM_COMPUTE_ENABLE_FP16
+#endif           // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE_END() // Float
 
@@ -185,17 +163,16 @@ TEST_SUITE(Quantized)
 
 // Int8 and UInt8 are very similar, therefore no need to test both from thread-safety perspective
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuActivationQuantizedThreadSafeFixture<int8_t>,
-    framework::DatasetMode::ALL,
-    combine(
-        datasets::SmallShapes(),
-        QuantizedActivationDatasetForThreadSafetyTests,
-        make("DataType", DataType::QASYMM8_SIGNED),
-        make("QuantizationInfo", { QuantizationInfo(0.5f, 10.0f) })
-    ))
+FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
+                       CpuActivationQuantizedThreadSafeFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(),
+                               QuantizedActivationDatasetForThreadSafetyTests,
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("QuantizationInfo", {QuantizationInfo(0.5f, 10.0f)})))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], helper::tolerance_qasymm8(_function));
     }
@@ -204,7 +181,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuActivationQuanti
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // ThreadSafety
-#endif // #ifndef BARE_METAL
+#endif           // #ifndef BARE_METAL
 
 TEST_SUITE_END() // CpuActivation
 TEST_SUITE_END() // OPERATORS

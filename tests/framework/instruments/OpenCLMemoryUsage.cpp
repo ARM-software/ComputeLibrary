@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,10 +44,18 @@ std::string OpenCLMemoryUsage::id() const
 }
 
 OpenCLMemoryUsage::OpenCLMemoryUsage(ScaleFactor scale_factor)
-    : real_clCreateBuffer(CLSymbols::get().clCreateBuffer_ptr), real_clRetainMemObject(CLSymbols::get().clRetainMemObject_ptr), real_clReleaseMemObject(CLSymbols::get().clReleaseMemObject_ptr),
-      real_clSVMAlloc(CLSymbols::get().clSVMAlloc_ptr), real_clSVMFree(CLSymbols::get().clSVMFree_ptr), _allocations(), _svm_allocations(), _start(), _end(), _now()
+    : real_clCreateBuffer(CLSymbols::get().clCreateBuffer_ptr),
+      real_clRetainMemObject(CLSymbols::get().clRetainMemObject_ptr),
+      real_clReleaseMemObject(CLSymbols::get().clReleaseMemObject_ptr),
+      real_clSVMAlloc(CLSymbols::get().clSVMAlloc_ptr),
+      real_clSVMFree(CLSymbols::get().clSVMFree_ptr),
+      _allocations(),
+      _svm_allocations(),
+      _start(),
+      _end(),
+      _now()
 {
-    switch(scale_factor)
+    switch (scale_factor)
     {
         case ScaleFactor::NONE:
             _scale_factor = 1;
@@ -71,15 +79,11 @@ void OpenCLMemoryUsage::test_start()
     _now = Stats();
 
     ARM_COMPUTE_ERROR_ON(CLSymbols::get().clCreateBuffer_ptr == nullptr);
-    CLSymbols::get().clCreateBuffer_ptr = [this](
-                                              cl_context   context,
-                                              cl_mem_flags flags,
-                                              size_t       size,
-                                              void        *host_ptr,
-                                              cl_int *     errcode_ret)
+    CLSymbols::get().clCreateBuffer_ptr =
+        [this](cl_context context, cl_mem_flags flags, size_t size, void *host_ptr, cl_int *errcode_ret)
     {
         cl_mem retval = this->real_clCreateBuffer(context, flags, size, host_ptr, errcode_ret);
-        if(host_ptr != nullptr)
+        if (host_ptr != nullptr)
         {
             // If it's an SVM / external allocation;
             size = 0;
@@ -89,7 +93,7 @@ void OpenCLMemoryUsage::test_start()
             _now.num_allocations++;
             _now.in_use += size;
             _now.total_allocated += size;
-            if(_now.in_use > _now.max_in_use)
+            if (_now.in_use > _now.max_in_use)
             {
                 _now.max_in_use = _now.in_use;
             }
@@ -109,7 +113,7 @@ void OpenCLMemoryUsage::test_start()
     {
         cl_int      retval = this->real_clRetainMemObject(memobj);
         Allocation &alloc  = this->_allocations[memobj];
-        if(--alloc.refcount == 0)
+        if (--alloc.refcount == 0)
         {
             _now.in_use -= alloc.size;
         }
@@ -117,18 +121,19 @@ void OpenCLMemoryUsage::test_start()
     };
 
     //Only intercept the function if it exists:
-    if(CLSymbols::get().clSVMAlloc_ptr != nullptr)
+    if (CLSymbols::get().clSVMAlloc_ptr != nullptr)
     {
-        CLSymbols::get().clSVMAlloc_ptr = [this](cl_context context, cl_svm_mem_flags flags, size_t size, cl_uint alignment)
+        CLSymbols::get().clSVMAlloc_ptr =
+            [this](cl_context context, cl_svm_mem_flags flags, size_t size, cl_uint alignment)
         {
             void *retval = this->real_clSVMAlloc(context, flags, size, alignment);
-            if(retval != nullptr)
+            if (retval != nullptr)
             {
                 _svm_allocations[retval] = size;
                 _now.num_allocations++;
                 _now.in_use += size;
                 _now.total_allocated += size;
-                if(_now.in_use > _now.max_in_use)
+                if (_now.in_use > _now.max_in_use)
                 {
                     _now.max_in_use = _now.in_use;
                 }
@@ -138,13 +143,13 @@ void OpenCLMemoryUsage::test_start()
     }
 
     //Only intercept the function if it exists:
-    if(CLSymbols::get().clSVMFree_ptr != nullptr)
+    if (CLSymbols::get().clSVMFree_ptr != nullptr)
     {
         CLSymbols::get().clSVMFree_ptr = [this](cl_context context, void *svm_pointer)
         {
             this->real_clSVMFree(context, svm_pointer);
             auto iterator = _svm_allocations.find(svm_pointer);
-            if(iterator != _svm_allocations.end())
+            if (iterator != _svm_allocations.end())
             {
                 size_t size = iterator->second;
                 _svm_allocations.erase(iterator);
@@ -176,8 +181,10 @@ void OpenCLMemoryUsage::test_stop()
 Instrument::MeasurementsMap OpenCLMemoryUsage::measurements() const
 {
     MeasurementsMap measurements;
-    measurements.emplace("Num buffers allocated per run", Measurement(_end.num_allocations - _start.num_allocations, ""));
-    measurements.emplace("Total memory allocated per run", Measurement((_end.total_allocated - _start.total_allocated) / _scale_factor, _unit));
+    measurements.emplace("Num buffers allocated per run",
+                         Measurement(_end.num_allocations - _start.num_allocations, ""));
+    measurements.emplace("Total memory allocated per run",
+                         Measurement((_end.total_allocated - _start.total_allocated) / _scale_factor, _unit));
     measurements.emplace("Memory in use at start of run", Measurement(_start.in_use / _scale_factor, _unit));
 
     return measurements;
@@ -192,7 +199,7 @@ Instrument::MeasurementsMap OpenCLMemoryUsage::test_measurements() const
 
     size_t num_programs = CLKernelLibrary::get().get_built_programs().size();
     size_t total_size   = 0;
-    for(auto const &it : CLKernelLibrary::get().get_built_programs())
+    for (auto const &it : CLKernelLibrary::get().get_built_programs())
     {
         std::vector<size_t> binary_sizes = it.second.getInfo<CL_PROGRAM_BINARY_SIZES>();
         total_size                       = std::accumulate(binary_sizes.begin(), binary_sizes.end(), total_size);

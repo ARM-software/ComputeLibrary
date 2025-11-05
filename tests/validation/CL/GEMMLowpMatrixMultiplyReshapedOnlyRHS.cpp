@@ -25,17 +25,18 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
+
 #include "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel.h"
 #include "src/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/GEMMLowpFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -50,14 +51,22 @@ using namespace arm_compute::misc::shape_calculator;
 using CLGEMMReshapeRHSMatrix = CLSynthetizeOperator<opencl::kernels::ClGemmReshapeRhsMatrixKernel>;
 
 // Create function for CLGEMMLowpMatrixMultiplyReshapedOnlyRHSKernel
-using CLGEMMLowpMatrixMultiplyReshapedOnlyRHS = CLSynthetizeOperator<opencl::kernels::ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel>;
+using CLGEMMLowpMatrixMultiplyReshapedOnlyRHS =
+    CLSynthetizeOperator<opencl::kernels::ClGemmLowpMatrixMultiplyReshapedOnlyRhsKernel>;
 
 // Fixture for CLGEMMLowpMatrixMultiplyReshapedOnlyRHS
-using CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFixture = GEMMLowpMatrixMultiplyReshapedOnlyRHSValidationFixture<CLTensor, CLAccessor, CLGEMMReshapeRHSMatrix, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS>;
+using CLGEMMLowpMatrixMultiplyReshapedOnlyRHSFixture =
+    GEMMLowpMatrixMultiplyReshapedOnlyRHSValidationFixture<CLTensor,
+                                                           CLAccessor,
+                                                           CLGEMMReshapeRHSMatrix,
+                                                           CLGEMMLowpMatrixMultiplyReshapedOnlyRHS>;
 
 // Fixture for CLGEMMLowpMatrixMultiplyReshapedOnlyRHS3D
 using CLGEMMLowpMatrixMultiplyReshapedOnlyRHS3DFixture =
-    GEMMLowpMatrixMultiplyReshapedOnlyRHS3DValidationFixture<CLTensor, CLAccessor, CLGEMMReshapeRHSMatrix, CLGEMMLowpMatrixMultiplyReshapedOnlyRHS>;
+    GEMMLowpMatrixMultiplyReshapedOnlyRHS3DValidationFixture<CLTensor,
+                                                             CLAccessor,
+                                                             CLGEMMReshapeRHSMatrix,
+                                                             CLGEMMLowpMatrixMultiplyReshapedOnlyRHS>;
 
 namespace
 {

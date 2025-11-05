@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLComparison.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ComparisonOperationsDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ComparisonFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -44,8 +45,8 @@ namespace validation
 using framework::dataset::make;
 namespace
 {
-const auto configure_dataset = combine(datasets::SmallShapes(),
-                                       make("DataType", { DataType::QASYMM8, DataType::F16, DataType::F32 }));
+const auto configure_dataset =
+    combine(datasets::SmallShapes(), make("DataType", {DataType::QASYMM8, DataType::F16, DataType::F32}));
 
 const auto run_small_dataset = combine(datasets::ComparisonOperations(), datasets::SmallShapes());
 const auto run_large_dataset = combine(datasets::ComparisonOperations(), datasets::LargeShapes());
@@ -138,9 +139,10 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLComparisonQuantizedFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(run_small_dataset, make("DataType", DataType::QASYMM8),
-                                       make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                               make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
+                       combine(run_small_dataset,
+                               make("DataType", DataType::QASYMM8),
+                               make("QuantizationInfo", {QuantizationInfo(5.f / 255.f, 20)}),
+                               make("QuantizationInfo", {QuantizationInfo(2.f / 255.f, 10)})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

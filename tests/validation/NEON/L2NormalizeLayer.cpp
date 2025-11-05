@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/NEON/functions/NEL2NormalizeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/L2NormalizeLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -100,19 +101,27 @@ template <typename T>
 using NEL2NormalizeLayerFixture = L2NormalizeLayerValidationFixture<Tensor, Accessor, NEL2NormalizeLayer, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEL2NormalizeLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallShapes(), make("DataType", DataType::F32), make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       make("Axis", { -1, 0, 1, 2 }),
-                               make("Epsilon", { 1e-6 })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEL2NormalizeLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("Axis", {-1, 0, 1, 2}),
+                               make("Epsilon", {1e-6})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEL2NormalizeLayerFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeShapes(), make("DataType", DataType::F32), make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       make("Axis", { -1, 0, 2 }),
-                               make("Epsilon", { 1e-6 })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEL2NormalizeLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("Axis", {-1, 0, 2}),
+                               make("Epsilon", {1e-6})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -121,12 +130,16 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEL2NormalizeLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallShapes(), make("DataType", DataType::F16), make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       make("Axis", { -1, 0, 1, 2 }),
-                               make("Epsilon", { 1e-6 })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEL2NormalizeLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("Axis", {-1, 0, 1, 2}),
+                               make("Epsilon", {1e-6})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_f16);
@@ -138,12 +151,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEL2NormalizeLayerFixture<half>, framework::Dat
     }
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEL2NormalizeLayerFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeShapes(), make("DataType", DataType::F16), make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       make("Axis", { -1, 0, 2 }),
-                               make("Epsilon", { 1e-6 })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEL2NormalizeLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("Axis", {-1, 0, 2}),
+                               make("Epsilon", {1e-6})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_f16);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ACL_TESTS_DATASETS_SCATTERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
+
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -45,10 +46,10 @@ public:
                  std::vector<TensorShape>::const_iterator updates_it,
                  std::vector<TensorShape>::const_iterator indices_it,
                  std::vector<TensorShape>::const_iterator dst_it)
-            : _src_it{ std::move(src_it) },
-              _updates_it{ std::move(updates_it) },
+            : _src_it{std::move(src_it)},
+              _updates_it{std::move(updates_it)},
               _indices_it{std::move(indices_it)},
-              _dst_it{ std::move(dst_it) }
+              _dst_it{std::move(dst_it)}
         {
         }
 
@@ -91,7 +92,8 @@ public:
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_indices_shapes.size(), std::min(_update_shapes.size(), _dst_shapes.size())));
+        return std::min(_src_shapes.size(),
+                        std::min(_indices_shapes.size(), std::min(_update_shapes.size(), _dst_shapes.size())));
     }
 
     void add_config(TensorShape a, TensorShape b, TensorShape c, TensorShape dst)
@@ -103,7 +105,7 @@ public:
     }
 
 protected:
-    ScatterDataset()                 = default;
+    ScatterDataset()                  = default;
     ScatterDataset(ScatterDataset &&) = default;
 
 private:
@@ -112,7 +114,6 @@ private:
     std::vector<TensorShape> _indices_shapes{};
     std::vector<TensorShape> _dst_shapes{};
 };
-
 
 // 1D dataset for simple scatter tests.
 class Small1DScatterDataset final : public ScatterDataset
@@ -137,7 +138,8 @@ public:
         //      - src/updates/dst should all have same number of dims. Indices should be 2D.
         add_config(TensorShape(6U, 5U), TensorShape(6U, 2U), TensorShape(1U, 2U), TensorShape(6U, 5U));
         add_config(TensorShape(9U, 3U, 4U), TensorShape(9U, 3U, 2U), TensorShape(1U, 2U), TensorShape(9U, 3U, 4U));
-        add_config(TensorShape(17U, 3U, 2U, 4U), TensorShape(17U, 3U, 2U, 7U), TensorShape(1U, 7U), TensorShape(17U, 3U, 2U, 4U));
+        add_config(TensorShape(17U, 3U, 2U, 4U), TensorShape(17U, 3U, 2U, 7U), TensorShape(1U, 7U),
+                   TensorShape(17U, 3U, 2U, 4U));
     }
 };
 
@@ -152,21 +154,29 @@ public:
 
         // index length is 2
         add_config(TensorShape(6U, 5U, 2U), TensorShape(6U, 4U), TensorShape(2U, 4U), TensorShape(6U, 5U, 2U));
-        add_config(TensorShape(17U, 3U, 3U, 2U), TensorShape(17U, 3U, 2U), TensorShape(2U, 2U), TensorShape(17U, 3U, 3U, 2U));
-        add_config(TensorShape(11U, 3U, 3U, 2U, 4U), TensorShape(11U, 3U, 3U, 4U), TensorShape(2U, 4U), TensorShape(11U, 3U, 3U, 2U, 4U));
-        add_config(TensorShape(5U, 4U, 3U, 3U, 2U, 4U), TensorShape(5U, 4U, 3U, 3U, 5U), TensorShape(2U, 5U), TensorShape(5U, 4U, 3U, 3U, 2U, 4U));
+        add_config(TensorShape(17U, 3U, 3U, 2U), TensorShape(17U, 3U, 2U), TensorShape(2U, 2U),
+                   TensorShape(17U, 3U, 3U, 2U));
+        add_config(TensorShape(11U, 3U, 3U, 2U, 4U), TensorShape(11U, 3U, 3U, 4U), TensorShape(2U, 4U),
+                   TensorShape(11U, 3U, 3U, 2U, 4U));
+        add_config(TensorShape(5U, 4U, 3U, 3U, 2U, 4U), TensorShape(5U, 4U, 3U, 3U, 5U), TensorShape(2U, 5U),
+                   TensorShape(5U, 4U, 3U, 3U, 2U, 4U));
 
         // index length is 3
         add_config(TensorShape(4U, 3U, 2U, 2U), TensorShape(4U, 2U), TensorShape(3U, 2U), TensorShape(4U, 3U, 2U, 2U));
-        add_config(TensorShape(17U, 4U, 3U, 2U, 2U), TensorShape(17U, 4U, 4U), TensorShape(3U, 4U), TensorShape(17U, 4U, 3U, 2U, 2U));
-        add_config(TensorShape(10U, 4U, 5U, 3U, 2U, 2U), TensorShape(10U, 4U, 5U, 3U), TensorShape(3U, 3U), TensorShape(10U, 4U, 5U, 3U, 2U, 2U));
+        add_config(TensorShape(17U, 4U, 3U, 2U, 2U), TensorShape(17U, 4U, 4U), TensorShape(3U, 4U),
+                   TensorShape(17U, 4U, 3U, 2U, 2U));
+        add_config(TensorShape(10U, 4U, 5U, 3U, 2U, 2U), TensorShape(10U, 4U, 5U, 3U), TensorShape(3U, 3U),
+                   TensorShape(10U, 4U, 5U, 3U, 2U, 2U));
 
         // index length is 4
-        add_config(TensorShape(35U, 4U, 3U, 2U, 2U), TensorShape(35U, 4U), TensorShape(4U, 4U), TensorShape(35U, 4U, 3U, 2U, 2U));
-        add_config(TensorShape(10U, 4U, 5U, 3U, 2U, 2U), TensorShape(10U, 4U, 3U), TensorShape(4U, 3U), TensorShape(10U, 4U, 5U, 3U, 2U, 2U));
+        add_config(TensorShape(35U, 4U, 3U, 2U, 2U), TensorShape(35U, 4U), TensorShape(4U, 4U),
+                   TensorShape(35U, 4U, 3U, 2U, 2U));
+        add_config(TensorShape(10U, 4U, 5U, 3U, 2U, 2U), TensorShape(10U, 4U, 3U), TensorShape(4U, 3U),
+                   TensorShape(10U, 4U, 5U, 3U, 2U, 2U));
 
         // index length is 5
-        add_config(TensorShape(10U, 4U, 5U, 3U, 2U, 2U), TensorShape(10U, 3U), TensorShape(5U, 3U), TensorShape(10U, 4U, 5U, 3U, 2U, 2U));
+        add_config(TensorShape(10U, 4U, 5U, 3U, 2U, 2U), TensorShape(10U, 3U), TensorShape(5U, 3U),
+                   TensorShape(10U, 4U, 5U, 3U, 2U, 2U));
     }
 };
 
@@ -182,17 +192,21 @@ public:
         // k is the number of batch dimensions
         // k = 2
         add_config(TensorShape(6U, 5U), TensorShape(6U, 2U, 2U), TensorShape(1U, 2U, 2U), TensorShape(6U, 5U));
-        add_config(TensorShape(5U, 5U, 4U, 2U, 2U), TensorShape(5U, 5U, 6U, 2U), TensorShape(3U, 6U, 2U), TensorShape(5U, 5U, 4U, 2U, 2U));
+        add_config(TensorShape(5U, 5U, 4U, 2U, 2U), TensorShape(5U, 5U, 6U, 2U), TensorShape(3U, 6U, 2U),
+                   TensorShape(5U, 5U, 4U, 2U, 2U));
 
         // k = 3
         add_config(TensorShape(6U, 5U), TensorShape(6U, 2U, 2U, 2U), TensorShape(1U, 2U, 2U, 2U), TensorShape(6U, 5U));
-        add_config(TensorShape(5U, 5U, 4U, 2U, 2U), TensorShape(5U, 5U, 3U, 6U, 2U), TensorShape(3U, 3U, 6U, 2U), TensorShape(5U, 5U, 4U, 2U, 2U));
+        add_config(TensorShape(5U, 5U, 4U, 2U, 2U), TensorShape(5U, 5U, 3U, 6U, 2U), TensorShape(3U, 3U, 6U, 2U),
+                   TensorShape(5U, 5U, 4U, 2U, 2U));
 
         // k = 4
-        add_config(TensorShape(5U, 5U, 4U, 2U, 2U), TensorShape(5U, 6U, 2U, 3U, 2U), TensorShape(4U, 6U, 2U, 3U, 2U), TensorShape(5U, 5U, 4U, 2U, 2U));
+        add_config(TensorShape(5U, 5U, 4U, 2U, 2U), TensorShape(5U, 6U, 2U, 3U, 2U), TensorShape(4U, 6U, 2U, 3U, 2U),
+                   TensorShape(5U, 5U, 4U, 2U, 2U));
 
         // k = 5
-        add_config(TensorShape(5U, 5U, 4U, 2U, 2U), TensorShape(5U, 3U, 4U, 3U, 2U, 2U), TensorShape(4U, 3U, 4U, 3U, 2U, 2U), TensorShape(5U, 5U, 4U, 2U, 2U));
+        add_config(TensorShape(5U, 5U, 4U, 2U, 2U), TensorShape(5U, 3U, 4U, 3U, 2U, 2U),
+                   TensorShape(4U, 3U, 4U, 3U, 2U, 2U), TensorShape(5U, 5U, 4U, 2U, 2U));
     }
 };
 
@@ -204,7 +218,8 @@ public:
     {
         add_config(TensorShape(6U, 5U), TensorShape(6U), TensorShape(2U, 6U), TensorShape(6U, 5U));
         add_config(TensorShape(6U, 5U), TensorShape(6U, 6U), TensorShape(2U, 6U, 6U), TensorShape(6U, 5U));
-        add_config(TensorShape(3U, 3U, 6U, 5U), TensorShape(6U, 6U), TensorShape(4U, 6U, 6U), TensorShape(3U, 3U, 6U, 5U));
+        add_config(TensorShape(3U, 3U, 6U, 5U), TensorShape(6U, 6U), TensorShape(4U, 6U, 6U),
+                   TensorShape(3U, 3U, 6U, 5U));
     }
 };
 
@@ -217,8 +232,10 @@ public:
         add_config(TensorShape(10U), TensorShape(2U), TensorShape(1U, 2U), TensorShape(10U));
         add_config(TensorShape(9U, 3U, 4U), TensorShape(9U, 3U, 2U), TensorShape(1U, 2U), TensorShape(9U, 3U, 4U));
         add_config(TensorShape(6U, 5U), TensorShape(6U, 6U), TensorShape(2U, 6U, 6U), TensorShape(6U, 5U));
-        add_config(TensorShape(35U, 4U, 3U, 2U, 2U), TensorShape(35U, 4U), TensorShape(4U, 4U), TensorShape(35U, 4U, 3U, 2U, 2U));
-        add_config(TensorShape(11U, 3U, 3U, 2U, 4U), TensorShape(11U, 3U, 3U, 4U), TensorShape(2U, 4U), TensorShape(11U, 3U, 3U, 2U, 4U));
+        add_config(TensorShape(35U, 4U, 3U, 2U, 2U), TensorShape(35U, 4U), TensorShape(4U, 4U),
+                   TensorShape(35U, 4U, 3U, 2U, 2U));
+        add_config(TensorShape(11U, 3U, 3U, 2U, 4U), TensorShape(11U, 3U, 3U, 4U), TensorShape(2U, 4U),
+                   TensorShape(11U, 3U, 3U, 2U, 4U));
         add_config(TensorShape(6U, 5U, 2U), TensorShape(6U, 2U, 2U), TensorShape(2U, 2U, 2U), TensorShape(6U, 5U, 2U));
     }
 };

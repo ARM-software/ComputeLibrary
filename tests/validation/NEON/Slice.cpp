@@ -26,13 +26,13 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 
-#include "tests/NEON/Accessor.h"
 #include "tests/datasets/SliceOperationsDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/SliceOperationsFixtures.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -77,7 +77,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallSliceDataset(), make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         validate(Accessor(_target), _reference);
     }
@@ -93,7 +93,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeSliceDataset(), make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         validate(Accessor(_target), _reference);
     }

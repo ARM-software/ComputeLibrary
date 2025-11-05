@@ -27,14 +27,15 @@
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "src/cpu/kernels/CpuMaxUnpoolingLayerKernel.h"
-#include "tests/NEON/Accessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/MaxUnpoolingLayerFixture.h"
+#include "tests/validation/Validation.h"
 namespace arm_compute
 {
 namespace test
@@ -47,18 +48,25 @@ TEST_SUITE(NEON)
 TEST_SUITE(PoolingLayer)
 
 template <typename T>
-using NEMaxUnpoolingLayerFixture = MaxUnpoolingLayerValidationFixture<Tensor, Accessor, NEPoolingLayer, NEMaxUnpoolingLayer, T>;
+using NEMaxUnpoolingLayerFixture =
+    MaxUnpoolingLayerValidationFixture<Tensor, Accessor, NEPoolingLayer, NEMaxUnpoolingLayer, T>;
 
-const auto PoolingLayerIndicesDatasetFPSmall = combine(make("PoolType", { PoolingType::MAX }), make("PoolingSize", { Size2D(2, 2) }),
-                                                       make("PadStride", { PadStrideInfo(2, 2, 0, 0), PadStrideInfo(2, 1, 0, 0) }));
+const auto PoolingLayerIndicesDatasetFPSmall =
+    combine(make("PoolType", {PoolingType::MAX}),
+            make("PoolingSize", {Size2D(2, 2)}),
+            make("PadStride", {PadStrideInfo(2, 2, 0, 0), PadStrideInfo(2, 1, 0, 0)}));
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallNoneUnitShapes(), PoolingLayerIndicesDatasetFPSmall,
-                                                                                                                   make("DataType", DataType::F32),
-                                                                                                                   make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
+FIXTURE_DATA_TEST_CASE(MaxUnpooling,
+                       NEMaxUnpoolingLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallNoneUnitShapes(),
+                               PoolingLayerIndicesDatasetFPSmall,
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})
 
-                                                                                                                  ))
+                                   ))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -66,13 +74,17 @@ FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<float>, framewor
 TEST_SUITE_END() // FP32
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(MaxUnpooling, NEMaxUnpoolingLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallNoneUnitShapes(), PoolingLayerIndicesDatasetFPSmall,
-                                                                                                                  make("DataType", DataType::F16),
-                                                                                                                  make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
+FIXTURE_DATA_TEST_CASE(MaxUnpooling,
+                       NEMaxUnpoolingLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallNoneUnitShapes(),
+                               PoolingLayerIndicesDatasetFPSmall,
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})
 
-                                                                                                                 ))
+                                   ))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -90,14 +102,12 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(KernelSelection)
 
-DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL,
+DATA_TEST_CASE(KernelSelection,
+               framework::DatasetMode::ALL,
                combine(make("CpuExt", std::string("NEON")),
-                       make("DataType", { DataType::F32,
-                                                              DataType::F16,
-                                                              DataType::QASYMM8,
-                                                              DataType::QASYMM8_SIGNED
-                                                            })),
-               cpu_ext, data_type)
+                       make("DataType", {DataType::F32, DataType::F16, DataType::QASYMM8, DataType::QASYMM8_SIGNED})),
+               cpu_ext,
+               data_type)
 {
     using namespace cpu::kernels;
 
@@ -106,7 +116,8 @@ DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL,
     cpu_isa.sve  = (cpu_ext == "SVE");
     cpu_isa.fp16 = (data_type == DataType::F16);
 
-    const auto *selected_impl = CpuMaxUnpoolingLayerKernel::get_implementation(DataTypeISASelectorData{ data_type, cpu_isa }, cpu::KernelSelectionType::Preferred);
+    const auto *selected_impl = CpuMaxUnpoolingLayerKernel::get_implementation(
+        DataTypeISASelectorData{data_type, cpu_isa}, cpu::KernelSelectionType::Preferred);
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl);
 

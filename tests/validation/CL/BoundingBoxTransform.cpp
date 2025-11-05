@@ -23,12 +23,13 @@
  */
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLBoundingBoxTransform.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/Globals.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/Globals.h"
 #include "tests/validation/fixtures/BoundingBoxTransformFixture.h"
+#include "tests/validation/Validation.h"
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -111,8 +112,10 @@ using CLBoundingBoxTransformFixture = BoundingBoxTransformFixture<CLTensor, CLAc
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(BoundingBox, CLBoundingBoxTransformFixture<float>, framework::DatasetMode::ALL,
-                       combine(DeltaDataset, BboxInfoDataset, make("DataType", { DataType::F32 })))
+FIXTURE_DATA_TEST_CASE(BoundingBox,
+                       CLBoundingBoxTransformFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(DeltaDataset, BboxInfoDataset, make("DataType", {DataType::F32})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, relative_tolerance_f32, 0.f, absolute_tolerance_f32);
@@ -120,8 +123,10 @@ FIXTURE_DATA_TEST_CASE(BoundingBox, CLBoundingBoxTransformFixture<float>, framew
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(BoundingBox, CLBoundingBoxTransformFixture<half>, framework::DatasetMode::ALL,
-                       combine(DeltaDataset, BboxInfoDataset, make("DataType", { DataType::F16 })))
+FIXTURE_DATA_TEST_CASE(BoundingBox,
+                       CLBoundingBoxTransformFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(DeltaDataset, BboxInfoDataset, make("DataType", {DataType::F16})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, relative_tolerance_f16, 0.03f, absolute_tolerance_f16);
@@ -130,13 +135,18 @@ TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 
 template <typename T>
-using CLBoundingBoxTransformQuantizedFixture = BoundingBoxTransformQuantizedFixture<CLTensor, CLAccessor, CLBoundingBoxTransform, T>;
+using CLBoundingBoxTransformQuantizedFixture =
+    BoundingBoxTransformQuantizedFixture<CLTensor, CLAccessor, CLBoundingBoxTransform, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM16)
-FIXTURE_DATA_TEST_CASE(BoundingBox, CLBoundingBoxTransformQuantizedFixture<uint16_t>, framework::DatasetMode::ALL,
-                       combine(DeltaDataset, BboxInfoDataset, make("DataType", { DataType::QASYMM16 }),
-                               make("DeltasQuantInfo", { QuantizationInfo(1.f / 255.f, 127) })))
+FIXTURE_DATA_TEST_CASE(BoundingBox,
+                       CLBoundingBoxTransformQuantizedFixture<uint16_t>,
+                       framework::DatasetMode::ALL,
+                       combine(DeltaDataset,
+                               BboxInfoDataset,
+                               make("DataType", {DataType::QASYMM16}),
+                               make("DeltasQuantInfo", {QuantizationInfo(1.f / 255.f, 127)})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm16);

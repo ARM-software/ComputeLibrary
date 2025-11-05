@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "Reorder.h"
+
 #include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 
 namespace arm_compute
@@ -44,12 +45,23 @@ namespace reference
  * Need to cope with the work requested in either dimension not actually
  * being a multiple of the block sizes.
  */
-template <unsigned int tIntBy, unsigned int BlockBy, size_t TOutSize, size_t TInSize, typename d_type, arm_gemm::VLType vlt>
+template <unsigned int tIntBy,
+          unsigned int BlockBy,
+          size_t       TOutSize,
+          size_t       TInSize,
+          typename d_type,
+          arm_gemm::VLType vlt>
 struct Transform_ref
 {
     template <typename TOut, typename TIn>
-    static void Transform(TOut &out, const TIn in, const int stride,
-                          const int y0, const int ymax, const int x0, const int xmax, bool transposed)
+    static void Transform(TOut     &out,
+                          const TIn in,
+                          const int stride,
+                          const int y0,
+                          const int ymax,
+                          const int x0,
+                          const int xmax,
+                          bool      transposed)
     {
         // NOTE: This code is disabled to avoid the call to get_vector_length(), so templated transforms will not be
         // correct for SVE.  This is not an issue as we have specializations for all SVE cases.
@@ -69,7 +81,7 @@ struct Transform_ref
         // "Y" loop: advance down the rows of the source IntBy rows at a time.
         // Set up fill_rows to show the number rows to copy from, and blank_rows
         // for the number of blank rows to add.
-        for(int y_block = 0; y_block < n_y_blocks; y_block++)
+        for (int y_block = 0; y_block < n_y_blocks; y_block++)
         {
             const int fill_rows  = (y_block < n_whole_y_blocks) ? IntBy : y_remainders;
             const int blank_rows = IntBy - fill_rows;
@@ -77,19 +89,19 @@ struct Transform_ref
             const int y_base = y0 + (y_block * IntBy);
 
             // So now advance along this block of rows, BlockBy columns at a time.
-            for(int x_block = 0; x_block < n_x_blocks; x_block++)
+            for (int x_block = 0; x_block < n_x_blocks; x_block++)
             {
                 const int fill_cols  = (x_block < n_whole_x_blocks) ? BlockBy : x_remainders;
                 const int blank_cols = BlockBy - fill_cols;
 
                 const int x_base = x0 + (x_block * BlockBy);
 
-                for(int row = 0; row < fill_rows; row++)
+                for (int row = 0; row < fill_rows; row++)
                 {
-                    for(int col = 0; col < fill_cols; col++)
+                    for (int col = 0; col < fill_cols; col++)
                     {
                         // In-range copy.  If it's transposed, we reverse the sense of rows and columns here.
-                        if(transposed)
+                        if (transposed)
                         {
                             out[out_index] = static_cast<d_type>(in[(x_base + col) * stride + y_base + row]);
                             out_index++;
@@ -101,7 +113,7 @@ struct Transform_ref
                         }
                     }
                     // "col" tail - row is in range but column is out of range.
-                    for(int col = 0; col < blank_cols; col++)
+                    for (int col = 0; col < blank_cols; col++)
                     {
                         out[out_index] = static_cast<d_type>(0);
                         out_index++;
@@ -111,7 +123,7 @@ struct Transform_ref
                 const d_type zeroval = static_cast<d_type>(0);
                 const int    pads    = blank_rows * (fill_cols + blank_cols);
 
-                for(int i = 0; i < pads; i++)
+                for (int i = 0; i < pads; i++)
                 {
                     out[out_index] = zeroval;
                 }
@@ -123,29 +135,52 @@ struct Transform_ref
 };
 
 template <typename TOut, typename TIn>
-SimpleTensor<TOut> reorder_layer(const SimpleTensor<TIn> &src, const TensorShape &output_shape, WeightFormat output_wf, DataType output_data_type, bool transpose)
+SimpleTensor<TOut> reorder_layer(const SimpleTensor<TIn> &src,
+                                 const TensorShape       &output_shape,
+                                 WeightFormat             output_wf,
+                                 DataType                 output_data_type,
+                                 bool                     transpose)
 {
-    SimpleTensor<TOut> dst{ output_shape, output_data_type };
-    const int       cols = src.shape()[0];
-    const int       rows = src.shape()[1];
+    SimpleTensor<TOut> dst{output_shape, output_data_type};
+    const int          cols = src.shape()[0];
+    const int          rows = src.shape()[1];
 
     const auto interleave_by = arm_compute::interleave_by(output_wf);
-    const auto block_by = arm_compute::block_by(output_wf);
-    if (interleave_by == 4 && block_by == 1) {
-        Transform_ref<4, 1, sizeof(TOut), sizeof(TIn), TOut, arm_gemm::VLType::None>::Transform(dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
-    } else if (interleave_by == 8 && block_by == 1) {
-        Transform_ref<8, 1, sizeof(TOut), sizeof(TIn), TOut, arm_gemm::VLType::None>::Transform(dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
-    } else if (interleave_by == 4 && block_by == 4) {
-        Transform_ref<4, 4, sizeof(TOut), sizeof(TIn), TOut, arm_gemm::VLType::None>::Transform(dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
-    } else if (interleave_by == 8 && block_by == 4) {
-        Transform_ref<8, 4, sizeof(TOut), sizeof(TIn), TOut, arm_gemm::VLType::None>::Transform(dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
+    const auto block_by      = arm_compute::block_by(output_wf);
+    if (interleave_by == 4 && block_by == 1)
+    {
+        Transform_ref<4, 1, sizeof(TOut), sizeof(TIn), TOut, arm_gemm::VLType::None>::Transform(
+            dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
+    }
+    else if (interleave_by == 8 && block_by == 1)
+    {
+        Transform_ref<8, 1, sizeof(TOut), sizeof(TIn), TOut, arm_gemm::VLType::None>::Transform(
+            dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
+    }
+    else if (interleave_by == 4 && block_by == 4)
+    {
+        Transform_ref<4, 4, sizeof(TOut), sizeof(TIn), TOut, arm_gemm::VLType::None>::Transform(
+            dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
+    }
+    else if (interleave_by == 8 && block_by == 4)
+    {
+        Transform_ref<8, 4, sizeof(TOut), sizeof(TIn), TOut, arm_gemm::VLType::None>::Transform(
+            dst, src, transpose ? rows : cols, 0, rows, 0, cols, transpose);
     }
 
     return dst;
 }
 
-template SimpleTensor<float> reorder_layer(const SimpleTensor<float> &src, const TensorShape &output_shape, WeightFormat output_wf, DataType output_data_type, bool transpose);
-template SimpleTensor<bfloat16> reorder_layer(const SimpleTensor<float> &src, const TensorShape &output_shape, WeightFormat output_wf, DataType output_data_type, bool transpose);
+template SimpleTensor<float>    reorder_layer(const SimpleTensor<float> &src,
+                                              const TensorShape         &output_shape,
+                                              WeightFormat               output_wf,
+                                              DataType                   output_data_type,
+                                              bool                       transpose);
+template SimpleTensor<bfloat16> reorder_layer(const SimpleTensor<float> &src,
+                                              const TensorShape         &output_shape,
+                                              WeightFormat               output_wf,
+                                              DataType                   output_data_type,
+                                              bool                       transpose);
 
 } // namespace reference
 } // namespace validation

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ROIPOOLLAYER_H
-#define ARM_COMPUTE_TEST_ROIPOOLLAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_ROIPOOLINGLAYER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_ROIPOOLINGLAYER_H
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
 
@@ -37,10 +38,13 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> roi_pool_layer(const SimpleTensor<T> &src, const SimpleTensor<uint16_t> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo);
+SimpleTensor<T> roi_pool_layer(const SimpleTensor<T>        &src,
+                               const SimpleTensor<uint16_t> &rois,
+                               const ROIPoolingLayerInfo    &pool_info,
+                               const QuantizationInfo       &output_qinfo);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_TEST_ROIPOOLLAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_ROIPOOLINGLAYER_H

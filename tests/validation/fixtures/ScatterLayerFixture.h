@@ -25,16 +25,17 @@
 #define ACL_TESTS_VALIDATION_FIXTURES_SCATTERLAYERFIXTURE_H
 
 #include "arm_compute/core/Utils.h"
-#include "tests/Globals.h"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/Helpers.h"
-#include "tests/validation/Validation.h"
-#include "tests/validation/reference/ScatterLayer.h"
+#include "tests/Globals.h"
 #include "tests/SimpleTensor.h"
+#include "tests/validation/Helpers.h"
+#include "tests/validation/reference/ScatterLayer.h"
+#include "tests/validation/Validation.h"
 
-#include <random>
 #include <cstdint>
+#include <random>
 
 namespace arm_compute
 {
@@ -46,31 +47,39 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ScatterGenericValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape src_shape, TensorShape updates_shape, TensorShape indices_shape,
-        TensorShape out_shape, DataType data_type, ScatterInfo scatter_info, bool inplace, bool padding,
-        QuantizationInfo src_qinfo = QuantizationInfo(), QuantizationInfo o_qinfo = QuantizationInfo())
+    void setup(TensorShape      src_shape,
+               TensorShape      updates_shape,
+               TensorShape      indices_shape,
+               TensorShape      out_shape,
+               DataType         data_type,
+               ScatterInfo      scatter_info,
+               bool             inplace,
+               bool             padding,
+               QuantizationInfo src_qinfo = QuantizationInfo(),
+               QuantizationInfo o_qinfo   = QuantizationInfo())
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
         }
 
         // this is for improving randomness across tests
-        _hash = src_shape[0] + src_shape[1] + src_shape[2] + src_shape[3] + src_shape[4] + src_shape[5]
-              + updates_shape[0] + updates_shape[1] + updates_shape[2] + updates_shape[3]
-              + updates_shape[4] + updates_shape[5]
-              + indices_shape[0] + indices_shape[1] + indices_shape[2] + indices_shape[3];
+        _hash = src_shape[0] + src_shape[1] + src_shape[2] + src_shape[3] + src_shape[4] + src_shape[5] +
+                updates_shape[0] + updates_shape[1] + updates_shape[2] + updates_shape[3] + updates_shape[4] +
+                updates_shape[5] + indices_shape[0] + indices_shape[1] + indices_shape[2] + indices_shape[3];
 
-        _target    = compute_target(src_shape, updates_shape, indices_shape,  out_shape, data_type, scatter_info, inplace, padding, src_qinfo, o_qinfo);
-        _reference = compute_reference(src_shape, updates_shape, indices_shape,  out_shape, data_type,scatter_info, src_qinfo , o_qinfo);
+        _target = compute_target(src_shape, updates_shape, indices_shape, out_shape, data_type, scatter_info, inplace,
+                                 padding, src_qinfo, o_qinfo);
+        _reference = compute_reference(src_shape, updates_shape, indices_shape, out_shape, data_type, scatter_info,
+                                       src_qinfo, o_qinfo);
     }
 
 protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::F32:
             case DataType::F16:
@@ -108,34 +117,41 @@ protected:
     void fill_indices(U &&tensor, int i, const TensorShape &shape)
     {
         // Calculate max indices the shape should contain. Add an arbitrary value to allow testing for some out of bounds values (In this case min dimension)
-        const int32_t max = std::min({shape[0] , shape[1], shape[2]}) + 1;
+        const int32_t max = std::min({shape[0], shape[1], shape[2]}) + 1;
         library->fill_tensor_uniform(tensor, i, static_cast<int32_t>(0), static_cast<int32_t>(max));
     }
 
-    TensorType compute_target(const TensorShape &shape_a, const TensorShape &shape_b, const TensorShape &shape_c,
-        const TensorShape &out_shape, DataType data_type, const ScatterInfo info, bool inplace, bool padding,
-        QuantizationInfo a_qinfo, QuantizationInfo o_qinfo)
+    TensorType compute_target(const TensorShape &shape_a,
+                              const TensorShape &shape_b,
+                              const TensorShape &shape_c,
+                              const TensorShape &out_shape,
+                              DataType           data_type,
+                              const ScatterInfo  info,
+                              bool               inplace,
+                              bool               padding,
+                              QuantizationInfo   a_qinfo,
+                              QuantizationInfo   o_qinfo)
     {
         // 1. Create relevant tensors using ScatterInfo data structure.
         // ----------------------------------------------------
         // In order - src, updates, indices, output.
-        TensorType src   = create_tensor<TensorType>(shape_a, data_type, 1, a_qinfo);
-        TensorType updates   = create_tensor<TensorType>(shape_b, data_type, 1, a_qinfo);
-        TensorType indices   = create_tensor<TensorType>(shape_c, DataType::S32, 1, QuantizationInfo());
-        TensorType dst = create_tensor<TensorType>(out_shape, data_type, 1, o_qinfo);
+        TensorType src     = create_tensor<TensorType>(shape_a, data_type, 1, a_qinfo);
+        TensorType updates = create_tensor<TensorType>(shape_b, data_type, 1, a_qinfo);
+        TensorType indices = create_tensor<TensorType>(shape_c, DataType::S32, 1, QuantizationInfo());
+        TensorType dst     = create_tensor<TensorType>(out_shape, data_type, 1, o_qinfo);
 
         FunctionType scatter;
 
         // Configure operator
         // When scatter_info.zero_initialization is true, pass nullptr for src
         // because dst does not need to be initialized with src values.
-        if(info.zero_initialization)
+        if (info.zero_initialization)
         {
             scatter.configure(nullptr, &updates, &indices, &dst, info);
         }
         else
         {
-            if(inplace)
+            if (inplace)
             {
                 scatter.configure(&src, &updates, &indices, &src, info);
             }
@@ -151,13 +167,13 @@ protected:
         ARM_COMPUTE_ASSERT(indices.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
-        if(padding)
+        if (padding)
         {
-            add_padding_x({ &src, &updates, &indices});
+            add_padding_x({&src, &updates, &indices});
 
-            if(!inplace)
+            if (!inplace)
             {
-                add_padding_x({ &dst });
+                add_padding_x({&dst});
             }
         }
 
@@ -166,7 +182,7 @@ protected:
         updates.allocator()->allocate();
         indices.allocator()->allocate();
 
-        if(!inplace)
+        if (!inplace)
         {
             dst.allocator()->allocate();
         }
@@ -175,19 +191,19 @@ protected:
         ARM_COMPUTE_ASSERT(!updates.info()->is_resizable());
         ARM_COMPUTE_ASSERT(!indices.info()->is_resizable());
 
-        if(!inplace)
+        if (!inplace)
         {
             ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
         }
 
         // Fill update (a) and indices (b) tensors.
         fill(AccessorType(src), 0 + _hash);
-        fill(AccessorType(updates), 1+ _hash);
+        fill(AccessorType(updates), 1 + _hash);
         fill_indices(AccessorType(indices), 2 + _hash, out_shape);
 
         scatter.run();
 
-        if(inplace)
+        if (inplace)
         {
             return src;
         }
@@ -197,33 +213,41 @@ protected:
         }
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &a_shape, const TensorShape &b_shape, const TensorShape &c_shape,
-        const TensorShape &out_shape, DataType data_type, ScatterInfo info, QuantizationInfo a_qinfo, QuantizationInfo o_qinfo)
+    SimpleTensor<T> compute_reference(const TensorShape &a_shape,
+                                      const TensorShape &b_shape,
+                                      const TensorShape &c_shape,
+                                      const TensorShape &out_shape,
+                                      DataType           data_type,
+                                      ScatterInfo        info,
+                                      QuantizationInfo   a_qinfo,
+                                      QuantizationInfo   o_qinfo)
     {
         // Output Quantization not currently in use - fixture should be extended to support this.
         ARM_COMPUTE_UNUSED(o_qinfo);
-        TensorShape src_shape = a_shape;
+        TensorShape src_shape     = a_shape;
         TensorShape updates_shape = b_shape;
         TensorShape indices_shape = c_shape;
-        const int num_ind_dims = c_shape.num_dimensions();
+        const int   num_ind_dims  = c_shape.num_dimensions();
 
         // 1. Collapse batch index into a single dim if necessary for update tensor and indices tensor.
-        if(num_ind_dims >= 3)
+        if (num_ind_dims >= 3)
         {
             indices_shape = indices_shape.collapsed_from(1);
-            updates_shape = updates_shape.collapsed_from(updates_shape.num_dimensions() - (num_ind_dims -1)); // Collapses batch dims
+            updates_shape = updates_shape.collapsed_from(updates_shape.num_dimensions() -
+                                                         (num_ind_dims - 1)); // Collapses batch dims
         }
 
         // 2. Collapse data dims into a single dim.
         //    Collapse all src dims into 2 dims. First one holding data, the other being the index we iterate over.
-        src_shape.collapse(updates_shape.num_dimensions() - 1);     // Collapse all data dims into single dim.
-        src_shape = src_shape.collapsed_from(1);                    // Collapse all index dims into a single dim
-        updates_shape.collapse(updates_shape.num_dimensions() - 1); // Collapse data dims (all except last dim which is batch dim)
+        src_shape.collapse(updates_shape.num_dimensions() - 1); // Collapse all data dims into single dim.
+        src_shape = src_shape.collapsed_from(1);                // Collapse all index dims into a single dim
+        updates_shape.collapse(updates_shape.num_dimensions() -
+                               1); // Collapse data dims (all except last dim which is batch dim)
 
         // Create reference tensors
-        SimpleTensor<T> src{ src_shape, data_type, 1, a_qinfo };
-        SimpleTensor<T> updates{updates_shape, data_type, 1, QuantizationInfo() };
-        SimpleTensor<int32_t> indices{ indices_shape, DataType::S32, 1, QuantizationInfo() };
+        SimpleTensor<T>       src{src_shape, data_type, 1, a_qinfo};
+        SimpleTensor<T>       updates{updates_shape, data_type, 1, QuantizationInfo()};
+        SimpleTensor<int32_t> indices{indices_shape, DataType::S32, 1, QuantizationInfo()};
 
         // Fill reference
         fill(src, 0 + _hash);
@@ -236,7 +260,7 @@ protected:
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
-    int32_t _hash{};
+    int32_t         _hash{};
 };
 
 // This fixture will use the same shape for updates as indices.
@@ -244,12 +268,19 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ScatterValidationFixture : public ScatterGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape src_shape, TensorShape update_shape, TensorShape indices_shape,
-        TensorShape out_shape, DataType data_type, ScatterFunction func, bool zero_init, bool inplace, bool padding)
+    void setup(TensorShape     src_shape,
+               TensorShape     update_shape,
+               TensorShape     indices_shape,
+               TensorShape     out_shape,
+               DataType        data_type,
+               ScatterFunction func,
+               bool            zero_init,
+               bool            inplace,
+               bool            padding)
     {
-        ScatterGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, update_shape,
-            indices_shape, out_shape, data_type, ScatterInfo(func, zero_init), inplace, padding,
-            QuantizationInfo(), QuantizationInfo());
+        ScatterGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            src_shape, update_shape, indices_shape, out_shape, data_type, ScatterInfo(func, zero_init), inplace,
+            padding, QuantizationInfo(), QuantizationInfo());
     }
 };
 

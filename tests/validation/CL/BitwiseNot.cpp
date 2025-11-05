@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/CL/functions/CLBitwiseNot.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/BitwiseNotFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -47,8 +48,10 @@ TEST_SUITE(BitwiseNot)
 template <typename T>
 using CLBitwiseNotFixture = BitwiseNotValidationFixture<CLTensor, CLAccessor, CLBitwiseNot, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLBitwiseNotFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), make("DataType",
-                                                                                                    DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLBitwiseNotFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

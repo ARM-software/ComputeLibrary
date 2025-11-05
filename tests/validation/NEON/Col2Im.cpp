@@ -22,12 +22,13 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+
 #include "src/cpu/kernels/CpuCol2ImKernel.h"
-#include "tests/NEON/Helper.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Helper.h"
 #include "tests/validation/Validation.h"
 
 namespace arm_compute

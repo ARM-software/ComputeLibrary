@@ -26,10 +26,10 @@
 #include "src/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/GEMMFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -48,7 +48,12 @@ using CLGEMMMatrixMultiplyReshapedOnlyRhsMMUL = CLSynthetizeOperator<ClGemmMatri
 
 // Fixture for CLGEMMMatrixMultiplyReshapedOnlyRhsMMUL
 template <typename T>
-using CLGEMMMatrixMultiplyReshapedOnlyRhsMMULFixture = GEMMMatrixMultiplyReshapedOnlyRhsMMULValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshapedOnlyRhsMMUL>;
+using CLGEMMMatrixMultiplyReshapedOnlyRhsMMULFixture =
+    GEMMMatrixMultiplyReshapedOnlyRhsMMULValidationFixture<CLTensor,
+                                                           CLAccessor,
+                                                           T,
+                                                           CLGEMMReshapeRHSMatrix,
+                                                           CLGEMMMatrixMultiplyReshapedOnlyRhsMMUL>;
 
 namespace
 {

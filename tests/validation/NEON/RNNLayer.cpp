@@ -22,14 +22,15 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NERNNLayer.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/RNNLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/RNNLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -41,11 +42,14 @@ using framework::dataset::make;
 
 namespace
 {
-RelativeTolerance<float> tolerance_f32(0.001f); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F32 */
+RelativeTolerance<float> tolerance_f32(
+    0.001f); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F32 */
 #ifdef ARM_COMPUTE_ENABLE_FP16
-RelativeTolerance<half> tolerance_f16(half(0.1)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F16 */
-constexpr float         abs_tolerance_f16(0.02f); /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType:F16 */
-#endif                                            /* ARM_COMPUTE_ENABLE_FP16 */
+RelativeTolerance<half> tolerance_f16(half(
+    0.1)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F16 */
+constexpr float         abs_tolerance_f16(
+            0.02f); /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType:F16 */
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
 } // namespace
 
 TEST_SUITE(NEON)
@@ -130,7 +134,10 @@ template <typename T>
 using NERNNLayerFixture = RNNLayerValidationFixture<Tensor, Accessor, NERNNLayer, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NERNNLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallRNNLayerDataset(), make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NERNNLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallRNNLayerDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -139,9 +146,12 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NERNNLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallRNNLayerDataset(), make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NERNNLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallRNNLayerDataset(), make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_f16, 0.02f, abs_tolerance_f16);

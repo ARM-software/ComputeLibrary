@@ -51,8 +51,8 @@ namespace validation
 {
 namespace
 {
-constexpr int NUM_THREADS =  3;
-}// namespace
+constexpr int NUM_THREADS = 3;
+} // namespace
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class CpuElementwiseOperationsGenericFixture : public framework::Fixture
 {
@@ -67,7 +67,7 @@ public:
                QuantizationInfo    qinfo1,
                QuantizationInfo    qinfo_out,
                bool                is_inplace = false,
-               TestType            test_type = TestType::ConfigureOnceRunOnce)
+               TestType            test_type  = TestType::ConfigureOnceRunOnce)
     {
         if (std::is_same<TensorType, Tensor>::value && // Cpu
             (data_type0 == DataType::F16 || data_type1 == DataType::F16 || output_data_type == DataType::F16) &&
@@ -76,9 +76,9 @@ public:
             return;
         }
 
-        _op         = op;
-        _is_inplace = is_inplace;
-        _test_type  = test_type;
+        _op                = op;
+        _is_inplace        = is_inplace;
+        _test_type         = test_type;
         _num_parallel_runs = (_test_type == TestType::ConfigureOnceRunMultiThreaded ? NUM_THREADS : 1);
 
         compute_target(shape0, shape1, data_type0, data_type1, output_data_type, qinfo0, qinfo1, qinfo_out);
@@ -109,8 +109,10 @@ protected:
         }
     }
 
-    void allocate_and_fill_tensors(TensorType *src1, TensorType *src2, TensorType *dst){
-        for(int i = 0; i < _num_parallel_runs; ++i){
+    void allocate_and_fill_tensors(TensorType *src1, TensorType *src2, TensorType *dst)
+    {
+        for (int i = 0; i < _num_parallel_runs; ++i)
+        {
             ARM_COMPUTE_ASSERT(src1[i].info()->is_resizable());
             ARM_COMPUTE_ASSERT(src2[i].info()->is_resizable());
 
@@ -130,8 +132,8 @@ protected:
             }
 
             // Fill tensors
-            fill(AccessorType(src1[i]), (2*i + 0));
-            fill(AccessorType(src2[i]), (2*i + 1));
+            fill(AccessorType(src1[i]), (2 * i + 0));
+            fill(AccessorType(src2[i]), (2 * i + 1));
         }
     }
 
@@ -145,17 +147,18 @@ protected:
                         QuantizationInfo   qinfo_out)
     {
         // Create tensors
-        TensorType src1[NUM_THREADS];
-        TensorType src2[NUM_THREADS];
-        TensorType dst[NUM_THREADS];
-        ITensorPack run_pack[NUM_THREADS];
-        TensorType *dst_ptrs[NUM_THREADS];
+        TensorType        src1[NUM_THREADS];
+        TensorType        src2[NUM_THREADS];
+        TensorType        dst[NUM_THREADS];
+        ITensorPack       run_pack[NUM_THREADS];
+        TensorType       *dst_ptrs[NUM_THREADS];
         const TensorShape out_shape = TensorShape::broadcast_shape(shape0, shape1);
 
-        for(int i = 0; i < _num_parallel_runs; ++i){
-            src1[i] = create_tensor<TensorType>(shape0, data_type0, 1, qinfo0);
-            src2[i] = create_tensor<TensorType>(shape1, data_type1, 1, qinfo1);
-            dst[i]  = create_tensor<TensorType>(out_shape, output_data_type, 1, qinfo_out);
+        for (int i = 0; i < _num_parallel_runs; ++i)
+        {
+            src1[i]     = create_tensor<TensorType>(shape0, data_type0, 1, qinfo0);
+            src2[i]     = create_tensor<TensorType>(shape1, data_type1, 1, qinfo1);
+            dst[i]      = create_tensor<TensorType>(out_shape, output_data_type, 1, qinfo_out);
             dst_ptrs[i] = &dst[i];
         }
 
@@ -163,13 +166,14 @@ protected:
         if (_is_inplace)
         {
             bool src1_is_inplace = !arm_compute::detail::have_different_dimensions(out_shape, shape0, 0) &&
-                                   (data_type0 == output_data_type) && (qinfo0 == qinfo_out) ;
+                                   (data_type0 == output_data_type) && (qinfo0 == qinfo_out);
             bool src2_is_inplace = !arm_compute::detail::have_different_dimensions(out_shape, shape1, 0) &&
                                    (data_type1 == output_data_type) && (qinfo1 == qinfo_out);
             bool do_in_place = out_shape.total_size() != 0 && (src1_is_inplace || src2_is_inplace);
             ARM_COMPUTE_ASSERT(do_in_place);
 
-            for(int i = 0; i < _num_parallel_runs; ++i){
+            for (int i = 0; i < _num_parallel_runs; ++i)
+            {
                 dst_ptrs[i] = src1_is_inplace ? &(src1[i]) : &(src2[i]);
             }
         }
@@ -180,26 +184,27 @@ protected:
 
         allocate_and_fill_tensors(src1, src2, dst);
 
-        if(_test_type == TestType::ConfigureOnceRunMultiThreaded)
+        if (_test_type == TestType::ConfigureOnceRunMultiThreaded)
         {
 #ifndef BARE_METAL
             std::vector<std::thread> threads;
 
             threads.reserve(_num_parallel_runs);
-            for(int i = 0; i < _num_parallel_runs; ++i)
+            for (int i = 0; i < _num_parallel_runs; ++i)
             {
                 // Compute function
-                run_pack[i] = { { arm_compute::TensorType::ACL_SRC_0, &src1[i] },
-                                {arm_compute::TensorType::ACL_SRC_1, &src2[i]},
-                                {arm_compute::TensorType::ACL_DST, dst_ptrs[i]}};
+                run_pack[i] = {{arm_compute::TensorType::ACL_SRC_0, &src1[i]},
+                               {arm_compute::TensorType::ACL_SRC_1, &src2[i]},
+                               {arm_compute::TensorType::ACL_DST, dst_ptrs[i]}};
 
-                threads.emplace_back([&,i]
-                {
-                    elem_op.run(run_pack[i]);
-                    _target[i] = std::move(*(dst_ptrs[i]));
-                });
+                threads.emplace_back(
+                    [&, i]
+                    {
+                        elem_op.run(run_pack[i]);
+                        _target[i] = std::move(*(dst_ptrs[i]));
+                    });
             }
-            for(int i = 0; i < _num_parallel_runs; ++i)
+            for (int i = 0; i < _num_parallel_runs; ++i)
             {
                 threads[i].join();
             }
@@ -209,8 +214,8 @@ protected:
         {
             // Compute function
             ITensorPack run_pack{{arm_compute::TensorType::ACL_SRC_0, &src1[0]},
-                                {arm_compute::TensorType::ACL_SRC_1, &src2[0]},
-                                {arm_compute::TensorType::ACL_DST, dst_ptrs[0]}};
+                                 {arm_compute::TensorType::ACL_SRC_1, &src2[0]},
+                                 {arm_compute::TensorType::ACL_DST, dst_ptrs[0]}};
             elem_op.run(run_pack);
             _target[0] = std::move(*(dst_ptrs[0]));
         }
@@ -231,10 +236,10 @@ protected:
         SimpleTensor<T> ref_dst{TensorShape::broadcast_shape(shape0, shape1), output_data_type, 1, qinfo_out};
 
         // Fill reference
-        for(int i = 0; i < _num_parallel_runs; ++i)
+        for (int i = 0; i < _num_parallel_runs; ++i)
         {
-            fill(ref_src1, 2*i + 0);
-            fill(ref_src2, 2*i + 1);
+            fill(ref_src1, 2 * i + 0);
+            fill(ref_src2, 2 * i + 1);
             _reference[i] = reference::arithmetic_operation<T>(_op, ref_src1, ref_src2, ref_dst);
         }
     }
@@ -266,7 +271,8 @@ class CpuElementwiseDivisionThreadSafeValidationFixture
     : public CpuElementwiseOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
+    void setup(
+        const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, bool is_inplace)
     {
         CpuElementwiseOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
             ArithmeticOperation::DIV, shape, shape, data_type0, data_type1, output_data_type, QuantizationInfo(),
@@ -307,13 +313,18 @@ class CpuElementwiseMaxQuantizedThreadSafeValidationFixture
     : public CpuElementwiseOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(
-        const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type,
-        QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace)
+    void setup(const TensorShape &shape,
+               DataType           data_type0,
+               DataType           data_type1,
+               DataType           output_data_type,
+               QuantizationInfo   qinfo0,
+               QuantizationInfo   qinfo1,
+               QuantizationInfo   qinfo_out,
+               bool               is_inplace)
     {
         CpuElementwiseOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
-            ArithmeticOperation::MAX, shape, shape, data_type0, data_type1, output_data_type, qinfo0,
-            qinfo1, qinfo_out, is_inplace, TestType::ConfigureOnceRunMultiThreaded);
+            ArithmeticOperation::MAX, shape, shape, data_type0, data_type1, output_data_type, qinfo0, qinfo1, qinfo_out,
+            is_inplace, TestType::ConfigureOnceRunMultiThreaded);
     }
 };
 
@@ -350,13 +361,18 @@ class CpuElementwiseMinQuantizedThreadSafeValidationFixture
     : public CpuElementwiseOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(
-        const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type,
-        QuantizationInfo qinfo0, QuantizationInfo qinfo1, QuantizationInfo qinfo_out, bool is_inplace)
+    void setup(const TensorShape &shape,
+               DataType           data_type0,
+               DataType           data_type1,
+               DataType           output_data_type,
+               QuantizationInfo   qinfo0,
+               QuantizationInfo   qinfo1,
+               QuantizationInfo   qinfo_out,
+               bool               is_inplace)
     {
         CpuElementwiseOperationsGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
-            ArithmeticOperation::MIN, shape, shape, data_type0, data_type1, output_data_type, qinfo0,
-            qinfo1, qinfo_out, is_inplace, TestType::ConfigureOnceRunMultiThreaded);
+            ArithmeticOperation::MIN, shape, shape, data_type0, data_type1, output_data_type, qinfo0, qinfo1, qinfo_out,
+            is_inplace, TestType::ConfigureOnceRunMultiThreaded);
     }
 };
 

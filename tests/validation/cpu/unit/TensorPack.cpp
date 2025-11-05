@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,11 +33,19 @@ TEST_SUITE(CPU)
 TEST_SUITE(UNIT)
 TEST_SUITE(TensorPack)
 
-EMPTY_BODY_FIXTURE_TEST_CASE(CreateTensorPackWithInvalidContext, CreateTensorPackWithInvalidContextFixture, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidTensorPack, DestroyInvalidTensorPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(AddInvalidObjectToTensorPack, AddInvalidObjectToTensorPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(CreateTensorPackWithInvalidContext,
+                             CreateTensorPackWithInvalidContextFixture,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidTensorPack,
+                             DestroyInvalidTensorPackFixture<acl::Target::Cpu>,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(AddInvalidObjectToTensorPack,
+                             AddInvalidObjectToTensorPackFixture<acl::Target::Cpu>,
+                             framework::DatasetMode::ALL)
 EMPTY_BODY_FIXTURE_TEST_CASE(SimpleTensorPack, SimpleTensorPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(MultipleTensorsInPack, MultipleTensorsInPackFixture<acl::Target::Cpu>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(MultipleTensorsInPack,
+                             MultipleTensorsInPackFixture<acl::Target::Cpu>,
+                             framework::DatasetMode::ALL)
 
 TEST_SUITE_END() // Tensor
 TEST_SUITE_END() // UNIT

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_BATCHNORMALIZATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_BATCHNORMALIZATION_LAYER_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_BATCHNORMALIZATIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_BATCHNORMALIZATIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -45,9 +45,7 @@ public:
         iterator(std::vector<TensorShape>::const_iterator tensor_it,
                  std::vector<TensorShape>::const_iterator param_it,
                  std::vector<float>::const_iterator       epsilon_it)
-            : _tensor_it{ std::move(tensor_it) },
-              _param_it{ std::move(param_it) },
-              _epsilon_it{ std::move(epsilon_it) }
+            : _tensor_it{std::move(tensor_it)}, _param_it{std::move(param_it)}, _epsilon_it{std::move(epsilon_it)}
         {
         }
 
@@ -113,4 +111,4 @@ private:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_BATCHNORMALIZATION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_BATCHNORMALIZATIONLAYERDATASET_H

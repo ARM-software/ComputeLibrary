@@ -22,14 +22,15 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLLSTMLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/LSTMLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/LSTMLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -43,7 +44,6 @@ namespace
 RelativeTolerance<float> tolerance_f32(0.001f);
 RelativeTolerance<half>  tolerance_f16(half(0.1));
 } // namespace
-
 
 TEST_SUITE(CL)
 TEST_SUITE(LSTMLayer)
@@ -165,14 +165,15 @@ template <typename T>
 using CLLSTMLayerFixture = LSTMLayerValidationFixture<CLTensor, CLAccessor, CLLSTMLayer, LSTMParams<ICLTensor>, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLSTMLayerFixture<float>, framework::DatasetMode::ALL,
-    combine(
-        datasets::SmallLSTMLayerDataset(),
-        make("DataType", DataType::F32),
-        make("ProjectionOpt", { true, false }),
-        make("PeepholeOpt", { true, false }),
-        make("UseLayerNorm", { true, false }),
-        make("UseMemoryManager", { true, false })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLLSTMLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallLSTMLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("ProjectionOpt", {true, false}),
+                               make("PeepholeOpt", {true, false}),
+                               make("UseLayerNorm", {true, false}),
+                               make("UseMemoryManager", {true, false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -181,14 +182,15 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLLSTMLayerFixture<float>, framework::DatasetMo
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLLSTMLayerFixture<half>, framework::DatasetMode::ALL,
-    combine(
-        datasets::SmallLSTMLayerDataset(),
-        make("DataType", DataType::F16),
-        make("ProjectionOpt", { true, false }),
-        make("PeepholeOpt", { true, false }),
-        make("UseLayerNorm", { true, false }),
-        make("UseMemoryManager", { true, false })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLLSTMLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallLSTMLayerDataset(),
+                               make("DataType", DataType::F16),
+                               make("ProjectionOpt", {true, false}),
+                               make("PeepholeOpt", {true, false}),
+                               make("UseLayerNorm", {true, false}),
+                               make("UseMemoryManager", {true, false})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);

@@ -21,19 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "tests/validation/reference/DFT.h"
+
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
 #include "tests/Globals.h"
 #include "tests/SimpleTensor.h"
 #include "tests/SimpleTensorAccessor.h"
-#include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
-
-#include "tests/validation/Validation.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
-#include "tests/validation/reference/DFT.h"
+#include "tests/validation/Validation.h"
 
 #include <random>
 
@@ -48,39 +49,24 @@ namespace
 using framework::dataset::make;
 using framework::dataset::zip;
 
-auto shapes_1d_dft = make("TensorShape", { TensorShape(33U),
-                                           TensorShape(8U),
-                                           TensorShape(23U, 7U),
-                                           TensorShape(16U, 8U, 4U)
-                                         });
+auto shapes_1d_dft =
+    make("TensorShape", {TensorShape(33U), TensorShape(8U), TensorShape(23U, 7U), TensorShape(16U, 8U, 4U)});
 
-auto shapes_2d_dft = make("TensorShape", { TensorShape(33U, 14U),
-                                           TensorShape(8U, 9U),
-                                           TensorShape(23U, 7U, 3U),
-                                           TensorShape(16U, 8U, 4U)
-                                         });
+auto shapes_2d_dft = make(
+    "TensorShape", {TensorShape(33U, 14U), TensorShape(8U, 9U), TensorShape(23U, 7U, 3U), TensorShape(16U, 8U, 4U)});
 
-auto conv_dataset_dft = zip(zip(make("InputShape", { TensorShape(8U, 7U, 3U, 2U),
-                                                     TensorShape(18U, 22U, 4U),
-                                                     TensorShape(32U, 48U, 8U)
-                                                   }),
-                             make("WeightShape", { TensorShape(3U, 3U, 3U, 6U),
-                                                   TensorShape(5U, 5U, 4U, 3U),
-                                                   TensorShape(9U, 9U, 8U, 3U)
-                                                 })),
-                       make("ConvInfo", { PadStrideInfo(1, 1, 1, 1),
-                                          PadStrideInfo(1, 1, 2, 2),
-                                          PadStrideInfo(1, 1, 4, 4)
-                                        }));
+auto conv_dataset_dft = zip(
+    zip(make("InputShape", {TensorShape(8U, 7U, 3U, 2U), TensorShape(18U, 22U, 4U), TensorShape(32U, 48U, 8U)}),
+        make("WeightShape", {TensorShape(3U, 3U, 3U, 6U), TensorShape(5U, 5U, 4U, 3U), TensorShape(9U, 9U, 8U, 3U)})),
+    make("ConvInfo", {PadStrideInfo(1, 1, 1, 1), PadStrideInfo(1, 1, 2, 2), PadStrideInfo(1, 1, 4, 4)}));
 } // namespace
 TEST_SUITE(CPP)
 TEST_SUITE(DFT)
 
 TEST_SUITE(DFT1D)
-DATA_TEST_CASE(Real, framework::DatasetMode::ALL, shapes_1d_dft,
-               shape)
+DATA_TEST_CASE(Real, framework::DatasetMode::ALL, shapes_1d_dft, shape)
 {
-    SimpleTensor<float>                   src{ shape, DataType::F32, 1 };
+    SimpleTensor<float>                   src{shape, DataType::F32, 1};
     std::uniform_real_distribution<float> distribution(-5.f, 5.f);
     library->fill(src, distribution, 0);
 
@@ -95,10 +81,9 @@ DATA_TEST_CASE(Real, framework::DatasetMode::ALL, shapes_1d_dft,
     validate(SimpleTensorAccessor<float>(src), backward, RelativeTolerance<float>(0.1f));
 }
 
-DATA_TEST_CASE(Complex, framework::DatasetMode::ALL, shapes_1d_dft,
-               shape)
+DATA_TEST_CASE(Complex, framework::DatasetMode::ALL, shapes_1d_dft, shape)
 {
-    SimpleTensor<float>                   src{ shape, DataType::F32, 2 };
+    SimpleTensor<float>                   src{shape, DataType::F32, 2};
     std::uniform_real_distribution<float> distribution(-5.f, 5.f);
     library->fill(src, distribution, 0);
 
@@ -108,15 +93,15 @@ DATA_TEST_CASE(Complex, framework::DatasetMode::ALL, shapes_1d_dft,
     auto backward = reference::dft_1d(forward, reference::FFTDirection::Inverse);
 
     // Validate with input
-    validate(SimpleTensorAccessor<float>(src), backward, RelativeTolerance<float>(0.1f), 0.f, AbsoluteTolerance<float>(0.001f));
+    validate(SimpleTensorAccessor<float>(src), backward, RelativeTolerance<float>(0.1f), 0.f,
+             AbsoluteTolerance<float>(0.001f));
 }
 TEST_SUITE_END() // DFT1D
 
 TEST_SUITE(DFT2D)
-DATA_TEST_CASE(Real, framework::DatasetMode::ALL, shapes_2d_dft,
-               shape)
+DATA_TEST_CASE(Real, framework::DatasetMode::ALL, shapes_2d_dft, shape)
 {
-    SimpleTensor<float>                   src{ shape, DataType::F32, 1 };
+    SimpleTensor<float>                   src{shape, DataType::F32, 1};
     std::uniform_real_distribution<float> distribution(-5.f, 5.f);
     library->fill(src, distribution, 0);
 
@@ -128,13 +113,13 @@ DATA_TEST_CASE(Real, framework::DatasetMode::ALL, shapes_2d_dft,
     auto backward = reference::ridft_2d(forward, is_odd);
 
     // Validate with input
-    validate(SimpleTensorAccessor<float>(src), backward, RelativeTolerance<float>(0.1f), 0.f, AbsoluteTolerance<float>(0.001f));
+    validate(SimpleTensorAccessor<float>(src), backward, RelativeTolerance<float>(0.1f), 0.f,
+             AbsoluteTolerance<float>(0.001f));
 }
 
-DATA_TEST_CASE(Complex, framework::DatasetMode::ALL, shapes_2d_dft,
-               shape)
+DATA_TEST_CASE(Complex, framework::DatasetMode::ALL, shapes_2d_dft, shape)
 {
-    SimpleTensor<float>                   src{ shape, DataType::F32, 2 };
+    SimpleTensor<float>                   src{shape, DataType::F32, 2};
     std::uniform_real_distribution<float> distribution(-5.f, 5.f);
     library->fill(src, distribution, 0);
 
@@ -144,26 +129,27 @@ DATA_TEST_CASE(Complex, framework::DatasetMode::ALL, shapes_2d_dft,
     auto backward = reference::dft_2d(forward, reference::FFTDirection::Inverse);
 
     // Validate with input
-    validate(SimpleTensorAccessor<float>(src), backward, RelativeTolerance<float>(0.1f), 0.f, AbsoluteTolerance<float>(0.001f));
+    validate(SimpleTensorAccessor<float>(src), backward, RelativeTolerance<float>(0.1f), 0.f,
+             AbsoluteTolerance<float>(0.001f));
 }
 TEST_SUITE_END() // DFT2D
 
 TEST_SUITE(Conv)
-DATA_TEST_CASE(Real2Real, framework::DatasetMode::ALL, conv_dataset_dft,
-               shape_in, shape_w, conv_info)
+DATA_TEST_CASE(Real2Real, framework::DatasetMode::ALL, conv_dataset_dft, shape_in, shape_w, conv_info)
 {
     std::uniform_real_distribution<float> distribution(-1.f, 1.f);
     std::uniform_real_distribution<float> distribution_b(0.f, 0.f);
 
-    SimpleTensor<float> src{ shape_in, DataType::F32, 1 };
-    SimpleTensor<float> w{ shape_w, DataType::F32, 1 };
-    SimpleTensor<float> b{ TensorShape(shape_w[3]), DataType::F32, 1 };
+    SimpleTensor<float> src{shape_in, DataType::F32, 1};
+    SimpleTensor<float> w{shape_w, DataType::F32, 1};
+    SimpleTensor<float> b{TensorShape(shape_w[3]), DataType::F32, 1};
 
     library->fill(src, distribution, 0);
     library->fill(w, distribution, 1);
     library->fill(b, distribution_b, 2);
 
-    const auto  output_wh = arm_compute::scaled_dimensions(shape_in.x(), shape_in.y(), shape_w.x(), shape_w.y(), conv_info);
+    const auto output_wh =
+        arm_compute::scaled_dimensions(shape_in.x(), shape_in.y(), shape_w.x(), shape_w.y(), conv_info);
     TensorShape dst_shape = shape_in;
     dst_shape.set(0, output_wh.first);
     dst_shape.set(1, output_wh.second);
@@ -175,7 +161,8 @@ DATA_TEST_CASE(Real2Real, framework::DatasetMode::ALL, conv_dataset_dft,
     auto dst_ref = reference::convolution_layer(src, w, b, dst_shape, conv_info);
 
     // Validate with input
-    validate(SimpleTensorAccessor<float>(dst), dst_ref, RelativeTolerance<float>(0.1f), 0.f, AbsoluteTolerance<float>(0.001f));
+    validate(SimpleTensorAccessor<float>(dst), dst_ref, RelativeTolerance<float>(0.1f), 0.f,
+             AbsoluteTolerance<float>(0.001f));
 }
 TEST_SUITE_END() // Conv
 

@@ -25,12 +25,13 @@
 #include "arm_compute/runtime/NEON/functions/NEDetectionPostProcessLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/Validation.h"
 
 namespace arm_compute
@@ -54,7 +55,7 @@ inline void quantize_and_fill_tensor(U &&tensor, const std::vector<T> &v)
     QuantizationInfo     qi = tensor.quantization_info();
     std::vector<uint8_t> quantized;
     quantized.reserve(v.size());
-    for(auto elem : v)
+    for (auto elem : v)
     {
         quantized.emplace_back(quantize_qasymm8(elem, qi));
     }
@@ -70,7 +71,7 @@ inline QuantizationInfo qinfo_scaleoffset_from_minmax(const float min, const flo
     const float   f_qmax = qmax;
 
     // Continue only if [min,max] is a valid range and not a point
-    if(min != max)
+    if (min != max)
     {
         scale                       = (max - min) / (f_qmax - f_qmin);
         const float offset_from_min = f_qmin - min / scale;
@@ -78,14 +79,14 @@ inline QuantizationInfo qinfo_scaleoffset_from_minmax(const float min, const flo
 
         const float offset_from_min_error = std::abs(f_qmin) + std::abs(min / scale);
         const float offset_from_max_error = std::abs(f_qmax) + std::abs(max / scale);
-        const float f_offset              = offset_from_min_error < offset_from_max_error ? offset_from_min : offset_from_max;
+        const float f_offset = offset_from_min_error < offset_from_max_error ? offset_from_min : offset_from_max;
 
         uint8_t uint8_offset = 0;
-        if(f_offset < f_qmin)
+        if (f_offset < f_qmin)
         {
             uint8_offset = qmin;
         }
-        else if(f_offset > f_qmax)
+        else if (f_offset > f_qmax)
         {
             uint8_offset = qmax;
         }
@@ -98,48 +99,35 @@ inline QuantizationInfo qinfo_scaleoffset_from_minmax(const float min, const flo
     return QuantizationInfo(scale, offset);
 }
 
-inline void base_test_case(DetectionPostProcessLayerInfo info, DataType data_type, const SimpleTensor<float> &expected_output_boxes,
-                           const SimpleTensor<float> &expected_output_classes, const SimpleTensor<float> &expected_output_scores, const SimpleTensor<float> &expected_num_detection,
-                           AbsoluteTolerance<float> tolerance_boxes = AbsoluteTolerance<float>(0.1f), AbsoluteTolerance<float> tolerance_others = AbsoluteTolerance<float>(0.1f))
+inline void base_test_case(DetectionPostProcessLayerInfo info,
+                           DataType                      data_type,
+                           const SimpleTensor<float>    &expected_output_boxes,
+                           const SimpleTensor<float>    &expected_output_classes,
+                           const SimpleTensor<float>    &expected_output_scores,
+                           const SimpleTensor<float>    &expected_num_detection,
+                           AbsoluteTolerance<float>      tolerance_boxes  = AbsoluteTolerance<float>(0.1f),
+                           AbsoluteTolerance<float>      tolerance_others = AbsoluteTolerance<float>(0.1f))
 {
-    Tensor box_encoding     = create_tensor<Tensor>(TensorShape(4U, 6U, 1U), data_type, 1, qinfo_scaleoffset_from_minmax(-1.0f, 1.0f));
-    Tensor class_prediction = create_tensor<Tensor>(TensorShape(3U, 6U, 1U), data_type, 1, qinfo_scaleoffset_from_minmax(0.0f, 1.0f));
-    Tensor anchors          = create_tensor<Tensor>(TensorShape(4U, 6U), data_type, 1, qinfo_scaleoffset_from_minmax(0.0f, 100.5f));
+    Tensor box_encoding =
+        create_tensor<Tensor>(TensorShape(4U, 6U, 1U), data_type, 1, qinfo_scaleoffset_from_minmax(-1.0f, 1.0f));
+    Tensor class_prediction =
+        create_tensor<Tensor>(TensorShape(3U, 6U, 1U), data_type, 1, qinfo_scaleoffset_from_minmax(0.0f, 1.0f));
+    Tensor anchors =
+        create_tensor<Tensor>(TensorShape(4U, 6U), data_type, 1, qinfo_scaleoffset_from_minmax(0.0f, 100.5f));
 
     box_encoding.allocator()->allocate();
     class_prediction.allocator()->allocate();
     anchors.allocator()->allocate();
 
-    std::vector<float> box_encoding_vector =
-    {
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, -1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f
-    };
-    std::vector<float> class_prediction_vector =
-    {
-        0.0f, 0.7f, 0.68f,
-        0.0f, 0.6f, 0.5f,
-        0.0f, 0.9f, 0.83f,
-        0.0f, 0.91f, 0.97f,
-        0.0f, 0.5f, 0.4f,
-        0.0f, 0.31f, 0.22f
-    };
-    std::vector<float> anchors_vector =
-    {
-        0.4f, 0.4f, 1.1f, 1.1f,
-        0.4f, 0.4f, 1.1f, 1.1f,
-        0.4f, 0.4f, 1.1f, 1.1f,
-        0.4f, 10.4f, 1.1f, 1.1f,
-        0.4f, 10.4f, 1.1f, 1.1f,
-        0.4f, 100.4f, 1.1f, 1.1f
-    };
+    std::vector<float> box_encoding_vector = {0.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                                              0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,  0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<float> class_prediction_vector = {0.0f, 0.7f,  0.68f, 0.0f, 0.6f, 0.5f, 0.0f, 0.9f,  0.83f,
+                                                  0.0f, 0.91f, 0.97f, 0.0f, 0.5f, 0.4f, 0.0f, 0.31f, 0.22f};
+    std::vector<float> anchors_vector = {0.4f, 0.4f,  1.1f, 1.1f, 0.4f, 0.4f,  1.1f, 1.1f, 0.4f, 0.4f,   1.1f, 1.1f,
+                                         0.4f, 10.4f, 1.1f, 1.1f, 0.4f, 10.4f, 1.1f, 1.1f, 0.4f, 100.4f, 1.1f, 1.1f};
 
     // Fill the tensors with random pre-generated values
-    if(data_type == DataType::F32)
+    if (data_type == DataType::F32)
     {
         fill_tensor(Accessor(box_encoding), box_encoding_vector);
         fill_tensor(Accessor(class_prediction), class_prediction_vector);
@@ -158,7 +146,8 @@ inline void base_test_case(DetectionPostProcessLayerInfo info, DataType data_typ
     Tensor                      output_scores;
     Tensor                      num_detection;
     NEDetectionPostProcessLayer detection;
-    detection.configure(&box_encoding, &class_prediction, &anchors, &output_boxes, &output_classes, &output_scores, &num_detection, info);
+    detection.configure(&box_encoding, &class_prediction, &anchors, &output_boxes, &output_classes, &output_scores,
+                        &num_detection, info);
 
     output_boxes.allocator()->allocate();
     output_classes.allocator()->allocate();
@@ -253,136 +242,150 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 TEST_SUITE(F32)
 TEST_CASE(Float_general, framework::DatasetMode::ALL)
 {
-    DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo(3 /*max_detections*/, 1 /*max_classes_per_detection*/, 0.0 /*nms_score_threshold*/,
-                                                                       0.5 /*nms_iou_threshold*/, 2 /*num_classes*/, { 11.0, 11.0, 6.0, 6.0 } /*scale*/);
+    DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo(
+        3 /*max_detections*/, 1 /*max_classes_per_detection*/, 0.0 /*nms_score_threshold*/, 0.5 /*nms_iou_threshold*/,
+        2 /*num_classes*/, {11.0, 11.0, 6.0, 6.0} /*scale*/);
     // Fill expected detection boxes
     SimpleTensor<float> expected_output_boxes(TensorShape(4U, 3U), DataType::F32);
-    fill_tensor(expected_output_boxes, std::vector<float> { -0.15, 9.85, 0.95, 10.95, -0.15, -0.15, 0.95, 0.95, -0.15, 99.85, 0.95, 100.95 });
+    fill_tensor(expected_output_boxes,
+                std::vector<float>{-0.15, 9.85, 0.95, 10.95, -0.15, -0.15, 0.95, 0.95, -0.15, 99.85, 0.95, 100.95});
     // Fill expected detection classes
     SimpleTensor<float> expected_output_classes(TensorShape(3U), DataType::F32);
-    fill_tensor(expected_output_classes, std::vector<float> { 1.0f, 0.0f, 0.0f });
+    fill_tensor(expected_output_classes, std::vector<float>{1.0f, 0.0f, 0.0f});
     // Fill expected detection scores
     SimpleTensor<float> expected_output_scores(TensorShape(3U), DataType::F32);
-    fill_tensor(expected_output_scores, std::vector<float> { 0.97f, 0.95f, 0.31f });
+    fill_tensor(expected_output_scores, std::vector<float>{0.97f, 0.95f, 0.31f});
     // Fill expected num detections
     SimpleTensor<float> expected_num_detection(TensorShape(1U), DataType::F32);
-    fill_tensor(expected_num_detection, std::vector<float> { 3.f });
+    fill_tensor(expected_num_detection, std::vector<float>{3.f});
     // Run base test
-    base_test_case(info, DataType::F32, expected_output_boxes, expected_output_classes, expected_output_scores, expected_num_detection);
+    base_test_case(info, DataType::F32, expected_output_boxes, expected_output_classes, expected_output_scores,
+                   expected_num_detection);
 }
 
 TEST_CASE(Float_fast, framework::DatasetMode::ALL)
 {
-    DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo(3 /*max_detections*/, 1 /*max_classes_per_detection*/, 0.0 /*nms_score_threshold*/,
-                                                                       0.5 /*nms_iou_threshold*/, 2 /*num_classes*/, { 11.0, 11.0, 6.0, 6.0 } /*scale*/,
-                                                                       false /*use_regular_nms*/, 1 /*detections_per_class*/);
+    DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo(
+        3 /*max_detections*/, 1 /*max_classes_per_detection*/, 0.0 /*nms_score_threshold*/, 0.5 /*nms_iou_threshold*/,
+        2 /*num_classes*/, {11.0, 11.0, 6.0, 6.0} /*scale*/, false /*use_regular_nms*/, 1 /*detections_per_class*/);
 
     // Fill expected detection boxes
     SimpleTensor<float> expected_output_boxes(TensorShape(4U, 3U), DataType::F32);
-    fill_tensor(expected_output_boxes, std::vector<float> { -0.15, 9.85, 0.95, 10.95, -0.15, -0.15, 0.95, 0.95, -0.15, 99.85, 0.95, 100.95 });
+    fill_tensor(expected_output_boxes,
+                std::vector<float>{-0.15, 9.85, 0.95, 10.95, -0.15, -0.15, 0.95, 0.95, -0.15, 99.85, 0.95, 100.95});
     // Fill expected detection classes
     SimpleTensor<float> expected_output_classes(TensorShape(3U), DataType::F32);
-    fill_tensor(expected_output_classes, std::vector<float> { 1.0f, 0.0f, 0.0f });
+    fill_tensor(expected_output_classes, std::vector<float>{1.0f, 0.0f, 0.0f});
     // Fill expected detection scores
     SimpleTensor<float> expected_output_scores(TensorShape(3U), DataType::F32);
-    fill_tensor(expected_output_scores, std::vector<float> { 0.97f, 0.95f, 0.31f });
+    fill_tensor(expected_output_scores, std::vector<float>{0.97f, 0.95f, 0.31f});
     // Fill expected num detections
     SimpleTensor<float> expected_num_detection(TensorShape(1U), DataType::F32);
-    fill_tensor(expected_num_detection, std::vector<float> { 3.f });
+    fill_tensor(expected_num_detection, std::vector<float>{3.f});
 
     // Run base test
-    base_test_case(info, DataType::F32, expected_output_boxes, expected_output_classes, expected_output_scores, expected_num_detection);
+    base_test_case(info, DataType::F32, expected_output_boxes, expected_output_classes, expected_output_scores,
+                   expected_num_detection);
 }
 
 TEST_CASE(Float_regular, framework::DatasetMode::ALL)
 {
-    DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo(3 /*max_detections*/, 1 /*max_classes_per_detection*/, 0.0 /*nms_score_threshold*/,
-                                                                       0.5 /*nms_iou_threshold*/, 2 /*num_classes*/, { 11.0, 11.0, 6.0, 6.0 } /*scale*/,
-                                                                       true /*use_regular_nms*/, 1 /*detections_per_class*/);
+    DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo(
+        3 /*max_detections*/, 1 /*max_classes_per_detection*/, 0.0 /*nms_score_threshold*/, 0.5 /*nms_iou_threshold*/,
+        2 /*num_classes*/, {11.0, 11.0, 6.0, 6.0} /*scale*/, true /*use_regular_nms*/, 1 /*detections_per_class*/);
 
     // Fill expected detection boxes
     SimpleTensor<float> expected_output_boxes(TensorShape(4U, 3U), DataType::F32);
-    fill_tensor(expected_output_boxes, std::vector<float> { -0.15, 9.85, 0.95, 10.95, -0.15, 9.85, 0.95, 10.95, 0.0f, 0.0f, 0.0f, 0.0f });
+    fill_tensor(expected_output_boxes,
+                std::vector<float>{-0.15, 9.85, 0.95, 10.95, -0.15, 9.85, 0.95, 10.95, 0.0f, 0.0f, 0.0f, 0.0f});
     // Fill expected detection classes
     SimpleTensor<float> expected_output_classes(TensorShape(3U), DataType::F32);
-    fill_tensor(expected_output_classes, std::vector<float> { 1.0f, 0.0f, 0.0f });
+    fill_tensor(expected_output_classes, std::vector<float>{1.0f, 0.0f, 0.0f});
     // Fill expected detection scores
     SimpleTensor<float> expected_output_scores(TensorShape(3U), DataType::F32);
-    fill_tensor(expected_output_scores, std::vector<float> { 0.97f, 0.91f, 0.0f });
+    fill_tensor(expected_output_scores, std::vector<float>{0.97f, 0.91f, 0.0f});
     // Fill expected num detections
     SimpleTensor<float> expected_num_detection(TensorShape(1U), DataType::F32);
-    fill_tensor(expected_num_detection, std::vector<float> { 2.f });
+    fill_tensor(expected_num_detection, std::vector<float>{2.f});
 
     // Run test
-    base_test_case(info, DataType::F32, expected_output_boxes, expected_output_classes, expected_output_scores, expected_num_detection);
+    base_test_case(info, DataType::F32, expected_output_boxes, expected_output_classes, expected_output_scores,
+                   expected_num_detection);
 }
 TEST_SUITE_END() // F32
 
 TEST_SUITE(QASYMM8)
 TEST_CASE(Quantized_general, framework::DatasetMode::ALL)
 {
-    DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo(3 /*max_detections*/, 1 /*max_classes_per_detection*/, 0.0 /*nms_score_threshold*/,
-                                                                       0.5 /*nms_iou_threshold*/, 2 /*num_classes*/, { 11.0, 11.0, 6.0, 6.0 } /*scale*/);
+    DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo(
+        3 /*max_detections*/, 1 /*max_classes_per_detection*/, 0.0 /*nms_score_threshold*/, 0.5 /*nms_iou_threshold*/,
+        2 /*num_classes*/, {11.0, 11.0, 6.0, 6.0} /*scale*/);
 
     // Fill expected detection boxes
     SimpleTensor<float> expected_output_boxes(TensorShape(4U, 3U), DataType::F32);
-    fill_tensor(expected_output_boxes, std::vector<float> { -0.15, 9.85, 0.95, 10.95, -0.15, -0.15, 0.95, 0.95, -0.15, 99.85, 0.95, 100.95 });
+    fill_tensor(expected_output_boxes,
+                std::vector<float>{-0.15, 9.85, 0.95, 10.95, -0.15, -0.15, 0.95, 0.95, -0.15, 99.85, 0.95, 100.95});
     // Fill expected detection classes
     SimpleTensor<float> expected_output_classes(TensorShape(3U), DataType::F32);
-    fill_tensor(expected_output_classes, std::vector<float> { 1.0f, 0.0f, 0.0f });
+    fill_tensor(expected_output_classes, std::vector<float>{1.0f, 0.0f, 0.0f});
     // Fill expected detection scores
     SimpleTensor<float> expected_output_scores(TensorShape(3U), DataType::F32);
-    fill_tensor(expected_output_scores, std::vector<float> { 0.97f, 0.95f, 0.31f });
+    fill_tensor(expected_output_scores, std::vector<float>{0.97f, 0.95f, 0.31f});
     // Fill expected num detections
     SimpleTensor<float> expected_num_detection(TensorShape(1U), DataType::F32);
-    fill_tensor(expected_num_detection, std::vector<float> { 3.f });
+    fill_tensor(expected_num_detection, std::vector<float>{3.f});
     // Run test
-    base_test_case(info, DataType::QASYMM8, expected_output_boxes, expected_output_classes, expected_output_scores, expected_num_detection, AbsoluteTolerance<float>(0.3f));
+    base_test_case(info, DataType::QASYMM8, expected_output_boxes, expected_output_classes, expected_output_scores,
+                   expected_num_detection, AbsoluteTolerance<float>(0.3f));
 }
 
 TEST_CASE(Quantized_fast, framework::DatasetMode::ALL)
 {
-    DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo(3 /*max_detections*/, 1 /*max_classes_per_detection*/, 0.0 /*nms_score_threshold*/,
-                                                                       0.5 /*nms_iou_threshold*/, 2 /*num_classes*/, { 11.0, 11.0, 6.0, 6.0 } /*scale*/,
-                                                                       false /*use_regular_nms*/, 1 /*detections_per_class*/);
+    DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo(
+        3 /*max_detections*/, 1 /*max_classes_per_detection*/, 0.0 /*nms_score_threshold*/, 0.5 /*nms_iou_threshold*/,
+        2 /*num_classes*/, {11.0, 11.0, 6.0, 6.0} /*scale*/, false /*use_regular_nms*/, 1 /*detections_per_class*/);
 
     // Fill expected detection boxes
     SimpleTensor<float> expected_output_boxes(TensorShape(4U, 3U), DataType::F32);
-    fill_tensor(expected_output_boxes, std::vector<float> { -0.15, 9.85, 0.95, 10.95, -0.15, -0.15, 0.95, 0.95, -0.15, 99.85, 0.95, 100.95 });
+    fill_tensor(expected_output_boxes,
+                std::vector<float>{-0.15, 9.85, 0.95, 10.95, -0.15, -0.15, 0.95, 0.95, -0.15, 99.85, 0.95, 100.95});
     // Fill expected detection classes
     SimpleTensor<float> expected_output_classes(TensorShape(3U), DataType::F32);
-    fill_tensor(expected_output_classes, std::vector<float> { 1.0f, 0.0f, 0.0f });
+    fill_tensor(expected_output_classes, std::vector<float>{1.0f, 0.0f, 0.0f});
     // Fill expected detection scores
     SimpleTensor<float> expected_output_scores(TensorShape(3U), DataType::F32);
-    fill_tensor(expected_output_scores, std::vector<float> { 0.97f, 0.95f, 0.31f });
+    fill_tensor(expected_output_scores, std::vector<float>{0.97f, 0.95f, 0.31f});
     // Fill expected num detections
     SimpleTensor<float> expected_num_detection(TensorShape(1U), DataType::F32);
-    fill_tensor(expected_num_detection, std::vector<float> { 3.f });
+    fill_tensor(expected_num_detection, std::vector<float>{3.f});
 
     // Run base test
-    base_test_case(info, DataType::QASYMM8, expected_output_boxes, expected_output_classes, expected_output_scores, expected_num_detection, AbsoluteTolerance<float>(0.3f));
+    base_test_case(info, DataType::QASYMM8, expected_output_boxes, expected_output_classes, expected_output_scores,
+                   expected_num_detection, AbsoluteTolerance<float>(0.3f));
 }
 
 TEST_CASE(Quantized_regular, framework::DatasetMode::ALL)
 {
-    DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo(3 /*max_detections*/, 1 /*max_classes_per_detection*/, 0.0 /*nms_score_threshold*/,
-                                                                       0.5 /*nms_iou_threshold*/, 2 /*num_classes*/, { 11.0, 11.0, 6.0, 6.0 } /*scale*/,
-                                                                       true /*use_regular_nms*/, 1 /*detections_per_class*/);
+    DetectionPostProcessLayerInfo info = DetectionPostProcessLayerInfo(
+        3 /*max_detections*/, 1 /*max_classes_per_detection*/, 0.0 /*nms_score_threshold*/, 0.5 /*nms_iou_threshold*/,
+        2 /*num_classes*/, {11.0, 11.0, 6.0, 6.0} /*scale*/, true /*use_regular_nms*/, 1 /*detections_per_class*/);
     // Fill expected detection boxes
     SimpleTensor<float> expected_output_boxes(TensorShape(4U, 3U), DataType::F32);
-    fill_tensor(expected_output_boxes, std::vector<float> { -0.15, 9.85, 0.95, 10.95, -0.15, 9.85, 0.95, 10.95, 0.0f, 0.0f, 0.0f, 0.0f });
+    fill_tensor(expected_output_boxes,
+                std::vector<float>{-0.15, 9.85, 0.95, 10.95, -0.15, 9.85, 0.95, 10.95, 0.0f, 0.0f, 0.0f, 0.0f});
     // Fill expected detection classes
     SimpleTensor<float> expected_output_classes(TensorShape(3U), DataType::F32);
-    fill_tensor(expected_output_classes, std::vector<float> { 1.0f, 0.0f, 0.0f });
+    fill_tensor(expected_output_classes, std::vector<float>{1.0f, 0.0f, 0.0f});
     // Fill expected detection scores
     SimpleTensor<float> expected_output_scores(TensorShape(3U), DataType::F32);
-    fill_tensor(expected_output_scores, std::vector<float> { 0.95f, 0.91f, 0.0f });
+    fill_tensor(expected_output_scores, std::vector<float>{0.95f, 0.91f, 0.0f});
     // Fill expected num detections
     SimpleTensor<float> expected_num_detection(TensorShape(1U), DataType::F32);
-    fill_tensor(expected_num_detection, std::vector<float> { 2.f });
+    fill_tensor(expected_num_detection, std::vector<float>{2.f});
 
     // Run test
-    base_test_case(info, DataType::QASYMM8, expected_output_boxes, expected_output_classes, expected_output_scores, expected_num_detection, AbsoluteTolerance<float>(0.3f));
+    base_test_case(info, DataType::QASYMM8, expected_output_boxes, expected_output_classes, expected_output_scores,
+                   expected_num_detection, AbsoluteTolerance<float>(0.3f));
 }
 
 TEST_SUITE_END() // QASYMM8

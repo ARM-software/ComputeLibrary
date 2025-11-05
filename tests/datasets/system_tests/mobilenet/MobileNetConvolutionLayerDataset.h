@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_MOBILENET_CONVOLUTION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_MOBILENET_CONVOLUTION_LAYER_DATASET
-
-#include "tests/datasets/ConvolutionLayerDataset.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_MOBILENET_MOBILENETCONVOLUTIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_MOBILENET_MOBILENETCONVOLUTIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/datasets/ConvolutionLayerDataset.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -42,12 +41,15 @@ class MobileNetConvolutionLayerDataset final : public ConvolutionLayerDataset
 public:
     MobileNetConvolutionLayerDataset()
     {
-        add_config(TensorShape(10U, 10U, 384U), TensorShape(1U, 1U, 384U, 384U), TensorShape(384U), TensorShape(10U, 10U, 384U), PadStrideInfo(1, 1, 0, 0));
-        add_config(TensorShape(5U, 5U, 768U), TensorShape(1U, 1U, 768U, 768U), TensorShape(768U), TensorShape(5U, 5U, 768U), PadStrideInfo(1, 1, 0, 0));
-        add_config(TensorShape(40U, 40U, 96U), TensorShape(1U, 1U, 96U, 96U), TensorShape(96U), TensorShape(40U, 40U, 96U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(10U, 10U, 384U), TensorShape(1U, 1U, 384U, 384U), TensorShape(384U),
+                   TensorShape(10U, 10U, 384U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(5U, 5U, 768U), TensorShape(1U, 1U, 768U, 768U), TensorShape(768U),
+                   TensorShape(5U, 5U, 768U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(40U, 40U, 96U), TensorShape(1U, 1U, 96U, 96U), TensorShape(96U),
+                   TensorShape(40U, 40U, 96U), PadStrideInfo(1, 1, 0, 0));
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_MOBILENET_CONVOLUTION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_MOBILENET_MOBILENETCONVOLUTIONLAYERDATASET_H

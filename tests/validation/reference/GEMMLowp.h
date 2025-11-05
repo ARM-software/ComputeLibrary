@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,40 +36,74 @@ namespace validation
 namespace reference
 {
 template <typename T1, typename T2, typename T3>
-SimpleTensor<T1> gemmlowp_matrix_multiply_core(const SimpleTensor<T2> &a, const SimpleTensor<T3> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset);
+SimpleTensor<T1> gemmlowp_matrix_multiply_core(
+    const SimpleTensor<T2> &a, const SimpleTensor<T3> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset);
 
 template <typename T1, typename T2, typename T3>
-void gemmlowp_matrix_multiply_core_accumulate(const SimpleTensor<T2> &a, const SimpleTensor<T3> &b, TensorShape shape_c, int32_t a_offset, int32_t b_offset, SimpleTensor<T1> &dst_);
+void gemmlowp_matrix_multiply_core_accumulate(const SimpleTensor<T2> &a,
+                                              const SimpleTensor<T3> &b,
+                                              TensorShape             shape_c,
+                                              int32_t                 a_offset,
+                                              int32_t                 b_offset,
+                                              SimpleTensor<T1>       &dst_);
 
 template <typename T1, typename T2, typename T3 = T2>
 SimpleTensor<T1> gemmlowp(const SimpleTensor<T2> &a, const SimpleTensor<T3> &b, TensorShape shape_c);
 
 template <typename TIn, typename TOut>
-SimpleTensor<uint8_t> gemmlowp_quantize_down_scale(const SimpleTensor<TIn> &in, int32_t result_offset, std::vector<int32_t> result_mult_int, std::vector<int32_t> result_shift);
+SimpleTensor<uint8_t> gemmlowp_quantize_down_scale(const SimpleTensor<TIn> &in,
+                                                   int32_t                  result_offset,
+                                                   std::vector<int32_t>     result_mult_int,
+                                                   std::vector<int32_t>     result_shift);
 
 template <typename TIn, typename TOut>
-SimpleTensor<TOut> gemmlowp_quantize_down_scale(const SimpleTensor<TIn> &in, int32_t result_offset, std::vector<int32_t> result_mult_int, std::vector<int32_t> result_shift,
-                                                int32_t min = 0, int32_t max = 0);
+SimpleTensor<TOut> gemmlowp_quantize_down_scale(const SimpleTensor<TIn> &in,
+                                                int32_t                  result_offset,
+                                                std::vector<int32_t>     result_mult_int,
+                                                std::vector<int32_t>     result_shift,
+                                                int32_t                  min = 0,
+                                                int32_t                  max = 0);
 
 template <typename TIn, typename TOut>
-SimpleTensor<TOut> gemmlowp_quantize_down_scale(const SimpleTensor<TIn> &in, const SimpleTensor<TIn> &bias, int32_t result_offset, std::vector<int32_t> result_mult_int,
-                                                std::vector<int32_t> result_shift, int32_t min = 0, int32_t max = 0);
+SimpleTensor<TOut> gemmlowp_quantize_down_scale(const SimpleTensor<TIn> &in,
+                                                const SimpleTensor<TIn> &bias,
+                                                int32_t                  result_offset,
+                                                std::vector<int32_t>     result_mult_int,
+                                                std::vector<int32_t>     result_shift,
+                                                int32_t                  min = 0,
+                                                int32_t                  max = 0);
 
 template <typename TIn, typename TOut>
-SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_fixedpoint(const SimpleTensor<TIn> &in, std::vector<int32_t> result_fixedpoint_multiplier, std::vector<int32_t> result_shift,
-                                                              int32_t result_offset_after_shift, int32_t min = 0, int32_t max = 0);
+SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_fixedpoint(const SimpleTensor<TIn> &in,
+                                                              std::vector<int32_t>     result_fixedpoint_multiplier,
+                                                              std::vector<int32_t>     result_shift,
+                                                              int32_t                  result_offset_after_shift,
+                                                              int32_t                  min = 0,
+                                                              int32_t                  max = 0);
 
 template <typename TIn, typename TOut>
-SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_fixedpoint(const SimpleTensor<TIn> &in, const SimpleTensor<TIn> &bias, std::vector<int32_t> result_fixedpoint_multiplier,
-                                                              std::vector<int32_t> result_shift, int32_t result_offset_after_shift, int32_t min = 0, int32_t max = 0);
-
-template <typename TIn, typename TOut>
-SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_float(const SimpleTensor<TIn> &in, const SimpleTensor<TIn> &bias,
-                                                         std::vector<float_t> result_real_multiplier, int32_t result_offset, int32_t min = 0, int32_t max = 0);
+SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_fixedpoint(const SimpleTensor<TIn> &in,
+                                                              const SimpleTensor<TIn> &bias,
+                                                              std::vector<int32_t>     result_fixedpoint_multiplier,
+                                                              std::vector<int32_t>     result_shift,
+                                                              int32_t                  result_offset_after_shift,
+                                                              int32_t                  min = 0,
+                                                              int32_t                  max = 0);
 
 template <typename TIn, typename TOut>
 SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_float(const SimpleTensor<TIn> &in,
-                                                         std::vector<float_t> result_real_multiplier, int32_t result_offset, int32_t min = 0, int32_t max = 0);
+                                                         const SimpleTensor<TIn> &bias,
+                                                         std::vector<float_t>     result_real_multiplier,
+                                                         int32_t                  result_offset,
+                                                         int32_t                  min = 0,
+                                                         int32_t                  max = 0);
+
+template <typename TIn, typename TOut>
+SimpleTensor<TOut> gemmlowp_quantize_down_scale_by_float(const SimpleTensor<TIn> &in,
+                                                         std::vector<float_t>     result_real_multiplier,
+                                                         int32_t                  result_offset,
+                                                         int32_t                  min = 0,
+                                                         int32_t                  max = 0);
 } // namespace reference
 } // namespace validation
 } // namespace test

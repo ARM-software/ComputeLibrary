@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,12 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/DepthConvertLayer.h"
 
@@ -45,9 +46,14 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DepthConvertLayerValidationBaseFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, QuantizationInfo quantization_info)
+    void setup(TensorShape      shape,
+               DataType         dt_in,
+               DataType         dt_out,
+               ConvertPolicy    policy,
+               uint32_t         shift,
+               QuantizationInfo quantization_info)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             (dt_in == DataType::F16 || dt_out == DataType::F16) && !CPUInfo::get().has_fp16())
         {
             return;
@@ -63,7 +69,7 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i, DataType dt_in, DataType dt_out)
     {
-        if(is_data_type_quantized(tensor.data_type()))
+        if (is_data_type_quantized(tensor.data_type()))
         {
             std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
             std::uniform_int_distribution<uint32_t> distribution(bounds.first, bounds.second);
@@ -73,7 +79,7 @@ protected:
         else
         {
             // When converting S32 to F16, both reference and Compute Library implementations are + or - infinity outside the F16 range.
-            if(dt_in == DataType::S32 && dt_out == DataType::F16)
+            if (dt_in == DataType::S32 && dt_out == DataType::F16)
             {
                 std::uniform_int_distribution<int32_t> distribution_s32(-65504, 65504);
                 library->fill(tensor, distribution_s32, i);
@@ -85,7 +91,8 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
+    TensorType
+    compute_target(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, dt_in, 1, _quantization_info);
@@ -114,10 +121,11 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T2> compute_reference(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
+    SimpleTensor<T2>
+    compute_reference(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
     {
         // Create reference
-        SimpleTensor<T1> src{ shape, dt_in, 1, _quantization_info };
+        SimpleTensor<T1> src{shape, dt_in, 1, _quantization_info};
 
         // Fill reference
         fill(src, 0, dt_in, dt_out);
@@ -132,24 +140,31 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
-class DepthConvertLayerValidationFixture : public DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>
+class DepthConvertLayerValidationFixture
+    : public DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>
 {
 public:
     void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
     {
-        DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, dt_in, dt_out, policy,
-                                                                                                      shift, QuantizationInfo());
+        DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(
+            shape, dt_in, dt_out, policy, shift, QuantizationInfo());
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
-class DepthConvertLayerValidationQuantizedFixture : public DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>
+class DepthConvertLayerValidationQuantizedFixture
+    : public DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>
 {
 public:
-    void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, QuantizationInfo quantization_info)
+    void setup(TensorShape      shape,
+               DataType         dt_in,
+               DataType         dt_out,
+               ConvertPolicy    policy,
+               uint32_t         shift,
+               QuantizationInfo quantization_info)
     {
-        DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, dt_in, dt_out, policy,
-                                                                                                      shift, quantization_info);
+        DepthConvertLayerValidationBaseFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(
+            shape, dt_in, dt_out, policy, shift, quantization_info);
     }
 };
 } // namespace validation

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,7 @@ MaliHWInfo get_mali_hw_info(const char *path)
 {
     int fd = open(path, O_RDWR); // NOLINT
 
-    if(fd < 0)
+    if (fd < 0)
     {
         ARM_COMPUTE_ERROR("Failed to get HW info.");
     }
@@ -57,7 +57,7 @@ MaliHWInfo get_mali_hw_info(const char *path)
         version_check_args.major     = 10;
         version_check_args.minor     = 2;
 
-        if(mali_userspace::mali_ioctl(fd, version_check_args) != 0)
+        if (mali_userspace::mali_ioctl(fd, version_check_args) != 0)
         {
             ARM_COMPUTE_ERROR("Failed to check version.");
             close(fd);
@@ -70,7 +70,7 @@ MaliHWInfo get_mali_hw_info(const char *path)
         flags.header.id    = mali_userspace::KBASE_FUNC_SET_FLAGS; // NOLINT
         flags.create_flags = mali_userspace::BASE_CONTEXT_CREATE_KERNEL_FLAGS;
 
-        if(mali_userspace::mali_ioctl(fd, flags) != 0)
+        if (mali_userspace::mali_ioctl(fd, flags) != 0)
         {
             ARM_COMPUTE_ERROR("Failed settings flags ioctl.");
             close(fd);
@@ -81,7 +81,7 @@ MaliHWInfo get_mali_hw_info(const char *path)
         mali_userspace::kbase_uk_gpuprops props;                         // NOLINT
         props.header.id = mali_userspace::KBASE_FUNC_GPU_PROPS_REG_DUMP; // NOLINT
 
-        if(mali_ioctl(fd, props) != 0)
+        if (mali_ioctl(fd, props) != 0)
         {
             ARM_COMPUTE_ERROR("Failed settings flags ioctl.");
             close(fd);
@@ -93,7 +93,7 @@ MaliHWInfo get_mali_hw_info(const char *path)
         hw_info.r_value = props.props.core_props.major_revision;
         hw_info.p_value = props.props.core_props.minor_revision;
 
-        for(unsigned int i = 0; i < props.props.coherency_info.num_core_groups; ++i)
+        for (unsigned int i = 0; i < props.props.coherency_info.num_core_groups; ++i)
         {
             hw_info.core_mask |= props.props.coherency_info.group[i].core_mask;
         }
@@ -109,21 +109,19 @@ MaliHWInfo get_mali_hw_info(const char *path)
 
 MaliCounter::MaliCounter(ScaleFactor scale_factor)
 {
-    _counters =
-    {
-        { "GPU_ACTIVE", Measurement(0, "cycles") },
+    _counters = {
+        {"GPU_ACTIVE", Measurement(0, "cycles")},
     };
 
-    _core_counters =
-    {
-        { "ARITH_WORDS", { "Arithmetic pipe", std::map<int, uint64_t>(), "instructions" } },
-        { "LS_ISSUE", { "LS pipe", std::map<int, uint64_t>(), "instructions" } },
-        { "TEX_ISSUE", { "Texture pipe", std::map<int, uint64_t>(), "instructions" } },
-        { "COMPUTE_ACTIVE", { "Compute core", std::map<int, uint64_t>(), "cycles" } },
-        { "FRAG_ACTIVE", { "Fragment core", std::map<int, uint64_t>(), "cycles" } },
+    _core_counters = {
+        {"ARITH_WORDS", {"Arithmetic pipe", std::map<int, uint64_t>(), "instructions"}},
+        {"LS_ISSUE", {"LS pipe", std::map<int, uint64_t>(), "instructions"}},
+        {"TEX_ISSUE", {"Texture pipe", std::map<int, uint64_t>(), "instructions"}},
+        {"COMPUTE_ACTIVE", {"Compute core", std::map<int, uint64_t>(), "cycles"}},
+        {"FRAG_ACTIVE", {"Fragment core", std::map<int, uint64_t>(), "cycles"}},
     };
 
-    switch(scale_factor)
+    switch (scale_factor)
     {
         case ScaleFactor::NONE:
             _scale_factor = 1;
@@ -159,7 +157,7 @@ void MaliCounter::init()
 
     _fd = open(_device, O_RDWR | O_CLOEXEC | O_NONBLOCK); // NOLINT
 
-    if(_fd < 0)
+    if (_fd < 0)
     {
         ARM_COMPUTE_ERROR("Failed to open /dev/mali0.");
     }
@@ -168,11 +166,11 @@ void MaliCounter::init()
         mali_userspace::kbase_uk_hwcnt_reader_version_check_args check; // NOLINT
         memset(&check, 0, sizeof(check));
 
-        if(mali_userspace::mali_ioctl(_fd, check) != 0)
+        if (mali_userspace::mali_ioctl(_fd, check) != 0)
         {
             ARM_COMPUTE_ERROR("Failed to get ABI version.");
         }
-        else if(check.major < 10)
+        else if (check.major < 10)
         {
             ARM_COMPUTE_ERROR("Unsupported ABI version 10.");
         }
@@ -184,7 +182,7 @@ void MaliCounter::init()
         flags.header.id    = mali_userspace::KBASE_FUNC_SET_FLAGS; // NOLINT
         flags.create_flags = mali_userspace::BASE_CONTEXT_CREATE_KERNEL_FLAGS;
 
-        if(mali_userspace::mali_ioctl(_fd, flags) != 0)
+        if (mali_userspace::mali_ioctl(_fd, flags) != 0)
         {
             ARM_COMPUTE_ERROR("Failed settings flags ioctl.");
         }
@@ -201,7 +199,7 @@ void MaliCounter::init()
         setup.mmu_l2_bm    = -1;
         setup.fd           = -1;
 
-        if(mali_userspace::mali_ioctl(_fd, setup) != 0)
+        if (mali_userspace::mali_ioctl(_fd, setup) != 0)
         {
             ARM_COMPUTE_ERROR("Failed setting hwcnt reader ioctl.");
         }
@@ -212,44 +210,45 @@ void MaliCounter::init()
     {
         uint32_t api_version = ~mali_userspace::HWCNT_READER_API;
 
-        if(ioctl(_hwc_fd, mali_userspace::KBASE_HWCNT_READER_GET_API_VERSION, &api_version) != 0) // NOLINT
+        if (ioctl(_hwc_fd, mali_userspace::KBASE_HWCNT_READER_GET_API_VERSION, &api_version) != 0) // NOLINT
         {
             ARM_COMPUTE_ERROR("Could not determine hwcnt reader API.");
         }
-        else if(api_version != mali_userspace::HWCNT_READER_API)
+        else if (api_version != mali_userspace::HWCNT_READER_API)
         {
             ARM_COMPUTE_ERROR("Invalid API version.");
         }
     }
 
-    if(ioctl(_hwc_fd, static_cast<int>(mali_userspace::KBASE_HWCNT_READER_GET_BUFFER_SIZE), &_buffer_size) != 0) // NOLINT
+    if (ioctl(_hwc_fd, static_cast<int>(mali_userspace::KBASE_HWCNT_READER_GET_BUFFER_SIZE), &_buffer_size) !=
+        0) // NOLINT
     {
         ARM_COMPUTE_ERROR("Failed to get buffer size.");
     }
 
-    if(ioctl(_hwc_fd, static_cast<int>(mali_userspace::KBASE_HWCNT_READER_GET_HWVER), &_hw_ver) != 0) // NOLINT
+    if (ioctl(_hwc_fd, static_cast<int>(mali_userspace::KBASE_HWCNT_READER_GET_HWVER), &_hw_ver) != 0) // NOLINT
     {
         ARM_COMPUTE_ERROR("Could not determine HW version.");
     }
 
-    if(_hw_ver < 5)
+    if (_hw_ver < 5)
     {
         ARM_COMPUTE_ERROR("Unsupported HW version.");
     }
 
-    _sample_data = static_cast<uint8_t *>(mmap(nullptr, _buffer_count * _buffer_size, PROT_READ, MAP_PRIVATE, _hwc_fd, 0));
+    _sample_data =
+        static_cast<uint8_t *>(mmap(nullptr, _buffer_count * _buffer_size, PROT_READ, MAP_PRIVATE, _hwc_fd, 0));
 
-    if(_sample_data == MAP_FAILED) // NOLINT
+    if (_sample_data == MAP_FAILED) // NOLINT
     {
         ARM_COMPUTE_ERROR("Failed to map sample data.");
     }
 
-    auto product = std::find_if(std::begin(mali_userspace::products), std::end(mali_userspace::products), [&](const mali_userspace::CounterMapping & cm)
-    {
-        return (cm.product_mask & hw_info.gpu_id) == cm.product_id;
-    });
+    auto product = std::find_if(std::begin(mali_userspace::products), std::end(mali_userspace::products),
+                                [&](const mali_userspace::CounterMapping &cm)
+                                { return (cm.product_mask & hw_info.gpu_id) == cm.product_id; });
 
-    if(product != std::end(mali_userspace::products))
+    if (product != std::end(mali_userspace::products))
     {
         _names_lut = product->names_lut;
     }
@@ -266,7 +265,7 @@ void MaliCounter::init()
 
     unsigned int mask = hw_info.core_mask;
 
-    while(mask != 0)
+    while (mask != 0)
     {
         unsigned int bit = __builtin_ctz(mask);
         _core_index_remap.push_back(bit);
@@ -276,19 +275,19 @@ void MaliCounter::init()
 
 void MaliCounter::term()
 {
-    if(_sample_data != nullptr)
+    if (_sample_data != nullptr)
     {
         munmap(_sample_data, _buffer_count * _buffer_size);
         _sample_data = nullptr;
     }
 
-    if(_hwc_fd >= 0)
+    if (_hwc_fd >= 0)
     {
         close(_hwc_fd);
         _hwc_fd = -1;
     }
 
-    if(_fd >= 0)
+    if (_fd >= 0)
     {
         close(_fd);
         _fd = -1;
@@ -297,7 +296,7 @@ void MaliCounter::term()
 
 void MaliCounter::sample_counters()
 {
-    if(ioctl(_hwc_fd, mali_userspace::KBASE_HWCNT_READER_DUMP, 0) != 0)
+    if (ioctl(_hwc_fd, mali_userspace::KBASE_HWCNT_READER_DUMP, 0) != 0)
     {
         ARM_COMPUTE_ERROR("Could not sample hardware counters.");
     }
@@ -311,16 +310,16 @@ void MaliCounter::wait_next_event()
 
     const int count = poll(&poll_fd, 1, -1);
 
-    if(count < 0)
+    if (count < 0)
     {
         ARM_COMPUTE_ERROR("poll() failed.");
     }
 
-    if((poll_fd.revents & POLLIN) != 0)
+    if ((poll_fd.revents & POLLIN) != 0)
     {
         mali_userspace::kbase_hwcnt_reader_metadata meta; // NOLINT
 
-        if(ioctl(_hwc_fd, static_cast<int>(mali_userspace::KBASE_HWCNT_READER_GET_BUFFER), &meta) != 0) // NOLINT
+        if (ioctl(_hwc_fd, static_cast<int>(mali_userspace::KBASE_HWCNT_READER_GET_BUFFER), &meta) != 0) // NOLINT
         {
             ARM_COMPUTE_ERROR("Failed READER_GET_BUFFER.");
         }
@@ -328,12 +327,12 @@ void MaliCounter::wait_next_event()
         memcpy(_raw_counter_buffer.data(), _sample_data + _buffer_size * meta.buffer_idx, _buffer_size);
         _timestamp = meta.timestamp;
 
-        if(ioctl(_hwc_fd, mali_userspace::KBASE_HWCNT_READER_PUT_BUFFER, &meta) != 0) // NOLINT
+        if (ioctl(_hwc_fd, mali_userspace::KBASE_HWCNT_READER_PUT_BUFFER, &meta) != 0) // NOLINT
         {
             ARM_COMPUTE_ERROR("Failed READER_PUT_BUFFER.");
         }
     }
-    else if((poll_fd.revents & POLLHUP) != 0)
+    else if ((poll_fd.revents & POLLHUP) != 0)
     {
         ARM_COMPUTE_ERROR("HWC hung up.");
     }
@@ -346,7 +345,7 @@ const uint32_t *MaliCounter::get_counters() const
 
 const uint32_t *MaliCounter::get_counters(mali_userspace::MaliCounterBlockName block, int core) const
 {
-    switch(block)
+    switch (block)
     {
         case mali_userspace::MALI_NAME_BLOCK_JM:
             return _raw_counter_buffer.data() + mali_userspace::MALI_NAME_BLOCK_SIZE * 0;
@@ -355,7 +354,7 @@ const uint32_t *MaliCounter::get_counters(mali_userspace::MaliCounterBlockName b
         case mali_userspace::MALI_NAME_BLOCK_TILER:
             return _raw_counter_buffer.data() + mali_userspace::MALI_NAME_BLOCK_SIZE * 1;
         default:
-            if(core < 0)
+            if (core < 0)
             {
                 ARM_COMPUTE_ERROR("Invalid core number.");
             }
@@ -368,9 +367,9 @@ int MaliCounter::find_counter_index_by_name(mali_userspace::MaliCounterBlockName
 {
     const char *const *names = &_names_lut[mali_userspace::MALI_NAME_BLOCK_SIZE * block];
 
-    for(int i = 0; i < mali_userspace::MALI_NAME_BLOCK_SIZE; ++i)
+    for (int i = 0; i < mali_userspace::MALI_NAME_BLOCK_SIZE; ++i)
     {
-        if(strstr(names[i], name) != nullptr)
+        if (strstr(names[i], name) != nullptr)
         {
             return i;
         }
@@ -391,8 +390,10 @@ void MaliCounter::stop()
     sample_counters();
     wait_next_event();
 
-    const uint32_t *counter    = get_counters(mali_userspace::MALI_NAME_BLOCK_JM);
-    _counters.at("GPU_ACTIVE") = Measurement(counter[find_counter_index_by_name(mali_userspace::MALI_NAME_BLOCK_JM, "GPU_ACTIVE")], _counters.at("GPU_ACTIVE").unit());
+    const uint32_t *counter = get_counters(mali_userspace::MALI_NAME_BLOCK_JM);
+    _counters.at("GPU_ACTIVE") =
+        Measurement(counter[find_counter_index_by_name(mali_userspace::MALI_NAME_BLOCK_JM, "GPU_ACTIVE")],
+                    _counters.at("GPU_ACTIVE").unit());
 
     const int arith_index   = find_counter_index_by_name(mali_userspace::MALI_NAME_BLOCK_SHADER, "ARITH_WORDS");
     const int ls_index      = find_counter_index_by_name(mali_userspace::MALI_NAME_BLOCK_SHADER, "LS_ISSUE");
@@ -401,7 +402,7 @@ void MaliCounter::stop()
     const int frag_index    = find_counter_index_by_name(mali_userspace::MALI_NAME_BLOCK_SHADER, "FRAG_ACTIVE");
 
     // Shader core counters can be averaged if desired, but here we don't.
-    for(uint32_t core = 0; core < _num_cores; ++core)
+    for (uint32_t core = 0; core < _num_cores; ++core)
     {
         const uint32_t *sc_counter = get_counters(mali_userspace::MALI_NAME_BLOCK_SHADER, core);
 
@@ -422,19 +423,20 @@ std::string MaliCounter::id() const
 
 Instrument::MeasurementsMap MaliCounter::measurements() const
 {
-    Measurement counters((_counters.at("GPU_ACTIVE").value() / _scale_factor).v.floating_point, _unit + _counters.at("GPU_ACTIVE").unit()); //NOLINT
+    Measurement counters((_counters.at("GPU_ACTIVE").value() / _scale_factor).v.floating_point,
+                         _unit + _counters.at("GPU_ACTIVE").unit()); //NOLINT
 
-    MeasurementsMap measurements
-    {
-        { "Timespan", Measurement(_stop_time - _start_time, "ns") },
-        { "GPU active", counters },
+    MeasurementsMap measurements{
+        {"Timespan", Measurement(_stop_time - _start_time, "ns")},
+        {"GPU active", counters},
     };
 
-    for(const auto &counter : _core_counters)
+    for (const auto &counter : _core_counters)
     {
-        for(const auto &core : counter.second.values)
+        for (const auto &core : counter.second.values)
         {
-            measurements.emplace(counter.second.name + " #" + support::cpp11::to_string(core.first), Measurement(core.second / _scale_factor, _unit + counter.second.unit));
+            measurements.emplace(counter.second.name + " #" + support::cpp11::to_string(core.first),
+                                 Measurement(core.second / _scale_factor, _unit + counter.second.unit));
         }
     }
 

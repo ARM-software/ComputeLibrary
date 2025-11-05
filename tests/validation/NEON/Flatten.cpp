@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/Allocator.h"
 #include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
 #include "arm_compute/runtime/Tensor.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/FlattenLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -70,14 +71,20 @@ using NEFlattenLayerFixture = FlattenLayerValidationFixture<Tensor, Accessor, NE
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFlattenLayerFixture<float>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                    make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEFlattenLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEFlattenLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
-                                                                                                        make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEFlattenLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -86,11 +93,14 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFlattenLayerFixture<half>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                   make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEFlattenLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
+                               make("DataType", DataType::F16)))
 {
     // Only validate if the cpu architecture supports FP16.
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -101,11 +111,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFlattenLayerFixture<half>, framework::Dataset
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEFlattenLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
-                                                                                                       make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEFlattenLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
+                               make("DataType", DataType::F16)))
 {
     // Validate output
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);

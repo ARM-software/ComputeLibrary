@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,18 +22,18 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_TEST_GATHER_FIXTURE
-#define ARM_COMPUTE_TEST_GATHER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_GATHERFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_GATHERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Gather.h"
 
@@ -67,26 +67,25 @@ protected:
         uint32_t    *indices_ptr = static_cast<uint32_t *>(indices.data());
 
         // 10% of the time the index is out-of-range.
-        uint32_t max_index = input_shape[actual_axis] + input_shape[actual_axis] / 9 + 1;
+        uint32_t                                max_index = input_shape[actual_axis] + input_shape[actual_axis] / 9 + 1;
         std::uniform_int_distribution<uint32_t> dist_index(0, max_index - 1);
 
-        for(unsigned int ind = 0; ind < indices_shape.total_size(); ind++)
+        for (unsigned int ind = 0; ind < indices_shape.total_size(); ind++)
         {
             indices_ptr[ind] = dist_index(gen);
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape,
-                              DataType           data_type,
-                              int                axis,
-                              const TensorShape  indices_shape)
+    TensorType
+    compute_target(const TensorShape &input_shape, DataType data_type, int axis, const TensorShape indices_shape)
     {
         // Create tensors
         TensorType     src            = create_tensor<TensorType>(input_shape, data_type);
         TensorType     indices_tensor = create_tensor<TensorType>(indices_shape, DataType::U32);
         const uint32_t actual_axis    = wrap_around(axis, static_cast<int>(input_shape.num_dimensions()));
-        TensorShape    output_shape   = arm_compute::misc::shape_calculator::compute_gather_shape(input_shape, indices_shape, actual_axis);
-        TensorType     dst            = create_tensor<TensorType>(output_shape, data_type);
+        TensorShape    output_shape =
+            arm_compute::misc::shape_calculator::compute_gather_shape(input_shape, indices_shape, actual_axis);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type);
 
         // Create and configure function
         FunctionType gather;
@@ -115,14 +114,12 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape,
-                                      DataType           data_type,
-                                      int                axis,
-                                      const TensorShape  indices_shape)
+    SimpleTensor<T>
+    compute_reference(const TensorShape &input_shape, DataType data_type, int axis, const TensorShape indices_shape)
     {
         // Create reference tensor
-        SimpleTensor<T>        src{ input_shape, data_type };
-        SimpleTensor<uint32_t> indices_tensor{ indices_shape, DataType::U32 };
+        SimpleTensor<T>        src{input_shape, data_type};
+        SimpleTensor<uint32_t> indices_tensor{indices_shape, DataType::U32};
         const uint32_t         actual_axis = wrap_around(axis, static_cast<int>(input_shape.num_dimensions()));
 
         // Fill reference tensor
@@ -140,4 +137,4 @@ protected:
 } // namespace test
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_TEST_GATHER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_GATHERFIXTURE_H

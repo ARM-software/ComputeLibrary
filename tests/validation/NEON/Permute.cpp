@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/NEON/functions/NEPermute.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/validation/fixtures/PermuteFixture.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/PermuteFixture.h"
 
 namespace arm_compute
 {
@@ -46,31 +47,27 @@ using framework::dataset::make;
 namespace
 {
 const auto PermuteVectors2 = make("PermutationVector",
-{
-    PermutationVector(0U, 1U),
-    PermutationVector(1U, 0U),
-});
+                                  {
+                                      PermutationVector(0U, 1U),
+                                      PermutationVector(1U, 0U),
+                                  });
 const auto PermuteVectors3 = make("PermutationVector",
-{
-    PermutationVector(2U, 0U, 1U),
-    PermutationVector(1U, 2U, 0U),
-    PermutationVector(0U, 1U, 2U),
-    PermutationVector(0U, 2U, 1U),
-    PermutationVector(1U, 0U, 2U),
-    PermutationVector(2U, 1U, 0U),
-});
-const auto PermuteVectors4 = make("PermutationVector",
-{
-    PermutationVector(3U, 2U, 0U, 1U),
-    PermutationVector(3U, 2U, 1U, 0U),
-    PermutationVector(2U, 3U, 1U, 0U),
-    PermutationVector(1U, 3U, 2U, 0U),
-    PermutationVector(3U, 1U, 2U, 0U),
-    PermutationVector(3U, 0U, 2U, 1U),
-    PermutationVector(0U, 3U, 2U, 1U)
-});
-const auto PermuteVectors         = concat(PermuteVectors2, PermuteVectors3, PermuteVectors4);
-const auto PermuteParametersSmall = concat(datasets::Small2DShapes(), datasets::Small3DShapes(), datasets::Small4DShapes()) * PermuteVectors;
+                                  {
+                                      PermutationVector(2U, 0U, 1U),
+                                      PermutationVector(1U, 2U, 0U),
+                                      PermutationVector(0U, 1U, 2U),
+                                      PermutationVector(0U, 2U, 1U),
+                                      PermutationVector(1U, 0U, 2U),
+                                      PermutationVector(2U, 1U, 0U),
+                                  });
+const auto PermuteVectors4 =
+    make("PermutationVector",
+         {PermutationVector(3U, 2U, 0U, 1U), PermutationVector(3U, 2U, 1U, 0U), PermutationVector(2U, 3U, 1U, 0U),
+          PermutationVector(1U, 3U, 2U, 0U), PermutationVector(3U, 1U, 2U, 0U), PermutationVector(3U, 0U, 2U, 1U),
+          PermutationVector(0U, 3U, 2U, 1U)});
+const auto PermuteVectors = concat(PermuteVectors2, PermuteVectors3, PermuteVectors4);
+const auto PermuteParametersSmall =
+    concat(datasets::Small2DShapes(), datasets::Small3DShapes(), datasets::Small4DShapes()) * PermuteVectors;
 const auto PermuteParametersLarge = datasets::Large4DShapes() * PermuteVectors;
 } // namespace
 TEST_SUITE(NEON)
@@ -143,15 +140,19 @@ template <typename T>
 using NEPermuteFixture = PermuteValidationFixture<Tensor, Accessor, NEPermute, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       PermuteParametersSmall * make("DataType", DataType::U8))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEPermuteFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall *make("DataType", DataType::U8))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       PermuteParametersLarge * make("DataType", DataType::U8))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEPermuteFixture<uint8_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge *make("DataType", DataType::U8))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -159,14 +160,18 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint8_t>, framework::DatasetMo
 TEST_SUITE_END()
 
 TEST_SUITE(U16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<uint16_t>, framework::DatasetMode::PRECOMMIT,
-                       PermuteParametersSmall * make("DataType", DataType::U16))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEPermuteFixture<uint16_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall *make("DataType", DataType::U16))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint16_t>, framework::DatasetMode::NIGHTLY,
-                       PermuteParametersLarge * make("DataType", DataType::U16))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEPermuteFixture<uint16_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge *make("DataType", DataType::U16))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -174,14 +179,18 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint16_t>, framework::DatasetM
 TEST_SUITE_END()
 
 TEST_SUITE(U32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<uint32_t>, framework::DatasetMode::PRECOMMIT,
-                       PermuteParametersSmall * make("DataType", DataType::U32))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEPermuteFixture<uint32_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall *make("DataType", DataType::U32))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<uint32_t>, framework::DatasetMode::NIGHTLY,
-                       PermuteParametersLarge * make("DataType", DataType::U32))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEPermuteFixture<uint32_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge *make("DataType", DataType::U32))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -190,8 +199,10 @@ TEST_SUITE_END()
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<float16_t>, framework::DatasetMode::PRECOMMIT,
-                       PermuteParametersSmall * make("DataType", DataType::F16))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEPermuteFixture<float16_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       PermuteParametersSmall *make("DataType", DataType::F16))
 {
     if (cpu_supports_dtypes({DataType::F16}))
     {
@@ -204,8 +215,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPermuteFixture<float16_t>, framework::Dataset
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPermuteFixture<float16_t>, framework::DatasetMode::NIGHTLY,
-                       PermuteParametersLarge * make("DataType", DataType::F16))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEPermuteFixture<float16_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       PermuteParametersLarge *make("DataType", DataType::F16))
 {
     if (cpu_supports_dtypes({DataType::F16}))
     {

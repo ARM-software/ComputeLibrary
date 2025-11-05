@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,12 @@
  */
 
 #include "ROIPoolingLayer.h"
+
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/validation/Helpers.h"
+
 #include <algorithm>
 
 namespace arm_compute
@@ -37,7 +40,10 @@ namespace validation
 namespace reference
 {
 template <>
-SimpleTensor<float> roi_pool_layer(const SimpleTensor<float> &src, const SimpleTensor<uint16_t> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)
+SimpleTensor<float> roi_pool_layer(const SimpleTensor<float>    &src,
+                                   const SimpleTensor<uint16_t> &rois,
+                                   const ROIPoolingLayerInfo    &pool_info,
+                                   const QuantizationInfo       &output_qinfo)
 {
     ARM_COMPUTE_UNUSED(output_qinfo);
 
@@ -64,7 +70,7 @@ SimpleTensor<float> roi_pool_layer(const SimpleTensor<float> &src, const SimpleT
     const auto *rois_ptr = reinterpret_cast<const uint16_t *>(rois.data());
 
     // Iterate through pixel width (X-Axis)
-    for(size_t pw = 0; pw < num_rois; ++pw)
+    for (size_t pw = 0; pw < num_rois; ++pw)
     {
         const unsigned int roi_batch = rois_ptr[values_per_roi * pw];
         const auto         x1        = rois_ptr[values_per_roi * pw + 1];
@@ -73,10 +79,10 @@ SimpleTensor<float> roi_pool_layer(const SimpleTensor<float> &src, const SimpleT
         const auto         y2        = rois_ptr[values_per_roi * pw + 4];
 
         //Iterate through pixel height (Y-Axis)
-        for(size_t fm = 0; fm < input_shape[2]; ++fm)
+        for (size_t fm = 0; fm < input_shape[2]; ++fm)
         {
             // Iterate through regions of interest index
-            for(size_t py = 0; py < pool_info.pooled_height(); ++py)
+            for (size_t py = 0; py < pool_info.pooled_height(); ++py)
             {
                 // Scale ROI
                 const int roi_anchor_x = support::cpp11::round(x1 * spatial_scale);
@@ -85,12 +91,15 @@ SimpleTensor<float> roi_pool_layer(const SimpleTensor<float> &src, const SimpleT
                 const int roi_height   = std::max(support::cpp11::round((y2 - y1) * spatial_scale), 1.f);
 
                 // Iterate over feature map (Z axis)
-                for(size_t px = 0; px < pool_info.pooled_width(); ++px)
+                for (size_t px = 0; px < pool_info.pooled_width(); ++px)
                 {
                     auto region_start_x = static_cast<int>(std::floor((static_cast<float>(px) / pooled_w) * roi_width));
-                    auto region_end_x   = static_cast<int>(std::floor((static_cast<float>(px + 1) / pooled_w) * roi_width));
-                    auto region_start_y = static_cast<int>(std::floor((static_cast<float>(py) / pooled_h) * roi_height));
-                    auto region_end_y   = static_cast<int>(std::floor((static_cast<float>(py + 1) / pooled_h) * roi_height));
+                    auto region_end_x =
+                        static_cast<int>(std::floor((static_cast<float>(px + 1) / pooled_w) * roi_width));
+                    auto region_start_y =
+                        static_cast<int>(std::floor((static_cast<float>(py) / pooled_h) * roi_height));
+                    auto region_end_y =
+                        static_cast<int>(std::floor((static_cast<float>(py + 1) / pooled_h) * roi_height));
 
                     region_start_x = std::min(std::max(region_start_x + roi_anchor_x, 0), width);
                     region_end_x   = std::min(std::max(region_end_x + roi_anchor_x, 0), width);
@@ -98,28 +107,31 @@ SimpleTensor<float> roi_pool_layer(const SimpleTensor<float> &src, const SimpleT
                     region_end_y   = std::min(std::max(region_end_y + roi_anchor_y, 0), height);
 
                     // Iterate through the pooling region
-                    if((region_end_x <= region_start_x) || (region_end_y <= region_start_y))
+                    if ((region_end_x <= region_start_x) || (region_end_y <= region_start_y))
                     {
                         /* Assign element in tensor 'output' at coordinates px, py, fm, roi_indx, to 0 */
-                        auto out_ptr = output.data() + px + py * output_shape[0] + fm * output_shape[0] * output_shape[1] + pw * output_stride_w;
-                        *out_ptr     = 0;
+                        auto out_ptr = output.data() + px + py * output_shape[0] +
+                                       fm * output_shape[0] * output_shape[1] + pw * output_stride_w;
+                        *out_ptr = 0;
                     }
                     else
                     {
                         float curr_max = -std::numeric_limits<float>::max();
-                        for(int j = region_start_y; j < region_end_y; ++j)
+                        for (int j = region_start_y; j < region_end_y; ++j)
                         {
-                            for(int i = region_start_x; i < region_end_x; ++i)
+                            for (int i = region_start_x; i < region_end_x; ++i)
                             {
                                 /* Retrieve element from input tensor at coordinates(i, j, fm, roi_batch) */
-                                float in_element = *(src.data() + i + j * input_shape[0] + fm * input_shape[0] * input_shape[1] + roi_batch * input_stride_w);
+                                float in_element = *(src.data() + i + j * input_shape[0] +
+                                                     fm * input_shape[0] * input_shape[1] + roi_batch * input_stride_w);
                                 curr_max         = std::max(in_element, curr_max);
                             }
                         }
 
                         /* Assign element in tensor 'output' at coordinates px, py, fm, roi_indx, to curr_max */
-                        auto out_ptr = output.data() + px + py * output_shape[0] + fm * output_shape[0] * output_shape[1] + pw * output_stride_w;
-                        *out_ptr     = curr_max;
+                        auto out_ptr = output.data() + px + py * output_shape[0] +
+                                       fm * output_shape[0] * output_shape[1] + pw * output_stride_w;
+                        *out_ptr = curr_max;
                     }
                 }
             }
@@ -133,7 +145,10 @@ SimpleTensor<float> roi_pool_layer(const SimpleTensor<float> &src, const SimpleT
     Template genericised method to allow calling of roi_pooling_layer with quantized 8 bit datatype
 */
 template <>
-SimpleTensor<uint8_t> roi_pool_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint16_t> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)
+SimpleTensor<uint8_t> roi_pool_layer(const SimpleTensor<uint8_t>  &src,
+                                     const SimpleTensor<uint16_t> &rois,
+                                     const ROIPoolingLayerInfo    &pool_info,
+                                     const QuantizationInfo       &output_qinfo)
 {
     const SimpleTensor<float> src_tmp = convert_from_asymmetric(src);
     SimpleTensor<float>       dst_tmp = roi_pool_layer<float>(src_tmp, rois, pool_info, output_qinfo);

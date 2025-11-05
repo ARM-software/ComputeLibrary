@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SCALELAYERFIXTURE
-#define ARM_COMPUTE_TEST_SCALELAYERFIXTURE
+#ifndef ACL_TESTS_BENCHMARK_FIXTURES_SCALELAYERFIXTURE_H
+#define ACL_TESTS_BENCHMARK_FIXTURES_SCALELAYERFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "tests/Globals.h"
-#include "tests/Utils.h"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 
 namespace arm_compute
 {
@@ -40,7 +41,13 @@ template <typename TensorType, typename Function, typename Accessor, typename T>
 class ScaleLayerFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy, float sx, float sy, DataType data_type)
+    void setup(TensorShape         shape,
+               InterpolationPolicy policy,
+               BorderMode          border_mode,
+               SamplingPolicy      sampling_policy,
+               float               sx,
+               float               sy,
+               DataType            data_type)
     {
         constexpr float max_width  = 8192.0f;
         constexpr float max_height = 6384.0f;
@@ -60,7 +67,7 @@ public:
         shape_scaled.set(1, shape[1] * scale_y);
         dst = create_tensor<TensorType>(shape_scaled, data_type);
 
-        scale_layer.configure(&src, &dst, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy });
+        scale_layer.configure(&src, &dst, ScaleKernelInfo{policy, border_mode, constant_border_value, sampling_policy});
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
@@ -94,4 +101,4 @@ private:
 };
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SCALELAYERFIXTURE */
+#endif // ACL_TESTS_BENCHMARK_FIXTURES_SCALELAYERFIXTURE_H

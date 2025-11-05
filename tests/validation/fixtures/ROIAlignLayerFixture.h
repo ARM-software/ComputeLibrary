@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,12 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ROIAlignLayer.h"
 
@@ -45,17 +46,23 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ROIAlignLayerGenericFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape input_shape, const ROIPoolingLayerInfo pool_info, TensorShape rois_shape, DataType data_type, DataLayout data_layout, QuantizationInfo qinfo, QuantizationInfo output_qinfo)
+    void setup(TensorShape               input_shape,
+               const ROIPoolingLayerInfo pool_info,
+               TensorShape               rois_shape,
+               DataType                  data_type,
+               DataLayout                data_layout,
+               QuantizationInfo          qinfo,
+               QuantizationInfo          output_qinfo)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
         }
 
         _rois_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::QASYMM16 : data_type;
-        _target         = compute_target(input_shape, data_type, data_layout, pool_info, rois_shape, qinfo, output_qinfo);
-        _reference      = compute_reference(input_shape, data_type, pool_info, rois_shape, qinfo, output_qinfo);
+        _target    = compute_target(input_shape, data_type, data_layout, pool_info, rois_shape, qinfo, output_qinfo);
+        _reference = compute_reference(input_shape, data_type, pool_info, rois_shape, qinfo, output_qinfo);
     }
 
 protected:
@@ -66,7 +73,11 @@ protected:
     }
 
     template <typename U>
-    void generate_rois(U &&rois, const TensorShape &shape, const ROIPoolingLayerInfo &pool_info, TensorShape rois_shape, DataLayout data_layout = DataLayout::NCHW)
+    void generate_rois(U                        &&rois,
+                       const TensorShape         &shape,
+                       const ROIPoolingLayerInfo &pool_info,
+                       TensorShape                rois_shape,
+                       DataLayout                 data_layout = DataLayout::NCHW)
     {
         const size_t values_per_roi = rois_shape.x();
         const size_t num_rois       = rois_shape.y();
@@ -79,19 +90,23 @@ protected:
         const float roi_scale   = pool_info.spatial_scale();
 
         // Calculate distribution bounds
-        const auto scaled_width  = static_cast<float>((shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)] / roi_scale) / pool_width);
-        const auto scaled_height = static_cast<float>((shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT)] / roi_scale) / pool_height);
-        const auto min_width     = static_cast<float>(pool_width / roi_scale);
-        const auto min_height    = static_cast<float>(pool_height / roi_scale);
+        const auto scaled_width = static_cast<float>(
+            (shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)] / roi_scale) / pool_width);
+        const auto scaled_height = static_cast<float>(
+            (shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT)] / roi_scale) /
+            pool_height);
+        const auto min_width  = static_cast<float>(pool_width / roi_scale);
+        const auto min_height = static_cast<float>(pool_height / roi_scale);
 
         // Create distributions
         std::uniform_int_distribution<int> dist_batch(0, shape[3] - 1);
         std::uniform_int_distribution<>    dist_x1(0, scaled_width);
         std::uniform_int_distribution<>    dist_y1(0, scaled_height);
-        std::uniform_int_distribution<>    dist_w(min_width, std::max(float(min_width), (pool_width - 2) * scaled_width));
-        std::uniform_int_distribution<>    dist_h(min_height, std::max(float(min_height), (pool_height - 2) * scaled_height));
+        std::uniform_int_distribution<> dist_w(min_width, std::max(float(min_width), (pool_width - 2) * scaled_width));
+        std::uniform_int_distribution<> dist_h(min_height,
+                                               std::max(float(min_height), (pool_height - 2) * scaled_height));
 
-        for(unsigned int pw = 0; pw < num_rois; ++pw)
+        for (unsigned int pw = 0; pw < num_rois; ++pw)
         {
             const auto batch_idx = dist_batch(gen);
             const auto x1        = dist_x1(gen);
@@ -100,7 +115,7 @@ protected:
             const auto y2        = y1 + dist_h(gen);
 
             rois_ptr[values_per_roi * pw] = batch_idx;
-            if(rois.data_type() == DataType::QASYMM16)
+            if (rois.data_type() == DataType::QASYMM16)
             {
                 rois_ptr[values_per_roi * pw + 1] = quantize_qasymm16(static_cast<float>(x1), rois.quantization_info());
                 rois_ptr[values_per_roi * pw + 2] = quantize_qasymm16(static_cast<float>(y1), rois.quantization_info());
@@ -125,19 +140,21 @@ protected:
                               const QuantizationInfo    &qinfo,
                               const QuantizationInfo    &output_qinfo)
     {
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
         }
 
-        const QuantizationInfo rois_qinfo = is_data_type_quantized(data_type) ? QuantizationInfo(0.125f, 0) : QuantizationInfo();
+        const QuantizationInfo rois_qinfo =
+            is_data_type_quantized(data_type) ? QuantizationInfo(0.125f, 0) : QuantizationInfo();
 
         // Create tensors
         TensorType src         = create_tensor<TensorType>(input_shape, data_type, 1, qinfo, data_layout);
         TensorType rois_tensor = create_tensor<TensorType>(rois_shape, _rois_data_type, 1, rois_qinfo);
 
-        const TensorShape dst_shape = misc::shape_calculator::compute_roi_align_shape(*(src.info()), *(rois_tensor.info()), pool_info);
-        TensorType        dst       = create_tensor<TensorType>(dst_shape, data_type, 1, output_qinfo, data_layout);
+        const TensorShape dst_shape =
+            misc::shape_calculator::compute_roi_align_shape(*(src.info()), *(rois_tensor.info()), pool_info);
+        TensorType dst = create_tensor<TensorType>(dst_shape, data_type, 1, output_qinfo, data_layout);
 
         // Create and configure function
         FunctionType roi_align_layer;
@@ -174,9 +191,10 @@ protected:
                                       const QuantizationInfo    &output_qinfo)
     {
         // Create reference tensor
-        SimpleTensor<T>        src{ input_shape, data_type, 1, qinfo };
-        const QuantizationInfo rois_qinfo = is_data_type_quantized(data_type) ? QuantizationInfo(0.125f, 0) : QuantizationInfo();
-        SimpleTensor<TRois>    rois_tensor{ rois_shape, _rois_data_type, 1, rois_qinfo };
+        SimpleTensor<T>        src{input_shape, data_type, 1, qinfo};
+        const QuantizationInfo rois_qinfo =
+            is_data_type_quantized(data_type) ? QuantizationInfo(0.125f, 0) : QuantizationInfo();
+        SimpleTensor<TRois> rois_tensor{rois_shape, _rois_data_type, 1, rois_qinfo};
 
         // Fill reference tensor
         fill(src);
@@ -194,22 +212,32 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ROIAlignLayerFixture : public ROIAlignLayerGenericFixture<TensorType, AccessorType, FunctionType, T, TRois>
 {
 public:
-    void setup(TensorShape input_shape, const ROIPoolingLayerInfo pool_info, TensorShape rois_shape, DataType data_type, DataLayout data_layout)
+    void setup(TensorShape               input_shape,
+               const ROIPoolingLayerInfo pool_info,
+               TensorShape               rois_shape,
+               DataType                  data_type,
+               DataLayout                data_layout)
     {
-        ROIAlignLayerGenericFixture<TensorType, AccessorType, FunctionType, T, TRois>::setup(input_shape, pool_info, rois_shape, data_type, data_layout,
-                                                                                             QuantizationInfo(), QuantizationInfo());
+        ROIAlignLayerGenericFixture<TensorType, AccessorType, FunctionType, T, TRois>::setup(
+            input_shape, pool_info, rois_shape, data_type, data_layout, QuantizationInfo(), QuantizationInfo());
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename TRois>
-class ROIAlignLayerQuantizedFixture : public ROIAlignLayerGenericFixture<TensorType, AccessorType, FunctionType, T, TRois>
+class ROIAlignLayerQuantizedFixture
+    : public ROIAlignLayerGenericFixture<TensorType, AccessorType, FunctionType, T, TRois>
 {
 public:
-    void setup(TensorShape input_shape, const ROIPoolingLayerInfo pool_info, TensorShape rois_shape, DataType data_type,
-               DataLayout data_layout, QuantizationInfo qinfo, QuantizationInfo output_qinfo)
+    void setup(TensorShape               input_shape,
+               const ROIPoolingLayerInfo pool_info,
+               TensorShape               rois_shape,
+               DataType                  data_type,
+               DataLayout                data_layout,
+               QuantizationInfo          qinfo,
+               QuantizationInfo          output_qinfo)
     {
-        ROIAlignLayerGenericFixture<TensorType, AccessorType, FunctionType, T, TRois>::setup(input_shape, pool_info, rois_shape,
-                                                                                             data_type, data_layout, qinfo, output_qinfo);
+        ROIAlignLayerGenericFixture<TensorType, AccessorType, FunctionType, T, TRois>::setup(
+            input_shape, pool_info, rois_shape, data_type, data_layout, qinfo, output_qinfo);
     }
 };
 } // namespace validation

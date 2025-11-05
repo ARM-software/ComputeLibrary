@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/NEON/functions/NEPadLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/PadLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -45,14 +46,14 @@ using framework::dataset::make;
 namespace
 {
 const auto PaddingSizesDataset = make("PaddingSize",
-{
-    PaddingList{ { 0, 0 } },
-    PaddingList{ { 1, 1 } },
-    PaddingList{ { 1, 1 }, { 2, 2 } },
-    PaddingList{ { 1, 1 }, { 1, 1 }, { 1, 1 } },
-    PaddingList{ { 0, 0 }, { 1, 0 }, { 0, 1 } },
-    PaddingList{ { 0, 1 }, { 1, 0 }, { 0, 1 } },
-});
+                                      {
+                                          PaddingList{{0, 0}},
+                                          PaddingList{{1, 1}},
+                                          PaddingList{{1, 1}, {2, 2}},
+                                          PaddingList{{1, 1}, {1, 1}, {1, 1}},
+                                          PaddingList{{0, 0}, {1, 0}, {0, 1}},
+                                          PaddingList{{0, 1}, {1, 0}, {0, 1}},
+                                      });
 } // namespace
 
 TEST_SUITE(NEON)
@@ -129,18 +130,25 @@ using NEPaddingFixture = PaddingFixture<Tensor, Accessor, NEPadLayer, T>;
 TEST_SUITE(Float)
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPaddingFixture<float>, framework::DatasetMode::ALL,
-                       combine(datasets::Small3DShapes(), make("DataType", { DataType::F32 }),
-                                       PaddingSizesDataset,
-                               make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEPaddingFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small3DShapes(),
+                               make("DataType", {DataType::F32}),
+                               PaddingSizesDataset,
+                               make("PaddingMode", {PaddingMode::CONSTANT, PaddingMode::REFLECT})))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPaddingFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::Large3DShapes(), make("DataType", { DataType::F32 }),
-                                       PaddingSizesDataset,
-                               make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEPaddingFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::Large3DShapes(),
+                               make("DataType", {DataType::F32}),
+                               PaddingSizesDataset,
+                               make("PaddingMode",
+                                    {PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC})))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -149,12 +157,15 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPaddingFixture<half>, framework::DatasetMode::ALL,
-                       combine(datasets::Small3DShapes(), make("DataType", { DataType::F16 }),
-                                       PaddingSizesDataset,
-                               make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEPaddingFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small3DShapes(),
+                               make("DataType", {DataType::F16}),
+                               PaddingSizesDataset,
+                               make("PaddingMode", {PaddingMode::CONSTANT, PaddingMode::REFLECT})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -165,12 +176,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEPaddingFixture<half>, framework::DatasetMode:
         framework::ARM_COMPUTE_PRINT_INFO();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPaddingFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::Large3DShapes(), make("DataType", { DataType::F16 }),
-                                       PaddingSizesDataset,
-                               make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEPaddingFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::Large3DShapes(),
+                               make("DataType", {DataType::F16}),
+                               PaddingSizesDataset,
+                               make("PaddingMode",
+                                    {PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -187,18 +202,25 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPaddingFixture<uint8_t>, framework::DatasetMode::ALL,
-                       combine(datasets::Small3DShapes(), make("DataType", { DataType::QASYMM8 }),
-                                       PaddingSizesDataset,
-                               make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEPaddingFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small3DShapes(),
+                               make("DataType", {DataType::QASYMM8}),
+                               PaddingSizesDataset,
+                               make("PaddingMode", {PaddingMode::CONSTANT, PaddingMode::REFLECT})))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPaddingFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::Large3DShapes(), make("DataType", { DataType::QASYMM8 }),
-                                       PaddingSizesDataset,
-                               make("PaddingMode", { PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEPaddingFixture<uint8_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::Large3DShapes(),
+                               make("DataType", {DataType::QASYMM8}),
+                               PaddingSizesDataset,
+                               make("PaddingMode",
+                                    {PaddingMode::CONSTANT, PaddingMode::REFLECT, PaddingMode::SYMMETRIC})))
 {
     // Validate output
     validate(Accessor(_target), _reference);

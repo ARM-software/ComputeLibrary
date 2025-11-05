@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "src/runtime/CL/mlgo/MLGOHeuristics.h"
+
 #include "src/runtime/CL/mlgo/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -84,25 +85,45 @@ TEST_CASE(CorrectDotMLGOShouldLoadCorrectly, framework::DatasetMode::ALL)
     MLGOHeuristics    heuristics;
     heuristics.reload_from_stream(ss);
 
-    ARM_COMPUTE_EXPECT(heuristics.query_gemm_type(Query{ "g76", DataType::F32, 10, 1024, 20, 1 }).second == GEMMType::RESHAPED, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(heuristics.query_gemm_type(Query{ "g76", DataType::F32, 400, 201, 5, 1 }).second == GEMMType::RESHAPED_ONLY_RHS, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(heuristics.query_gemm_type(Query{ "g76", DataType::F32, 400, 200, 199, 16 }).second == GEMMType::RESHAPED_ONLY_RHS, framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(heuristics.query_gemm_type(Query{ "g76", DataType::F32, 400, 199, 512, 4 }).second == GEMMType::RESHAPED, framework::LogLevel::ERRORS);
-
-    ARM_COMPUTE_EXPECT((heuristics.query_gemm_config_reshaped_only_rhs(Query{ "g71", DataType::F16, 100, 1024, 20, 32 }).second == GEMMConfigReshapedOnlyRHS{ 4, 4, 4, 2, true, false, true }),
+    ARM_COMPUTE_EXPECT(heuristics.query_gemm_type(Query{"g76", DataType::F32, 10, 1024, 20, 1}).second ==
+                           GEMMType::RESHAPED,
                        framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT((heuristics.query_gemm_config_reshaped_only_rhs(Query{ "g71", DataType::F16, 100, 1024, 20, 32 }).second == GEMMConfigReshapedOnlyRHS{ 4, 4, 4, 2, true, false, true }),
+    ARM_COMPUTE_EXPECT(heuristics.query_gemm_type(Query{"g76", DataType::F32, 400, 201, 5, 1}).second ==
+                           GEMMType::RESHAPED_ONLY_RHS,
                        framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT((heuristics.query_gemm_config_reshaped_only_rhs(Query{ "g71", DataType::F16, 128, 101, 20, 1 }).second == GEMMConfigReshapedOnlyRHS{ 2, 2, 4, 2, true, true, true }),
+    ARM_COMPUTE_EXPECT(heuristics.query_gemm_type(Query{"g76", DataType::F32, 400, 200, 199, 16}).second ==
+                           GEMMType::RESHAPED_ONLY_RHS,
                        framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT((heuristics.query_gemm_config_reshaped_only_rhs(Query{ "g71", DataType::F16, 400, 100, 512, 1 }).second == GEMMConfigReshapedOnlyRHS{ 5, 4, 4, 5, true, true, false }),
-                       framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT((heuristics.query_gemm_config_reshaped_only_rhs(Query{ "g71", DataType::F16, 400, 100, 512, 1 }).second == GEMMConfigReshapedOnlyRHS{ 5, 4, 4, 5, true, true, false }),
+    ARM_COMPUTE_EXPECT(heuristics.query_gemm_type(Query{"g76", DataType::F32, 400, 199, 512, 4}).second ==
+                           GEMMType::RESHAPED,
                        framework::LogLevel::ERRORS);
 
-    ARM_COMPUTE_EXPECT((heuristics.query_gemm_config_reshaped(Query{ "g76", DataType::F16, 100, 100, 20, 32 }).second == GEMMConfigReshaped{ 4, 2, 4, 2, 8, true, false, true, false }),
+    ARM_COMPUTE_EXPECT(
+        (heuristics.query_gemm_config_reshaped_only_rhs(Query{"g71", DataType::F16, 100, 1024, 20, 32}).second ==
+         GEMMConfigReshapedOnlyRHS{4, 4, 4, 2, true, false, true}),
+        framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(
+        (heuristics.query_gemm_config_reshaped_only_rhs(Query{"g71", DataType::F16, 100, 1024, 20, 32}).second ==
+         GEMMConfigReshapedOnlyRHS{4, 4, 4, 2, true, false, true}),
+        framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(
+        (heuristics.query_gemm_config_reshaped_only_rhs(Query{"g71", DataType::F16, 128, 101, 20, 1}).second ==
+         GEMMConfigReshapedOnlyRHS{2, 2, 4, 2, true, true, true}),
+        framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(
+        (heuristics.query_gemm_config_reshaped_only_rhs(Query{"g71", DataType::F16, 400, 100, 512, 1}).second ==
+         GEMMConfigReshapedOnlyRHS{5, 4, 4, 5, true, true, false}),
+        framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(
+        (heuristics.query_gemm_config_reshaped_only_rhs(Query{"g71", DataType::F16, 400, 100, 512, 1}).second ==
+         GEMMConfigReshapedOnlyRHS{5, 4, 4, 5, true, true, false}),
+        framework::LogLevel::ERRORS);
+
+    ARM_COMPUTE_EXPECT((heuristics.query_gemm_config_reshaped(Query{"g76", DataType::F16, 100, 100, 20, 32}).second ==
+                        GEMMConfigReshaped{4, 2, 4, 2, 8, true, false, true, false}),
                        framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT((heuristics.query_gemm_config_reshaped(Query{ "g76", DataType::F16, 128, 512, 1024, 1 }).second == GEMMConfigReshaped{ 4, 2, 4, 2, 8, true, false, true, false }),
+    ARM_COMPUTE_EXPECT((heuristics.query_gemm_config_reshaped(Query{"g76", DataType::F16, 128, 512, 1024, 1}).second ==
+                        GEMMConfigReshaped{4, 2, 4, 2, 8, true, false, true, false}),
                        framework::LogLevel::ERRORS);
 }
 
@@ -459,11 +480,15 @@ TEST_CASE(InvalidUsageOfHeuristicsShouldReturnInvalidStatus, framework::DatasetM
     ARM_COMPUTE_EXPECT(heuristics.reload_from_stream(ss), framework::LogLevel::ERRORS);
 
     // Querying unavailable heuristic type should return invalid Status
-    ARM_COMPUTE_EXPECT(!heuristics.query_gemm_config_reshaped(Query{ "g76", DataType::F32, 1024, 1024, 100, 3 }).first, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!heuristics.query_gemm_config_reshaped(Query{"g76", DataType::F32, 1024, 1024, 100, 3}).first,
+                       framework::LogLevel::ERRORS);
     // Querying unavailable ip target should return invalid Status
-    ARM_COMPUTE_EXPECT(!heuristics.query_gemm_type(Query{ "g77", DataType::F32, 1024, 1024, 100, 3 }).first, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(!heuristics.query_gemm_type(Query{"g77", DataType::F32, 1024, 1024, 100, 3}).first,
+                       framework::LogLevel::ERRORS);
     // Querying unavailable data type should return invalid Status
-    ARM_COMPUTE_EXPECT(!heuristics.query_gemm_config_reshaped_only_rhs(Query{ "g76", DataType::QASYMM8, 1024, 1024, 100, 3 }).first, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(
+        !heuristics.query_gemm_config_reshaped_only_rhs(Query{"g76", DataType::QASYMM8, 1024, 1024, 100, 3}).first,
+        framework::LogLevel::ERRORS);
 }
 TEST_SUITE_END() // MLGOHeuristics
 TEST_SUITE_END() // UNIT

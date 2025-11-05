@@ -26,14 +26,15 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/DilatedConvolutionLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ConvolutionLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -44,68 +45,73 @@ namespace validation
 using framework::dataset::make;
 namespace
 {
-RelativeTolerance<float>            rel_tolerance_f32(0.05f);                 /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr AbsoluteTolerance<float>  abs_tolerance_qasymm8(1);                 /**< Relative tolerance value for comparing reference's output against implementation's output for quantized data types */
-constexpr float                     abs_tolerance_f32 = 0.001f;               /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-constexpr float                     abs_tolerance_f16 = 0.3f;                 /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr float                     tolerance_num_f16 = 0.07f;                /**< Tolerance number for FP16 */
+RelativeTolerance<float> rel_tolerance_f32(
+    0.05f); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(
+    0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr AbsoluteTolerance<float>  abs_tolerance_qasymm8(
+     1); /**< Relative tolerance value for comparing reference's output against implementation's output for quantized data types */
+constexpr float abs_tolerance_f32 =
+    0.001f; /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr float abs_tolerance_f16 =
+    0.3f; /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr float tolerance_num_f16 = 0.07f; /**< Tolerance number for FP16 */
 
 /** CNN data types */
 const auto CNNDataTypes = make("DataType",
-{
-    DataType::F16,
-    DataType::F32,
-    DataType::QASYMM8,
-});
+                               {
+                                   DataType::F16,
+                                   DataType::F32,
+                                   DataType::QASYMM8,
+                               });
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(DilatedConvolutionLayer)
 
-DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(make("InputInfo", { TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32),
-                                                                                                                        TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32),
-                                                                                                                        TensorInfo(TensorShape(23U, 27U, 23U, 4U), 1, DataType::F32),
-                                                                                                                        TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32),
-                                                                                                                        TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32)
-                                                                                                                                     }),
-                                                                                               make("WeightsInfo", { TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32),
-                                                                                                                        TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32),
-                                                                                                                        TensorInfo(TensorShape(3U, 3U, 23U, 21U), 1, DataType::F32),
-                                                                                                                        TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
-                                                                                                                        TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16)
-                                                                                                                                       }),
-                                                                                           make("OutputInfo", { TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32),
-                                                                                                                    TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32),
-                                                                                                                    TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32),
-                                                                                                                    TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
-                                                                                                                    TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32)
-                                                                                                                                  }),
-                                                                                       make("ConvInfo", { PadStrideInfo(1, 2, 1, 1),
-                                                                                                                PadStrideInfo(1, 2, 1, 1),
-                                                                                                                PadStrideInfo(1, 1, 0, 0),
-                                                                                                                PadStrideInfo(2, 1, 0, 0),
-                                                                                                                PadStrideInfo(3, 2, 1, 0)
-                                                                                                                            }),
-                                                                                   make("GpuTarget", { GPUTarget::BIFROST,
-                                                                                                            GPUTarget::MIDGARD,
-                                                                                                            GPUTarget::G71,
-                                                                                                            GPUTarget::MIDGARD,
-                                                                                                            GPUTarget::BIFROST
-                                                                                                                         }),
-                                                                               make("Dilation", { Size2D(1U, 1U),
-                                                                                                                      Size2D(1U, 1U),
-                                                                                                                      Size2D(1U, 1U),
-                                                                                                                      Size2D(2U, 2U),
-                                                                                                                      Size2D(3U, 3U)
-                                                                                                                    }),
+DATA_TEST_CASE(ValidateConvolutionMethod,
+               framework::DatasetMode::ALL,
+               zip(make("InputInfo",
+                        {TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32),
+                         TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32),
+                         TensorInfo(TensorShape(23U, 27U, 23U, 4U), 1, DataType::F32),
+                         TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32),
+                         TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32)}),
+                   make("WeightsInfo",
+                        {TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32),
+                         TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32),
+                         TensorInfo(TensorShape(3U, 3U, 23U, 21U), 1, DataType::F32),
+                         TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
+                         TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16)}),
+                   make("OutputInfo",
+                        {TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32),
+                         TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32),
+                         TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32),
+                         TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
+                         TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32)}),
+                   make("ConvInfo",
+                        {PadStrideInfo(1, 2, 1, 1), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(1, 1, 0, 0),
+                         PadStrideInfo(2, 1, 0, 0), PadStrideInfo(3, 2, 1, 0)}),
+                   make("GpuTarget",
+                        {GPUTarget::BIFROST, GPUTarget::MIDGARD, GPUTarget::G71, GPUTarget::MIDGARD,
+                         GPUTarget::BIFROST}),
+                   make("Dilation", {Size2D(1U, 1U), Size2D(1U, 1U), Size2D(1U, 1U), Size2D(2U, 2U), Size2D(3U, 3U)}),
 
-                                                                           make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
-               input_info, weights_info, output_info, conv_info, gpu_target, dilation, expected)
+                   make("Expected",
+                        {ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::WINOGRAD,
+                         ConvolutionMethod::GEMM, ConvolutionMethod::GEMM})),
+               input_info,
+               weights_info,
+               output_info,
+               conv_info,
+               gpu_target,
+               dilation,
+               expected)
 {
-    ConvolutionMethod is_valid = CLConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(true),
-                                                                            &weights_info.clone()->set_is_resizable(true),
-                                                                            &output_info.clone()->set_is_resizable(true), conv_info, WeightsInfo(), ActivationLayerInfo(), gpu_target, dilation);
+    ConvolutionMethod is_valid = CLConvolutionLayer::get_convolution_method(
+        &input_info.clone()->set_is_resizable(true), &weights_info.clone()->set_is_resizable(true),
+        &output_info.clone()->set_is_resizable(true), conv_info, WeightsInfo(), ActivationLayerInfo(), gpu_target,
+        dilation);
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 
@@ -114,25 +120,32 @@ TEST_SUITE_END()
 TEST_SUITE(GEMMDilatedConvolutionLayer)
 
 template <typename T>
-using CLGEMMDilatedConvolutionLayerFixture = ConvolutionValidationFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
+using CLGEMMDilatedConvolutionLayerFixture =
+    ConvolutionValidationFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                                                                                                                        make("ReshapeWeights", { true }),
-                                                                                                                        make("DataType", DataType::F16),
-                                                                                                                        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                                        make("ActivationLayerInfo", ActivationLayerInfo())))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLGEMMDilatedConvolutionLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallDilatedConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.0f, abs_tolerance_f16);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDilatedConvolutionLayerDataset(),
-                                                                                                                      make("ReshapeWeights", { true }),
-                                                                                                                      make("DataType", DataType::F16),
-                                                                                                                      make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                                      make("ActivationLayerInfo", ActivationLayerInfo())))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLGEMMDilatedConvolutionLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeDilatedConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16);
@@ -141,21 +154,27 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMDilatedConvolutionLayerFixture<half>, fra
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                       make("ReshapeWeights", { true }),
-                       make("DataType", DataType::F32),
-                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                       make("ActivationLayerInfo", ActivationLayerInfo())))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLGEMMDilatedConvolutionLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallDilatedConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDilatedConvolutionLayerDataset(),
-                                                                                                                       make("ReshapeWeights", { true }),
-                                                                                                                       make("DataType", DataType::F32),
-                                                                                                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                                       make("ActivationLayerInfo", ActivationLayerInfo())))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLGEMMDilatedConvolutionLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeDilatedConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
@@ -164,7 +183,8 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 template <typename T>
-using CLGEMMDilatedConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
+using CLGEMMDilatedConvolutionLayerQuantizedFixture =
+    ConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
 
 TEST_SUITE(Quantized)
 /// @note: Every asymmetric quantized test where there's no fused activation will have its quantization info ignored
@@ -173,25 +193,29 @@ TEST_SUITE(Quantized)
 /// When we can also support dynamic quantization with the presence of activation, we can remove the explicit
 /// quantization info.
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                                                               make("ReshapeWeights", { true }),
-                                                       make("DataType", DataType::QASYMM8),
-                                               make("DataLayout", { DataLayout::NCHW }),
-                                       make("IgnoredQuantizationInfo", { QuantizationInfo() }),
-                               make("ActivationLayerInfo", { ActivationLayerInfo() })))
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8),
+                               make("DataLayout", {DataLayout::NCHW}),
+                               make("IgnoredQuantizationInfo", {QuantizationInfo()}),
+                               make("ActivationLayerInfo", {ActivationLayerInfo()})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, abs_tolerance_qasymm8);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::NIGHTLY,
                        combine(datasets::LargeDilatedConvolutionLayerDataset(),
-                                                               make("ReshapeWeights", { true }),
-                                                       make("DataType", DataType::QASYMM8),
-                                               make("DataLayout", { DataLayout::NCHW }),
-                                       make("IgnoredQuantizationInfo", { QuantizationInfo() }),
-                               make("ActivationLayerInfo", { ActivationLayerInfo() })))
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::QASYMM8),
+                               make("DataLayout", {DataLayout::NCHW}),
+                               make("IgnoredQuantizationInfo", {QuantizationInfo()}),
+                               make("ActivationLayerInfo", {ActivationLayerInfo()})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, abs_tolerance_qasymm8);

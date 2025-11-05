@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_NON_MAXIMA_SUPPRESSION_H
-#define ARM_COMPUTE_TEST_NON_MAXIMA_SUPPRESSION_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_NONMAXIMASUPPRESSION_H
+#define ACL_TESTS_VALIDATION_REFERENCE_NONMAXIMASUPPRESSION_H
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/SimpleTensor.h"
 
 namespace arm_compute
@@ -41,4 +42,4 @@ SimpleTensor<T> non_maxima_suppression(const SimpleTensor<T> &src, BorderMode bo
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_NON_MAXIMA_SUPPRESSION_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_NONMAXIMASUPPRESSION_H

@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/NEON/functions/NESpaceToDepthLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/datasets/SpaceToDepthDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/SpaceToDepthFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -75,16 +76,22 @@ DATA_TEST_CASE(ValidateStatic, framework::DatasetMode::ALL, zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Small, NESpaceToDepthLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToDepthLayerDataset(), make("DataType",
-                                                                                                                    DataType::F32),
-                                                                                                            make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(Small,
+                       NESpaceToDepthLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallSpaceToDepthLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, NESpaceToDepthLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToDepthLayerDataset(), make("DataType",
-                                                                                                                  DataType::F32),
-                                                                                                          make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(Large,
+                       NESpaceToDepthLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeSpaceToDepthLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -92,16 +99,22 @@ FIXTURE_DATA_TEST_CASE(Large, NESpaceToDepthLayerFixture<float>, framework::Data
 TEST_SUITE_END() // FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Small, NESpaceToDepthLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallSpaceToDepthLayerDataset(), make("DataType",
-                                                                                                                   DataType::F16),
-                                                                                                           make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(Small,
+                       NESpaceToDepthLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallSpaceToDepthLayerDataset(),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(Large, NESpaceToDepthLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeSpaceToDepthLayerDataset(), make("DataType",
-                                                                                                                 DataType::F16),
-                                                                                                         make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(Large,
+                       NESpaceToDepthLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeSpaceToDepthLayerDataset(),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(Accessor(_target), _reference);

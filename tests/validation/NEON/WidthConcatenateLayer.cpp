@@ -25,13 +25,14 @@
 #include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/ConcatenateLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -85,22 +86,26 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 // clang-format on
 // *INDENT-ON*
 template <typename T>
-using NEWidthConcatenateLayerFixture = ConcatenateLayerValidationFixture<Tensor, ITensor, Accessor, NEConcatenateLayer, T>;
+using NEWidthConcatenateLayerFixture =
+    ConcatenateLayerValidationFixture<Tensor, ITensor, Accessor, NEConcatenateLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEWidthConcatenateLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
-                                                                                                                   make("DataType",
-                                                                                                                           DataType::F32),
-                                                                                                                   make("Axis", 0)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEWidthConcatenateLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
+                               make("DataType", DataType::F32),
+                               make("Axis", 0)))
 
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEWidthConcatenateLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::ConcatenateLayerShapes(), make("DataType",
-                                                                                                                 DataType::F32),
-                                                                                                                 make("Axis", 0)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEWidthConcatenateLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::ConcatenateLayerShapes(), make("DataType", DataType::F32), make("Axis", 0)))
 
 {
     // Validate output
@@ -111,10 +116,12 @@ TEST_SUITE_END()
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEWidthConcatenateLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
-                                                                                                                     make("DataType",
-                                                                                                                             DataType::QASYMM8),
-                                                                                                                     make("Axis", 0)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEWidthConcatenateLayerFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
+                               make("DataType", DataType::QASYMM8),
+                               make("Axis", 0)))
 
 {
     // Validate output
@@ -123,10 +130,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEWidthConcatenateLayerFixture<uint8_t>, framew
 TEST_SUITE_END()
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEWidthConcatenateLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
-                                                                                                                    make("DataType",
-                                                                                                                            DataType::QASYMM8_SIGNED),
-                                                                                                                    make("Axis", 0)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEWidthConcatenateLayerFixture<int8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(concat(datasets::Small2DShapes(), datasets::Tiny4DShapes()),
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("Axis", 0)))
 
 {
     // Validate output

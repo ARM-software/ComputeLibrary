@@ -54,14 +54,10 @@ TEST_SUITE(FP32)
 #if defined(ARM_COMPUTE_ENABLE_SVE)
 DATA_TEST_CASE(ValidateReorderOHWIo8,
                framework::DatasetMode::ALL,
-               combine(zip(
-                           make("InShape", {TensorShape(10U, 9U), TensorShape(234U, 301U)}),
-                           make("OutShape", {TensorShape(10U, 16U), TensorShape(234U, 304U)})
-                           ),
-                       zip(
-                           make("InputWeightFormat", {WeightFormat::OHWI}),
-                           make("OutputWeightFormat", {WeightFormat::OHWIo8})
-                           )),
+               combine(zip(make("InShape", {TensorShape(10U, 9U), TensorShape(234U, 301U)}),
+                           make("OutShape", {TensorShape(10U, 16U), TensorShape(234U, 304U)})),
+                       zip(make("InputWeightFormat", {WeightFormat::OHWI}),
+                           make("OutputWeightFormat", {WeightFormat::OHWIo8}))),
                input_shape,
                output_shape,
                input_wf,
@@ -69,8 +65,8 @@ DATA_TEST_CASE(ValidateReorderOHWIo8,
 {
     arm_compute::NEReorderLayer reorder_layer;
     bool                        expected_bool_status = true;
-    TensorInfo input_tensor_info(input_shape, 1, DataType::F32);
-    TensorInfo output_tensor_info(output_shape, 1, DataType::F32);
+    TensorInfo                  input_tensor_info(input_shape, 1, DataType::F32);
+    TensorInfo                  output_tensor_info(output_shape, 1, DataType::F32);
 
     Status status =
         reorder_layer.validate(&input_tensor_info, &output_tensor_info, input_wf, output_wf, true /* transpose */);
@@ -118,7 +114,7 @@ FIXTURE_DATA_TEST_CASE(RunInterleave4Block4,
                                make("OutputDataType", DataType::BFLOAT16),
                                make("Transpose", {true, false})))
 {
-    if(CPUInfo::get().has_bf16())
+    if (CPUInfo::get().has_bf16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -140,7 +136,7 @@ FIXTURE_DATA_TEST_CASE(RunInterleave8Block4,
                                make("OutputDataType", DataType::BFLOAT16),
                                make("Transpose", {true, false})))
 {
-    if(CPUInfo::get().has_bf16())
+    if (CPUInfo::get().has_bf16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
@@ -154,7 +150,7 @@ FIXTURE_DATA_TEST_CASE(RunInterleave8Block4,
 #endif // ARM_COMPUTE_ENABLE_SVE
 
 TEST_SUITE_END() // BF16
-#endif // ARM_COMPUTE_ENABLE_BF16
+#endif           // ARM_COMPUTE_ENABLE_BF16
 
 TEST_SUITE_END() // ReorderLayer
 TEST_SUITE_END() // NEON

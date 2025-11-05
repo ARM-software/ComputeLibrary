@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,11 @@
 #ifndef ACL_TESTS_VALIDATION_REFERENCE_SCATTERLAYER_H
 #define ACL_TESTS_VALIDATION_REFERENCE_SCATTERLAYER_H
 
-#include "Utils.h"
 #include "arm_compute/function_info/ScatterInfo.h"
+
 #include "tests/SimpleTensor.h"
+
+#include "Utils.h"
 
 namespace arm_compute
 {
@@ -37,10 +39,18 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> scatter_layer_internal(const SimpleTensor<T> &src, const SimpleTensor<T> &update, const SimpleTensor<int32_t> &indices, const TensorShape &shape, const ScatterInfo &info);
+SimpleTensor<T> scatter_layer_internal(const SimpleTensor<T>       &src,
+                                       const SimpleTensor<T>       &update,
+                                       const SimpleTensor<int32_t> &indices,
+                                       const TensorShape           &shape,
+                                       const ScatterInfo           &info);
 
 template <typename T>
-SimpleTensor<T> scatter_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &update, const SimpleTensor<int32_t> &indices, const TensorShape &shape, const ScatterInfo &info);
+SimpleTensor<T> scatter_layer(const SimpleTensor<T>       &src,
+                              const SimpleTensor<T>       &update,
+                              const SimpleTensor<int32_t> &indices,
+                              const TensorShape           &shape,
+                              const ScatterInfo           &info);
 } // namespace reference
 } // namespace validation
 } // namespace test

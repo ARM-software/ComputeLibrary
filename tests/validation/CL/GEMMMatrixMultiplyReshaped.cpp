@@ -26,18 +26,19 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
+
 #include "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.h"
 #include "src/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
 #include "src/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/GEMMFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -60,21 +61,44 @@ using CLGEMMMatrixMultiplyReshaped = CLSynthetizeOperator<ClGemmMatrixMultiplyRe
 
 // Fixture for CLGEMMMatrixMultiplyReshaped
 template <typename T>
-using CLGEMMMatrixMultiplyReshapedFixture = GEMMMatrixMultiplyReshapedValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshaped>;
+using CLGEMMMatrixMultiplyReshapedFixture = GEMMMatrixMultiplyReshapedValidationFixture<CLTensor,
+                                                                                        CLAccessor,
+                                                                                        T,
+                                                                                        CLGEMMReshapeLHSMatrix,
+                                                                                        CLGEMMReshapeRHSMatrix,
+                                                                                        CLGEMMMatrixMultiplyReshaped>;
 
 // Fixture for CLGEMMMatrixMultiplyReshaped mixed precision
 template <typename T>
 using CLGEMMMatrixMultiplyReshapedMixedPrecisionFixture =
-    GEMMMatrixMultiplyReshapedValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshaped, true>;
+    GEMMMatrixMultiplyReshapedValidationFixture<CLTensor,
+                                                CLAccessor,
+                                                T,
+                                                CLGEMMReshapeLHSMatrix,
+                                                CLGEMMReshapeRHSMatrix,
+                                                CLGEMMMatrixMultiplyReshaped,
+                                                true>;
 
 // Fixture for CLGEMMMatrixMultiplyReshaped3D
 template <typename T>
-using CLGEMMMatrixMultiplyReshaped3DFixture = GEMMMatrixMultiplyReshaped3DValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshaped>;
+using CLGEMMMatrixMultiplyReshaped3DFixture =
+    GEMMMatrixMultiplyReshaped3DValidationFixture<CLTensor,
+                                                  CLAccessor,
+                                                  T,
+                                                  CLGEMMReshapeLHSMatrix,
+                                                  CLGEMMReshapeRHSMatrix,
+                                                  CLGEMMMatrixMultiplyReshaped>;
 
 // Fixture for CLGEMMMatrixMultiplyReshaped3D mixed precision
 template <typename T>
 using CLGEMMMatrixMultiplyReshaped3DMixedPrecisionFixture =
-    GEMMMatrixMultiplyReshaped3DValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshaped, true>;
+    GEMMMatrixMultiplyReshaped3DValidationFixture<CLTensor,
+                                                  CLAccessor,
+                                                  T,
+                                                  CLGEMMReshapeLHSMatrix,
+                                                  CLGEMMReshapeRHSMatrix,
+                                                  CLGEMMMatrixMultiplyReshaped,
+                                                  true>;
 
 namespace
 {

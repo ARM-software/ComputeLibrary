@@ -22,15 +22,17 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/experimental/operators/CpuGEMMLowp.h"
+
 #include "arm_compute/runtime/Tensor.h"
+
 #include "src/core/helpers/MemoryHelpers.h"
-#include "tests/NEON/Accessor.h"
 #include "tests/datasets/LargeGEMMLowpDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/datasets/SmallGEMMLowpDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/CpuGEMMLowpFixture.h"
 
 /*
@@ -58,11 +60,21 @@ TEST_SUITE(NEON)
 TEST_SUITE(OPERATORS)
 TEST_SUITE(CpuGEMMLowp)
 
-using CpuGEMMLowpFixture = CpuGEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, arm_compute::experimental::op::CpuGEMMLowp>;
-using CpuGEMMLowpStaticQuantFixture = CpuGEMMLowpStaticQuantMatrixMultiplyCoreValidationFixture<Tensor, Accessor, arm_compute::experimental::op::CpuGEMMLowp>;
+using CpuGEMMLowpFixture =
+    CpuGEMMLowpMatrixMultiplyCoreValidationFixture<Tensor, Accessor, arm_compute::experimental::op::CpuGEMMLowp>;
+using CpuGEMMLowpStaticQuantFixture =
+    CpuGEMMLowpStaticQuantMatrixMultiplyCoreValidationFixture<Tensor,
+                                                              Accessor,
+                                                              arm_compute::experimental::op::CpuGEMMLowp>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()),
-               shape_a, shape_b, shape_c, a_offset, b_offset)
+DATA_TEST_CASE(Configuration,
+               framework::DatasetMode::ALL,
+               framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()),
+               shape_a,
+               shape_b,
+               shape_c,
+               a_offset,
+               b_offset)
 {
     // Create tensors
     Tensor a = create_tensor<Tensor>(shape_a, DataType::QASYMM8);
@@ -87,19 +99,22 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::c
 }
 // accumulation is not supported for Int8/UInt8 in aarch32
 #ifdef __aarch64__
-DATA_TEST_CASE(ValidateAccumulate, framework::DatasetMode::ALL, combine(
-                                                                    zip(
-                                                                     make("In0",{ TensorShape(21U, 1U) }),
-                                                                     make("In1", { TensorShape(1U, 21U) }),
-                                                                     make("Dst", { TensorShape(1U, 1U) }),
-                                                                     make("a_offset", { -2 }),
-                                                                     make("b_offset", { 13 })
-                                                                    ),
-                                                                    zip(
-                                                                     make("OutputDataType", {  DataType::S32,  DataType::QASYMM8, DataType::QASYMM8_SIGNED}),
-                                                                     make("Expected", { true, false, false })
-                                                                    )),
-               shape_a, shape_b, shape_dst, a_offset, b_offset, output_data_type, expected)
+DATA_TEST_CASE(ValidateAccumulate,
+               framework::DatasetMode::ALL,
+               combine(zip(make("In0", {TensorShape(21U, 1U)}),
+                           make("In1", {TensorShape(1U, 21U)}),
+                           make("Dst", {TensorShape(1U, 1U)}),
+                           make("a_offset", {-2}),
+                           make("b_offset", {13})),
+                       zip(make("OutputDataType", {DataType::S32, DataType::QASYMM8, DataType::QASYMM8_SIGNED}),
+                           make("Expected", {true, false, false}))),
+               shape_a,
+               shape_b,
+               shape_dst,
+               a_offset,
+               b_offset,
+               output_data_type,
+               expected)
 {
     DataType input_data_type = (output_data_type == DataType::S32 ? DataType::QASYMM8 : output_data_type);
     // Accumulation test for GEMM kernels
@@ -114,15 +129,15 @@ DATA_TEST_CASE(ValidateAccumulate, framework::DatasetMode::ALL, combine(
     if (is_data_type_quantized(output_data_type))
     {
         GEMMLowpOutputStageInfo gemmLowpOutputStageInfo = GEMMLowpOutputStageInfo();
-        gemmLowpOutputStageInfo.type = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
+        gemmLowpOutputStageInfo.type                    = GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT;
 
         gemm_info.set_gemmlowp_output_stage(gemmLowpOutputStageInfo);
     }
 
     arm_compute::experimental::op::CpuGEMMLowp gemmlowp_mm;
-    Status status = gemmlowp_mm.validate(&a, &b, nullptr, &dst, gemm_info);
+    Status                                     status = gemmlowp_mm.validate(&a, &b, nullptr, &dst, gemm_info);
 
-    ARM_COMPUTE_EXPECT((expected ==  bool(status)), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT((expected == bool(status)), framework::LogLevel::ERRORS);
 }
 #endif // __arch64__
 
@@ -187,15 +202,9 @@ TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
     b.allocator()->allocate();
     dst.allocator()->allocate();
 
-    ITensorPack run_pack =
-    {
-        { TensorType::ACL_SRC_0, &a },
-        { TensorType::ACL_SRC_1, &b },
-        { TensorType::ACL_DST, &dst }
-    };
-    ITensorPack prep_pack =
-    {
-        { TensorType::ACL_SRC_1, &b },
+    ITensorPack run_pack  = {{TensorType::ACL_SRC_0, &a}, {TensorType::ACL_SRC_1, &b}, {TensorType::ACL_DST, &dst}};
+    ITensorPack prep_pack = {
+        {TensorType::ACL_SRC_1, &b},
     };
 
     auto mg = MemoryGroup{};
@@ -217,9 +226,10 @@ TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
     };
     auto result_0 = run_gemm();
     auto result_1 = run_gemm();
-    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    for (size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT(((uint8_t *)result_0.buffer())[i] == ((uint8_t *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(((uint8_t *)result_0.buffer())[i] == ((uint8_t *)result_1.buffer())[i],
+                           framework::LogLevel::ERRORS);
     }
 }
 
@@ -232,29 +242,42 @@ FIXTURE_DATA_TEST_CASE(SmokeTest, CpuGEMMLowpFixture, framework::DatasetMode::AL
 #ifdef __aarch64__ // All the GeMM CPU assembly kernels for integer datatypes require aarch64
 TEST_SUITE(Quantized)
 
-DATA_TEST_CASE(ValidateQuantized, framework::DatasetMode::ALL, zip(
-    make("InputAInfo", { TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f/255, 10)),
-                         TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)),
-                                          }),
-    make("InputBInfo",{ TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f/256, 10)),
-                        TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f/256, 10)),
-                                          }),
-    make("OutputInfo",{ TensorInfo(TensorShape(64U, 32U), 1, DataType::QASYMM8_SIGNED),
-                        TensorInfo(TensorShape(64U, 32U), 1, DataType::QASYMM8),
-                                           }),
-    make("Expected", { true, true })),
-    a_info, b_info, output_info, expected)
+DATA_TEST_CASE(
+    ValidateQuantized,
+    framework::DatasetMode::ALL,
+    zip(make("InputAInfo",
+             {
+                 TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f / 255, 10)),
+                 TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8, QuantizationInfo(1.f / 255, 10)),
+             }),
+        make("InputBInfo",
+             {
+                 TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f / 256, 10)),
+                 TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f / 256, 10)),
+             }),
+        make("OutputInfo",
+             {
+                 TensorInfo(TensorShape(64U, 32U), 1, DataType::QASYMM8_SIGNED),
+                 TensorInfo(TensorShape(64U, 32U), 1, DataType::QASYMM8),
+             }),
+        make("Expected", {true, true})),
+    a_info,
+    b_info,
+    output_info,
+    expected)
 {
     // Lock tensors
-    Status status = arm_compute::experimental::op::CpuGEMMLowp::validate(&a_info.clone()->set_is_resizable(false),
-                                                            &b_info.clone()->set_is_resizable(false),
-                                                            nullptr,
-                                                            &output_info.clone()->set_is_resizable(false));
+    Status status = arm_compute::experimental::op::CpuGEMMLowp::validate(
+        &a_info.clone()->set_is_resizable(false), &b_info.clone()->set_is_resizable(false), nullptr,
+        &output_info.clone()->set_is_resizable(false));
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant, CpuGEMMLowpStaticQuantFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8)))
+FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant,
+                       CpuGEMMLowpStaticQuantFixture,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -262,14 +285,17 @@ FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant, CpuGEMMLowpStaticQuantFixture, fram
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant, CpuGEMMLowpStaticQuantFixture, framework::DatasetMode::ALL, combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8_SIGNED)))
+FIXTURE_DATA_TEST_CASE(SmokeTestStaticQuant,
+                       CpuGEMMLowpStaticQuantFixture,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallGEMMLowpDataset(), make("DataType", DataType::QASYMM8_SIGNED)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_signed);
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE_END() // Quantized
-#endif // #ifdef __aarch64__
+#endif           // #ifdef __aarch64__
 TEST_SUITE_END() // CpuGEMMLowp
 TEST_SUITE_END() // OPERATORS
 TEST_SUITE_END() // NEON

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,9 +25,8 @@
 #ifndef ACL_TESTS_VALIDATION_FIXTURES_CPUQUANTIZEFIXTURE_H
 #define ACL_TESTS_VALIDATION_FIXTURES_CPUQUANTIZEFIXTURE_H
 
-#include "tests/validation/fixtures/QuantizationLayerFixture.h"
-#include "tests/validation/Helpers.h"
 #include "src/core/helpers/MemoryHelpers.h"
+#include "tests/validation/fixtures/QuantizationLayerFixture.h"
 #include "tests/validation/Helpers.h"
 namespace arm_compute
 {
@@ -37,28 +36,34 @@ namespace validation
 {
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename Tin, typename Tout>
-class CpuQuantizationValidationFixture : public QuantizationValidationFixture<TensorType, AccessorType, FunctionType, Tin, Tout>
+class CpuQuantizationValidationFixture
+    : public QuantizationValidationFixture<TensorType, AccessorType, FunctionType, Tin, Tout>
 {
 public:
-void setup(TensorShape shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo)
-{
-    QuantizationInfo qinfo_in;
-    if(std::is_same<TensorType, Tensor>::value &&  // Cpu
-        (data_type_in == DataType::F16 || data_type_out == DataType::F16) && !CPUInfo::get().has_fp16())
+    void setup(TensorShape shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo)
     {
-        return;
-    }
+        QuantizationInfo qinfo_in;
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
+            (data_type_in == DataType::F16 || data_type_out == DataType::F16) && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
 
-    if(!cpu_supports_dtypes({data_type_in, data_type_out})) {
-        return;
-    }
+        if (!cpu_supports_dtypes({data_type_in, data_type_out}))
+        {
+            return;
+        }
 
-    this->_target    = compute_target(shape, data_type_in, data_type_out, qinfo, qinfo_in);
-    this->_reference = this->compute_reference(shape, data_type_in, data_type_out, qinfo, qinfo_in);
-}
+        this->_target    = compute_target(shape, data_type_in, data_type_out, qinfo, qinfo_in);
+        this->_reference = this->compute_reference(shape, data_type_in, data_type_out, qinfo, qinfo_in);
+    }
 
 protected:
-    TensorType compute_target(const TensorShape &shape, DataType data_type_in, DataType data_type_out, QuantizationInfo qinfo, QuantizationInfo qinfo_in)
+    TensorType compute_target(const TensorShape &shape,
+                              DataType           data_type_in,
+                              DataType           data_type_out,
+                              QuantizationInfo   qinfo,
+                              QuantizationInfo   qinfo_in)
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, data_type_in, 1, qinfo_in);
@@ -82,10 +87,9 @@ protected:
         this->fill(AccessorType(src));
 
         // Prepare tensor pack
-        ITensorPack run_pack = { { arm_compute::TensorType::ACL_SRC, &src },
-                                { arm_compute::TensorType::ACL_DST, &dst } };
-        auto mg = MemoryGroup{};
-        auto ws = arm_compute::manage_workspace<TensorType>(quantization_layer.workspace(), mg, run_pack);
+        ITensorPack run_pack = {{arm_compute::TensorType::ACL_SRC, &src}, {arm_compute::TensorType::ACL_DST, &dst}};
+        auto        mg       = MemoryGroup{};
+        auto        ws       = arm_compute::manage_workspace<TensorType>(quantization_layer.workspace(), mg, run_pack);
         allocate_tensors(quantization_layer.workspace(), ws);
 
         // Compute function
@@ -95,10 +99,8 @@ protected:
     }
 };
 
-
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-
 
 #endif // ACL_TESTS_VALIDATION_FIXTURES_CPUQUANTIZEFIXTURE_H

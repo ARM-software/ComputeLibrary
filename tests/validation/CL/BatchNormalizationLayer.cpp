@@ -27,18 +27,19 @@
 #include "arm_compute/runtime/CL/functions/CLBatchNormalizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLFuseBatchNormalization.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeConvolutionLayerDataset.h"
 #include "tests/datasets/RandomBatchNormalizationLayerDataset.h"
 #include "tests/datasets/SmallConvolutionLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Helpers.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/BatchNormalizationLayerFixture.h"
 #include "tests/validation/fixtures/BatchNormalizationLayerFusionFixture.h"
+#include "tests/validation/Helpers.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -49,21 +50,23 @@ namespace validation
 using framework::dataset::make;
 namespace
 {
-RelativeTolerance<float>           rel_tolerance_f32(0.05f);   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-constexpr AbsoluteTolerance<float> abs_tolerance_f32(0.0001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-constexpr AbsoluteTolerance<float> tolerance_f16(0.02f);       /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-const auto                         act_infos = make("ActivationInfo",
-{
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
-});
+RelativeTolerance<float> rel_tolerance_f32(
+    0.05f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<float> abs_tolerance_f32(
+    0.0001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<float> tolerance_f16(
+    0.02f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+const auto act_infos = make("ActivationInfo",
+                            {
+                                ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f),
+                                ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
+                            });
 
-const auto common_fusion_dataset = combine(make("UseBias",
-{ false, true }),
-make("UseBeta", { false, true }),
-make("UseGamma", { false, true }),
-make("Epsilon", { 0.001f }));
+const auto common_fusion_dataset = combine(make("UseBias", {false, true}),
+                                           make("UseBeta", {false, true}),
+                                           make("UseGamma", {false, true}),
+                                           make("Epsilon", {0.001f}));
 
 } // namespace
 
@@ -71,7 +74,8 @@ TEST_SUITE(CL)
 TEST_SUITE(BatchNormalizationLayer)
 
 template <typename T>
-using CLBatchNormalizationLayerFixture = BatchNormalizationLayerValidationFixture<CLTensor, CLAccessor, CLBatchNormalizationLayer, T>;
+using CLBatchNormalizationLayerFixture =
+    BatchNormalizationLayerValidationFixture<CLTensor, CLAccessor, CLBatchNormalizationLayer, T>;
 
 // *INDENT-OFF*
 // clang-format off
@@ -122,11 +126,15 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo", { Te
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
-                                                                                                                   make("UseBeta", { false, true }), make("UseGamma", { false, true }),
-                                                                                                                   act_infos,
-                                                                                                                   make("DataType", DataType::F32),
-                                                                                                                   make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(Random,
+                       CLBatchNormalizationLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
+                               make("UseBeta", {false, true}),
+                               make("UseGamma", {false, true}),
+                               act_infos,
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, abs_tolerance_f32, 0);
@@ -134,12 +142,16 @@ FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<float>, framewor
 TEST_SUITE_END() //FP32
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
-                                                                                                                  make("UseBeta", { false, true }), make("UseGamma", { false, true }),
-                                                                                                                  make("ActivationInfo",
-                                                                                                                          ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f)),
-                                                                                                                  make("DataType", DataType::F16),
-                                                                                                                  make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(Random,
+                       CLBatchNormalizationLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallRandomBatchNormalizationLayerDataset(),
+                               make("UseBeta", {false, true}),
+                               make("UseGamma", {false, true}),
+                               make("ActivationInfo",
+                                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f)),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, 0);
@@ -181,22 +193,32 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("Weights", { Tens
 // clang-format on
 // *INDENT-ON*
 template <typename T>
-using CLBatchNormalizationLayerFusionFixture = BatchNormalizationLayerFusionValidationFixture<CLTensor, CLAccessor, CLConvolutionLayer, CLFuseBatchNormalization, T>;
+using CLBatchNormalizationLayerFusionFixture = BatchNormalizationLayerFusionValidationFixture<CLTensor,
+                                                                                              CLAccessor,
+                                                                                              CLConvolutionLayer,
+                                                                                              CLFuseBatchNormalization,
+                                                                                              T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLBatchNormalizationLayerFusionFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallConvolutionLayerReducedDataset(), common_fusion_dataset,
-                                       make("DataType", DataType::F32),
-                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLBatchNormalizationLayerFusionFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallConvolutionLayerReducedDataset(),
+                               common_fusion_dataset,
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLBatchNormalizationLayerFusionFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(datasets::SmallConvolutionLayerDataset(), common_fusion_dataset,
-                                       make("DataType", DataType::F32),
-                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLBatchNormalizationLayerFusionFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::SmallConvolutionLayerDataset(),
+                               common_fusion_dataset,
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);

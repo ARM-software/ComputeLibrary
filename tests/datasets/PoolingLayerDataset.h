@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_POOLING_LAYER_DATASET
-#define ARM_COMPUTE_TEST_POOLING_LAYER_DATASET
+#ifndef ACL_TESTS_DATASETS_POOLINGLAYERDATASET_H
+#define ACL_TESTS_DATASETS_POOLINGLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -43,8 +44,7 @@ public:
     {
         iterator(std::vector<TensorShape>::const_iterator      src_it,
                  std::vector<PoolingLayerInfo>::const_iterator infos_it)
-            : _src_it{ std::move(src_it) },
-              _infos_it{ std::move(infos_it) }
+            : _src_it{std::move(src_it)}, _infos_it{std::move(infos_it)}
         {
         }
 
@@ -106,14 +106,20 @@ public:
     PoolingLayerDatasetSpecial()
     {
         // Special cases
-        add_config(TensorShape(2U, 3U, 4U, 1U), PoolingLayerInfo(PoolingType::AVG, Size2D(2, 2), DataLayout::NCHW, PadStrideInfo(3, 3, 0, 0), true));
-        add_config(TensorShape(60U, 52U, 3U, 2U), PoolingLayerInfo(PoolingType::AVG, Size2D(100, 100), DataLayout::NCHW, PadStrideInfo(5, 5, 50, 50), true));
+        add_config(TensorShape(2U, 3U, 4U, 1U),
+                   PoolingLayerInfo(PoolingType::AVG, Size2D(2, 2), DataLayout::NCHW, PadStrideInfo(3, 3, 0, 0), true));
+        add_config(TensorShape(60U, 52U, 3U, 2U), PoolingLayerInfo(PoolingType::AVG, Size2D(100, 100), DataLayout::NCHW,
+                                                                   PadStrideInfo(5, 5, 50, 50), true));
         // Asymmetric padding
-        add_config(TensorShape(112U, 112U, 32U), PoolingLayerInfo(PoolingType::MAX, 3, DataLayout::NCHW, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR)));
-        add_config(TensorShape(14U, 14U, 832U), PoolingLayerInfo(PoolingType::MAX, 2, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(112U, 112U, 32U),
+                   PoolingLayerInfo(PoolingType::MAX, 3, DataLayout::NCHW,
+                                    PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR)));
+        add_config(TensorShape(14U, 14U, 832U),
+                   PoolingLayerInfo(PoolingType::MAX, 2, DataLayout::NCHW,
+                                    PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL)));
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_POOLING_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_POOLINGLAYERDATASET_H

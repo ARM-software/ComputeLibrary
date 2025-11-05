@@ -25,13 +25,14 @@
 #include "arm_compute/runtime/NEON/functions/NEPriorBoxLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/datasets/PriorBoxLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/PriorBoxLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -43,7 +44,8 @@ using framework::dataset::make;
 
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<float> tolerance_f32(
+    0.00001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 } // namespace
 
 TEST_SUITE(NEON)
@@ -75,16 +77,22 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPriorBoxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallPriorBoxLayerDataset(),
-                                                                                                                   make("DataType", DataType::F32),
-                                                                                                           make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEPriorBoxLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallPriorBoxLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32, 0);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPriorBoxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargePriorBoxLayerDataset(),
-                                                                                                                 make("DataType", DataType::F32),
-                                                                                                         make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEPriorBoxLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargePriorBoxLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32, 0);

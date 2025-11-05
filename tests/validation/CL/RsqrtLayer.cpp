@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/CL/functions/CLElementwiseUnaryLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ElementwiseUnaryFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -45,8 +46,10 @@ namespace
 {
 RelativeTolerance<float>             tolerance_fp32(0.000001f);
 RelativeTolerance<float>             tolerance_fp16(0.001f);
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);   /**< Tolerance value for comparing reference's output against implementation's output for unsigned 8-bit asymmetric type */
-constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_s(1); /**< Tolerance value for comparing reference's output against implementation's output for signed 8-bit asymmetric type */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(
+    1); /**< Tolerance value for comparing reference's output against implementation's output for unsigned 8-bit asymmetric type */
+constexpr AbsoluteTolerance<int8_t> tolerance_qasymm8_s(
+    1); /**< Tolerance value for comparing reference's output against implementation's output for signed 8-bit asymmetric type */
 
 } // namespace
 TEST_SUITE(CL)
@@ -76,14 +79,18 @@ using CLRsqrtLayerQuantizedFixture = RsqrtQuantizedValidationFixture<CLTensor, C
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLRsqrtLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
-                                                                                                       DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLRsqrtLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLRsqrtLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
-                                                                                                     DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLRsqrtLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16);
@@ -91,14 +98,18 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLRsqrtLayerFixture<half>, framework::DatasetMo
 
 TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLRsqrtLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
-                                                                                                        DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLRsqrtLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLRsqrtLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), make("DataType",
-                                                                                                      DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLRsqrtLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -109,10 +120,13 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLRsqrtLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
-                                                                                                                  DataType::QASYMM8_SIGNED),
-                                                                                                                  make("SrcQInfo", { QuantizationInfo(0.4044, -128) }),
-                                                                                                                  make("OutQInfo", { QuantizationInfo(0.0027, -128) })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLRsqrtLayerQuantizedFixture<int8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("SrcQInfo", {QuantizationInfo(0.4044, -128)}),
+                               make("OutQInfo", {QuantizationInfo(0.0027, -128)})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8_s);
@@ -120,10 +134,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLRsqrtLayerQuantizedFixture<int8_t>, framework
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE(QASYMM8)
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLRsqrtLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), make("DataType",
-                                                                                                                   DataType::QASYMM8),
-                                                                                                                   make("SrcQInfo", { QuantizationInfo(0.4044, 0) }),
-                                                                                                                   make("OutQInfo", { QuantizationInfo(0.0027, 0) })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLRsqrtLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::QASYMM8),
+                               make("SrcQInfo", {QuantizationInfo(0.4044, 0)}),
+                               make("OutQInfo", {QuantizationInfo(0.0027, 0)})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2023 Arm Limited.
+ * Copyright (c) 2017-2020, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SIMPLE_TENSOR_H
-#define ARM_COMPUTE_TEST_SIMPLE_TENSOR_H
+#ifndef ACL_TESTS_SIMPLETENSOR_H
+#define ACL_TESTS_SIMPLETENSOR_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
+
 #include "tests/IAccessor.h"
 #include "tests/Utils.h"
 
@@ -76,7 +77,8 @@ public:
      * @param[in] quantization_info (Optional) Quantization info for asymmetric quantization (default = empty).
      * @param[in] data_layout       (Optional) Data layout of the tensor (default = NCHW).
      */
-    SimpleTensor(TensorShape shape, DataType data_type,
+    SimpleTensor(TensorShape      shape,
+                 DataType         data_type,
                  int              num_channels      = 1,
                  QuantizationInfo quantization_info = QuantizationInfo(),
                  DataLayout       data_layout       = DataLayout::NCHW);
@@ -219,23 +221,21 @@ public:
     friend void swap(SimpleTensor<U> &tensor1, SimpleTensor<U> &tensor2);
 
 protected:
-    Buffer           _buffer{ nullptr };
+    Buffer           _buffer{nullptr};
     TensorShape      _shape{};
-    Format           _format{ Format::UNKNOWN };
-    DataType         _data_type{ DataType::UNKNOWN };
-    int              _num_channels{ 0 };
+    Format           _format{Format::UNKNOWN};
+    DataType         _data_type{DataType::UNKNOWN};
+    int              _num_channels{0};
     QuantizationInfo _quantization_info{};
-    DataLayout       _data_layout{ DataLayout::UNKNOWN };
+    DataLayout       _data_layout{DataLayout::UNKNOWN};
 };
 
 template <typename T1, typename T2>
 SimpleTensor<T1> copy_tensor(const SimpleTensor<T2> &tensor)
 {
-    SimpleTensor<T1> st(tensor.shape(), tensor.data_type(),
-                        tensor.num_channels(),
-                        tensor.quantization_info(),
+    SimpleTensor<T1> st(tensor.shape(), tensor.data_type(), tensor.num_channels(), tensor.quantization_info(),
                         tensor.data_layout());
-    for(size_t n = 0; n < size_t(st.num_elements()); n++)
+    for (size_t n = 0; n < size_t(st.num_elements()); n++)
     {
         st.data()[n] = static_cast<T1>(tensor.data()[n]);
     }
@@ -245,22 +245,20 @@ SimpleTensor<T1> copy_tensor(const SimpleTensor<T2> &tensor)
 template <typename T1, typename T2, typename std::enable_if<std::is_same<T1, T2>::value, int>::type = 0>
 SimpleTensor<T1> copy_tensor(const SimpleTensor<half> &tensor)
 {
-    SimpleTensor<T1> st(tensor.shape(), tensor.data_type(),
-                        tensor.num_channels(),
-                        tensor.quantization_info(),
+    SimpleTensor<T1> st(tensor.shape(), tensor.data_type(), tensor.num_channels(), tensor.quantization_info(),
                         tensor.data_layout());
     memcpy((void *)st.data(), (const void *)tensor.data(), size_t(st.num_elements() * sizeof(T1)));
     return st;
 }
 
-template < typename T1, typename T2, typename std::enable_if < (std::is_same<T1, half>::value || std::is_same<T2, half>::value), int >::type = 0 >
+template <typename T1,
+          typename T2,
+          typename std::enable_if<(std::is_same<T1, half>::value || std::is_same<T2, half>::value), int>::type = 0>
 SimpleTensor<T1> copy_tensor(const SimpleTensor<half> &tensor)
 {
-    SimpleTensor<T1> st(tensor.shape(), tensor.data_type(),
-                        tensor.num_channels(),
-                        tensor.quantization_info(),
+    SimpleTensor<T1> st(tensor.shape(), tensor.data_type(), tensor.num_channels(), tensor.quantization_info(),
                         tensor.data_layout());
-    for(size_t n = 0; n < size_t(st.num_elements()); n++)
+    for (size_t n = 0; n < size_t(st.num_elements()); n++)
     {
         st.data()[n] = half_float::detail::half_cast<T1, T2>(tensor.data()[n]);
     }
@@ -269,18 +267,15 @@ SimpleTensor<T1> copy_tensor(const SimpleTensor<half> &tensor)
 
 template <typename T>
 SimpleTensor<T>::SimpleTensor(TensorShape shape, Format format)
-    : _buffer(nullptr),
-      _shape(shape),
-      _format(format),
-      _quantization_info(),
-      _data_layout(DataLayout::NCHW)
+    : _buffer(nullptr), _shape(shape), _format(format), _quantization_info(), _data_layout(DataLayout::NCHW)
 {
     _num_channels = num_channels();
     _buffer       = std::make_unique<T[]>(num_elements() * _num_channels);
 }
 
 template <typename T>
-SimpleTensor<T>::SimpleTensor(TensorShape shape, DataType data_type, int num_channels, QuantizationInfo quantization_info, DataLayout data_layout)
+SimpleTensor<T>::SimpleTensor(
+    TensorShape shape, DataType data_type, int num_channels, QuantizationInfo quantization_info, DataLayout data_layout)
     : _buffer(nullptr),
       _shape(shape),
       _data_type(data_type),
@@ -372,7 +367,7 @@ DataLayout SimpleTensor<T>::data_layout() const
 template <typename T>
 DataType SimpleTensor<T>::data_type() const
 {
-    if(_format != Format::UNKNOWN)
+    if (_format != Format::UNKNOWN)
     {
         return data_type_from_format(_format);
     }
@@ -385,7 +380,7 @@ DataType SimpleTensor<T>::data_type() const
 template <typename T>
 int SimpleTensor<T>::num_channels() const
 {
-    switch(_format)
+    switch (_format)
     {
         case Format::U8:
         case Format::U16:
@@ -471,4 +466,4 @@ void swap(SimpleTensor<U> &tensor1, SimpleTensor<U> &tensor2)
 }
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SIMPLE_TENSOR_H */
+#endif // ACL_TESTS_SIMPLETENSOR_H

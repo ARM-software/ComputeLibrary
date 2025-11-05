@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLCast.h"
+
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/ConvertPolicyDataset.h"
 #include "tests/datasets/DatatypeDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/CastFixture.h"
+#include "tests/validation/Validation.h"
 
 #include <map>
 #include <vector>
@@ -55,13 +56,13 @@ constexpr AbsoluteTolerance<float> zero_tolerance(0);
 /** Input data sets **/
 // QASYMM8
 const auto CastQASYMM8toF32Dataset = combine(make("DataType", DataType::QASYMM8), make("DataType", DataType::F32));
-const auto CastQSYMM8toF32Dataset = combine(make("DataType", DataType::QSYMM8), make("DataType", DataType::F32));
+const auto CastQSYMM8toF32Dataset  = combine(make("DataType", DataType::QSYMM8), make("DataType", DataType::F32));
 
-#define U8Types DataType::U8, DataType::QASYMM8
-#define S8Types DataType::S8, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::QASYMM8_SIGNED
+#define U8Types          DataType::U8, DataType::QASYMM8
+#define S8Types          DataType::S8, DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::QASYMM8_SIGNED
 #define S8Types_wo_q8_pc DataType::S8, DataType::QSYMM8, DataType::QASYMM8_SIGNED
-#define U16Types DataType::QASYMM16, DataType::U16
-#define S16Types DataType::S16, DataType::QSYMM16
+#define U16Types         DataType::QASYMM16, DataType::U16
+#define S16Types         DataType::S16, DataType::QSYMM16
 
 // U8
 const auto CastU8toS8Dataset  = combine(make("DataType", {U8Types}), make("DataType", {S8Types}));
@@ -73,8 +74,9 @@ const auto CastU8toF16Dataset = combine(make("DataType", {U8Types}), make("DataT
 const auto CastU8toF32Dataset = combine(make("DataType", {U8Types}), make("DataType", DataType::F32));
 
 // S8
-const auto CastS8toU8Dataset  = combine(make("DataType", {S8Types_wo_q8_pc}), make("DataType", {U8Types}));
-const auto CastQSYMM8_PER_CHANNELtoU8Dataset  = combine(make("DataType", DataType::QSYMM8_PER_CHANNEL), make("DataType", DataType::U8));
+const auto CastS8toU8Dataset = combine(make("DataType", {S8Types_wo_q8_pc}), make("DataType", {U8Types}));
+const auto CastQSYMM8_PER_CHANNELtoU8Dataset =
+    combine(make("DataType", DataType::QSYMM8_PER_CHANNEL), make("DataType", DataType::U8));
 const auto CastS8toU16Dataset = combine(make("DataType", {S8Types}), make("DataType", {U16Types}));
 const auto CastS8toS16Dataset = combine(make("DataType", {S8Types}), make("DataType", {S16Types}));
 const auto CastS8toU32Dataset = combine(make("DataType", {S8Types}), make("DataType", DataType::U32));
@@ -158,68 +160,74 @@ const auto CastS64toF32Dataset = combine(make("DataType", DataType::S64), make("
 
 void validate_data_types(DataType input_dtype, DataType output_dtype)
 {
-    const auto input = TensorInfo(TensorShape(16U, 16U, 5U), 1, input_dtype);
-    auto output = TensorInfo(TensorShape(16U, 16U, 5U), 1, output_dtype);
+    const auto input  = TensorInfo(TensorShape(16U, 16U, 5U), 1, input_dtype);
+    auto       output = TensorInfo(TensorShape(16U, 16U, 5U), 1, output_dtype);
 
-    const Status status = (CLCast::validate(&input, &output, ConvertPolicy::SATURATE));
-    const bool is_valid = static_cast<bool>(status);
+    const Status status   = (CLCast::validate(&input, &output, ConvertPolicy::SATURATE));
+    const bool   is_valid = static_cast<bool>(status);
 
     static std::map<DataType, std::vector<DataType>> supported_dtypes;
 
-    supported_dtypes[DataType::U8] = {
-        S8Types, U16Types, S16Types, DataType::U32, DataType::S32, DataType::F16, DataType::F32};
+    supported_dtypes[DataType::U8] = {S8Types,       U16Types,      S16Types,     DataType::U32,
+                                      DataType::S32, DataType::F16, DataType::F32};
 
-    supported_dtypes[DataType::S8] = {
-        U8Types, U16Types, S16Types, DataType::U32, DataType::S32, DataType::F16, DataType::F32};
+    supported_dtypes[DataType::S8] = {U8Types,       U16Types,      S16Types,     DataType::U32,
+                                      DataType::S32, DataType::F16, DataType::F32};
 
-    supported_dtypes[DataType::U16] = {
-        DataType::U8, DataType::S8, DataType::S16, DataType::U32, DataType::S32, DataType::F16, DataType::F32,
-        DataType::QSYMM8, DataType::QASYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::QASYMM8_SIGNED, DataType::QSYMM16};
+    supported_dtypes[DataType::U16] = {DataType::U8,
+                                       DataType::S8,
+                                       DataType::S16,
+                                       DataType::U32,
+                                       DataType::S32,
+                                       DataType::F16,
+                                       DataType::F32,
+                                       DataType::QSYMM8,
+                                       DataType::QASYMM8,
+                                       DataType::QSYMM8_PER_CHANNEL,
+                                       DataType::QASYMM8_SIGNED,
+                                       DataType::QSYMM16};
 
-    supported_dtypes[DataType::S16] = {
-        S8Types, U8Types, U16Types, DataType::U32, DataType::S32, DataType::F16, DataType::F32};
+    supported_dtypes[DataType::S16] = {S8Types,       U8Types,       U16Types,     DataType::U32,
+                                       DataType::S32, DataType::F16, DataType::F32};
 
-    supported_dtypes[DataType::U32] = {
-        S8Types, U8Types, U16Types, S16Types, DataType::S32, DataType::F16, DataType::F32};
+    supported_dtypes[DataType::U32] = {S8Types,       U8Types,       U16Types,     S16Types,
+                                       DataType::S32, DataType::F16, DataType::F32};
 
-    supported_dtypes[DataType::S32] = {
-        S8Types, U8Types, U16Types, S16Types, DataType::U32, DataType::F16, DataType::F32};
+    supported_dtypes[DataType::S32] = {S8Types,       U8Types,       U16Types,     S16Types,
+                                       DataType::U32, DataType::F16, DataType::F32};
 
-    supported_dtypes[DataType::U64] = {
-        S8Types, U8Types, U16Types, S16Types, DataType::U32, DataType::S32,
-        DataType::F16, DataType::F32};
+    supported_dtypes[DataType::U64] = {S8Types,       U8Types,       U16Types,      S16Types,
+                                       DataType::U32, DataType::S32, DataType::F16, DataType::F32};
 
-    supported_dtypes[DataType::S64] = {
-        S8Types, U8Types, U16Types, S16Types, DataType::U32, DataType::S32,
-        DataType::F16, DataType::F32};
+    supported_dtypes[DataType::S64] = {S8Types,       U8Types,       U16Types,      S16Types,
+                                       DataType::U32, DataType::S32, DataType::F16, DataType::F32};
 
-    supported_dtypes[DataType::F16] = {
-        S8Types, U8Types, U16Types, S16Types, DataType::U32, DataType::S32, DataType::F32};
+    supported_dtypes[DataType::F16] = {S8Types,       U8Types,       U16Types,     S16Types,
+                                       DataType::U32, DataType::S32, DataType::F32};
 
-    supported_dtypes[DataType::F32] = {
-       S8Types, U8Types, U16Types, S16Types, DataType::U32, DataType::S32, DataType::F16};
+    supported_dtypes[DataType::F32] = {S8Types,       U8Types,       U16Types,     S16Types,
+                                       DataType::U32, DataType::S32, DataType::F16};
 
-    supported_dtypes[DataType::QSYMM8] = supported_dtypes[DataType::S8];
-    supported_dtypes[DataType::QASYMM8_SIGNED] = supported_dtypes[DataType::S8];
-    supported_dtypes[DataType::QSYMM8_PER_CHANNEL] = {
-        U16Types, S16Types, DataType::U8, DataType::U32, DataType::S32, DataType::F16, DataType::F32
-    };
+    supported_dtypes[DataType::QSYMM8]             = supported_dtypes[DataType::S8];
+    supported_dtypes[DataType::QASYMM8_SIGNED]     = supported_dtypes[DataType::S8];
+    supported_dtypes[DataType::QSYMM8_PER_CHANNEL] = {U16Types,      S16Types,      DataType::U8, DataType::U32,
+                                                      DataType::S32, DataType::F16, DataType::F32};
 
     supported_dtypes[DataType::QASYMM8] = supported_dtypes[DataType::U8];
 
-    supported_dtypes[DataType::QSYMM16] = supported_dtypes[DataType::S16];
+    supported_dtypes[DataType::QSYMM16]  = supported_dtypes[DataType::S16];
     supported_dtypes[DataType::QASYMM16] = supported_dtypes[DataType::U16];
 
     bool expected = false;
-    if(supported_dtypes.find(input_dtype) != supported_dtypes.end())
+    if (supported_dtypes.find(input_dtype) != supported_dtypes.end())
     {
         const auto supports = supported_dtypes[input_dtype];
-        expected = (std::find(supports.begin(), supports.end(), output_dtype) != supports.end());
+        expected            = (std::find(supports.begin(), supports.end(), output_dtype) != supports.end());
     }
 
     ARM_COMPUTE_EXPECT_EQUAL(is_valid, expected, framework::LogLevel::ERRORS);
 
-    if(is_valid != expected)
+    if (is_valid != expected)
     {
         std::cout << status.error_description() << std::endl;
     }
@@ -245,23 +253,22 @@ using CLCastToF16Fixture = CastValidationFixture<CLTensor, CLAccessor, CLCast, T
 template <typename T>
 using CLCastToF32Fixture = CastValidationFixture<CLTensor, CLAccessor, CLCast, T, float>;
 
-DATA_TEST_CASE(ValidateAllDataTypes, framework::DatasetMode::ALL,
-    combine(
-        datasets::AllDataTypes("InputDataType"),
-        datasets::AllDataTypes("OutputDataType")),
-        input_dtype, output_dtype)
+DATA_TEST_CASE(ValidateAllDataTypes,
+               framework::DatasetMode::ALL,
+               combine(datasets::AllDataTypes("InputDataType"), datasets::AllDataTypes("OutputDataType")),
+               input_dtype,
+               output_dtype)
 {
     validate_data_types(input_dtype, output_dtype);
 }
 
-
-#define CAST_SUITE(NAME, type, dataset, tolerance)                                                                     \
-    TEST_SUITE(NAME)                                                                                                             \
-    FIXTURE_DATA_TEST_CASE(RunSmall, type, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), dataset, \
-                                                                                      datasets::ConvertPolicies()))              \
-    {                                                                                                                            \
-        validate(CLAccessor(_target), _reference, tolerance);                                                                    \
-    }                                                                                                                            \
+#define CAST_SUITE(NAME, type, dataset, tolerance)                                                 \
+    TEST_SUITE(NAME)                                                                               \
+    FIXTURE_DATA_TEST_CASE(RunSmall, type, framework::DatasetMode::PRECOMMIT,                      \
+                           combine(datasets::SmallShapes(), dataset, datasets::ConvertPolicies())) \
+    {                                                                                              \
+        validate(CLAccessor(_target), _reference, tolerance);                                      \
+    }                                                                                              \
     TEST_SUITE_END()
 
 // U8
@@ -269,7 +276,7 @@ CAST_SUITE(U8_to_S8, CLCastToS8Fixture<uint8_t>, CastU8toS8Dataset, zero_toleran
 CAST_SUITE(U8_to_U16, CLCastToU16Fixture<uint8_t>, CastU8toU16Dataset, zero_tolerance)
 CAST_SUITE(U8_to_S16, CLCastToS16Fixture<uint8_t>, CastU8toS16Dataset, zero_tolerance)
 CAST_SUITE(U8_to_U32, CLCastToU32Fixture<uint8_t>, CastU8toU32Dataset, zero_tolerance)
-CAST_SUITE(U8_to_S32,  CLCastToS32Fixture<uint8_t>, CastU8toS32Dataset, zero_tolerance)
+CAST_SUITE(U8_to_S32, CLCastToS32Fixture<uint8_t>, CastU8toS32Dataset, zero_tolerance)
 CAST_SUITE(U8_to_F16, CLCastToF16Fixture<uint8_t>, CastU8toF16Dataset, zero_tolerance)
 CAST_SUITE(U8_to_F32, CLCastToF32Fixture<uint8_t>, CastU8toF32Dataset, zero_tolerance)
 

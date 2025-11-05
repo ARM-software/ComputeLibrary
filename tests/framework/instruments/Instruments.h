@@ -32,7 +32,6 @@
 #endif /* !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) */
 #include "SchedulerTimer.h"
 #include "WallClockTimer.h"
-
 #include <memory>
 #include <sstream>
 #include <string>
@@ -80,10 +79,10 @@ inline ::std::stringstream &operator>>(::std::stringstream &stream, InstrumentsD
 
 inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsDescription instrument)
 {
-    switch(instrument.first)
+    switch (instrument.first)
     {
         case InstrumentType::WALL_CLOCK_TIMESTAMPS:
-            switch(instrument.second)
+            switch (instrument.second)
             {
                 case ScaleFactor::NONE:
                     stream << "WALL_CLOCK_TIMESTAMPS";
@@ -99,7 +98,7 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
             }
             break;
         case InstrumentType::WALL_CLOCK_TIMER:
-            switch(instrument.second)
+            switch (instrument.second)
             {
                 case ScaleFactor::NONE:
                     stream << "WALL_CLOCK_TIMER";
@@ -115,7 +114,7 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
             }
             break;
         case InstrumentType::SCHEDULER_TIMESTAMPS:
-            switch(instrument.second)
+            switch (instrument.second)
             {
                 case ScaleFactor::NONE:
                     stream << "SCHEDULER_TIMESTAMPS";
@@ -131,7 +130,7 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
             }
             break;
         case InstrumentType::SCHEDULER_TIMER:
-            switch(instrument.second)
+            switch (instrument.second)
             {
                 case ScaleFactor::NONE:
                     stream << "SCHEDULER_TIMER";
@@ -147,7 +146,7 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
             }
             break;
         case InstrumentType::PMU:
-            switch(instrument.second)
+            switch (instrument.second)
             {
                 case ScaleFactor::NONE:
                     stream << "PMU";
@@ -169,7 +168,7 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
             stream << "PMU_INSTRUCTION_COUNTER";
             break;
         case InstrumentType::MALI:
-            switch(instrument.second)
+            switch (instrument.second)
             {
                 case ScaleFactor::NONE:
                     stream << "MALI";
@@ -185,7 +184,7 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
             }
             break;
         case InstrumentType::OPENCL_TIMESTAMPS:
-            switch(instrument.second)
+            switch (instrument.second)
             {
                 case ScaleFactor::NONE:
                     stream << "OPENCL_TIMESTAMPS";
@@ -204,7 +203,7 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
             }
             break;
         case InstrumentType::OPENCL_TIMER:
-            switch(instrument.second)
+            switch (instrument.second)
             {
                 case ScaleFactor::NONE:
                     stream << "OPENCL_TIMER";
@@ -223,7 +222,7 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
             }
             break;
         case InstrumentType::OPENCL_MEMORY_USAGE:
-            switch(instrument.second)
+            switch (instrument.second)
             {
                 case ScaleFactor::NONE:
                     stream << "OPENCL_MEMORY_USAGE";

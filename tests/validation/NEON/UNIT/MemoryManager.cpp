@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,12 +28,13 @@
 #include "arm_compute/runtime/NEON/functions/NENormalizationLayer.h"
 #include "arm_compute/runtime/PoolManager.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "tests/AssetsLibrary.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Macros.h"
 #include "tests/Globals.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/Utils.h"
-#include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 
 namespace arm_compute
 {

@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NEFuseBatchNormalization.h"
+
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
 #include "tests/Globals.h"
 #include "tests/NEON/Accessor.h"
-#include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/FuseBatchNormalizationFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -47,9 +48,11 @@ AbsoluteTolerance<float> absolute_tolerance_f16(0.2f);
 } // namespace
 
 template <typename T>
-using NEFuseBatchNormalizationConvFixture = FuseBatchNormalizationFixture<Tensor, Accessor, NEFuseBatchNormalization, 4, T>;
+using NEFuseBatchNormalizationConvFixture =
+    FuseBatchNormalizationFixture<Tensor, Accessor, NEFuseBatchNormalization, 4, T>;
 template <typename T>
-using NEFuseBatchNormalizationDWCFixture = FuseBatchNormalizationFixture<Tensor, Accessor, NEFuseBatchNormalization, 3, T>;
+using NEFuseBatchNormalizationDWCFixture =
+    FuseBatchNormalizationFixture<Tensor, Accessor, NEFuseBatchNormalization, 3, T>;
 
 // *INDENT-OFF*
 // clang-format off

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ALEXNET_NORMALIZATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_ALEXNET_NORMALIZATION_LAYER_DATASET
-
-#include "tests/framework/datasets/Datasets.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_ALEXNET_ALEXNETNORMALIZATIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_ALEXNET_ALEXNETNORMALIZATIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/framework/datasets/Datasets.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -37,16 +36,15 @@ namespace test
 {
 namespace datasets
 {
-class AlexNetNormalizationLayerDataset final : public
-    framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>, framework::dataset::SingletonDataset<NormalizationLayerInfo>>
+class AlexNetNormalizationLayerDataset final
+    : public framework::dataset::CartesianProductDataset<framework::dataset::InitializerListDataset<TensorShape>,
+                                                         framework::dataset::SingletonDataset<NormalizationLayerInfo>>
 {
 public:
     AlexNetNormalizationLayerDataset()
-        : CartesianProductDataset
-    {
-        framework::dataset::make("Shape", { TensorShape(55U, 55U, 96U), TensorShape(27U, 27U, 256U) }),
-        framework::dataset::make("Info", NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
-    }
+        : CartesianProductDataset{
+              framework::dataset::make("Shape", {TensorShape(55U, 55U, 96U), TensorShape(27U, 27U, 256U)}),
+              framework::dataset::make("Info", NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))}
     {
     }
     AlexNetNormalizationLayerDataset(AlexNetNormalizationLayerDataset &&) = default;
@@ -55,4 +53,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ALEXNET_NORMALIZATION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_ALEXNET_ALEXNETNORMALIZATIONLAYERDATASET_H

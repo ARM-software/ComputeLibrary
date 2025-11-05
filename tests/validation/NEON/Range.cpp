@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/NEON/functions/NERange.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/RangeFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -47,11 +48,12 @@ namespace
 constexpr RelativeTolerance<float> tolerance(0.01f);
 constexpr AbsoluteTolerance<float> abs_tolerance(0.02f);
 
-const auto start_dataset          = make("Start", { float(3), float(-17), float(16) });
-const auto unsigned_start_dataset = make("Start", { float(3), float(16) });
-const auto float_step_dataset     = make("Step", { float(1), float(-0.2f), float(0.2), float(12.2), float(-12.2), float(-1.2), float(-3), float(3) });
-const auto step_dataset           = make("Step", { float(1), float(12), float(-12), float(-1), float(-3), float(3) });
-const auto unsigned_step_dataset  = make("Step", { float(1), float(12), float(3) });
+const auto start_dataset          = make("Start", {float(3), float(-17), float(16)});
+const auto unsigned_start_dataset = make("Start", {float(3), float(16)});
+const auto float_step_dataset =
+    make("Step", {float(1), float(-0.2f), float(0.2), float(12.2), float(-12.2), float(-1.2), float(-3), float(3)});
+const auto step_dataset          = make("Step", {float(1), float(12), float(-12), float(-1), float(-3), float(3)});
+const auto unsigned_step_dataset = make("Step", {float(1), float(12), float(3)});
 } // namespace
 
 TEST_SUITE(NEON)
@@ -123,11 +125,13 @@ template <typename T>
 using NERangeFixture = RangeFixture<Tensor, Accessor, NERange, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(
-                                                                                                                 make("DataType", DataType::U8),
-                                                                                                                 unsigned_start_dataset,
-                                                                                                             unsigned_step_dataset,
-                                                                                                     make("QuantizationInfo", { QuantizationInfo() })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NERangeFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(make("DataType", DataType::U8),
+                               unsigned_start_dataset,
+                               unsigned_step_dataset,
+                               make("QuantizationInfo", {QuantizationInfo()})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance, 0.f, abs_tolerance);
@@ -135,11 +139,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<uint8_t>, framework::DatasetMode
 TEST_SUITE_END() // U8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(
-                                                                                                                 make("DataType", DataType::S16),
-                                                                                                                 start_dataset,
-                                                                                                             step_dataset,
-                                                                                                     make("QuantizationInfo", { QuantizationInfo() })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NERangeFixture<int16_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(make("DataType", DataType::S16),
+                               start_dataset,
+                               step_dataset,
+                               make("QuantizationInfo", {QuantizationInfo()})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance, 0.f, abs_tolerance);
@@ -149,13 +155,15 @@ TEST_SUITE_END() // S16
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<half>, framework::DatasetMode::PRECOMMIT, combine(
-                                                                                                              make("DataType", DataType::F16),
-                                                                                                              start_dataset,
-                                                                                                          float_step_dataset,
-                                                                                                  make("QuantizationInfo", { QuantizationInfo() })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NERangeFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(make("DataType", DataType::F16),
+                               start_dataset,
+                               float_step_dataset,
+                               make("QuantizationInfo", {QuantizationInfo()})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance, 0.f, abs_tolerance);
@@ -170,11 +178,13 @@ TEST_SUITE_END() // FP16
 #endif           // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NERangeFixture<float>, framework::DatasetMode::PRECOMMIT, combine(
-                                                                                                               make("DataType", DataType::F32),
-                                                                                                               start_dataset,
-                                                                                                           float_step_dataset,
-                                                                                                   make("QuantizationInfo", { QuantizationInfo() })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NERangeFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(make("DataType", DataType::F32),
+                               start_dataset,
+                               float_step_dataset,
+                               make("QuantizationInfo", {QuantizationInfo()})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance, 0.f, abs_tolerance);

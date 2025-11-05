@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ReshapeLayerDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ReshapeLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -85,7 +86,10 @@ using NEReshapeLayerPaddedFixture = ReshapeLayerPaddedValidationFixture<Tensor, 
 
 TEST_SUITE(Float)
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReshapeLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -95,7 +99,10 @@ TEST_SUITE_END() //Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReshapeLayerFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -103,7 +110,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<int8_t>, framework::Datas
 TEST_SUITE_END() //S8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReshapeLayerFixture<int16_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -114,7 +124,10 @@ TEST_SUITE_END() //Integer
 TEST_SUITE(Padded)
 TEST_SUITE(Float)
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerPaddedFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReshapeLayerPaddedFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -124,7 +137,10 @@ TEST_SUITE_END() //Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerPaddedFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReshapeLayerPaddedFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -132,7 +148,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerPaddedFixture<int8_t>, framework:
 TEST_SUITE_END() //S8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerPaddedFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReshapeLayerPaddedFixture<int16_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

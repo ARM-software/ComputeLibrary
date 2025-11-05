@@ -31,22 +31,24 @@
 #ifdef ARM_COMPUTE_OPENCL_ENABLED
 #include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
 #endif // ARM_COMPUTE_OPENCL_ENABLED
-#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 #include "src/graph/mutators/MutatorUtils.h"
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
+#include "tests/validation/reference/DequantizationLayer.h"
 #include "tests/validation/reference/PadLayer.h"
 #include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/Utils.h"
-#include "tests/validation/reference/DequantizationLayer.h"
+
 #include <random>
 #include <type_traits>
 
@@ -61,55 +63,66 @@ namespace detail
 template <typename ConvolutionFunction, typename TensorType>
 #ifdef ARM_COMPUTE_OPENCL_ENABLED
 std::enable_if_t<!std::is_same<ConvolutionFunction, CLGEMMConvolutionLayer>::value, void>
-#else // ARM_COMPUTE_OPENCL_ENABLED
+#else  // ARM_COMPUTE_OPENCL_ENABLED
 void
 #endif // ARM_COMPUTE_OPENCL_ENABLED
-configure_conv_function(ConvolutionFunction &func,
-                             TensorType *src, const TensorType *weights, const TensorType *bias, TensorType *dst,
-                             const PadStrideInfo &info, const WeightsInfo &weights_info,
-                             const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
+configure_conv_function(ConvolutionFunction       &func,
+                        TensorType                *src,
+                        const TensorType          *weights,
+                        const TensorType          *bias,
+                        TensorType                *dst,
+                        const PadStrideInfo       &info,
+                        const WeightsInfo         &weights_info,
+                        const Size2D              &dilation,
+                        const ActivationLayerInfo &act_info,
+                        unsigned int               num_groups)
 {
-    func.configure(src, weights, bias, dst, info, weights_info, dilation, act_info, false /* enable_fast_math */, num_groups);
+    func.configure(src, weights, bias, dst, info, weights_info, dilation, act_info, false /* enable_fast_math */,
+                   num_groups);
 }
 
 #ifdef ARM_COMPUTE_OPENCL_ENABLED
 template <typename ConvolutionFunction, typename TensorType>
 std::enable_if_t<std::is_same<ConvolutionFunction, CLGEMMConvolutionLayer>::value, void>
-configure_conv_function(ConvolutionFunction &func,
-                             TensorType *src, const TensorType *weights, const TensorType *bias, TensorType *dst,
-                             const PadStrideInfo &info, const WeightsInfo &weights_info,
-                             const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
+configure_conv_function(ConvolutionFunction       &func,
+                        TensorType                *src,
+                        const TensorType          *weights,
+                        const TensorType          *bias,
+                        TensorType                *dst,
+                        const PadStrideInfo       &info,
+                        const WeightsInfo         &weights_info,
+                        const Size2D              &dilation,
+                        const ActivationLayerInfo &act_info,
+                        unsigned int               num_groups)
 {
     func.configure(src, weights, bias, dst, info, weights_info, dilation, act_info, num_groups);
 }
 #endif // ARM_COMPUTE_OPENCL_ENABLED
 } // namespace detail
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename TW, typename TO=T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename TW, typename TO = T>
 class ConvolutionValidationGenericFixture : public framework::Fixture
 {
 public:
     // Quantized input?
-    static constexpr bool T_is_q =
-        std::is_same<typename std::decay<T>::type, uint8_t>::value ||
-        std::is_same<typename std::decay<T>::type, int8_t>::value;
+    static constexpr bool T_is_q = std::is_same<typename std::decay<T>::type, uint8_t>::value ||
+                                   std::is_same<typename std::decay<T>::type, int8_t>::value;
 
     // Float output?
-    static constexpr bool TO_is_f32 =
-        std::is_same<typename std::decay<TO>::type, float>::value;
+    static constexpr bool TO_is_f32 = std::is_same<typename std::decay<TO>::type, float>::value;
 
     // Bias type:
     //  - Q->F32: float
     //  - Q->Q  : int32_t
     //  - FP->* : T
-    using TBias = typename std::conditional<
-        (T_is_q && TO_is_f32),
-        float,
-        typename std::conditional<T_is_q, int32_t, T>::type
-    >::type;
+    using TBias = typename std::
+        conditional<(T_is_q && TO_is_f32), float, typename std::conditional<T_is_q, int32_t, T>::type>::type;
 
-    void setup_quantization(TensorShape input_shape, TensorShape weights_shape, QuantizationInfo &input_q_info,
-        QuantizationInfo &weights_q_info, DataType data_type)
+    void setup_quantization(TensorShape       input_shape,
+                            TensorShape       weights_shape,
+                            QuantizationInfo &input_q_info,
+                            QuantizationInfo &weights_q_info,
+                            DataType          data_type)
     {
         const int32_t t_max = static_cast<int32_t>(std::numeric_limits<T>::max());
         const int32_t t_min = static_cast<int32_t>(std::numeric_limits<T>::min());
@@ -124,24 +137,38 @@ public:
         const int32_t offset_lhs = distribution_t(generator);
         const int32_t offset_rhs = distribution_t(generator);
 
-        _quantization_info = QuantizationInfo(scale_lhs, offset_lhs);
+        _quantization_info        = QuantizationInfo(scale_lhs, offset_lhs);
         _weight_quantization_info = QuantizationInfo(scale_rhs, offset_rhs);
 
-        QuantizationHint q_hint = suggest_conv_dst_q_info_and_bias(input_q_info, weights_q_info,
-            weights_shape.y() /* heights */, weights_shape.x() /* width */, input_shape.z() /* channels */,
-            data_type, 0.5f /* bias_fraction */);
+        QuantizationHint q_hint = suggest_conv_dst_q_info_and_bias(
+            input_q_info, weights_q_info, weights_shape.y() /* heights */, weights_shape.x() /* width */,
+            input_shape.z() /* channels */, data_type, 0.5f /* bias_fraction */);
 
         _dst_q_info = q_hint.q_info;
-        _min_bias = q_hint.bias_min;
-        _max_bias = q_hint.bias_max;
+        _min_bias   = q_hint.bias_min;
+        _max_bias   = q_hint.bias_max;
     }
 
 public:
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights,
-               DataType data_type, DataType weights_data_type, DataLayout data_layout, QuantizationInfo quantization_info, QuantizationInfo weight_quantization_info, ActivationLayerInfo act_info,
-               bool mixed_layout = false, PaddingList pre_pad_layer = PaddingList({}), bool padded_weights = false, bool updated_sq_info_after_config = false)
+    void setup(TensorShape         input_shape,
+               TensorShape         weights_shape,
+               TensorShape         bias_shape,
+               TensorShape         output_shape,
+               PadStrideInfo       info,
+               Size2D              dilation,
+               bool                reshape_weights,
+               DataType            data_type,
+               DataType            weights_data_type,
+               DataLayout          data_layout,
+               QuantizationInfo    quantization_info,
+               QuantizationInfo    weight_quantization_info,
+               ActivationLayerInfo act_info,
+               bool                mixed_layout                 = false,
+               PaddingList         pre_pad_layer                = PaddingList({}),
+               bool                padded_weights               = false,
+               bool                updated_sq_info_after_config = false)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             (data_type == DataType::F16 || weights_data_type == DataType::F16) && !CPUInfo::get().has_fp16())
         {
             return;
@@ -151,30 +178,29 @@ public:
         // this is intentional as it's a very easy way to make the the current
         // random generation process almost different for many test configurations,
         // which were using the same set of values before.
-        _hash = input_shape[0] + input_shape[1] + input_shape[2] + input_shape[3] +
-            + weights_shape[0] + weights_shape[1] + weights_shape[2] + weights_shape[3] +
-            mixed_layout + (data_type == DataType::QASYMM8_SIGNED) + (data_layout == DataLayout::NHWC);
+        _hash = input_shape[0] + input_shape[1] + input_shape[2] + input_shape[3] + +weights_shape[0] +
+                weights_shape[1] + weights_shape[2] + weights_shape[3] + mixed_layout +
+                (data_type == DataType::QASYMM8_SIGNED) + (data_layout == DataLayout::NHWC);
 
-        _mixed_layout             = mixed_layout;
-        _data_type                = data_type;
-        _weights_data_type        = weights_data_type;
-        const bool is_quantized   = is_data_type_quantized(weights_data_type);
+        _mixed_layout           = mixed_layout;
+        _data_type              = data_type;
+        _weights_data_type      = weights_data_type;
+        const bool is_quantized = is_data_type_quantized(weights_data_type);
 
-        _is_bfloat16            = data_type == DataType::BFLOAT16;
-        _output_data_type       = (_is_bfloat16 || std::is_same<TO, float>::value) ? DataType::F32 : data_type;
+        _is_bfloat16      = data_type == DataType::BFLOAT16;
+        _output_data_type = (_is_bfloat16 || std::is_same<TO, float>::value) ? DataType::F32 : data_type;
 
-        const bool q_to_f32     = is_quantized && (_output_data_type == DataType::F32);
-        _bias_data_type         = q_to_f32 ? DataType::F32
-                                   : (is_quantized ? DataType::S32
-                                                   : (_is_bfloat16 ? DataType::F32 : data_type));
+        const bool q_to_f32 = is_quantized && (_output_data_type == DataType::F32);
+        _bias_data_type =
+            q_to_f32 ? DataType::F32 : (is_quantized ? DataType::S32 : (_is_bfloat16 ? DataType::F32 : data_type));
 
         _quantization_info        = quantization_info;
         _weight_quantization_info = weight_quantization_info;
         _data_layout              = data_layout;
         _dst_q_info               = quantization_info;
 
-
-        if(is_quantized && !is_data_type_quantized_symmetric(weights_data_type) && (!act_info.enabled() || act_info.activation() == ActivationFunction::IDENTITY))
+        if (is_quantized && !is_data_type_quantized_symmetric(weights_data_type) &&
+            (!act_info.enabled() || act_info.activation() == ActivationFunction::IDENTITY))
         {
             setup_quantization(input_shape, weights_shape, _quantization_info, _weight_quantization_info, data_type);
             _use_dynamic_output_quant = true;
@@ -182,14 +208,18 @@ public:
 
         if (updated_sq_info_after_config)
         {
-            _target = compute_gemmlowp_target_for_updated_sq_info_after_config(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation, act_info, pre_pad_layer, padded_weights);
+            _target = compute_gemmlowp_target_for_updated_sq_info_after_config(
+                input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation, act_info,
+                pre_pad_layer, padded_weights);
         }
         else
         {
-            _target = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation, act_info, pre_pad_layer, padded_weights);
+            _target = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights,
+                                     dilation, act_info, pre_pad_layer, padded_weights);
         }
 
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, dilation, act_info, pre_pad_layer);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, dilation, act_info,
+                                       pre_pad_layer);
     }
 
 protected:
@@ -210,7 +240,7 @@ protected:
     void regularize_values(void *values, size_t size)
     {
         float *fvalues = static_cast<float *>(values);
-        for(size_t i = 0; i < size; ++i)
+        for (size_t i = 0; i < size; ++i)
         {
             fvalues[i] = float(bfloat16(fvalues[i]));
         }
@@ -219,11 +249,11 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::QASYMM8:
             {
-                if(_use_dynamic_output_quant)
+                if (_use_dynamic_output_quant)
                 {
                     std::uniform_int_distribution<int32_t> distribution(0, 255);
                     library->fill(tensor, distribution, i);
@@ -231,7 +261,7 @@ protected:
                 else
                 {
                     // Legacy initialization in case the output quantization info can't be reliably estimated
-                    std::pair<int, int>                     bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                    std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
                     std::uniform_int_distribution<uint32_t> distribution(bounds.first, bounds.second);
                     library->fill(tensor, distribution, i);
                 }
@@ -239,7 +269,7 @@ protected:
             }
             case DataType::QASYMM8_SIGNED:
             {
-                if(_use_dynamic_output_quant)
+                if (_use_dynamic_output_quant)
                 {
                     // Using -127 as the lower bound because of possible overflow.
                     // This is a known issue and reported in the errata.
@@ -250,7 +280,8 @@ protected:
                 else
                 {
                     // Legacy initialization in case the output quantization info can't be reliably estimated
-                    std::pair<int, int>                    bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                    std::pair<int, int> bounds =
+                        get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
                     std::uniform_int_distribution<int32_t> distribution(bounds.first, bounds.second);
                     library->fill(tensor, distribution, i);
                 }
@@ -260,14 +291,15 @@ protected:
             {
                 int min_bound = 128;
                 int max_bound = -127;
-                for(size_t i = 0; i < _weight_quantization_info.scale().size(); i++)
+                for (size_t i = 0; i < _weight_quantization_info.scale().size(); i++)
                 {
-                    std::pair<int, int> bounds = get_symm_quantized_per_channel_bounds(tensor.quantization_info(), -1.0f, 1.0f, i);
-                    if(bounds.first < min_bound)
+                    std::pair<int, int> bounds =
+                        get_symm_quantized_per_channel_bounds(tensor.quantization_info(), -1.0f, 1.0f, i);
+                    if (bounds.first < min_bound)
                     {
                         min_bound = bounds.first;
                     }
-                    if(bounds.second > max_bound)
+                    if (bounds.second > max_bound)
                     {
                         max_bound = bounds.second;
                     }
@@ -284,13 +316,13 @@ protected:
             }
             case DataType::BFLOAT16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution{ -1.0f, 1.0f };
+                arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution{-1.0f, 1.0f};
                 library->fill(tensor, distribution, i);
                 break;
             }
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -306,25 +338,33 @@ protected:
     }
 
     // given input is IN nchw format
-    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, const TensorShape &bias_shape, TensorShape output_shape, const PadStrideInfo &info,
-                              bool reshape_weights, const Size2D &dilation, const ActivationLayerInfo act_info, PaddingList pre_pad_layer = PaddingList({}), bool padded_weights = false)
+    TensorType compute_target(TensorShape               input_shape,
+                              TensorShape               weights_shape,
+                              const TensorShape        &bias_shape,
+                              TensorShape               output_shape,
+                              const PadStrideInfo      &info,
+                              bool                      reshape_weights,
+                              const Size2D             &dilation,
+                              const ActivationLayerInfo act_info,
+                              PaddingList               pre_pad_layer  = PaddingList({}),
+                              bool                      padded_weights = false)
     {
         ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
 
         const unsigned int num_groups = input_shape[2] / weights_shape[2];
 
-        if(_data_layout == DataLayout::NHWC)
+        if (_data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
             permute(weights_shape, PermutationVector(2U, 0U, 1U));
             permute(output_shape, PermutationVector(2U, 0U, 1U));
 
-            if(pre_pad_layer.size() > 0)
+            if (pre_pad_layer.size() > 0)
             {
                 // make sure paddings exist for each c,h,w dimensions
-                for(unsigned int i = 0; i < 3 - pre_pad_layer.size(); ++i)
+                for (unsigned int i = 0; i < 3 - pre_pad_layer.size(); ++i)
                 {
-                    pre_pad_layer.push_back({ 0, 0 });
+                    pre_pad_layer.push_back({0, 0});
                 }
 
                 // rotate padding info from nchw to nhwc
@@ -335,39 +375,41 @@ protected:
         const int idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
         const int idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
 
-        WeightsInfo weights_info(!reshape_weights, weights_shape[idx_width], weights_shape[idx_height], weights_shape[3]);
+        WeightsInfo weights_info(!reshape_weights, weights_shape[idx_width], weights_shape[idx_height],
+                                 weights_shape[3]);
         TensorShape reshaped_weights_shape(weights_shape);
 
         TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _quantization_info, _data_layout);
-        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _weights_data_type, 1, _weight_quantization_info, _data_layout);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, QuantizationInfo() /*bias is not a quantized type*/, _data_layout);
+        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _weights_data_type, 1,
+                                                       _weight_quantization_info, _data_layout);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1,
+                                                    QuantizationInfo() /*bias is not a quantized type*/, _data_layout);
         TensorType dst     = create_tensor<TensorType>(output_shape, _output_data_type, 1, _dst_q_info, _data_layout);
 
         // Create and configure function
         FunctionType conv;
 
-        const unsigned int height_index = arm_compute::graph::get_dimension_idx(_data_layout, DataLayoutDimension::HEIGHT);
-        const unsigned int width_index  = arm_compute::graph::get_dimension_idx(_data_layout, DataLayoutDimension::WIDTH);
+        const unsigned int height_index =
+            arm_compute::graph::get_dimension_idx(_data_layout, DataLayoutDimension::HEIGHT);
+        const unsigned int width_index =
+            arm_compute::graph::get_dimension_idx(_data_layout, DataLayoutDimension::WIDTH);
 
         const PaddingInfo pad_w = width_index < pre_pad_layer.size() ? pre_pad_layer[width_index] : PaddingInfo(0, 0);
         const PaddingInfo pad_h = height_index < pre_pad_layer.size() ? pre_pad_layer[height_index] : PaddingInfo(0, 0);
 
-        if(pre_pad_layer.size() > 0 && arm_compute::graph::is_padding_in_height_or_width(_data_layout, pre_pad_layer))
+        if (pre_pad_layer.size() > 0 && arm_compute::graph::is_padding_in_height_or_width(_data_layout, pre_pad_layer))
         {
             // this is the logic implemented in NodeFusionMutator -> fuse_pad_with_convolution
-            const PadStrideInfo new_conv_info(
-                info.stride().first,
-                info.stride().second,
-                info.pad_left() + pad_w.first,
-                info.pad_right() + pad_w.second,
-                info.pad_top() + pad_h.first,
-                info.pad_bottom() + pad_h.second,
-                info.round());
-            detail::configure_conv_function(conv, &src, &weights, &bias, &dst, new_conv_info, weights_info, dilation, act_info, num_groups);
+            const PadStrideInfo new_conv_info(info.stride().first, info.stride().second, info.pad_left() + pad_w.first,
+                                              info.pad_right() + pad_w.second, info.pad_top() + pad_h.first,
+                                              info.pad_bottom() + pad_h.second, info.round());
+            detail::configure_conv_function(conv, &src, &weights, &bias, &dst, new_conv_info, weights_info, dilation,
+                                            act_info, num_groups);
         }
         else
         {
-            detail::configure_conv_function(conv, &src, &weights, &bias, &dst, info, weights_info, dilation, act_info, num_groups);
+            detail::configure_conv_function(conv, &src, &weights, &bias, &dst, info, weights_info, dilation, act_info,
+                                            num_groups);
         }
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
@@ -375,12 +417,12 @@ protected:
         ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
         // Test "add padding after configure" behavior. This behavior should not affect the correctness
-        add_padding_x({ &src, &bias, &dst }, _data_layout);
+        add_padding_x({&src, &bias, &dst}, _data_layout);
 
         // Padding weights may affect code path in some backends
         if (padded_weights)
         {
-            add_padding_x({ &weights }, _data_layout);
+            add_padding_x({&weights}, _data_layout);
         }
 
         // Allocate tensors
@@ -399,7 +441,7 @@ protected:
         fill(AccessorType(weights), 1 + _hash);
         fill(AccessorType(bias), 2 + _hash);
 
-        if(_mixed_layout)
+        if (_mixed_layout)
         {
             mix_layout(conv, src, dst);
         }
@@ -412,26 +454,34 @@ protected:
     }
 
     // Compute the target when updating static quantization information after configuration.
-    TensorType compute_gemmlowp_target_for_updated_sq_info_after_config(TensorShape input_shape, TensorShape weights_shape, const TensorShape &bias_shape, TensorShape output_shape, const PadStrideInfo &info,
-                              bool reshape_weights, const Size2D &dilation, const ActivationLayerInfo act_info, PaddingList pre_pad_layer = PaddingList({}), bool padded_weights = false)
+    TensorType compute_gemmlowp_target_for_updated_sq_info_after_config(TensorShape               input_shape,
+                                                                        TensorShape               weights_shape,
+                                                                        const TensorShape        &bias_shape,
+                                                                        TensorShape               output_shape,
+                                                                        const PadStrideInfo      &info,
+                                                                        bool                      reshape_weights,
+                                                                        const Size2D             &dilation,
+                                                                        const ActivationLayerInfo act_info,
+                                                                        PaddingList pre_pad_layer  = PaddingList({}),
+                                                                        bool        padded_weights = false)
     {
         ARM_COMPUTE_ASSERT((std::is_same<FunctionType, NEGEMMConvolutionLayer>::value == true));
         ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
 
         const unsigned int num_groups = input_shape[2] / weights_shape[2];
 
-        if(_data_layout == DataLayout::NHWC)
+        if (_data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
             permute(weights_shape, PermutationVector(2U, 0U, 1U));
             permute(output_shape, PermutationVector(2U, 0U, 1U));
 
-            if(pre_pad_layer.size() > 0)
+            if (pre_pad_layer.size() > 0)
             {
                 // make sure paddings exist for each c,h,w dimensions
-                for(unsigned int i = 0; i < 3 - pre_pad_layer.size(); ++i)
+                for (unsigned int i = 0; i < 3 - pre_pad_layer.size(); ++i)
                 {
-                    pre_pad_layer.push_back({ 0, 0 });
+                    pre_pad_layer.push_back({0, 0});
                 }
 
                 // rotate padding info from nchw to nhwc
@@ -442,46 +492,49 @@ protected:
         const int idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
         const int idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
 
-        WeightsInfo weights_info(!reshape_weights, weights_shape[idx_width], weights_shape[idx_height], weights_shape[3]);
+        WeightsInfo weights_info(!reshape_weights, weights_shape[idx_width], weights_shape[idx_height],
+                                 weights_shape[3]);
         TensorShape reshaped_weights_shape(weights_shape);
 
         // Create tensors with fake quantization info and defer to pass the correct ones to a later stage.
-        auto qi = QuantizationInfo(0.550721, 37, true);
+        auto       qi      = QuantizationInfo(0.550721, 37, true);
         TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, qi, _data_layout);
         TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _weights_data_type, 1, qi, _data_layout);
         TensorType dst     = create_tensor<TensorType>(output_shape, _output_data_type, 1, qi, _data_layout);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, QuantizationInfo() /*bias is not a quantized type*/, _data_layout);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1,
+                                                    QuantizationInfo() /*bias is not a quantized type*/, _data_layout);
 
         // Create and configure function
         FunctionType conv;
 
-        const unsigned int height_index = arm_compute::graph::get_dimension_idx(_data_layout, DataLayoutDimension::HEIGHT);
-        const unsigned int width_index  = arm_compute::graph::get_dimension_idx(_data_layout, DataLayoutDimension::WIDTH);
+        const unsigned int height_index =
+            arm_compute::graph::get_dimension_idx(_data_layout, DataLayoutDimension::HEIGHT);
+        const unsigned int width_index =
+            arm_compute::graph::get_dimension_idx(_data_layout, DataLayoutDimension::WIDTH);
 
         const PaddingInfo pad_w = width_index < pre_pad_layer.size() ? pre_pad_layer[width_index] : PaddingInfo(0, 0);
         const PaddingInfo pad_h = height_index < pre_pad_layer.size() ? pre_pad_layer[height_index] : PaddingInfo(0, 0);
 
-        if(pre_pad_layer.size() > 0 && arm_compute::graph::is_padding_in_height_or_width(_data_layout, pre_pad_layer))
+        if (pre_pad_layer.size() > 0 && arm_compute::graph::is_padding_in_height_or_width(_data_layout, pre_pad_layer))
         {
             // this is the logic implemented in NodeFusionMutator -> fuse_pad_with_convolution
-            const PadStrideInfo new_conv_info(
-                info.stride().first,
-                info.stride().second,
-                info.pad_left() + pad_w.first,
-                info.pad_right() + pad_w.second,
-                info.pad_top() + pad_h.first,
-                info.pad_bottom() + pad_h.second,
-                info.round());
-            detail::configure_conv_function(conv, &src, &weights, &bias, &dst, new_conv_info, weights_info, dilation, act_info, num_groups);
+            const PadStrideInfo new_conv_info(info.stride().first, info.stride().second, info.pad_left() + pad_w.first,
+                                              info.pad_right() + pad_w.second, info.pad_top() + pad_h.first,
+                                              info.pad_bottom() + pad_h.second, info.round());
+            detail::configure_conv_function(conv, &src, &weights, &bias, &dst, new_conv_info, weights_info, dilation,
+                                            act_info, num_groups);
         }
         else
         {
-            detail::configure_conv_function(conv, &src, &weights, &bias, &dst, info, weights_info, dilation, act_info, num_groups);
+            detail::configure_conv_function(conv, &src, &weights, &bias, &dst, info, weights_info, dilation, act_info,
+                                            num_groups);
         }
 
         // After calling configure, we appropriately set the correct quantization info and update ACL.
-        src.info()->set_quantization_info(QuantizationInfo(_quantization_info.scale(), _quantization_info.offset(), true));
-        weights.info()->set_quantization_info(QuantizationInfo(_weight_quantization_info.scale(), _weight_quantization_info.offset(), true));
+        src.info()->set_quantization_info(
+            QuantizationInfo(_quantization_info.scale(), _quantization_info.offset(), true));
+        weights.info()->set_quantization_info(
+            QuantizationInfo(_weight_quantization_info.scale(), _weight_quantization_info.offset(), true));
         dst.info()->set_quantization_info(QuantizationInfo(_dst_q_info.scale(), _dst_q_info.offset(), true));
 
         // propagate trough ACL the correct quantization info
@@ -493,12 +546,12 @@ protected:
         ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
         // Test "add padding after configure" behavior. This behavior should not affect the correctness
-        add_padding_x({ &src, &bias, &dst }, _data_layout);
+        add_padding_x({&src, &bias, &dst}, _data_layout);
 
         // Padding weights may affect code path in some backends
         if (padded_weights)
         {
-            add_padding_x({ &weights }, _data_layout);
+            add_padding_x({&weights}, _data_layout);
         }
 
         // Allocate tensors
@@ -517,7 +570,7 @@ protected:
         fill(AccessorType(weights), 1 + _hash);
         fill(AccessorType(bias), 2 + _hash);
 
-        if(_mixed_layout)
+        if (_mixed_layout)
         {
             mix_layout(conv, src, dst);
         }
@@ -529,8 +582,14 @@ protected:
         return dst;
     }
 
-    SimpleTensor<TO> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                                      const Size2D &dilation, const ActivationLayerInfo act_info, PaddingList pre_pad_layer = PaddingList({}))
+    SimpleTensor<TO> compute_reference(const TensorShape        &input_shape,
+                                       const TensorShape        &weights_shape,
+                                       const TensorShape        &bias_shape,
+                                       const TensorShape        &output_shape,
+                                       const PadStrideInfo      &info,
+                                       const Size2D             &dilation,
+                                       const ActivationLayerInfo act_info,
+                                       PaddingList               pre_pad_layer = PaddingList({}))
     {
         ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
 
@@ -542,27 +601,28 @@ protected:
         const DataType bias_dt    = _is_bfloat16 ? DataType::F32 : _bias_data_type;
 
         // Create reference
-        SimpleTensor<T>     src{ input_shape, src_dt, 1, _quantization_info };
-        SimpleTensor<TW>    weights{ weights_shape, weights_dt, 1, _weight_quantization_info };
-        SimpleTensor<TBias> bias{ bias_shape, bias_dt, 1, _quantization_info };
+        SimpleTensor<T>     src{input_shape, src_dt, 1, _quantization_info};
+        SimpleTensor<TW>    weights{weights_shape, weights_dt, 1, _weight_quantization_info};
+        SimpleTensor<TBias> bias{bias_shape, bias_dt, 1, _quantization_info};
 
         fill(src, 0 + _hash);
         fill(weights, 1 + _hash);
         fill(bias, 2 + _hash);
 
         // Fill with bfloat16 to perform the conversion and reduce the mismatches in the output
-        if(_is_bfloat16)
+        if (_is_bfloat16)
         {
             regularize_values(static_cast<void *>(src.data()), src.num_elements());
             regularize_values(static_cast<void *>(weights.data()), weights.num_elements());
         }
-        if(pre_pad_layer.size() > 0)
+        if (pre_pad_layer.size() > 0)
         {
             src = reference::pad_layer<T>(src, pre_pad_layer, PixelValue(0), PaddingMode::CONSTANT);
         }
 
-        auto conv = reference::convolution_layer<T,TW,TBias,TO>(src, weights, bias, output_shape, info, dilation, num_groups, _dst_q_info);
-        auto res=  (act_info.enabled()) ? reference::activation_layer<TO>(conv, act_info) : conv;
+        auto conv = reference::convolution_layer<T, TW, TBias, TO>(src, weights, bias, output_shape, info, dilation,
+                                                                   num_groups, _dst_q_info);
+        auto res  = (act_info.enabled()) ? reference::activation_layer<TO>(conv, act_info) : conv;
 
         return res;
     }
@@ -586,66 +646,120 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
-class ConvolutionValidationFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
+class ConvolutionValidationFixture
+    : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
-               DataLayout data_layout, ActivationLayerInfo act_info)
+    void setup(TensorShape         input_shape,
+               TensorShape         weights_shape,
+               TensorShape         bias_shape,
+               TensorShape         output_shape,
+               PadStrideInfo       info,
+               Size2D              dilation,
+               bool                reshape_weights,
+               DataType            data_type,
+               DataLayout          data_layout,
+               ActivationLayerInfo act_info)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
-                                                                                                 data_type, data_type, data_layout,
-                                                                                                 QuantizationInfo(), QuantizationInfo(), act_info, mixed_layout);
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, data_type,
+            data_layout, QuantizationInfo(), QuantizationInfo(), act_info, mixed_layout);
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
-class ConvolutionValidationPaddedWeightsFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
+class ConvolutionValidationPaddedWeightsFixture
+    : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
-               DataLayout data_layout)
+    void setup(TensorShape   input_shape,
+               TensorShape   weights_shape,
+               TensorShape   bias_shape,
+               TensorShape   output_shape,
+               PadStrideInfo info,
+               Size2D        dilation,
+               bool          reshape_weights,
+               DataType      data_type,
+               DataLayout    data_layout)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
-                                                                                                 data_type, data_type, data_layout,
-                                                                                                 QuantizationInfo(), QuantizationInfo(), ActivationLayerInfo(), mixed_layout, PaddingList({}), true);
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, data_type,
+            data_layout, QuantizationInfo(), QuantizationInfo(), ActivationLayerInfo(), mixed_layout, PaddingList({}),
+            true);
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
-class ConvolutionValidationWithPaddingFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
+class ConvolutionValidationWithPaddingFixture
+    : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
-               DataLayout data_layout, ActivationLayerInfo act_info, PaddingList pre_pad_layer = PaddingList({}))
+    void setup(TensorShape         input_shape,
+               TensorShape         weights_shape,
+               TensorShape         bias_shape,
+               TensorShape         output_shape,
+               PadStrideInfo       info,
+               Size2D              dilation,
+               bool                reshape_weights,
+               DataType            data_type,
+               DataLayout          data_layout,
+               ActivationLayerInfo act_info,
+               PaddingList         pre_pad_layer = PaddingList({}))
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
-                                                                                                 data_type, data_type, data_layout,
-                                                                                                 QuantizationInfo(), QuantizationInfo(), act_info, mixed_layout, pre_pad_layer);
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, data_type,
+            data_layout, QuantizationInfo(), QuantizationInfo(), act_info, mixed_layout, pre_pad_layer);
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false, typename TO = T>
-class ConvolutionValidationQuantizedFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T, TO>
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          bool mixed_layout = false,
+          typename TO       = T>
+class ConvolutionValidationQuantizedFixture
+    : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T, TO>
 {
 public:
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
-               DataLayout data_layout, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+    void setup(TensorShape         input_shape,
+               TensorShape         weights_shape,
+               TensorShape         bias_shape,
+               TensorShape         output_shape,
+               PadStrideInfo       info,
+               Size2D              dilation,
+               bool                reshape_weights,
+               DataType            data_type,
+               DataLayout          data_layout,
+               QuantizationInfo    quantization_info,
+               ActivationLayerInfo act_info)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T, TO>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
-                                                                                                 data_type, data_type, data_layout, quantization_info, quantization_info, act_info, mixed_layout);
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T, TO>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, data_type,
+            data_layout, quantization_info, quantization_info, act_info, mixed_layout);
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
-class ConvolutionValidationForUpdatedStaticQuantInfoAfterConfigureFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
+class ConvolutionValidationForUpdatedStaticQuantInfoAfterConfigureFixture
+    : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
-               DataLayout data_layout, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+    void setup(TensorShape         input_shape,
+               TensorShape         weights_shape,
+               TensorShape         bias_shape,
+               TensorShape         output_shape,
+               PadStrideInfo       info,
+               Size2D              dilation,
+               bool                reshape_weights,
+               DataType            data_type,
+               DataLayout          data_layout,
+               QuantizationInfo    quantization_info,
+               ActivationLayerInfo act_info)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
-                                                                                                 data_type, data_type, data_layout, quantization_info, quantization_info, act_info, mixed_layout,
-                                                                                                 PaddingList({}), false, true);
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, data_type,
+            data_layout, quantization_info, quantization_info, act_info, mixed_layout, PaddingList({}), false, true);
     }
 };
 
@@ -675,25 +789,35 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename TW>
-class ConvolutionValidationQuantizedPerChannelFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, TW>
+class ConvolutionValidationQuantizedPerChannelFixture
+    : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, TW>
 {
 public:
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
-               DataLayout data_layout, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataType weights_data_type)
+    void setup(TensorShape         input_shape,
+               TensorShape         weights_shape,
+               TensorShape         bias_shape,
+               TensorShape         output_shape,
+               PadStrideInfo       info,
+               Size2D              dilation,
+               bool                reshape_weights,
+               DataType            data_type,
+               DataLayout          data_layout,
+               QuantizationInfo    quantization_info,
+               ActivationLayerInfo act_info,
+               DataType            weights_data_type)
     {
         std::vector<float>                    weights_scales{};
         std::mt19937                          gen(library->seed());
         std::uniform_real_distribution<float> dis(0.01f, 1.f);
-        for(size_t i = 0; i < output_shape[2]; ++i)
+        for (size_t i = 0; i < output_shape[2]; ++i)
         {
             weights_scales.push_back(dis(gen));
         }
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, TW>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation,
-                                                                                                  reshape_weights, data_type, weights_data_type, data_layout,
-                                                                                                  quantization_info, QuantizationInfo(weights_scales), act_info);
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, TW>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type,
+            weights_data_type, data_layout, quantization_info, QuantizationInfo(weights_scales), act_info);
     }
 };
-
 
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 inline TensorInfo prepare_weights(const TensorInfo tensor_info, const arm_compute::WeightFormat weight_format)
@@ -702,10 +826,10 @@ inline TensorInfo prepare_weights(const TensorInfo tensor_info, const arm_comput
     ARM_COMPUTE_EXPECT(data_layout == DataLayout::NHWC, framework::LogLevel::ERRORS);
     const DataType    data_type    = tensor_info.data_type();
     const TensorShape tensor_shape = tensor_info.tensor_shape();
-    const int         N            = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES)]; // N=O
-    const int         H            = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT)];
-    const int         W            = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)];
-    const int         C            = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL)]; // C=I
+    const int N = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES)]; // N=O
+    const int H = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT)];
+    const int W = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)];
+    const int C = tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL)]; // C=I
 
     const int interleave_by = arm_compute::interleave_by(weight_format);
     const int block_by      = arm_compute::block_by(weight_format);
@@ -724,8 +848,8 @@ inline TensorInfo prepare_weights(const TensorInfo tensor_info, const arm_comput
     const TensorShape TS(Ip, W, H, Op);
 
     TensorInfo new_tensor_info = tensor_info;
-    new_tensor_info.init(TS, 1 /*num_channels, deprecated*/, data_type, strides_in_bytes,
-        offset_first_element_in_bytes, total_size_in_bytes);
+    new_tensor_info.init(TS, 1 /*num_channels, deprecated*/, data_type, strides_in_bytes, offset_first_element_in_bytes,
+                         total_size_in_bytes);
     return new_tensor_info;
 }
 
@@ -739,25 +863,27 @@ inline void rearrange_data(const AccessorType src, AccessorType dst, const arm_c
     const TensorShape src_tensor_shape = src.shape();
     const DataLayout  data_layout      = src.data_layout();
     ARM_COMPUTE_EXPECT(data_layout == DataLayout::NHWC, framework::LogLevel::ERRORS);
-    const unsigned int O  = src_tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES)]; // N=O
-    const unsigned int H  = src_tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT)];
-    const unsigned int W  = src_tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)];
-    const unsigned int I  = src_tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL)]; // C=I
-    const unsigned int Ip = arm_gemm::roundup<unsigned int>(I, block_by);                                                 // C'=I'
-    const unsigned int Op = arm_gemm::roundup<unsigned int>(O, interleave_by);                                            // N'=O'
+    const unsigned int O =
+        src_tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES)]; // N=O
+    const unsigned int H = src_tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT)];
+    const unsigned int W = src_tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)];
+    const unsigned int I =
+        src_tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL)]; // C=I
+    const unsigned int Ip = arm_gemm::roundup<unsigned int>(I, block_by);                             // C'=I'
+    const unsigned int Op = arm_gemm::roundup<unsigned int>(O, interleave_by);                        // N'=O'
 
     ARM_COMPUTE_EXPECT_EQUAL(Op * H * W * Ip, (unsigned)dst.num_elements(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(src.num_elements() <= dst.num_elements(), framework::LogLevel::ERRORS);
 
     const ScalarType *src_ptr = reinterpret_cast<const ScalarType *>(src.data());
     ScalarType       *dst_ptr = reinterpret_cast<ScalarType *>(dst.data());
-    for(unsigned i = 0; i < I; ++i)
-        for(unsigned w = 0; w < W; ++w)
-            for(unsigned h = 0; h < H; ++h)
-                for(unsigned o = 0; o < O; ++o)
+    for (unsigned i = 0; i < I; ++i)
+        for (unsigned w = 0; w < W; ++w)
+            for (unsigned h = 0; h < H; ++h)
+                for (unsigned o = 0; o < O; ++o)
                 {
                     ScalarType src_element;
-                    switch(data_layout)
+                    switch (data_layout)
                     {
                         case DataLayout::NHWC:
                         {
@@ -775,24 +901,30 @@ inline void rearrange_data(const AccessorType src, AccessorType dst, const arm_c
                     const int x2      = std::floor((float)i / block_by);
                     const int x1      = o % interleave_by;
                     const int x0      = i % block_by;
-                    unsigned  dst_idx = x5 * H * W * Ip * interleave_by
-                                        + x4 * W * Ip * interleave_by
-                                        + x3 * Ip * interleave_by
-                                        + x2 * interleave_by * block_by
-                                        + x1 * block_by
-                                        + x0;
+                    unsigned  dst_idx = x5 * H * W * Ip * interleave_by + x4 * W * Ip * interleave_by +
+                                       x3 * Ip * interleave_by + x2 * interleave_by * block_by + x1 * block_by + x0;
                     dst_ptr[dst_idx] = src_element;
                 }
 }
 
-template <typename ConvolutionFunction, typename TensorClass, typename AccessorType, typename ScalarType, bool enable_fast_math>
+template <typename ConvolutionFunction,
+          typename TensorClass,
+          typename AccessorType,
+          typename ScalarType,
+          bool enable_fast_math>
 class VariableWeightsFixtureBaseClass : public framework::Fixture
 {
 public:
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, DataLayout data_layout,
+    void setup(TensorShape    input_shape,
+               TensorShape    weights_shape,
+               TensorShape    bias_shape,
+               TensorShape    output_shape,
+               PadStrideInfo  info,
+               Size2D         dilation,
+               DataLayout     data_layout,
                const DataType data_type)
     {
-        if(std::is_same<TensorClass, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorClass, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -817,11 +949,11 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -837,12 +969,20 @@ protected:
     }
 
 private:
-    virtual void configure_and_execute_kernel(TensorInfo src_tensor_info, TensorInfo weight_tensor_info, TensorInfo bias_tensor_info, TensorInfo dst_tensor_info, const WeightsInfo weights_info,
+    virtual void configure_and_execute_kernel(TensorInfo           src_tensor_info,
+                                              TensorInfo           weight_tensor_info,
+                                              TensorInfo           bias_tensor_info,
+                                              TensorInfo           dst_tensor_info,
+                                              const WeightsInfo    weights_info,
                                               const PadStrideInfo &conv_info,
                                               const Size2D        &dilation) = 0;
 
-    void compute_target(TensorShape input_shape, TensorShape weights_shape, const TensorShape &bias_shape, TensorShape output_shape, const PadStrideInfo &conv_info,
-                        const Size2D &dilation)
+    void compute_target(TensorShape          input_shape,
+                        TensorShape          weights_shape,
+                        const TensorShape   &bias_shape,
+                        TensorShape          output_shape,
+                        const PadStrideInfo &conv_info,
+                        const Size2D        &dilation)
     {
         // The dataset is always in NCHW format - we need to make C the
         // innermost dimension because the fixed-format kernel work only
@@ -855,54 +995,77 @@ private:
         const auto bias_tensor_info   = TensorInfo(bias_shape, 1, _data_type, _data_layout);
         auto       dst_tensor_info    = TensorInfo(output_shape, 1, _data_type, _data_layout);
 
-        const int kernel_height = weights_shape[get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT)];
-        const int kernel_width  = weights_shape[get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH)];
-        const int num_kernels   = weights_shape[get_data_layout_dimension_index(_data_layout, DataLayoutDimension::BATCHES)];
+        const int kernel_height =
+            weights_shape[get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT)];
+        const int kernel_width =
+            weights_shape[get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH)];
+        const int num_kernels =
+            weights_shape[get_data_layout_dimension_index(_data_layout, DataLayoutDimension::BATCHES)];
 
-        const WeightsInfo query_weights_info(/*reshape_weights*/ false, kernel_width, kernel_height, num_kernels, false, arm_compute::WeightFormat::ANY);
-        const bool        kernel_found = bool(ConvolutionFunction::has_opt_impl(_computed_weight_format, &src_tensor_info, &weight_tensor_info,
-                                                                                &bias_tensor_info, &dst_tensor_info, conv_info, query_weights_info));
+        const WeightsInfo query_weights_info(/*reshape_weights*/ false, kernel_width, kernel_height, num_kernels, false,
+                                             arm_compute::WeightFormat::ANY);
+        const bool        kernel_found =
+            bool(ConvolutionFunction::has_opt_impl(_computed_weight_format, &src_tensor_info, &weight_tensor_info,
+                                                   &bias_tensor_info, &dst_tensor_info, conv_info, query_weights_info));
         // Make surethat the setup founds a fixed-format kernel as requested by the test case.
         ARM_COMPUTE_EXPECT(kernel_found, framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(arm_compute::is_fixed_format(_computed_weight_format), framework::LogLevel::ERRORS);
 
-        const WeightsInfo weights_info(/*reshape_weights*/ false, kernel_width, kernel_height, num_kernels, false, _computed_weight_format);
-        configure_and_execute_kernel(src_tensor_info, weight_tensor_info, bias_tensor_info, dst_tensor_info, weights_info, conv_info,
-                                     dilation);
+        const WeightsInfo weights_info(/*reshape_weights*/ false, kernel_width, kernel_height, num_kernels, false,
+                                       _computed_weight_format);
+        configure_and_execute_kernel(src_tensor_info, weight_tensor_info, bias_tensor_info, dst_tensor_info,
+                                     weights_info, conv_info, dilation);
     }
-    void compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                           const Size2D &dilation)
+    void compute_reference(const TensorShape   &input_shape,
+                           const TensorShape   &weights_shape,
+                           const TensorShape   &bias_shape,
+                           const TensorShape   &output_shape,
+                           const PadStrideInfo &info,
+                           const Size2D        &dilation)
     {
-        ARM_COMPUTE_UNUSED(input_shape, weights_shape, bias_shape, output_shape, info,
-                           dilation);
+        ARM_COMPUTE_UNUSED(input_shape, weights_shape, bias_shape, output_shape, info, dilation);
 
         // Create reference
-        SimpleTensor<ScalarType> src{ input_shape, _data_type };
-        SimpleTensor<ScalarType> weights{ weights_shape, _data_type };
-        SimpleTensor<ScalarType> bias{ bias_shape, _data_type };
+        SimpleTensor<ScalarType> src{input_shape, _data_type};
+        SimpleTensor<ScalarType> weights{weights_shape, _data_type};
+        SimpleTensor<ScalarType> bias{bias_shape, _data_type};
         fill(src, 0);
         fill(bias, 1);
         fill(weights, 3);
-        _reference = reference::convolution_layer<ScalarType>(src, weights, bias, output_shape, info, dilation, 1 /*num_groups*/);
+        _reference = reference::convolution_layer<ScalarType>(src, weights, bias, output_shape, info, dilation,
+                                                              1 /*num_groups*/);
     }
     DataLayout _data_layout{};
     DataType   _data_type{};
 
 protected:
     std::unique_ptr<ConvolutionFunction> conv{};
-    arm_compute::WeightFormat            _computed_weight_format{ arm_compute::WeightFormat::UNSPECIFIED };
+    arm_compute::WeightFormat            _computed_weight_format{arm_compute::WeightFormat::UNSPECIFIED};
     TensorClass                          _target{};
     SimpleTensor<ScalarType>             _reference{};
 };
 
-template <typename ConvolutionFunction, typename TensorClass, typename AccessorType, typename ScalarType, bool enable_fast_math>
-class VariableWeightsFixture : public VariableWeightsFixtureBaseClass<ConvolutionFunction, TensorClass, AccessorType, ScalarType, enable_fast_math>
+template <typename ConvolutionFunction,
+          typename TensorClass,
+          typename AccessorType,
+          typename ScalarType,
+          bool enable_fast_math>
+class VariableWeightsFixture : public VariableWeightsFixtureBaseClass<ConvolutionFunction,
+                                                                      TensorClass,
+                                                                      AccessorType,
+                                                                      ScalarType,
+                                                                      enable_fast_math>
 {
-    void configure_and_execute_kernel(TensorInfo src_tensor_info, TensorInfo weight_tensor_info, TensorInfo bias_tensor_info, TensorInfo dst_tensor_info, const WeightsInfo weights_info,
+    void configure_and_execute_kernel(TensorInfo           src_tensor_info,
+                                      TensorInfo           weight_tensor_info,
+                                      TensorInfo           bias_tensor_info,
+                                      TensorInfo           dst_tensor_info,
+                                      const WeightsInfo    weights_info,
                                       const PadStrideInfo &conv_info,
                                       const Size2D        &dilation)
     {
-        this->conv->configure(&src_tensor_info, &weight_tensor_info, &bias_tensor_info, &dst_tensor_info, conv_info, weights_info, dilation, ActivationLayerInfo(), enable_fast_math);
+        this->conv->configure(&src_tensor_info, &weight_tensor_info, &bias_tensor_info, &dst_tensor_info, conv_info,
+                              weights_info, dilation, ActivationLayerInfo(), enable_fast_math);
 
         // Allocate input tensors
         auto             src                 = create_tensor<TensorClass>(src_tensor_info);
@@ -924,12 +1087,17 @@ class VariableWeightsFixture : public VariableWeightsFixtureBaseClass<Convolutio
 
         // First run
         this->fill(AccessorType(weights_original), 2);
-        rearrange_data<ScalarType, AccessorType>(AccessorType(weights_original), AccessorType(weights_transformed), this->_computed_weight_format);
-        ITensorPack run_pack{ { TensorType::ACL_SRC_0, &src }, { TensorType::ACL_SRC_1, &weights_transformed }, { TensorType::ACL_SRC_2, &bias }, { TensorType::ACL_DST, &(this->_target) } };
+        rearrange_data<ScalarType, AccessorType>(AccessorType(weights_original), AccessorType(weights_transformed),
+                                                 this->_computed_weight_format);
+        ITensorPack run_pack{{TensorType::ACL_SRC_0, &src},
+                             {TensorType::ACL_SRC_1, &weights_transformed},
+                             {TensorType::ACL_SRC_2, &bias},
+                             {TensorType::ACL_DST, &(this->_target)}};
         this->conv->run(run_pack);
         // Second run, with new weights
         this->fill(AccessorType(weights_original), 3);
-        rearrange_data<ScalarType, AccessorType>(AccessorType(weights_original), AccessorType(weights_transformed), this->_computed_weight_format);
+        rearrange_data<ScalarType, AccessorType>(AccessorType(weights_original), AccessorType(weights_transformed),
+                                                 this->_computed_weight_format);
         this->conv->run(run_pack);
         src.allocator()->free();
         weights_original.allocator()->free();
@@ -938,10 +1106,22 @@ class VariableWeightsFixture : public VariableWeightsFixtureBaseClass<Convolutio
     }
 };
 
-template <typename ConvolutionFunction, typename TensorClass, typename AccessorType, typename ScalarType, bool enable_fast_math>
-class VariableWeightsFixtureNEInterface : public VariableWeightsFixtureBaseClass<ConvolutionFunction, TensorClass, AccessorType, ScalarType, enable_fast_math>
+template <typename ConvolutionFunction,
+          typename TensorClass,
+          typename AccessorType,
+          typename ScalarType,
+          bool enable_fast_math>
+class VariableWeightsFixtureNEInterface : public VariableWeightsFixtureBaseClass<ConvolutionFunction,
+                                                                                 TensorClass,
+                                                                                 AccessorType,
+                                                                                 ScalarType,
+                                                                                 enable_fast_math>
 {
-    void configure_and_execute_kernel(TensorInfo src_tensor_info, TensorInfo weight_tensor_info, TensorInfo bias_tensor_info, TensorInfo dst_tensor_info, const WeightsInfo weights_info,
+    void configure_and_execute_kernel(TensorInfo           src_tensor_info,
+                                      TensorInfo           weight_tensor_info,
+                                      TensorInfo           bias_tensor_info,
+                                      TensorInfo           dst_tensor_info,
+                                      const WeightsInfo    weights_info,
                                       const PadStrideInfo &conv_info,
                                       const Size2D        &dilation)
     {
@@ -958,18 +1138,21 @@ class VariableWeightsFixtureNEInterface : public VariableWeightsFixtureBaseClass
         // Allocate destination tensor
         this->_target = create_tensor<TensorClass>(dst_tensor_info);
         this->_target.allocator()->allocate();
-        this->conv->configure(&src, &weights_transformed, &bias, &(this->_target), conv_info, weights_info, dilation, ActivationLayerInfo(), enable_fast_math);
+        this->conv->configure(&src, &weights_transformed, &bias, &(this->_target), conv_info, weights_info, dilation,
+                              ActivationLayerInfo(), enable_fast_math);
         // Prepare source and biases that are left unchanged.
         this->fill(AccessorType(src), 0);
         this->fill(AccessorType(bias), 1);
 
         // First run
         this->fill(AccessorType(weights_original), 2);
-        rearrange_data<ScalarType, AccessorType>(AccessorType(weights_original), AccessorType(weights_transformed), this->_computed_weight_format);
+        rearrange_data<ScalarType, AccessorType>(AccessorType(weights_original), AccessorType(weights_transformed),
+                                                 this->_computed_weight_format);
         this->conv->run();
         // Second run, with new weights
         this->fill(AccessorType(weights_original), 3);
-        rearrange_data<ScalarType, AccessorType>(AccessorType(weights_original), AccessorType(weights_transformed), this->_computed_weight_format);
+        rearrange_data<ScalarType, AccessorType>(AccessorType(weights_original), AccessorType(weights_transformed),
+                                                 this->_computed_weight_format);
         this->conv->run();
         src.allocator()->free();
         weights_original.allocator()->free();
@@ -984,7 +1167,7 @@ class HasOptImplFixture : public framework::Fixture
 public:
     void setup(DataType data_type, arm_compute::WeightFormat query_weight_format)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -992,19 +1175,20 @@ public:
 
         auto              conv        = std::make_unique<ConvolutionClass>();
         const auto        src_info    = TensorInfo(TensorShape(56U, 56U, 64U), 1, data_type, DataLayout::NHWC);
-        const auto        weight_info = TensorInfo(TensorShape(64, 3U, 3U, 64U), 1, enable_fast_math ? DataType::BFLOAT16 : data_type, DataLayout::NHWC);
+        const auto        weight_info = TensorInfo(TensorShape(64, 3U, 3U, 64U), 1,
+                                            enable_fast_math ? DataType::BFLOAT16 : data_type, DataLayout::NHWC);
         const auto        bias_info   = TensorInfo(TensorShape(64U), 1, data_type, DataLayout::NHWC);
         auto              dst_info    = TensorInfo(TensorShape(56U, 56U, 64U), 1, data_type, DataLayout::NHWC);
         const auto        conv_info   = PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::FLOOR);
         const WeightsInfo weights_info(false, 3U, 3U, 64U, false, query_weight_format);
-        _kernel_found = bool(ConvolutionClass::has_opt_impl(_computed_weight_format, &src_info, &weight_info,
-                                                            &bias_info, &dst_info, conv_info, weights_info,
-                                                            Size2D(1U, 1U) /*dilation*/, ActivationLayerInfo() /*act_info*/, enable_fast_math));
+        _kernel_found = bool(ConvolutionClass::has_opt_impl(
+            _computed_weight_format, &src_info, &weight_info, &bias_info, &dst_info, conv_info, weights_info,
+            Size2D(1U, 1U) /*dilation*/, ActivationLayerInfo() /*act_info*/, enable_fast_math));
     }
 
 protected:
-    bool                      _kernel_found{ false };
-    arm_compute::WeightFormat _computed_weight_format{ arm_compute::WeightFormat::UNSPECIFIED };
+    bool                      _kernel_found{false};
+    arm_compute::WeightFormat _computed_weight_format{arm_compute::WeightFormat::UNSPECIFIED};
 };
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 

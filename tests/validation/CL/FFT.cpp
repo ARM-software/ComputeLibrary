@@ -26,13 +26,14 @@
 #include "arm_compute/runtime/CL/functions/CLFFT1D.h"
 #include "arm_compute/runtime/CL/functions/CLFFT2D.h"
 #include "arm_compute/runtime/CL/functions/CLFFTConvolutionLayer.h"
+
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/SmallConvolutionLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/FFTFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -43,27 +44,21 @@ namespace validation
 using framework::dataset::make;
 namespace
 {
-const auto data_types = make("DataType", { DataType::F32 });
-const auto shapes_1d  = make("TensorShape", { TensorShape(2U, 2U, 3U), TensorShape(3U, 2U, 3U),
-                                                                  TensorShape(4U, 2U, 3U), TensorShape(5U, 2U, 3U),
-                                                                  TensorShape(7U, 2U, 3U), TensorShape(8U, 2U, 3U),
-                                                                  TensorShape(9U, 2U, 3U), TensorShape(25U, 2U, 3U),
-                                                                  TensorShape(49U, 2U, 3U), TensorShape(64U, 2U, 3U),
-                                                                  TensorShape(16U, 2U, 3U), TensorShape(32U, 2U, 3U),
-                                                                  TensorShape(96U, 2U, 2U)
-                                                                });
-const auto shapes_2d = make("TensorShape", { TensorShape(2U, 2U, 3U), TensorShape(3U, 6U, 3U),
-                                                                 TensorShape(4U, 5U, 3U), TensorShape(5U, 7U, 3U),
-                                                                 TensorShape(7U, 25U, 3U), TensorShape(8U, 2U, 3U),
-                                                                 TensorShape(9U, 16U, 3U), TensorShape(25U, 32U, 3U),
-                                                                 TensorShape(192U, 128U, 2U)
-                                                               });
+const auto data_types = make("DataType", {DataType::F32});
+const auto shapes_1d =
+    make("TensorShape",
+         {TensorShape(2U, 2U, 3U), TensorShape(3U, 2U, 3U), TensorShape(4U, 2U, 3U), TensorShape(5U, 2U, 3U),
+          TensorShape(7U, 2U, 3U), TensorShape(8U, 2U, 3U), TensorShape(9U, 2U, 3U), TensorShape(25U, 2U, 3U),
+          TensorShape(49U, 2U, 3U), TensorShape(64U, 2U, 3U), TensorShape(16U, 2U, 3U), TensorShape(32U, 2U, 3U),
+          TensorShape(96U, 2U, 2U)});
+const auto shapes_2d = make("TensorShape",
+                            {TensorShape(2U, 2U, 3U), TensorShape(3U, 6U, 3U), TensorShape(4U, 5U, 3U),
+                             TensorShape(5U, 7U, 3U), TensorShape(7U, 25U, 3U), TensorShape(8U, 2U, 3U),
+                             TensorShape(9U, 16U, 3U), TensorShape(25U, 32U, 3U), TensorShape(192U, 128U, 2U)});
 
-const auto ActivationFunctionsSmallDataset = make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
-});
+const auto ActivationFunctionsSmallDataset =
+    make("ActivationInfo",
+         {ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)});
 
 RelativeTolerance<float> tolerance_f32(0.1f);       /**< Relative tolerance value for FP32 */
 RelativeTolerance<half>  tolerance_f16(half(0.1f)); /**< Relative tolerance value for FP16 */
@@ -107,14 +102,20 @@ using CLFFT1DFixture = FFTValidationFixture<CLTensor, CLAccessor, CLFFT1D, FFT1D
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFFT1DFixture<float>, framework::DatasetMode::ALL, combine(shapes_1d, make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLFFT1DFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(shapes_1d, make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num_f32);
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFFT1DFixture<half>, framework::DatasetMode::ALL, combine(shapes_1d, make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLFFT1DFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(shapes_1d, make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num_f16);
@@ -154,14 +155,20 @@ using CLFFT2DFixture = FFTValidationFixture<CLTensor, CLAccessor, CLFFT2D, FFT2D
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFFT2DFixture<float>, framework::DatasetMode::ALL, combine(shapes_2d, make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLFFT2DFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(shapes_2d, make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num_f32);
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFFT2DFixture<half>, framework::DatasetMode::ALL, combine(shapes_2d, make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLFFT2DFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(shapes_2d, make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num_f16);
@@ -175,32 +182,42 @@ TEST_SUITE(FFTConvolutionLayer)
 template <typename T>
 using CLFFTConvolutionLayerFixture = FFTConvolutionValidationFixture<CLTensor, CLAccessor, CLFFTConvolutionLayer, T>;
 template <typename T>
-using CLFFTConvolutionLayerMixedDataLayoutFixture = FFTConvolutionValidationFixture<CLTensor, CLAccessor, CLFFTConvolutionLayer, T, true>;
+using CLFFTConvolutionLayerMixedDataLayoutFixture =
+    FFTConvolutionValidationFixture<CLTensor, CLAccessor, CLFFTConvolutionLayer, T, true>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFFTConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFFTConvolutionLayerDataset(),
-                                                                                                                 make("DataType", DataType::F32),
-                                                                                                                 make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                                 ActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLFFTConvolutionLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallFFTConvolutionLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               ActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, CLFFTConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFFTConvolutionLayerDataset(),
-                                                                                                                 make("DataType", DataType::F32),
-                                                                                                                 make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                                 ActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout,
+                       CLFFTConvolutionLayerMixedDataLayoutFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallFFTConvolutionLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               ActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num_f32);
 }
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFFTConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFFTConvolutionLayerDataset(),
-                                                                                                                        make("DataType", DataType::F16),
-                                                                                                                        make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                                ActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLFFTConvolutionLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallFFTConvolutionLayerDataset(),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               ActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num_f16);

@@ -22,17 +22,18 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Version.h"
+
 #include "support/StringSupport.h"
 #include "tests/AssetsLibrary.h"
+#include "tests/framework/command_line/CommonOptions.h"
 #include "tests/framework/DatasetModes.h"
 #include "tests/framework/Exceptions.h"
 #include "tests/framework/Framework.h"
+#include "tests/framework/instruments/Instruments.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/ParametersLibrary.h"
-#include "tests/framework/Profiler.h"
-#include "tests/framework/command_line/CommonOptions.h"
-#include "tests/framework/instruments/Instruments.h"
 #include "tests/framework/printers/Printers.h"
+#include "tests/framework/Profiler.h"
 #include "tests/instruments/Helpers.h"
 #include "utils/command_line/CommandLineOptions.h"
 #include "utils/command_line/CommandLineParser.h"
@@ -43,9 +44,11 @@
 #include "arm_compute/runtime/CL/CLHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+
 #include "utils/TypePrinter.h"
 #endif /* ARM_COMPUTE_CL */
 #include "arm_compute/runtime/Scheduler.h"
+
 #include "src/common/cpuinfo/CpuModel.h"
 
 #include <fstream>
@@ -63,7 +66,7 @@ namespace
 std::string command_line(int argc, char **argv)
 {
     std::stringstream ss;
-    for(int i = 0; i < argc; i++)
+    for (int i = 0; i < argc; i++)
     {
         ss << argv[i] << " ";
     }
@@ -100,17 +103,13 @@ int main(int argc, char **argv)
 
     utils::CommandLineParser parser;
 
-    std::set<framework::DatasetMode> allowed_modes
-    {
-        framework::DatasetMode::DISABLED,
-        framework::DatasetMode::PRECOMMIT,
-        framework::DatasetMode::NIGHTLY,
-        framework::DatasetMode::ALL
-    };
+    std::set<framework::DatasetMode> allowed_modes{framework::DatasetMode::DISABLED, framework::DatasetMode::PRECOMMIT,
+                                                   framework::DatasetMode::NIGHTLY, framework::DatasetMode::ALL};
 
     framework::CommonOptions options(parser);
 
-    auto dataset_mode = parser.add_option<utils::EnumOption<framework::DatasetMode>>("mode", allowed_modes, framework::DatasetMode::PRECOMMIT);
+    auto dataset_mode = parser.add_option<utils::EnumOption<framework::DatasetMode>>("mode", allowed_modes,
+                                                                                     framework::DatasetMode::PRECOMMIT);
     dataset_mode->set_help("For managed datasets select which group to use");
     auto filter = parser.add_option<utils::SimpleOption<std::string>>("filter", ".*");
     filter->set_help("Regular expression to select test cases");
@@ -119,7 +118,8 @@ int main(int argc, char **argv)
     auto stop_on_error = parser.add_option<utils::ToggleOption>("stop-on-error");
     stop_on_error->set_help("Stop execution after the first failed test (useful for debugging)");
     auto seed = parser.add_option<utils::SimpleOption<std::random_device::result_type>>("seed");
-    seed->set_help("Global seed for random number generation. When not set, each test iteration will use different random seed");
+    seed->set_help(
+        "Global seed for random number generation. When not set, each test iteration will use different random seed");
     auto list_tests = parser.add_option<utils::ToggleOption>("list-tests", false);
     list_tests->set_help("List all test names");
     auto test_instruments = parser.add_option<utils::ToggleOption>("test-instruments", false);
@@ -134,14 +134,11 @@ int main(int argc, char **argv)
     auto enable_tuner = parser.add_option<utils::ToggleOption>("enable-tuner");
     enable_tuner->set_help("Enable OpenCL dynamic tuner");
 
-    const std::set<CLTunerMode> supported_tuner_modes
-    {
-        CLTunerMode::EXHAUSTIVE,
-        CLTunerMode::NORMAL,
-        CLTunerMode::RAPID
-    };
-    auto tuner_mode = parser.add_option<utils::EnumOption<CLTunerMode>>("tuner-mode", supported_tuner_modes, CLTunerMode::NORMAL);
-    tuner_mode->set_help("Configures the time taken by the tuner to tune. Slow tuner produces the most performant LWS configuration");
+    const std::set<CLTunerMode> supported_tuner_modes{CLTunerMode::EXHAUSTIVE, CLTunerMode::NORMAL, CLTunerMode::RAPID};
+    auto                        tuner_mode =
+        parser.add_option<utils::EnumOption<CLTunerMode>>("tuner-mode", supported_tuner_modes, CLTunerMode::NORMAL);
+    tuner_mode->set_help(
+        "Configures the time taken by the tuner to tune. Slow tuner produces the most performant LWS configuration");
 
     auto tuner_file = parser.add_option<utils::SimpleOption<std::string>>("tuner-file", "");
     tuner_file->set_help("File to load/save CLTuner values");
@@ -154,16 +151,18 @@ int main(int argc, char **argv)
     auto cooldown_sec = parser.add_option<utils::SimpleOption<float>>("delay", -1.f);
     cooldown_sec->set_help("Delay to add between test executions in seconds");
     auto configure_only = parser.add_option<utils::ToggleOption>("configure-only", false);
-    configure_only->set_help("Only configures kernels, without allocating, running or validating. Needed in order to validate OpenCL kernel run-time compilation, without necessarily running or validating the kernels' execution");
+    configure_only->set_help(
+        "Only configures kernels, without allocating, running or validating. Needed in order to validate OpenCL kernel "
+        "run-time compilation, without necessarily running or validating the kernels' execution");
     auto print_iterations_figures = parser.add_option<utils::ToggleOption>("print_iterations_figures", false);
-    print_iterations_figures->set_help("When using instruments, this option prints the time taken by each iteration of the test");
-
+    print_iterations_figures->set_help(
+        "When using instruments, this option prints the time taken by each iteration of the test");
 
     try
     {
         parser.parse(argc, argv);
 
-        if(options.help->is_set() && options.help->value())
+        if (options.help->is_set() && options.help->value())
         {
             parser.print_help(argv[0]);
             return 0;
@@ -188,15 +187,16 @@ int main(int argc, char **argv)
 #ifdef ARM_COMPUTE_CL
         CLTuner                cl_tuner(false);
         CLGEMMHeuristicsHandle gemm_heuristics;
-        if(opencl_is_available())
+        if (opencl_is_available())
         {
             auto ctx_dev_err = create_opencl_context_and_device(CLBackendType::Native);
             ARM_COMPUTE_ERROR_ON_MSG(std::get<2>(ctx_dev_err) != CL_SUCCESS, "Failed to create OpenCL context");
             gemm_heuristics.reload_from_file(mlgo_file->value());
-            CLScheduler::get().default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), &cl_tuner, &gemm_heuristics);
+            CLScheduler::get().default_init_with_context(std::get<1>(ctx_dev_err), std::get<0>(ctx_dev_err), &cl_tuner,
+                                                         &gemm_heuristics);
         }
 
-        if(enable_tuner->is_set())
+        if (enable_tuner->is_set())
         {
             cl_tuner.set_tune_new_kernels(enable_tuner->value());
 
@@ -204,38 +204,38 @@ int main(int argc, char **argv)
             cl_tuner.set_tuner_mode(tuner_mode->value());
 
             // If that's the first run then the file won't exist yet
-            if(file_exists(tuner_file->value()))
+            if (file_exists(tuner_file->value()))
             {
                 cl_tuner.load_from_file(tuner_file->value());
             }
         }
-        else if(!tuner_file->value().empty())
+        else if (!tuner_file->value().empty())
         {
             //If we're not tuning and the file doesn't exist then we should raise an error:
             cl_tuner.load_from_file(tuner_file->value());
         }
 #endif /* ARM_COMPUTE_CL */
-        if(options.log_level->value() > framework::LogLevel::NONE)
+        if (options.log_level->value() > framework::LogLevel::NONE)
         {
-            for(auto &p : printers)
+            for (auto &p : printers)
             {
                 p->print_global_header();
             }
         }
 
-        const std::random_device::result_type seed_value = (seed->is_set()) ? seed->value(): std::random_device()();
-        const bool randomize_seeds = !seed->is_set() && (options.iterations->value() > 1);
+        const std::random_device::result_type seed_value = (seed->is_set()) ? seed->value() : std::random_device()();
+        const bool                            randomize_seeds = !seed->is_set() && (options.iterations->value() > 1);
 
-        if(options.log_level->value() >= framework::LogLevel::CONFIG)
+        if (options.log_level->value() >= framework::LogLevel::CONFIG)
         {
-            for(auto &p : printers)
+            for (auto &p : printers)
             {
                 p->print_entry("Version", build_information());
                 p->print_entry("CommandLine", command_line(argc, argv));
                 auto seed_str = randomize_seeds ? "Dynamic" : support::cpp11::to_string(seed_value);
                 p->print_entry("Seed", seed_str);
 #ifdef ARM_COMPUTE_CL
-                if(opencl_is_available())
+                if (opencl_is_available())
                 {
                     p->print_entry("CL_DEVICE_VERSION", CLKernelLibrary::get().get_device_version());
                 }
@@ -260,7 +260,7 @@ int main(int argc, char **argv)
                 p->print_entry("cpu_has_i8mm", support::cpp11::to_string(cpu_info.has_i8mm()));
                 p->print_entry("cpu_has_fhm", support::cpp11::to_string(cpu_info.has_fhm()));
 
-                for(unsigned int j = 0; j < num_cpus; ++j)
+                for (unsigned int j = 0; j < num_cpus; ++j)
                 {
                     const CPUModel model = cpu_info.get_cpu_model(j);
                     p->print_entry("CPU" + support::cpp11::to_string(j), cpuinfo::cpu_model_to_string(model));
@@ -281,20 +281,20 @@ int main(int argc, char **argv)
 
         // Initialize framework
         framework::FrameworkConfig fconfig;
-        fconfig.instruments     = options.instruments->value();
-        fconfig.name_filter     = filter->value();
-        fconfig.id_filter       = filter_id->value();
-        fconfig.num_iterations  = options.iterations->value();
-        fconfig.mode            = dataset_mode->value();
-        fconfig.log_level       = options.log_level->value();
-        fconfig.cooldown_sec    = cooldown_sec->value();
-        fconfig.configure_only  = configure_only->value();
-        fconfig.print_rerun_cmd = print_rerun_command->value();
-        fconfig.seed            = seed_value;
-        fconfig.print_iterations= print_iterations_figures->value();
+        fconfig.instruments      = options.instruments->value();
+        fconfig.name_filter      = filter->value();
+        fconfig.id_filter        = filter_id->value();
+        fconfig.num_iterations   = options.iterations->value();
+        fconfig.mode             = dataset_mode->value();
+        fconfig.log_level        = options.log_level->value();
+        fconfig.cooldown_sec     = cooldown_sec->value();
+        fconfig.configure_only   = configure_only->value();
+        fconfig.print_rerun_cmd  = print_rerun_command->value();
+        fconfig.seed             = seed_value;
+        fconfig.print_iterations = print_iterations_figures->value();
         framework.init(fconfig);
 
-        for(auto &p : printers)
+        for (auto &p : printers)
         {
             framework.add_printer(p.get());
         }
@@ -303,18 +303,20 @@ int main(int argc, char **argv)
         framework.set_error_on_missing_assets(error_on_missing_assets->value());
         if (randomize_seeds)
         {
-            framework.set_prepare_function([&] (){
+            framework.set_prepare_function(
+                [&]()
+                {
                     std::random_device::result_type seed = std::random_device()();
                     library->set_seed(seed);
                     framework.set_seed(seed);
-            });
+                });
         }
 
         bool success = true;
 
-        if(list_tests->value())
+        if (list_tests->value())
         {
-            for(auto &p : printers)
+            for (auto &p : printers)
             {
                 p->print_list_tests(framework.test_infos());
                 p->print_global_footer();
@@ -323,12 +325,12 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        if(test_instruments->value())
+        if (test_instruments->value())
         {
             framework::Profiler profiler = framework.get_profiler();
             profiler.start();
             profiler.stop();
-            for(auto &p : printers)
+            for (auto &p : printers)
             {
                 p->print_measurements(profiler.measurements());
             }
@@ -339,26 +341,26 @@ int main(int argc, char **argv)
         library       = std::make_unique<AssetsLibrary>(assets->value(), seed_value);
         fixed_library = std::make_unique<AssetsLibrary>(assets->value(), fixed_seed);
 
-        if(!parser.validate())
+        if (!parser.validate())
         {
             return 1;
         }
 
         success = framework.run();
 
-        if(options.log_level->value() > framework::LogLevel::NONE)
+        if (options.log_level->value() > framework::LogLevel::NONE)
         {
-            for(auto &p : printers)
+            for (auto &p : printers)
             {
                 p->print_global_footer();
             }
         }
 
 #ifdef ARM_COMPUTE_CL
-        if(opencl_is_available())
+        if (opencl_is_available())
         {
             CLScheduler::get().sync();
-            if(enable_tuner->is_set() && enable_tuner->value() && tuner_file->is_set())
+            if (enable_tuner->is_set() && enable_tuner->value() && tuner_file->is_set())
             {
                 cl_tuner.save_to_file(tuner_file->value());
             }
@@ -367,11 +369,11 @@ int main(int argc, char **argv)
 
         return (success ? 0 : 1);
     }
-    catch(const std::exception &error)
+    catch (const std::exception &error)
     {
         std::cerr << error.what() << "\n";
 
-        if(options.throw_errors->value())
+        if (options.throw_errors->value())
         {
             throw;
         }

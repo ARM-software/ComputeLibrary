@@ -25,16 +25,17 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLPriorBoxLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/PriorBoxLayerDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/validation/fixtures/PriorBoxLayerFixture.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/PriorBoxLayerFixture.h"
 
 namespace arm_compute
 {
@@ -45,7 +46,8 @@ namespace validation
 using framework::dataset::make;
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<float> tolerance_f32(
+    0.00001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 } // namespace
 
 TEST_SUITE(CL)
@@ -79,16 +81,22 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("Input1Info", { T
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPriorBoxLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallPriorBoxLayerDataset(),
-                                                                                                                   make("DataType", DataType::F32),
-                                                                                                           make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLPriorBoxLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallPriorBoxLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPriorBoxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargePriorBoxLayerDataset(),
-                                                                                                                 make("DataType", DataType::F32),
-                                                                                                         make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLPriorBoxLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargePriorBoxLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0);

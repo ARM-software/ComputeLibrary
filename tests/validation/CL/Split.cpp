@@ -29,10 +29,10 @@
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/SplitDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/SplitFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -104,7 +104,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        combine(datasets::SmallSplitDataset(), make("DataType", DataType::F16)))
 {
     // Validate outputs
-    for(unsigned int i = 0; i < _target.size(); ++i)
+    for (unsigned int i = 0; i < _target.size(); ++i)
     {
         validate(CLAccessor(_target[i]), _reference[i]);
     }
@@ -116,7 +116,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        combine(datasets::LargeSplitDataset(), make("DataType", DataType::F16)))
 {
     // Validate outputs
-    for(unsigned int i = 0; i < _target.size(); ++i)
+    for (unsigned int i = 0; i < _target.size(); ++i)
     {
         validate(CLAccessor(_target[i]), _reference[i]);
     }
@@ -128,7 +128,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallSplitShapes,
                        combine(datasets::SmallSplitShapesDataset(), make("DataType", DataType::F16)))
 {
     // Validate outputs
-    for(unsigned int i = 0; i < _target.size(); ++i)
+    for (unsigned int i = 0; i < _target.size(); ++i)
     {
         validate(CLAccessor(_target[i]), _reference[i]);
     }
@@ -142,7 +142,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        combine(datasets::SmallSplitDataset(), make("DataType", DataType::F32)))
 {
     // Validate outputs
-    for(unsigned int i = 0; i < _target.size(); ++i)
+    for (unsigned int i = 0; i < _target.size(); ++i)
     {
         validate(CLAccessor(_target[i]), _reference[i]);
     }
@@ -154,7 +154,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                        combine(datasets::LargeSplitDataset(), make("DataType", DataType::F32)))
 {
     // Validate outputs
-    for(unsigned int i = 0; i < _target.size(); ++i)
+    for (unsigned int i = 0; i < _target.size(); ++i)
     {
         validate(CLAccessor(_target[i]), _reference[i]);
     }
@@ -166,7 +166,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallSplitShapes,
                        combine(datasets::SmallSplitShapesDataset(), make("DataType", DataType::F32)))
 {
     // Validate outputs
-    for(unsigned int i = 0; i < _target.size(); ++i)
+    for (unsigned int i = 0; i < _target.size(); ++i)
     {
         validate(CLAccessor(_target[i]), _reference[i]);
     }

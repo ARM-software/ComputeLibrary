@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "tests/CL/CLAccessor.h"
-#include "tests/Globals.h"
 #include "tests/datasets/BorderModeDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/Globals.h"
 #include "tests/validation/Validation.h"
 
 namespace arm_compute
@@ -59,7 +60,7 @@ DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(datasets::SmallS
 // clang-format on
 // *INDENT-ON*
 {
-    BorderSize border_size{ static_cast<unsigned int>(size) };
+    BorderSize border_size{static_cast<unsigned int>(size)};
 
     std::mt19937                           generator(library->seed());
     std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
@@ -78,7 +79,7 @@ DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(datasets::SmallS
     validate(src.info()->padding(), padding);
 
     // Fill tensor with constant value
-    std::uniform_int_distribution<uint8_t> distribution{ tensor_value, tensor_value };
+    std::uniform_int_distribution<uint8_t> distribution{tensor_value, tensor_value};
     library->fill(CLAccessor(src), distribution, 0);
 
     // Create and configure kernel

@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLPReluLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ConvertPolicyDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ElementwiseOperationsFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -48,21 +49,19 @@ RelativeTolerance<float> tolerance_fp32(0.000001f);
 RelativeTolerance<float> tolerance_fp16(0.001f);
 
 /** Input data sets **/
-const auto PReluLayerU8Dataset = combine(make("DataType", DataType::U8), make("DataType", DataType::U8),
-                                         make("DataType",
-                                                                  DataType::U8));
-const auto PReluLayerQASYMM8Dataset = combine(make("DataType", DataType::QASYMM8), make("DataType", DataType::QASYMM8),
-                                              make("DataType",
-                                                                       DataType::QASYMM8));
-const auto PReluLayerQASYMM8SIGNEDDataset = combine(make("DataType", DataType::QASYMM8_SIGNED), make("DataType", DataType::QASYMM8_SIGNED),
-                                                    make("DataType",
-                                                                             DataType::QASYMM8_SIGNED));
-const auto PReluLayerS16Dataset = combine(make("DataType", { DataType::S16 }), make("DataType", DataType::S16),
-                                          make("DataType", DataType::S16));
-const auto PReluLayerFP16Dataset = combine(make("DataType", DataType::F16), make("DataType", DataType::F16),
-                                           make("DataType", DataType::F16));
-const auto PReluLayerFP32Dataset = combine(make("DataType", DataType::F32), make("DataType", DataType::F32),
-                                           make("DataType", DataType::F32));
+const auto PReluLayerU8Dataset =
+    combine(make("DataType", DataType::U8), make("DataType", DataType::U8), make("DataType", DataType::U8));
+const auto PReluLayerQASYMM8Dataset = combine(
+    make("DataType", DataType::QASYMM8), make("DataType", DataType::QASYMM8), make("DataType", DataType::QASYMM8));
+const auto PReluLayerQASYMM8SIGNEDDataset = combine(make("DataType", DataType::QASYMM8_SIGNED),
+                                                    make("DataType", DataType::QASYMM8_SIGNED),
+                                                    make("DataType", DataType::QASYMM8_SIGNED));
+const auto PReluLayerS16Dataset =
+    combine(make("DataType", {DataType::S16}), make("DataType", DataType::S16), make("DataType", DataType::S16));
+const auto PReluLayerFP16Dataset =
+    combine(make("DataType", DataType::F16), make("DataType", DataType::F16), make("DataType", DataType::F16));
+const auto PReluLayerFP32Dataset =
+    combine(make("DataType", DataType::F32), make("DataType", DataType::F32), make("DataType", DataType::F32));
 } // namespace
 
 TEST_SUITE(CL)
@@ -102,9 +101,9 @@ TEST_CASE(Validate, framework::DatasetMode::ALL)
 
 SimpleTensor<float> compute_float_reference(const TensorInfo &tensor_info)
 {
-    SimpleTensor<float> ref_src1{ tensor_info.tensor_shape(), tensor_info.data_type() };
-    SimpleTensor<float> ref_src2{ tensor_info.tensor_shape(), tensor_info.data_type() };
-    SimpleTensor<float> ref_dst{ tensor_info.tensor_shape(), tensor_info.data_type() };
+    SimpleTensor<float> ref_src1{tensor_info.tensor_shape(), tensor_info.data_type()};
+    SimpleTensor<float> ref_src2{tensor_info.tensor_shape(), tensor_info.data_type()};
+    SimpleTensor<float> ref_dst{tensor_info.tensor_shape(), tensor_info.data_type()};
 
     library->fill_tensor_uniform(ref_src1, 0);
     library->fill_tensor_uniform(ref_src2, 1);
@@ -151,7 +150,10 @@ template <typename T>
 using CLPReluLayerFixture = PReluLayerValidationFixture<CLTensor, CLAccessor, CLPReluLayer, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), PReluLayerU8Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLPReluLayerFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), PReluLayerU8Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -163,13 +165,16 @@ using CLPReluLayerQuantizedFixture = PReluLayerValidationQuantizedFixture<CLTens
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                                                                                                                   PReluLayerQASYMM8Dataset,
-                                                                                                                   make("QuantizationInfo", { QuantizationInfo(5.f / 255.f, 20) }),
-                                                                                                                   make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) }),
-                                                                                                                   make("QuantizationInfo", { QuantizationInfo(1.f / 255.f, 5) }))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLPReluLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               PReluLayerQASYMM8Dataset,
+                               make("QuantizationInfo", {QuantizationInfo(5.f / 255.f, 20)}),
+                               make("QuantizationInfo", {QuantizationInfo(2.f / 255.f, 10)}),
+                               make("QuantizationInfo", {QuantizationInfo(1.f / 255.f, 5)}))
 
-                      )
+)
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -177,13 +182,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerQuantizedFixture<uint8_t>, framewor
 TEST_SUITE_END()
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerQuantizedFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(),
-                                                                                                                  PReluLayerQASYMM8SIGNEDDataset,
-                                                                                                                  make("QuantizationInfo", { QuantizationInfo(5.f / 127.f, 20) }),
-                                                                                                                  make("QuantizationInfo", { QuantizationInfo(2.f / 127.f, 10) }),
-                                                                                                                  make("QuantizationInfo", { QuantizationInfo(1.f / 127.f, 5) }))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLPReluLayerQuantizedFixture<int8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               PReluLayerQASYMM8SIGNEDDataset,
+                               make("QuantizationInfo", {QuantizationInfo(5.f / 127.f, 20)}),
+                               make("QuantizationInfo", {QuantizationInfo(2.f / 127.f, 10)}),
+                               make("QuantizationInfo", {QuantizationInfo(1.f / 127.f, 5)}))
 
-                      )
+)
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -192,12 +200,18 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), PReluLayerS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLPReluLayerFixture<int16_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), PReluLayerS16Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunOneDimensional, CLPReluLayerFixture<int16_t>, framework::DatasetMode::ALL, combine(make("Shape", TensorShape(1U, 16U)), PReluLayerS16Dataset))
+FIXTURE_DATA_TEST_CASE(RunOneDimensional,
+                       CLPReluLayerFixture<int16_t>,
+                       framework::DatasetMode::ALL,
+                       combine(make("Shape", TensorShape(1U, 16U)), PReluLayerS16Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -206,7 +220,10 @@ TEST_SUITE_END()
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), PReluLayerFP16Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLPReluLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), PReluLayerFP16Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, 0.01);
@@ -214,7 +231,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerFixture<half>, framework::DatasetMo
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), PReluLayerFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLPReluLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), PReluLayerFP32Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -222,8 +242,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPReluLayerFixture<float>, framework::DatasetM
 template <typename T>
 using CLPReluLayerBroadcastFixture = PReluLayerBroadcastValidationFixture<CLTensor, CLAccessor, CLPReluLayer, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, CLPReluLayerBroadcastFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapesBroadcast(),
-                                                                                                                    PReluLayerFP32Dataset))
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
+                       CLPReluLayerBroadcastFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapesBroadcast(), PReluLayerFP32Dataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);

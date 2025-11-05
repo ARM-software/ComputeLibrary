@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FRAMEWORK_ASSERTS
-#define ARM_COMPUTE_TEST_FRAMEWORK_ASSERTS
+#ifndef ACL_TESTS_FRAMEWORK_ASSERTS_H
+#define ACL_TESTS_FRAMEWORK_ASSERTS_H
+
+#include "utils/TypePrinter.h"
 
 #include "Exceptions.h"
 #include "Framework.h"
-
 #include <sstream>
 #include <type_traits>
-
-#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -78,28 +77,43 @@ inline void ARM_COMPUTE_PRINT_INFO()
 
 namespace detail
 {
-#define ARM_COMPUTE_TEST_COMP_FACTORY(SEVERITY, SEVERITY_NAME, COMP, COMP_NAME, ERROR_CALL)                                            \
-    template <typename T, typename U>                                                                                                  \
-    void ARM_COMPUTE_##SEVERITY##_##COMP_NAME##_IMPL(T &&x, U &&y, const std::string &x_str, const std::string &y_str, LogLevel level) \
-    {                                                                                                                                  \
-        if(!(x COMP y))                                                                                                                \
-        {                                                                                                                              \
-            std::stringstream msg;                                                                                                     \
-            msg << #SEVERITY_NAME " '" << x_str << " " #COMP " " << y_str << "' failed. ["                                             \
-                << std::boolalpha << arm_compute::test::framework::make_printable(x)                                                   \
-                << " " #COMP " "                                                                                                       \
-                << std::boolalpha << arm_compute::test::framework::make_printable(y)                                                   \
-                << "]\n";                                                                                                              \
-            arm_compute::test::framework::Framework::get().print_test_info(msg);                                                       \
-            ERROR_CALL                                                                                                                 \
-        }                                                                                                                              \
-        arm_compute::test::framework::Framework::get().clear_test_info();                                                              \
+#define ARM_COMPUTE_TEST_COMP_FACTORY(SEVERITY, SEVERITY_NAME, COMP, COMP_NAME, ERROR_CALL)                            \
+    template <typename T, typename U>                                                                                  \
+    void ARM_COMPUTE_##SEVERITY##_##COMP_NAME##_IMPL(T &&x, U &&y, const std::string &x_str, const std::string &y_str, \
+                                                     LogLevel level)                                                   \
+    {                                                                                                                  \
+        if (!(x COMP y))                                                                                               \
+        {                                                                                                              \
+            std::stringstream msg;                                                                                     \
+            msg << #SEVERITY_NAME " '" << x_str << " " #COMP " " << y_str << "' failed. [" << std::boolalpha           \
+                << arm_compute::test::framework::make_printable(x) << " " #COMP " " << std::boolalpha                  \
+                << arm_compute::test::framework::make_printable(y) << "]\n";                                           \
+            arm_compute::test::framework::Framework::get().print_test_info(msg);                                       \
+            ERROR_CALL                                                                                                 \
+        }                                                                                                              \
+        arm_compute::test::framework::Framework::get().clear_test_info();                                              \
     }
 
-ARM_COMPUTE_TEST_COMP_FACTORY(EXPECT, Expectation, ==, EQUAL, arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), level));)
-ARM_COMPUTE_TEST_COMP_FACTORY(EXPECT, Expectation, !=, NOT_EQUAL, arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), level));)
-ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT, Assertion, ==, EQUAL, throw arm_compute::test::framework::TestError(msg.str(), level);)
-ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT, Assertion, !=, NOT_EQUAL, throw arm_compute::test::framework::TestError(msg.str(), level);)
+ARM_COMPUTE_TEST_COMP_FACTORY(EXPECT,
+                              Expectation,
+                              ==,
+                              EQUAL,
+                              arm_compute::test::framework::Framework::get().log_failed_expectation(
+                                  arm_compute::test::framework::TestError(msg.str(), level));)
+ARM_COMPUTE_TEST_COMP_FACTORY(EXPECT,
+                              Expectation,
+                              !=,
+                              NOT_EQUAL,
+                              arm_compute::test::framework::Framework::get().log_failed_expectation(
+                                  arm_compute::test::framework::TestError(msg.str(), level));)
+ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT,
+                              Assertion,
+                              ==
+                              , EQUAL, throw arm_compute::test::framework::TestError(msg.str(), level);)
+ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT,
+                              Assertion,
+                              !=
+                              , NOT_EQUAL, throw arm_compute::test::framework::TestError(msg.str(), level);)
 } // namespace detail
 
 #define ARM_COMPUTE_ASSERT_NOT_EQUAL(X, Y) \
@@ -118,7 +132,7 @@ ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT, Assertion, !=, NOT_EQUAL, throw arm_comput
     do                                                                                                                \
     {                                                                                                                 \
         const auto &x = X;                                                                                            \
-        if(!x)                                                                                                        \
+        if (!x)                                                                                                       \
         {                                                                                                             \
             std::stringstream msg;                                                                                    \
             msg << "Assertion '" #X "' failed.\n";                                                                    \
@@ -126,63 +140,66 @@ ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT, Assertion, !=, NOT_EQUAL, throw arm_comput
             throw arm_compute::test::framework::TestError(msg.str(), arm_compute::test::framework::LogLevel::ERRORS); \
         }                                                                                                             \
         arm_compute::test::framework::Framework::get().clear_test_info();                                             \
-    } while(false)
+    } while (false)
 
-#define ARM_COMPUTE_EXPECT(X, LEVEL)                                                                                                          \
-    do                                                                                                                                        \
-    {                                                                                                                                         \
-        const auto &x = X;                                                                                                                    \
-        if(!x)                                                                                                                                \
-        {                                                                                                                                     \
-            std::stringstream msg;                                                                                                            \
-            msg << "Expectation '" #X "' failed.\n";                                                                                          \
-            arm_compute::test::framework::Framework::get().print_test_info(msg);                                                              \
-            arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), LEVEL)); \
-        }                                                                                                                                     \
-        arm_compute::test::framework::Framework::get().clear_test_info();                                                                     \
-    } while(false)
+#define ARM_COMPUTE_EXPECT(X, LEVEL)                                               \
+    do                                                                             \
+    {                                                                              \
+        const auto &x = X;                                                         \
+        if (!x)                                                                    \
+        {                                                                          \
+            std::stringstream msg;                                                 \
+            msg << "Expectation '" #X "' failed.\n";                               \
+            arm_compute::test::framework::Framework::get().print_test_info(msg);   \
+            arm_compute::test::framework::Framework::get().log_failed_expectation( \
+                arm_compute::test::framework::TestError(msg.str(), LEVEL));        \
+        }                                                                          \
+        arm_compute::test::framework::Framework::get().clear_test_info();          \
+    } while (false)
 
-#define ARM_COMPUTE_EXPECT_NO_THROW(X, LEVEL)                                                                                                 \
-    do                                                                                                                                        \
-    {                                                                                                                                         \
-        try                                                                                                                                   \
-        {                                                                                                                                     \
-            const auto &x = X;                                                                                                                \
-            (void)x;                                                                                                                          \
-        }                                                                                                                                     \
-        catch(...)                                                                                                                            \
-        {                                                                                                                                     \
-            std::stringstream msg;                                                                                                            \
-            msg << "Expectation '" #X "' to not throw failed.\n";                                                                             \
-            arm_compute::test::framework::Framework::get().print_test_info(msg);                                                              \
-            arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), LEVEL)); \
-        }                                                                                                                                     \
-        arm_compute::test::framework::Framework::get().clear_test_info();                                                                     \
-    } while(false)
+#define ARM_COMPUTE_EXPECT_NO_THROW(X, LEVEL)                                      \
+    do                                                                             \
+    {                                                                              \
+        try                                                                        \
+        {                                                                          \
+            const auto &x = X;                                                     \
+            (void)x;                                                               \
+        }                                                                          \
+        catch (...)                                                                \
+        {                                                                          \
+            std::stringstream msg;                                                 \
+            msg << "Expectation '" #X "' to not throw failed.\n";                  \
+            arm_compute::test::framework::Framework::get().print_test_info(msg);   \
+            arm_compute::test::framework::Framework::get().log_failed_expectation( \
+                arm_compute::test::framework::TestError(msg.str(), LEVEL));        \
+        }                                                                          \
+        arm_compute::test::framework::Framework::get().clear_test_info();          \
+    } while (false)
 
 #if defined(ARM_COMPUTE_ASSERTS_ENABLED)
-#define ARM_COMPUTE_EXPECT_THROW(X, LEVEL)                                                                                                    \
-    do                                                                                                                                        \
-    {                                                                                                                                         \
-        bool exception_caught = false;                                                                                                        \
-        try                                                                                                                                   \
-        {                                                                                                                                     \
-            const auto &x = X;                                                                                                                \
-            (void)x;                                                                                                                          \
-        }                                                                                                                                     \
-        catch(...)                                                                                                                            \
-        {                                                                                                                                     \
-            exception_caught = true;                                                                                                          \
-        }                                                                                                                                     \
-        if(!exception_caught)                                                                                                                 \
-        {                                                                                                                                     \
-            std::stringstream msg;                                                                                                            \
-            msg << "Expectation '" #X "' to throw failed.\n";                                                                                 \
-            arm_compute::test::framework::Framework::get().print_test_info(msg);                                                              \
-            arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), LEVEL)); \
-        }                                                                                                                                     \
-        arm_compute::test::framework::Framework::get().clear_test_info();                                                                     \
-    } while(false)
+#define ARM_COMPUTE_EXPECT_THROW(X, LEVEL)                                         \
+    do                                                                             \
+    {                                                                              \
+        bool exception_caught = false;                                             \
+        try                                                                        \
+        {                                                                          \
+            const auto &x = X;                                                     \
+            (void)x;                                                               \
+        }                                                                          \
+        catch (...)                                                                \
+        {                                                                          \
+            exception_caught = true;                                               \
+        }                                                                          \
+        if (!exception_caught)                                                     \
+        {                                                                          \
+            std::stringstream msg;                                                 \
+            msg << "Expectation '" #X "' to throw failed.\n";                      \
+            arm_compute::test::framework::Framework::get().print_test_info(msg);   \
+            arm_compute::test::framework::Framework::get().log_failed_expectation( \
+                arm_compute::test::framework::TestError(msg.str(), LEVEL));        \
+        }                                                                          \
+        arm_compute::test::framework::Framework::get().clear_test_info();          \
+    } while (false)
 #else // defined(ARM_COMPUTE_ASSERTS_ENABLED)
 #define ARM_COMPUTE_EXPECT_THROW(X, LEVEL)                                   \
     do                                                                       \
@@ -192,7 +209,7 @@ ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT, Assertion, !=, NOT_EQUAL, throw arm_comput
         arm_compute::test::framework::Framework::get().print_test_info(msg); \
         arm_compute::test::framework::Framework::get().log_info(msg.str());  \
         arm_compute::test::framework::Framework::get().clear_test_info();    \
-    } while(false)
+    } while (false)
 #endif // defined(ARM_COMPUTE_ASSERTS_ENABLED)
 
 #define ARM_COMPUTE_ASSERT_FAIL(MSG)                                                                              \
@@ -203,18 +220,19 @@ ARM_COMPUTE_TEST_COMP_FACTORY(ASSERT, Assertion, !=, NOT_EQUAL, throw arm_comput
         arm_compute::test::framework::Framework::get().print_test_info(msg);                                      \
         throw arm_compute::test::framework::TestError(msg.str(), arm_compute::test::framework::LogLevel::ERRORS); \
         arm_compute::test::framework::Framework::get().clear_test_info();                                         \
-    } while(false)
+    } while (false)
 
-#define ARM_COMPUTE_EXPECT_FAIL(MSG, LEVEL)                                                                                               \
-    do                                                                                                                                    \
-    {                                                                                                                                     \
-        std::stringstream msg;                                                                                                            \
-        msg << "Expectation '" << MSG << "' failed.\n";                                                                                   \
-        arm_compute::test::framework::Framework::get().print_test_info(msg);                                                              \
-        arm_compute::test::framework::Framework::get().log_failed_expectation(arm_compute::test::framework::TestError(msg.str(), LEVEL)); \
-        arm_compute::test::framework::Framework::get().clear_test_info();                                                                 \
-    } while(false)
+#define ARM_COMPUTE_EXPECT_FAIL(MSG, LEVEL)                                    \
+    do                                                                         \
+    {                                                                          \
+        std::stringstream msg;                                                 \
+        msg << "Expectation '" << MSG << "' failed.\n";                        \
+        arm_compute::test::framework::Framework::get().print_test_info(msg);   \
+        arm_compute::test::framework::Framework::get().log_failed_expectation( \
+            arm_compute::test::framework::TestError(msg.str(), LEVEL));        \
+        arm_compute::test::framework::Framework::get().clear_test_info();      \
+    } while (false)
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FRAMEWORK_ASSERTS */
+#endif // ACL_TESTS_FRAMEWORK_ASSERTS_H

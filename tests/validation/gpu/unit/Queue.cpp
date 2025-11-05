@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/validation/fixtures/UNIT/QueueFixture.h"
-
 #include "arm_compute/AclOpenClExt.h"
+
 #include "src/gpu/cl/ClQueue.h"
+#include "tests/validation/fixtures/UNIT/QueueFixture.h"
 
 namespace arm_compute
 {
@@ -36,9 +36,15 @@ TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(Queue)
 
-EMPTY_BODY_FIXTURE_TEST_CASE(CreateQueueWithInvalidContext, CreateQueueWithInvalidContextFixture, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(CreateQueuerWithInvalidOptions, CreateQueuerWithInvalidOptionsFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidQueue, DestroyInvalidQueueFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(CreateQueueWithInvalidContext,
+                             CreateQueueWithInvalidContextFixture,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(CreateQueuerWithInvalidOptions,
+                             CreateQueuerWithInvalidOptionsFixture<acl::Target::GpuOcl>,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidQueue,
+                             DestroyInvalidQueueFixture<acl::Target::GpuOcl>,
+                             framework::DatasetMode::ALL)
 EMPTY_BODY_FIXTURE_TEST_CASE(SimpleQueue, SimpleQueueFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
 
 TEST_CASE(KhrQueuePriorities, framework::DatasetMode::ALL)
@@ -56,7 +62,7 @@ TEST_CASE(KhrQueuePriorities, framework::DatasetMode::ALL)
     ARM_COMPUTE_ASSERT(status == AclSuccess);
 
     std::string extensions = cl::Device(cl_dev).getInfo<CL_DEVICE_EXTENSIONS>();
-    if(extensions.find("cl_khr_priority_hints") != std::string::npos)
+    if (extensions.find("cl_khr_priority_hints") != std::string::npos)
     {
         cl_int error = CL_SUCCESS;
 
@@ -65,8 +71,8 @@ TEST_CASE(KhrQueuePriorities, framework::DatasetMode::ALL)
         ARM_COMPUTE_ASSERT(status == AclSuccess);
 
         /* Check a queue with high priority */
-        cl_queue_properties queue_properties[] = { CL_QUEUE_PRIORITY_KHR, CL_QUEUE_PRIORITY_HIGH_KHR, 0 };
-        cl_command_queue    priority_queue     = clCreateCommandQueueWithProperties(cl_ctx, cl_dev, queue_properties, &error);
+        cl_queue_properties queue_properties[] = {CL_QUEUE_PRIORITY_KHR, CL_QUEUE_PRIORITY_HIGH_KHR, 0};
+        cl_command_queue priority_queue = clCreateCommandQueueWithProperties(cl_ctx, cl_dev, queue_properties, &error);
         ARM_COMPUTE_ASSERT(error == CL_SUCCESS);
 
         clReleaseCommandQueue(priority_queue);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PRIOR_BOX_LAYER_H
-#define ARM_COMPUTE_TEST_PRIOR_BOX_LAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_PRIORBOXLAYER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_PRIORBOXLAYER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -36,9 +36,12 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> prior_box_layer(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, const PriorBoxLayerInfo &info, const TensorShape &output_shape);
+SimpleTensor<T> prior_box_layer(const SimpleTensor<T>   &src1,
+                                const SimpleTensor<T>   &src2,
+                                const PriorBoxLayerInfo &info,
+                                const TensorShape       &output_shape);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PRIOR_BOX_LAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_PRIORBOXLAYER_H

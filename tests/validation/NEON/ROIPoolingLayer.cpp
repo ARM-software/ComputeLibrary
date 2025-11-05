@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/NEON/functions/NEROIPoolingLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/Globals.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/datasets/ROIDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/Globals.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/ROIPoolingLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -105,10 +106,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 using NEROIPoolingLayerFloatFixture = ROIPoolingLayerFixture<Tensor, Accessor, NEROIPoolingLayer, float>;
 
 TEST_SUITE(Float)
-FIXTURE_DATA_TEST_CASE(SmallROIPoolingLayerFloat, NEROIPoolingLayerFloatFixture, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(SmallROIPoolingLayerFloat,
+                       NEROIPoolingLayerFloatFixture,
+                       framework::DatasetMode::ALL,
                        framework::dataset::combine(framework::dataset::combine(datasets::SmallROIDataset(),
-                                                                               make("DataType", { DataType::F32 })),
-                                                   make("DataLayout", { DataLayout::NCHW })))
+                                                                               make("DataType", {DataType::F32})),
+                                                   make("DataLayout", {DataLayout::NCHW})))
 {
     // Validate output
     validate(Accessor(_target), _reference, relative_tolerance_f32, .02f, absolute_tolerance_f32);
@@ -123,12 +126,14 @@ using NEROIPoolingLayerQuantizedFixture = ROIPoolingLayerQuantizedFixture<Tensor
 
 TEST_SUITE(QASYMM8)
 
-FIXTURE_DATA_TEST_CASE(Small, NEROIPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(Small,
+                       NEROIPoolingLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallROIDataset(),
-                                                       make("DataType", { DataType::QASYMM8 }),
-                                               make("DataLayout", { DataLayout::NCHW }),
-                                       make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) }),
-                               make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
+                               make("DataType", {DataType::QASYMM8}),
+                               make("DataLayout", {DataLayout::NCHW}),
+                               make("InputQuantizationInfo", {QuantizationInfo(1.f / 255.f, 127)}),
+                               make("OutputQuantizationInfo", {QuantizationInfo(2.f / 255.f, 120)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -140,6 +145,6 @@ TEST_SUITE_END() // end quantized tests
 TEST_SUITE_END() // RoiPooling
 TEST_SUITE_END() // NEON
 
-} // validation end
-} // test namespace end
-} // arm_compute namespace end
+} // namespace validation
+} // namespace test
+} // namespace arm_compute

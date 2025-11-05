@@ -25,13 +25,14 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLCropResize.h"
+
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/CropResizeDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/CropResizeFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -96,8 +97,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLCropResizeFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallCropResizeDataset(),
-                               make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::F16)))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
@@ -109,8 +110,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLCropResizeFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallCropResizeDataset(),
-                               make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::F32)))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
@@ -123,8 +124,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLCropResizeFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallCropResizeDataset(),
-                               make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::U8)))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
@@ -136,8 +137,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLCropResizeFixture<uint16_t>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallCropResizeDataset(),
-                               make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::U16)))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::U16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
@@ -149,8 +150,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLCropResizeFixture<int16_t>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallCropResizeDataset(),
-                               make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::S16)))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::S16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
@@ -162,8 +163,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLCropResizeFixture<uint32_t>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallCropResizeDataset(),
-                               make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::U32)))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::U32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);
@@ -175,8 +176,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLCropResizeFixture<int32_t>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallCropResizeDataset(),
-                               make("IsOutOfBounds", { true, false }),
-                                       make("DataType", DataType::S32)))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::S32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32, 0.01);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,11 +28,12 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/Reverse.h"
 
 namespace arm_compute
@@ -45,7 +46,11 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ReverseValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape, TensorShape axis_shape, DataType data_type, bool use_negative_axis = false, bool use_inverted_axis = false)
+    void setup(TensorShape shape,
+               TensorShape axis_shape,
+               DataType    data_type,
+               bool        use_negative_axis = false,
+               bool        use_inverted_axis = false)
     {
         _num_dims  = shape.num_dimensions();
         _target    = compute_target(shape, axis_shape, data_type, use_negative_axis, use_inverted_axis);
@@ -61,13 +66,13 @@ protected:
     std::vector<int32_t> generate_random_axis(bool use_negative = false)
     {
         std::vector<int32_t> axis_v;
-        if(use_negative)
+        if (use_negative)
         {
-            axis_v = { -1, -2, -3, -4 };
+            axis_v = {-1, -2, -3, -4};
         }
         else
         {
-            axis_v = { 0, 1, 2, 3 };
+            axis_v = {0, 1, 2, 3};
         }
         axis_v = std::vector<int32_t>(axis_v.begin(), axis_v.begin() + _num_dims);
         std::mt19937 g(library->seed());
@@ -76,15 +81,19 @@ protected:
         return axis_v;
     }
 
-    TensorType compute_target(const TensorShape &shape, const TensorShape &axis_shape, DataType data_type, bool use_negative_axis, bool use_inverted_axis = false)
+    TensorType compute_target(const TensorShape &shape,
+                              const TensorShape &axis_shape,
+                              DataType           data_type,
+                              bool               use_negative_axis,
+                              bool               use_inverted_axis = false)
     {
         // Create tensors
         QuantizationInfo qinfo = QuantizationInfo();
-        if(data_type == DataType::QSYMM8_PER_CHANNEL)
+        if (data_type == DataType::QSYMM8_PER_CHANNEL)
         {
             // We need dummy scale and offset values for tensor buffer allocation
             const std::vector<float> scales(1);
-            const std::vector<int> offsets(1);
+            const std::vector<int>   offsets(1);
 
             qinfo = QuantizationInfo(scales, offsets);
         }
@@ -115,7 +124,8 @@ protected:
         {
             auto axis_data = AccessorType(axis);
             auto axis_v    = generate_random_axis(use_negative_axis);
-            std::copy(axis_v.begin(), axis_v.begin() + axis_shape.total_size(), static_cast<int32_t *>(axis_data.data()));
+            std::copy(axis_v.begin(), axis_v.begin() + axis_shape.total_size(),
+                      static_cast<int32_t *>(axis_data.data()));
         }
 
         // Compute function
@@ -124,11 +134,15 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, const TensorShape &axis_shape, DataType data_type, bool use_negative_axis, bool use_inverted_axis = false)
+    SimpleTensor<T> compute_reference(const TensorShape &shape,
+                                      const TensorShape &axis_shape,
+                                      DataType           data_type,
+                                      bool               use_negative_axis,
+                                      bool               use_inverted_axis = false)
     {
         // Create reference
-        SimpleTensor<T>       src{ shape, data_type };
-        SimpleTensor<int32_t> axis{ axis_shape, DataType::S32 };
+        SimpleTensor<T>       src{shape, data_type};
+        SimpleTensor<int32_t> axis{axis_shape, DataType::S32};
 
         // Fill reference
         fill(src);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ SimpleTensor<T> widthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
     // Create reference
     std::vector<TensorShape> shapes;
     shapes.reserve(srcs.size());
-    for(const auto &src : srcs)
+    for (const auto &src : srcs)
     {
         shapes.emplace_back(src.shape());
     }
@@ -51,7 +51,7 @@ SimpleTensor<T> widthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
     const int width_out    = dst.shape().x();
     // Set output tensor to 0
     std::fill_n(dst.data(), dst.num_elements(), 0);
-    for(const auto &src : srcs)
+    for (const auto &src : srcs)
     {
         ARM_COMPUTE_ERROR_ON(width_offset >= width_out);
 
@@ -63,33 +63,35 @@ SimpleTensor<T> widthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
         const T *src_ptr = src.data();
         T       *dst_ptr = dst.data();
 
-        for(int u = 0; u < upper_dims; ++u)
+        for (int u = 0; u < upper_dims; ++u)
         {
-            for(int d = 0; d < depth; ++d)
+            for (int d = 0; d < depth; ++d)
             {
-                for(int r = 0; r < height; ++r)
+                for (int r = 0; r < height; ++r)
                 {
                     const int offset = u * height * depth + d * height + r;
-                    if(is_data_type_quantized(src.data_type()) && src.quantization_info() != dst.quantization_info())
+                    if (is_data_type_quantized(src.data_type()) && src.quantization_info() != dst.quantization_info())
                     {
                         const UniformQuantizationInfo iq_info = src.quantization_info().uniform();
                         const UniformQuantizationInfo oq_info = dst.quantization_info().uniform();
 
-                        if(src.data_type() == DataType::QASYMM8)
+                        if (src.data_type() == DataType::QASYMM8)
                         {
-                            std::transform(src_ptr, src_ptr + width, dst_ptr + width_offset + offset * width_out, [&](T t)
-                            {
-                                const float dequantized_input = dequantize_qasymm8(t, iq_info);
-                                return quantize_qasymm8(dequantized_input, oq_info);
-                            });
+                            std::transform(src_ptr, src_ptr + width, dst_ptr + width_offset + offset * width_out,
+                                           [&](T t)
+                                           {
+                                               const float dequantized_input = dequantize_qasymm8(t, iq_info);
+                                               return quantize_qasymm8(dequantized_input, oq_info);
+                                           });
                         }
                         else
                         {
-                            std::transform(src_ptr, src_ptr + width, dst_ptr + width_offset + offset * width_out, [&](T t)
-                            {
-                                const float dequantized_input = dequantize_qasymm8_signed(t, iq_info);
-                                return quantize_qasymm8_signed(dequantized_input, oq_info);
-                            });
+                            std::transform(src_ptr, src_ptr + width, dst_ptr + width_offset + offset * width_out,
+                                           [&](T t)
+                                           {
+                                               const float dequantized_input = dequantize_qasymm8_signed(t, iq_info);
+                                               return quantize_qasymm8_signed(dequantized_input, oq_info);
+                                           });
                         }
                         src_ptr += width;
                     }
@@ -106,16 +108,20 @@ SimpleTensor<T> widthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs,
     return dst;
 }
 
-template SimpleTensor<float> widthconcatenate_layer(const std::vector<SimpleTensor<float>> &srcs, SimpleTensor<float> &dst);
-template SimpleTensor<half> widthconcatenate_layer(const std::vector<SimpleTensor<half>> &srcs, SimpleTensor<half> &dst);
-template SimpleTensor<uint8_t> widthconcatenate_layer(const std::vector<SimpleTensor<uint8_t>> &srcs, SimpleTensor<uint8_t> &dst);
-template SimpleTensor<int8_t> widthconcatenate_layer(const std::vector<SimpleTensor<int8_t>> &srcs, SimpleTensor<int8_t> &dst);
+template SimpleTensor<float>   widthconcatenate_layer(const std::vector<SimpleTensor<float>> &srcs,
+                                                      SimpleTensor<float>                    &dst);
+template SimpleTensor<half>    widthconcatenate_layer(const std::vector<SimpleTensor<half>> &srcs,
+                                                      SimpleTensor<half>                    &dst);
+template SimpleTensor<uint8_t> widthconcatenate_layer(const std::vector<SimpleTensor<uint8_t>> &srcs,
+                                                      SimpleTensor<uint8_t>                    &dst);
+template SimpleTensor<int8_t>  widthconcatenate_layer(const std::vector<SimpleTensor<int8_t>> &srcs,
+                                                      SimpleTensor<int8_t>                    &dst);
 } // namespace
 
 template <typename T>
 SimpleTensor<T> concatenate_layer(std::vector<SimpleTensor<T>> &srcs, SimpleTensor<T> &dst, unsigned int axis)
 {
-    switch(axis)
+    switch (axis)
     {
         case Window::DimX:
         {
@@ -123,7 +129,7 @@ SimpleTensor<T> concatenate_layer(std::vector<SimpleTensor<T>> &srcs, SimpleTens
         }
         case Window::DimY:
         {
-            for(auto &t : srcs)
+            for (auto &t : srcs)
             {
                 t = reference::permute<T>(t, PermutationVector(1U, 0U));
             }
@@ -132,7 +138,7 @@ SimpleTensor<T> concatenate_layer(std::vector<SimpleTensor<T>> &srcs, SimpleTens
         }
         case Window::DimZ:
         {
-            for(auto &t : srcs)
+            for (auto &t : srcs)
             {
                 t = reference::permute<T>(t, PermutationVector(2U, 1U, 0U));
             }
@@ -141,7 +147,7 @@ SimpleTensor<T> concatenate_layer(std::vector<SimpleTensor<T>> &srcs, SimpleTens
         }
         case 3:
         {
-            for(auto &t : srcs)
+            for (auto &t : srcs)
             {
                 t = reference::permute<T>(t, PermutationVector(3U, 2U, 1U, 0U));
             }
@@ -157,10 +163,14 @@ SimpleTensor<T> concatenate_layer(std::vector<SimpleTensor<T>> &srcs, SimpleTens
     }
 }
 
-template SimpleTensor<float> concatenate_layer(std::vector<SimpleTensor<float>> &srcs, SimpleTensor<float> &dst, unsigned int axis);
-template SimpleTensor<half> concatenate_layer(std::vector<SimpleTensor<half>> &srcs, SimpleTensor<half> &dst, unsigned int axis);
-template SimpleTensor<uint8_t> concatenate_layer(std::vector<SimpleTensor<uint8_t>> &srcs, SimpleTensor<uint8_t> &dst, unsigned int axis);
-template SimpleTensor<int8_t> concatenate_layer(std::vector<SimpleTensor<int8_t>> &srcs, SimpleTensor<int8_t> &dst, unsigned int axis);
+template SimpleTensor<float>
+concatenate_layer(std::vector<SimpleTensor<float>> &srcs, SimpleTensor<float> &dst, unsigned int axis);
+template SimpleTensor<half>
+concatenate_layer(std::vector<SimpleTensor<half>> &srcs, SimpleTensor<half> &dst, unsigned int axis);
+template SimpleTensor<uint8_t>
+concatenate_layer(std::vector<SimpleTensor<uint8_t>> &srcs, SimpleTensor<uint8_t> &dst, unsigned int axis);
+template SimpleTensor<int8_t>
+concatenate_layer(std::vector<SimpleTensor<int8_t>> &srcs, SimpleTensor<int8_t> &dst, unsigned int axis);
 } // namespace reference
 } // namespace validation
 } // namespace test

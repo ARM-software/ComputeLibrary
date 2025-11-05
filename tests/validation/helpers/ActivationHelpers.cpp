@@ -22,8 +22,9 @@
  * SOFTWARE.
  */
 
-#include "arm_compute/core/utils/DataTypeUtils.h"
 #include "tests/validation/helpers/ActivationHelpers.h"
+
+#include "arm_compute/core/utils/DataTypeUtils.h"
 
 #include <initializer_list>
 #include <limits>
@@ -39,7 +40,7 @@ namespace helper
 {
 RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerInfo::ActivationFunction activation)
 {
-    switch(activation)
+    switch (activation)
     {
         case ActivationLayerInfo::ActivationFunction::LOGISTIC:
         case ActivationLayerInfo::ActivationFunction::ELU:
@@ -48,7 +49,7 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
         case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
         case ActivationLayerInfo::ActivationFunction::SWISH:
         case ActivationLayerInfo::ActivationFunction::GELU:
-            switch(data_type)
+            switch (data_type)
             {
                 case DataType::F16:
 #if defined(ENABLE_SVE)
@@ -60,7 +61,7 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
                     return RelativeTolerance<float>(0.05f);
             }
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-            switch(data_type)
+            switch (data_type)
             {
                 case DataType::F16:
 #if defined(ENABLE_SVE)
@@ -78,14 +79,14 @@ RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerI
 
 AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerInfo::ActivationFunction activation)
 {
-    switch(activation)
+    switch (activation)
     {
         case ActivationLayerInfo::ActivationFunction::LOGISTIC:
         case ActivationLayerInfo::ActivationFunction::SQRT:
         case ActivationLayerInfo::ActivationFunction::TANH:
         case ActivationLayerInfo::ActivationFunction::SWISH:
         case ActivationLayerInfo::ActivationFunction::HARD_SWISH:
-            switch(data_type)
+            switch (data_type)
             {
                 case DataType::F16:
 #if defined(ENABLE_SVE)
@@ -97,7 +98,7 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
                     return AbsoluteTolerance<float>(0.00001f);
             }
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-            switch(data_type)
+            switch (data_type)
             {
                 case DataType::F16:
 #if defined(ENABLE_SVE)
@@ -115,10 +116,10 @@ AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerI
 
 float tolerance_num(DataType data_type, ActivationLayerInfo::ActivationFunction activation)
 {
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::F16:
-            switch(activation)
+            switch (activation)
             {
                 case ActivationLayerInfo::ActivationFunction::GELU:
                 case ActivationLayerInfo::ActivationFunction::ELU:
@@ -134,25 +135,26 @@ float tolerance_num(DataType data_type, ActivationLayerInfo::ActivationFunction 
     }
 }
 
-QuantizationInfo calculate_output_quantization_info(DataType data_type, const ActivationLayerInfo &act_info,
-    const QuantizationInfo &default_qinfo)
+QuantizationInfo calculate_output_quantization_info(DataType                   data_type,
+                                                    const ActivationLayerInfo &act_info,
+                                                    const QuantizationInfo    &default_qinfo)
 {
     auto qasymm8_max        = float(std::numeric_limits<uint8_t>::max()) + 1.f;
     auto qasymm8_signed_max = float(std::numeric_limits<int8_t>::max()) + 1.f;
     auto qsymm16_max        = float(std::numeric_limits<int16_t>::max()) + 1.f;
 
-    switch(act_info.activation())
+    switch (act_info.activation())
     {
         case ActivationLayerInfo::ActivationFunction::TANH:
-            if(data_type == DataType::QSYMM16)
+            if (data_type == DataType::QSYMM16)
             {
                 return QuantizationInfo(1.f / qsymm16_max, 0);
             }
-            else if(data_type == DataType::QASYMM8)
+            else if (data_type == DataType::QASYMM8)
             {
                 return QuantizationInfo(1.f / (0.5 * qasymm8_max), int(0.5 * qasymm8_max));
             }
-            else if(data_type == DataType::QASYMM8_SIGNED)
+            else if (data_type == DataType::QASYMM8_SIGNED)
             {
                 return QuantizationInfo(1.f / qasymm8_signed_max, 0);
             }
@@ -161,15 +163,15 @@ QuantizationInfo calculate_output_quantization_info(DataType data_type, const Ac
                 return default_qinfo;
             }
         case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-            if(data_type == DataType::QSYMM16)
+            if (data_type == DataType::QSYMM16)
             {
                 return QuantizationInfo(1.f / qsymm16_max, 0);
             }
-            else if(data_type == DataType::QASYMM8)
+            else if (data_type == DataType::QASYMM8)
             {
                 return QuantizationInfo(1.f / qasymm8_max, 0);
             }
-            else if(data_type == DataType::QASYMM8_SIGNED)
+            else if (data_type == DataType::QASYMM8_SIGNED)
             {
                 return QuantizationInfo(1.f / (2.f * qasymm8_signed_max), -int(qasymm8_signed_max));
             }
@@ -182,7 +184,7 @@ QuantizationInfo calculate_output_quantization_info(DataType data_type, const Ac
     }
 }
 
-template<typename T>
+template <typename T>
 std::vector<T> get_boundary_values(DataType data_type, T min, T max)
 {
     // This function will return a vector filled with the following values that can
@@ -199,32 +201,33 @@ std::vector<T> get_boundary_values(DataType data_type, T min, T max)
     // To ensure all the inserted values are within the given range after subtracing/adding delta
     auto insert_values = [&boundary_values, &min, &max](const std::initializer_list<T> &new_values)
     {
-        for(auto &v : new_values)
+        for (auto &v : new_values)
         {
-            if(v >= min && v <= max)
+            if (v >= min && v <= max)
             {
                 boundary_values.emplace_back(v);
             }
         }
     };
 
-    insert_values({ min, static_cast<T>(min + delta), static_cast<T>(lower_quarter), static_cast<T>(center_value - delta) });                               // lower partition
-    insert_values({ static_cast<T>(center_value), static_cast<T>(center_value + delta), static_cast<T>(upper_quarter), static_cast<T>(max - delta), max }); // upper partition
+    insert_values({min, static_cast<T>(min + delta), static_cast<T>(lower_quarter),
+                   static_cast<T>(center_value - delta)}); // lower partition
+    insert_values({static_cast<T>(center_value), static_cast<T>(center_value + delta), static_cast<T>(upper_quarter),
+                   static_cast<T>(max - delta), max}); // upper partition
 
     return boundary_values;
 }
 
-
 // Explicit instatiations to keep the implementation in the cpp file
-template std::vector<float> get_boundary_values(DataType data_type, float min, float max);
-template std::vector<half> get_boundary_values(DataType data_type, half min, half max);
-template std::vector<int8_t> get_boundary_values(DataType data_type, int8_t min, int8_t max);
+template std::vector<float>   get_boundary_values(DataType data_type, float min, float max);
+template std::vector<half>    get_boundary_values(DataType data_type, half min, half max);
+template std::vector<int8_t>  get_boundary_values(DataType data_type, int8_t min, int8_t max);
 template std::vector<uint8_t> get_boundary_values(DataType data_type, uint8_t min, uint8_t max);
 template std::vector<int16_t> get_boundary_values(DataType data_type, int16_t min, int16_t max);
 
 AbsoluteTolerance<uint8_t> tolerance_qasymm8(ActivationLayerInfo::ActivationFunction activation)
 {
-    switch(activation)
+    switch (activation)
     {
         case ActivationLayerInfo::ActivationFunction::LOGISTIC:
         case ActivationLayerInfo::ActivationFunction::SQRT:

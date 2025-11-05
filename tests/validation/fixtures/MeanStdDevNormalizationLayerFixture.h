@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Arm Limited.
+ * Copyright (c) 2019-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,12 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/MeanStdDevNormalizationLayer.h"
 
@@ -46,7 +47,7 @@ class MeanStdDevNormalizationLayerValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType dt, bool in_place, float epsilon = 1e-8)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             dt == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -62,14 +63,14 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(is_data_type_float(_data_type))
+        if (is_data_type_float(_data_type))
         {
-            std::uniform_real_distribution<> distribution{ -1.0f, 1.0f };
+            std::uniform_real_distribution<> distribution{-1.0f, 1.0f};
             library->fill(tensor, distribution, 0);
         }
         else
         {
-            std::uniform_int_distribution<> distribution{ 0, 255 };
+            std::uniform_int_distribution<> distribution{0, 255};
             library->fill(tensor, distribution, 0);
         }
     }
@@ -93,7 +94,7 @@ protected:
         src.allocator()->allocate();
         ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
 
-        if(!in_place)
+        if (!in_place)
         {
             dst.allocator()->allocate();
             ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
@@ -105,7 +106,7 @@ protected:
         // Compute function
         norm.run();
 
-        if(in_place)
+        if (in_place)
         {
             return src;
         }
@@ -118,7 +119,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape, DataType dt, float epsilon, QuantizationInfo qi)
     {
         // Create reference
-        SimpleTensor<T> ref_src{ shape, dt, 1, qi };
+        SimpleTensor<T> ref_src{shape, dt, 1, qi};
 
         // Fill reference
         fill(ref_src);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,12 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/Select.h"
 
 namespace arm_compute
@@ -51,7 +52,7 @@ namespace detail
 inline TensorShape select_condition_shape(TensorShape shape, bool has_same_same_rank)
 {
     TensorShape condition_shape = shape;
-    if(!has_same_same_rank)
+    if (!has_same_same_rank)
     {
         condition_shape = TensorShape(shape[shape.num_dimensions() - 1]);
     }
@@ -65,7 +66,7 @@ class SelectValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, bool has_same_same_rank, DataType data_type)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -132,9 +133,9 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape, const TensorShape &condition_shape, DataType data_type)
     {
         // Create reference
-        SimpleTensor<uint8_t> ref_c{ condition_shape, DataType::U8 };
-        SimpleTensor<T>       ref_x{ shape, data_type };
-        SimpleTensor<T>       ref_y{ shape, data_type };
+        SimpleTensor<uint8_t> ref_c{condition_shape, DataType::U8};
+        SimpleTensor<T>       ref_x{shape, data_type};
+        SimpleTensor<T>       ref_y{shape, data_type};
 
         // Fill reference
         fill_bool(ref_c, 0);

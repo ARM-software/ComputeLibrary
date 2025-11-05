@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/AclVersion.h"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/validation/Validation.h"

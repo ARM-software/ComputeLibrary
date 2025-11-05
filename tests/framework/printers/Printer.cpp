@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,8 +29,7 @@ namespace test
 {
 namespace framework
 {
-Printer::Printer(std::ostream &stream)
-    : _stream{ &stream }
+Printer::Printer(std::ostream &stream) : _stream{&stream}
 {
 }
 

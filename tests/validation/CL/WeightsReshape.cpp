@@ -22,15 +22,16 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+
 #include "src/gpu/cl/kernels/ClWeightsReshapeKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/WeightsReshapeFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -56,38 +57,51 @@ using ClWeightsReshape = ClSynthetizeOperatorWithBorder<opencl::kernels::ClWeigh
  *     - num_groups != 1 is only supported for NCHW data layout
  *     - Bias' shape need to match input's shape.
  */
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo",
+DATA_TEST_CASE(
+    Validate,
+    framework::DatasetMode::ALL,
+    zip(make("InputInfo",
+             {
+                 TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),     // Mismatching data type
+                 TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),     // Mismatching data type
+                 TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::QASYMM8), // Bias only supports FP32/FP16
+                 TensorInfo(TensorShape(3U, 3U, 2U, 4U),
+                            1,
+                            DataType::F32,
+                            DataLayout::NHWC), // num_groups != 1 is only supported for NCHW data layout
+                 TensorInfo(
+                     TensorShape(3U, 3U, 2U, 4U, 4U), 1, DataType::F32), // Bias' shape need to match input's shape
+                 TensorInfo(
+                     TensorShape(3U, 3U, 2U, 4U, 4U), 1, DataType::F32), // Bias' shape need to match input's shape
+             }),
+        make("BiasesInfo",
+             {
+                 TensorInfo(TensorShape(4U), 1, DataType::F16),
+                 TensorInfo(TensorShape(4U), 1, DataType::F32),
+                 TensorInfo(TensorShape(4U), 1, DataType::QASYMM8),
+                 TensorInfo(TensorShape(4U), 1, DataType::F32),
+                 TensorInfo(TensorShape(4U, 3U), 1, DataType::F32),
+                 TensorInfo(TensorShape(3U, 4U), 1, DataType::F32),
+             }),
+        make("OutputInfo",
+             {
+                 TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
+                 TensorInfo(TensorShape(4U, 19U), 1, DataType::F16),
+                 TensorInfo(TensorShape(4U, 19U), 1, DataType::QASYMM8),
+                 TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
+                 TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
+                 TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
+             }),
+        make("NumGroups", {1, 1, 1, 2, 1, 2}),
+        make("Expected", {false, false, false, false, false, false})),
+    input_info,
+    biases_info,
+    output_info,
+    num_groups,
+    expected)
 {
-    TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),                   // Mismatching data type
-    TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),                   // Mismatching data type
-    TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::QASYMM8),               // Bias only supports FP32/FP16
-    TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, DataLayout::NHWC), // num_groups != 1 is only supported for NCHW data layout
-    TensorInfo(TensorShape(3U, 3U, 2U, 4U, 4U), 1, DataType::F32),               // Bias' shape need to match input's shape
-    TensorInfo(TensorShape(3U, 3U, 2U, 4U, 4U), 1, DataType::F32),               // Bias' shape need to match input's shape
-}),
-make("BiasesInfo",
-{
-    TensorInfo(TensorShape(4U), 1, DataType::F16),
-    TensorInfo(TensorShape(4U), 1, DataType::F32),
-    TensorInfo(TensorShape(4U), 1, DataType::QASYMM8),
-    TensorInfo(TensorShape(4U), 1, DataType::F32),
-    TensorInfo(TensorShape(4U, 3U), 1, DataType::F32),
-    TensorInfo(TensorShape(3U, 4U), 1, DataType::F32),
-}),
-make("OutputInfo",
-{
-    TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
-    TensorInfo(TensorShape(4U, 19U), 1, DataType::F16),
-    TensorInfo(TensorShape(4U, 19U), 1, DataType::QASYMM8),
-    TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
-    TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
-    TensorInfo(TensorShape(4U, 19U), 1, DataType::F32),
-}),
-make("NumGroups", { 1, 1, 1, 2, 1, 2 }),
-make("Expected", { false, false, false, false, false, false })),
-input_info, biases_info, output_info, num_groups, expected)
-{
-    bool status = bool(opencl::kernels::ClWeightsReshapeKernel::validate(&input_info, &biases_info, &output_info, num_groups));
+    bool status =
+        bool(opencl::kernels::ClWeightsReshapeKernel::validate(&input_info, &biases_info, &output_info, num_groups));
     ARM_COMPUTE_EXPECT(status == expected, framework::LogLevel::ERRORS);
 }
 
@@ -95,28 +109,37 @@ template <typename T>
 using ClWeightsReshapeFixture = WeightsReshapeOpValidationFixture<CLTensor, CLAccessor, ClWeightsReshape, T>;
 
 TEST_SUITE(Float)
-FIXTURE_DATA_TEST_CASE(FP32, ClWeightsReshapeFixture<float>, framework::DatasetMode::ALL, combine(make("InputShape", { TensorShape(3U, 3U, 48U, 120U) }),
-                                                                                                                  make("DataType", DataType::F32),
-                                                                                                          make("HasBias", { true, false }),
-                                                                                                  make("NumGroups", { 1, 2 })))
+FIXTURE_DATA_TEST_CASE(FP32,
+                       ClWeightsReshapeFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(make("InputShape", {TensorShape(3U, 3U, 48U, 120U)}),
+                               make("DataType", DataType::F32),
+                               make("HasBias", {true, false}),
+                               make("NumGroups", {1, 2})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(FP16, ClWeightsReshapeFixture<half>, framework::DatasetMode::ALL, combine(make("InputShape", { TensorShape(13U, 13U, 96U, 240U) }),
-                                                                                                                 make("DataType", DataType::F16),
-                                                                                                         make("HasBias", { true, false }),
-                                                                                                 make("NumGroups", { 3, 4 })))
+FIXTURE_DATA_TEST_CASE(FP16,
+                       ClWeightsReshapeFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(make("InputShape", {TensorShape(13U, 13U, 96U, 240U)}),
+                               make("DataType", DataType::F16),
+                               make("HasBias", {true, false}),
+                               make("NumGroups", {3, 4})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(BFloat16, ClWeightsReshapeFixture<half>, framework::DatasetMode::ALL, combine(make("InputShape", { TensorShape(9U, 9U, 96U, 240U) }),
-                                                                                                                     make("DataType", DataType::BFLOAT16),
-                                                                                                             make("HasBias", { false }),
-                                                                                                     make("NumGroups", { 3, 4 })))
+FIXTURE_DATA_TEST_CASE(BFloat16,
+                       ClWeightsReshapeFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(make("InputShape", {TensorShape(9U, 9U, 96U, 240U)}),
+                               make("DataType", DataType::BFLOAT16),
+                               make("HasBias", {false}),
+                               make("NumGroups", {3, 4})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -125,19 +148,25 @@ FIXTURE_DATA_TEST_CASE(BFloat16, ClWeightsReshapeFixture<half>, framework::Datas
 TEST_SUITE_END()
 
 TEST_SUITE(Quantized)
-FIXTURE_DATA_TEST_CASE(QASYMM8, ClWeightsReshapeFixture<uint8_t>, framework::DatasetMode::ALL, combine(make("InputShape", { TensorShape(5U, 5U, 48U, 120U) }),
-                                                                                                                       make("DataType", DataType::QASYMM8),
-                                                                                                               make("HasBias", { false }),
-                                                                                                       make("NumGroups", { 1, 2 })))
+FIXTURE_DATA_TEST_CASE(QASYMM8,
+                       ClWeightsReshapeFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(make("InputShape", {TensorShape(5U, 5U, 48U, 120U)}),
+                               make("DataType", DataType::QASYMM8),
+                               make("HasBias", {false}),
+                               make("NumGroups", {1, 2})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(QASYMM8_SIGNED, ClWeightsReshapeFixture<uint8_t>, framework::DatasetMode::ALL, combine(make("InputShape", { TensorShape(5U, 5U, 48U, 120U) }),
-                                                                                                                      make("DataType", DataType::QASYMM8_SIGNED),
-                                                                                                                      make("HasBias", { false }),
-                                                                                                              make("NumGroups", { 1, 2 })))
+FIXTURE_DATA_TEST_CASE(QASYMM8_SIGNED,
+                       ClWeightsReshapeFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(make("InputShape", {TensorShape(5U, 5U, 48U, 120U)}),
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("HasBias", {false}),
+                               make("NumGroups", {1, 2})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

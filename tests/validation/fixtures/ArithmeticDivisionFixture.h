@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ARITHMETIC_DIVISION_FIXTURE
-#define ARM_COMPUTE_TEST_ARITHMETIC_DIVISION_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_ARITHMETICDIVISIONFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_ARITHMETICDIVISIONFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ArithmeticDivision.h"
 
@@ -54,10 +55,13 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
-        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value,
+                      "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value,
+                                                           arm_compute::utils::uniform_real_distribution_16bit<T>,
+                                                           std::uniform_real_distribution<T>>::type;
 
-        DistributionType distribution{ T(1.0f), T(5.0f) };
+        DistributionType distribution{T(1.0f), T(5.0f)};
         library->fill(tensor, distribution, i);
     }
 
@@ -98,8 +102,8 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> ref_src1{ shape0, data_type, 1 };
-        SimpleTensor<T> ref_src2{ shape1, data_type, 1 };
+        SimpleTensor<T> ref_src1{shape0, data_type, 1};
+        SimpleTensor<T> ref_src2{shape1, data_type, 1};
 
         // Fill reference
         fill(ref_src1, 0);
@@ -113,15 +117,17 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ArithmeticDivisionValidationFixture : public ArithmeticDivisionBroadcastValidationFixture<TensorType, AccessorType, FunctionType, T>
+class ArithmeticDivisionValidationFixture
+    : public ArithmeticDivisionBroadcastValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(const TensorShape &shape, DataType data_type)
     {
-        ArithmeticDivisionBroadcastValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, shape, data_type);
+        ArithmeticDivisionBroadcastValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, shape,
+                                                                                                       data_type);
     }
 };
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ARITHMETIC_DIVISION_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_ARITHMETICDIVISIONFIXTURE_H

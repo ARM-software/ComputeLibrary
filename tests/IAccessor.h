@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, 2023 Arm Limited.
+ * Copyright (c) 2017-2019, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_IACCESSOR_H
-#define ARM_COMPUTE_TEST_IACCESSOR_H
+#ifndef ACL_TESTS_IACCESSOR_H
+#define ACL_TESTS_IACCESSOR_H
 
 #include "arm_compute/core/Coordinates.h"
-#include "arm_compute/core/Types.h"
 #include "arm_compute/core/QuantizationInfo.h"
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
@@ -119,4 +119,4 @@ public:
 };
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_IACCESSOR_H */
+#endif // ACL_TESTS_IACCESSOR_H

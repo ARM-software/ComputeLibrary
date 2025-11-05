@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_INSTRUMENT
-#define ARM_COMPUTE_TEST_INSTRUMENT
+#ifndef ACL_TESTS_FRAMEWORK_INSTRUMENTS_INSTRUMENT_H
+#define ACL_TESTS_FRAMEWORK_INSTRUMENTS_INSTRUMENT_H
 
 #include "../Utils.h"
 #include "Measurement.h"
-
 #include <map>
 #include <memory>
 #include <string>
@@ -148,4 +147,4 @@ inline std::unique_ptr<Instrument> Instrument::make_instrument()
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_INSTRUMENT */
+#endif // ACL_TESTS_FRAMEWORK_INSTRUMENTS_INSTRUMENT_H

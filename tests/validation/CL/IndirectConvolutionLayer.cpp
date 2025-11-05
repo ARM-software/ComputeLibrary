@@ -25,11 +25,12 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLIndirectConvolutionLayer.h"
+
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/DirectConvolutionLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 // Note: Since the interface of indirect convolution is the same of direct convolution, we can reuse
 // the direct convolution fixture
@@ -49,8 +50,8 @@ constexpr float          abs_tolerance_f32(0.0001f); /**< Absolute tolerance for
 constexpr float          tolerance_num = 0.07f;      /**< Tolerance number */
 
 /** Activation function Dataset*/
-const auto ActivationFunctionsDataset = make("ActivationInfo",
-{ ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f) });
+const auto ActivationFunctionsDataset =
+    make("ActivationInfo", {ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)});
 } // namespace
 
 TEST_SUITE(CL)
@@ -96,9 +97,9 @@ TEST_CASE(NoBias, framework::DatasetMode::PRECOMMIT)
     conv.run();
 
     // Compute reference to compare
-    SimpleTensor<float> ref_src{ src_shape_nchw, dt };
-    SimpleTensor<float> ref_wei{ wei_shape_nchw, dt };
-    SimpleTensor<float> ref_bia{ bia_shape, dt };
+    SimpleTensor<float> ref_src{src_shape_nchw, dt};
+    SimpleTensor<float> ref_wei{wei_shape_nchw, dt};
+    SimpleTensor<float> ref_bia{bia_shape, dt};
     library->fill_tensor_value(ref_src, 1.f);
     library->fill_tensor_value(ref_wei, 1.f);
     // No bias
@@ -148,9 +149,9 @@ TEST_CASE(NonSquareKernel, framework::DatasetMode::PRECOMMIT)
     conv.run();
 
     // Compute reference to compare
-    SimpleTensor<float> ref_src{ src_shape_nchw, dt };
-    SimpleTensor<float> ref_wei{ wei_shape_nchw, dt };
-    SimpleTensor<float> ref_bia{ bia_shape, dt };
+    SimpleTensor<float> ref_src{src_shape_nchw, dt};
+    SimpleTensor<float> ref_wei{wei_shape_nchw, dt};
+    SimpleTensor<float> ref_bia{bia_shape, dt};
     library->fill_tensor_value(ref_src, 1.f);
     library->fill_tensor_value(ref_wei, 1.f);
     // No bias

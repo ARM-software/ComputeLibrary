@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,9 @@
  */
 #include "NonMaximaSuppression.h"
 
-#include "Utils.h"
 #include "tests/validation/Helpers.h"
+
+#include "Utils.h"
 
 namespace arm_compute
 {
@@ -39,24 +40,29 @@ SimpleTensor<T> non_maxima_suppression(const SimpleTensor<T> &src, BorderMode bo
 {
     constexpr int   block_size = 3;
     SimpleTensor<T> dst(src.shape(), src.data_type(), src.num_channels());
-    ValidRegion     valid_region = shape_to_valid_region(src.shape(), border_mode == BorderMode::UNDEFINED, BorderSize(block_size / 2));
+    ValidRegion     valid_region =
+        shape_to_valid_region(src.shape(), border_mode == BorderMode::UNDEFINED, BorderSize(block_size / 2));
 
     const uint32_t num_elements = src.num_elements();
-    for(uint32_t i = 0; i < num_elements; ++i)
+    for (uint32_t i = 0; i < num_elements; ++i)
     {
         Coordinates coord = index2coord(src.shape(), i);
         int         x     = coord.x();
         int         y     = coord.y();
 
-        if(!is_in_valid_region(valid_region, coord))
+        if (!is_in_valid_region(valid_region, coord))
         {
             continue;
         }
 
-        if(src[i] >= tensor_elem_at(src, Coordinates(x - 1, y - 1), border_mode, constant_border_value) && src[i] >= tensor_elem_at(src, Coordinates(x, y - 1), border_mode, constant_border_value)
-           && src[i] >= tensor_elem_at(src, Coordinates(x + 1, y - 1), border_mode, constant_border_value) && src[i] >= tensor_elem_at(src, Coordinates(x - 1, y), border_mode, constant_border_value)
-           && src[i] > tensor_elem_at(src, Coordinates(x + 1, y), border_mode, constant_border_value) && src[i] > tensor_elem_at(src, Coordinates(x - 1, y + 1), border_mode, constant_border_value)
-           && src[i] > tensor_elem_at(src, Coordinates(x, y + 1), border_mode, constant_border_value) && src[i] > tensor_elem_at(src, Coordinates(x + 1, y + 1), border_mode, constant_border_value))
+        if (src[i] >= tensor_elem_at(src, Coordinates(x - 1, y - 1), border_mode, constant_border_value) &&
+            src[i] >= tensor_elem_at(src, Coordinates(x, y - 1), border_mode, constant_border_value) &&
+            src[i] >= tensor_elem_at(src, Coordinates(x + 1, y - 1), border_mode, constant_border_value) &&
+            src[i] >= tensor_elem_at(src, Coordinates(x - 1, y), border_mode, constant_border_value) &&
+            src[i] > tensor_elem_at(src, Coordinates(x + 1, y), border_mode, constant_border_value) &&
+            src[i] > tensor_elem_at(src, Coordinates(x - 1, y + 1), border_mode, constant_border_value) &&
+            src[i] > tensor_elem_at(src, Coordinates(x, y + 1), border_mode, constant_border_value) &&
+            src[i] > tensor_elem_at(src, Coordinates(x + 1, y + 1), border_mode, constant_border_value))
         {
             dst[i] = src[i];
         }
@@ -69,8 +75,10 @@ SimpleTensor<T> non_maxima_suppression(const SimpleTensor<T> &src, BorderMode bo
     return dst;
 }
 
-template SimpleTensor<float> non_maxima_suppression(const SimpleTensor<float> &src, BorderMode border_mode, float constant_border_value);
-template SimpleTensor<uint8_t> non_maxima_suppression(const SimpleTensor<uint8_t> &src, BorderMode border_mode, uint8_t constant_border_value);
+template SimpleTensor<float>
+non_maxima_suppression(const SimpleTensor<float> &src, BorderMode border_mode, float constant_border_value);
+template SimpleTensor<uint8_t>
+non_maxima_suppression(const SimpleTensor<uint8_t> &src, BorderMode border_mode, uint8_t constant_border_value);
 } // namespace reference
 } // namespace validation
 } // namespace test

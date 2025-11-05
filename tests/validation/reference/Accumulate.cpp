@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "Accumulate.h"
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -37,15 +38,15 @@ namespace reference
 template <typename T1, typename T2>
 SimpleTensor<T2> accumulate(const SimpleTensor<T1> &src, DataType output_data_type)
 {
-    SimpleTensor<T2> dst{ src.shape(), output_data_type };
+    SimpleTensor<T2> dst{src.shape(), output_data_type};
 
     library->fill_tensor_uniform(dst, 1, static_cast<T2>(0), static_cast<T2>(std::numeric_limits<T1>::max()));
 
     using intermediate_type = typename common_promoted_signed_type<T1, T2>::intermediate_type;
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
         intermediate_type val = static_cast<intermediate_type>(src[i]) + static_cast<intermediate_type>(dst[i]);
         dst[i]                = saturate_cast<T2>(val);
@@ -57,20 +58,22 @@ SimpleTensor<T2> accumulate(const SimpleTensor<T1> &src, DataType output_data_ty
 template <typename T1, typename T2>
 SimpleTensor<T2> accumulate_weighted(const SimpleTensor<T1> &src, float alpha, DataType output_data_type)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(alpha < 0.f || alpha > 1.f, "Weight (alpha) specified in accumulate_weighted must be within the range [0, 1]");
+    ARM_COMPUTE_ERROR_ON_MSG(alpha < 0.f || alpha > 1.f,
+                             "Weight (alpha) specified in accumulate_weighted must be within the range [0, 1]");
 
-    SimpleTensor<T2> dst{ src.shape(), output_data_type };
+    SimpleTensor<T2> dst{src.shape(), output_data_type};
 
     library->fill_tensor_uniform(dst, 1, static_cast<T2>(0), static_cast<T2>(std::numeric_limits<T1>::max()));
 
     using intermediate_type = typename common_promoted_signed_type<T1, T2>::intermediate_type;
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
-        double val = (1. - static_cast<double>(alpha)) * static_cast<intermediate_type>(dst[i]) + static_cast<double>(alpha) * static_cast<intermediate_type>(src[i]);
-        dst[i]     = static_cast<T2>(val);
+        double val = (1. - static_cast<double>(alpha)) * static_cast<intermediate_type>(dst[i]) +
+                     static_cast<double>(alpha) * static_cast<intermediate_type>(src[i]);
+        dst[i] = static_cast<T2>(val);
     }
 
     return dst;
@@ -81,27 +84,31 @@ SimpleTensor<T2> accumulate_squared(const SimpleTensor<T1> &src, uint32_t shift,
 {
     ARM_COMPUTE_ERROR_ON_MSG(shift > 15, "Shift in accumulate_squared must be within the range [0, 15]");
 
-    SimpleTensor<T2> dst{ src.shape(), output_data_type };
+    SimpleTensor<T2> dst{src.shape(), output_data_type};
 
     library->fill_tensor_uniform(dst, 1, static_cast<T2>(0), static_cast<T2>(std::numeric_limits<T1>::max()));
 
     using intermediate_type = typename common_promoted_signed_type<T1, T2>::intermediate_type;
     intermediate_type denom = 1 << shift;
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
-        intermediate_type val = static_cast<intermediate_type>(dst[i]) + (static_cast<intermediate_type>(src[i]) * static_cast<intermediate_type>(src[i]) / denom);
-        dst[i]                = saturate_cast<T2>(val);
+        intermediate_type val =
+            static_cast<intermediate_type>(dst[i]) +
+            (static_cast<intermediate_type>(src[i]) * static_cast<intermediate_type>(src[i]) / denom);
+        dst[i] = saturate_cast<T2>(val);
     }
 
     return dst;
 }
 
 template SimpleTensor<int16_t> accumulate(const SimpleTensor<uint8_t> &src, DataType output_data_type);
-template SimpleTensor<uint8_t> accumulate_weighted(const SimpleTensor<uint8_t> &src, float alpha, DataType output_data_type);
-template SimpleTensor<int16_t> accumulate_squared(const SimpleTensor<uint8_t> &src, uint32_t shift, DataType output_data_type);
+template SimpleTensor<uint8_t>
+accumulate_weighted(const SimpleTensor<uint8_t> &src, float alpha, DataType output_data_type);
+template SimpleTensor<int16_t>
+accumulate_squared(const SimpleTensor<uint8_t> &src, uint32_t shift, DataType output_data_type);
 } // namespace reference
 } // namespace validation
 } // namespace test

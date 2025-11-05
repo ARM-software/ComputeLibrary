@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,12 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/NormalizationLayer.h"
 
 #include <random>
@@ -46,9 +47,15 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class NormalizationValidationGenericFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, bool is_scaled, DataType data_type, DataLayout data_layout)
+    void setup(TensorShape shape,
+               NormType    norm_type,
+               int         norm_size,
+               float       beta,
+               bool        is_scaled,
+               DataType    data_type,
+               DataLayout  data_layout)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -64,16 +71,20 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
-        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value,
+                      "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value,
+                                                           arm_compute::utils::uniform_real_distribution_16bit<T>,
+                                                           std::uniform_real_distribution<T>>::type;
 
-        DistributionType distribution{ T(-1.0f), T(1.0f) };
+        DistributionType distribution{T(-1.0f), T(1.0f)};
         library->fill(tensor, distribution, 0);
     }
 
-    TensorType compute_target(TensorShape shape, NormalizationLayerInfo info, DataType data_type, DataLayout data_layout)
+    TensorType
+    compute_target(TensorShape shape, NormalizationLayerInfo info, DataType data_type, DataLayout data_layout)
     {
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(shape, PermutationVector(2U, 0U, 1U));
         }
@@ -108,7 +119,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape, NormalizationLayerInfo info, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 1 };
+        SimpleTensor<T> src{shape, data_type, 1};
 
         // Fill reference
         fill(src);
@@ -121,12 +132,20 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class NormalizationValidationFixture : public NormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class NormalizationValidationFixture
+    : public NormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, NormType norm_type, int norm_size, float beta, bool is_scaled, DataType data_type, DataLayout data_layout)
+    void setup(TensorShape shape,
+               NormType    norm_type,
+               int         norm_size,
+               float       beta,
+               bool        is_scaled,
+               DataType    data_type,
+               DataLayout  data_layout)
     {
-        NormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, norm_type, norm_size, beta, is_scaled, data_type, data_layout);
+        NormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, norm_type, norm_size, beta, is_scaled, data_type, data_layout);
     }
 };
 } // namespace validation

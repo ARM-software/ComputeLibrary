@@ -28,18 +28,19 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/PoolManager.h"
+
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "src/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "src/core/CL/kernels/CLReductionOperationKernel.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/CL/CLAccessor.h"
+#include "tests/framework/Asserts.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
 #include "tests/Globals.h"
 #include "tests/Utils.h"
-#include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/UNIT/DynamicTensorFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -51,9 +52,11 @@ using framework::dataset::make;
 using framework::dataset::zip;
 namespace
 {
-constexpr AbsoluteTolerance<float> absolute_tolerance_float(0.0001f); /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-RelativeTolerance<float>           tolerance_f32(0.1f);               /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-constexpr float                    tolerance_num = 0.07f;             /**< Tolerance number */
+constexpr AbsoluteTolerance<float> absolute_tolerance_float(
+    0.0001f); /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<float> tolerance_f32(
+    0.1f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr float tolerance_num = 0.07f; /**< Tolerance number */
 } // namespace
 
 #ifndef DOXYGEN_SKIP_THIS
@@ -68,8 +71,10 @@ TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(DynamicTensor)
 
-using BlobMemoryManagementService        = MemoryManagementService<CLBufferAllocator, BlobLifetimeManager, PoolManager, MemoryManagerOnDemand>;
-using CLDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<CLTensor, CLAccessor, BlobMemoryManagementService, CLL2NormLayerWrapper>;
+using BlobMemoryManagementService =
+    MemoryManagementService<CLBufferAllocator, BlobLifetimeManager, PoolManager, MemoryManagerOnDemand>;
+using CLDynamicTensorType3SingleFunction =
+    DynamicTensorType3SingleFunction<CLTensor, CLAccessor, BlobMemoryManagementService, CLL2NormLayerWrapper>;
 
 /** Tests the memory manager with dynamic input and output tensors.
  *
@@ -77,68 +82,78 @@ using CLDynamicTensorType3SingleFunction = DynamicTensorType3SingleFunction<CLTe
  *  change the input and output size requesting more memory and go through the manage/allocate process.
  *  The memory manager should be able to update the inner structures and allocate the requested memory
  * */
-FIXTURE_DATA_TEST_CASE(DynamicTensorType3Single, CLDynamicTensorType3SingleFunction, framework::DatasetMode::ALL,
-                       zip(make("Level0Shape", { TensorShape(12U, 11U, 3U), TensorShape(256U, 8U, 12U) }),
-                                               make("Level1Shape", { TensorShape(67U, 31U, 15U), TensorShape(11U, 2U, 3U) })))
+FIXTURE_DATA_TEST_CASE(DynamicTensorType3Single,
+                       CLDynamicTensorType3SingleFunction,
+                       framework::DatasetMode::ALL,
+                       zip(make("Level0Shape", {TensorShape(12U, 11U, 3U), TensorShape(256U, 8U, 12U)}),
+                           make("Level1Shape", {TensorShape(67U, 31U, 15U), TensorShape(11U, 2U, 3U)})))
 {
     ARM_COMPUTE_EXPECT(internal_l0.size() == internal_l1.size(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(cross_l0.size() == cross_l1.size(), framework::LogLevel::ERRORS);
 
     const unsigned int internal_size = internal_l0.size();
     const unsigned int cross_size    = cross_l0.size();
-    if(input_l0.total_size() < input_l1.total_size())
+    if (input_l0.total_size() < input_l1.total_size())
     {
-        for(unsigned int i = 0; i < internal_size; ++i)
+        for (unsigned int i = 0; i < internal_size; ++i)
         {
             ARM_COMPUTE_EXPECT(internal_l0[i].size < internal_l1[i].size, framework::LogLevel::ERRORS);
         }
-        for(unsigned int i = 0; i < cross_size; ++i)
+        for (unsigned int i = 0; i < cross_size; ++i)
         {
             ARM_COMPUTE_EXPECT(cross_l0[i].size < cross_l1[i].size, framework::LogLevel::ERRORS);
         }
     }
     else
     {
-        for(unsigned int i = 0; i < internal_size; ++i)
+        for (unsigned int i = 0; i < internal_size; ++i)
         {
             ARM_COMPUTE_EXPECT(internal_l0[i].size == internal_l1[i].size, framework::LogLevel::ERRORS);
         }
-        for(unsigned int i = 0; i < cross_size; ++i)
+        for (unsigned int i = 0; i < cross_size; ++i)
         {
             ARM_COMPUTE_EXPECT(cross_l0[i].size == cross_l1[i].size, framework::LogLevel::ERRORS);
         }
     }
 }
 
-using CLDynamicTensorType3ComplexFunction = DynamicTensorType3ComplexFunction<CLTensor, CLAccessor, BlobMemoryManagementService, CLConvolutionLayer>;
+using CLDynamicTensorType3ComplexFunction =
+    DynamicTensorType3ComplexFunction<CLTensor, CLAccessor, BlobMemoryManagementService, CLConvolutionLayer>;
 /** Tests the memory manager with dynamic input and output tensors.
  *
  *  Create and manage the tensors needed to run a complex function. After the function is executed,
  *  change the input and output size requesting more memory and go through the manage/allocate process.
  *  The memory manager should be able to update the inner structures and allocate the requested memory
  * */
-FIXTURE_DATA_TEST_CASE(DynamicTensorType3Complex, CLDynamicTensorType3ComplexFunction, framework::DatasetMode::ALL,
-                       zip(zip(zip(zip(
-                                                                                                   make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 16U), TensorShape(64U, 64U, 16U) } }),
-                                                                                                   make("WeightsManager", { TensorShape(3U, 3U, 16U, 5U) })),
-                                                                                               make("BiasShape", { TensorShape(5U) })),
-                                                                       make("OutputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 5U), TensorShape(64U, 64U, 5U) } })),
-                                               make("PadStrideInfo", { PadStrideInfo(1U, 1U, 1U, 1U) })))
+FIXTURE_DATA_TEST_CASE(
+    DynamicTensorType3Complex,
+    CLDynamicTensorType3ComplexFunction,
+    framework::DatasetMode::ALL,
+    zip(zip(zip(zip(make("InputShape",
+                         {std::vector<TensorShape>{TensorShape(12U, 12U, 16U), TensorShape(64U, 64U, 16U)}}),
+                    make("WeightsManager", {TensorShape(3U, 3U, 16U, 5U)})),
+                make("BiasShape", {TensorShape(5U)})),
+            make("OutputShape", {std::vector<TensorShape>{TensorShape(12U, 12U, 5U), TensorShape(64U, 64U, 5U)}})),
+        make("PadStrideInfo", {PadStrideInfo(1U, 1U, 1U, 1U)})))
 {
-    for(unsigned int i = 0; i < num_iterations; ++i)
+    for (unsigned int i = 0; i < num_iterations; ++i)
     {
         run_iteration(i);
         validate(CLAccessor(dst_target), dst_ref, tolerance_f32, tolerance_num, absolute_tolerance_float);
     }
 }
 
-using CLDynamicTensorType2PipelineFunction = DynamicTensorType2PipelineFunction<CLTensor, CLAccessor, BlobMemoryManagementService, CLConvolutionLayer>;
+using CLDynamicTensorType2PipelineFunction =
+    DynamicTensorType2PipelineFunction<CLTensor, CLAccessor, BlobMemoryManagementService, CLConvolutionLayer>;
 /** Tests the memory manager with dynamic input and output tensors.
  *
  *  Create and manage the tensors needed to run a pipeline. After the function is executed, resize the input size and rerun.
  */
-FIXTURE_DATA_TEST_CASE(DynamicTensorType2Pipeline, CLDynamicTensorType2PipelineFunction, framework::DatasetMode::ALL,
-                       make("InputShape", { std::vector<TensorShape>{ TensorShape(12U, 12U, 6U), TensorShape(128U, 128U, 6U) } }))
+FIXTURE_DATA_TEST_CASE(DynamicTensorType2Pipeline,
+                       CLDynamicTensorType2PipelineFunction,
+                       framework::DatasetMode::ALL,
+                       make("InputShape",
+                            {std::vector<TensorShape>{TensorShape(12U, 12U, 6U), TensorShape(128U, 128U, 6U)}}))
 {
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "ConvolutionLayer.h"
-
 #include "tests/validation/Helpers.h"
+
+#include "ConvolutionLayer.h"
 
 namespace arm_compute
 {
@@ -34,8 +34,12 @@ namespace validation
 namespace reference
 {
 template <typename T, typename TW, typename TB>
-SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<TW> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape,
-                                    const PadStrideInfo &info, QuantizationInfo out_qinfo)
+SimpleTensor<T> deconvolution_layer(const SimpleTensor<T>  &src,
+                                    const SimpleTensor<TW> &weights,
+                                    const SimpleTensor<TB> &bias,
+                                    const TensorShape      &output_shape,
+                                    const PadStrideInfo    &info,
+                                    QuantizationInfo        out_qinfo)
 {
     // Create reference
     const unsigned int pad_left           = info.pad_left();
@@ -80,7 +84,7 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     TensorShape scaled_shape = src.shape();
     scaled_shape.set(0, out_x);
     scaled_shape.set(1, out_y);
-    SimpleTensor<T> scaled{ scaled_shape, src.data_type(), 1, src.quantization_info() };
+    SimpleTensor<T> scaled{scaled_shape, src.data_type(), 1, src.quantization_info()};
 
     const int width_in      = src.shape().x();
     const int height_in     = src.shape().y();
@@ -88,7 +92,7 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     const int height_scaled = scaled.shape().y();
     const int num_2d_slices = src.shape().total_size() / (width_in * height_in);
 
-    if(src.data_type() == DataType::QASYMM8 || src.data_type() == DataType::QASYMM8_SIGNED)
+    if (src.data_type() == DataType::QASYMM8 || src.data_type() == DataType::QASYMM8_SIGNED)
     {
         const auto quantized_zero = static_cast<T>(src.quantization_info().uniform().offset);
         std::fill_n(scaled.data(), scaled.num_elements(), quantized_zero);
@@ -99,25 +103,27 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     }
 
     // Flip weights by 180 degrees
-    SimpleTensor<TW> weights_flipped{ weights.shape(), weights.data_type(), 1, weights.quantization_info(), weights.data_layout() };
+    SimpleTensor<TW> weights_flipped{weights.shape(), weights.data_type(), 1, weights.quantization_info(),
+                                     weights.data_layout()};
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int ud = 0; ud < weights_upper_dims; ++ud)
+    for (int ud = 0; ud < weights_upper_dims; ++ud)
     {
         const int offset = ud * weights_width * weights_height;
-        for(int y = 0; y < weights_height; ++y)
+        for (int y = 0; y < weights_height; ++y)
         {
-            for(int x = 0; x < weights_width; ++x)
+            for (int x = 0; x < weights_width; ++x)
             {
-                weights_flipped[offset + (weights_height - 1 - y) * weights_width + (weights_width - 1 - x)] = weights[offset + y * weights_width + x];
+                weights_flipped[offset + (weights_height - 1 - y) * weights_width + (weights_width - 1 - x)] =
+                    weights[offset + y * weights_width + x];
             }
         }
     }
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int slice = 0; slice < num_2d_slices; ++slice)
+    for (int slice = 0; slice < num_2d_slices; ++slice)
     {
         const int offset_slice_in  = slice * width_in * height_in;
         const int offset_slice_out = slice * width_scaled * height_scaled;
@@ -126,9 +132,9 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
         const int end_x            = width_scaled - deconv_pad_right;
         const int end_y            = height_scaled - deconv_pad_bottom;
 
-        for(int yi = start_y, in_y = 0; yi < end_y; yi += stride_y, in_y++)
+        for (int yi = start_y, in_y = 0; yi < end_y; yi += stride_y, in_y++)
         {
-            for(int xi = start_x, in_x = 0; xi < end_x; xi += stride_x, in_x++)
+            for (int xi = start_x, in_x = 0; xi < end_x; xi += stride_x, in_x++)
             {
                 const T *in  = src.data() + offset_slice_in + in_y * width_in + in_x;
                 T       *out = scaled.data() + offset_slice_out + xi + yi * width_scaled;
@@ -141,16 +147,36 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     return convolution_layer(scaled, weights_flipped, bias, output_shape, conv_info, Size2D(1U, 1U), 1, out_qinfo);
 }
 
-template SimpleTensor<uint8_t> deconvolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
-                                                   const PadStrideInfo &info, QuantizationInfo out_quant_info);
-template SimpleTensor<uint8_t> deconvolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
-                                                   const PadStrideInfo &info, QuantizationInfo out_quant_info);
-template SimpleTensor<int8_t> deconvolution_layer(const SimpleTensor<int8_t> &src, const SimpleTensor<int8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
-                                                  const PadStrideInfo &info, QuantizationInfo out_quant_info);
-template SimpleTensor<float> deconvolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,
-                                                 const PadStrideInfo &info, QuantizationInfo out_quant_info);
-template SimpleTensor<half> deconvolution_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &output_shape,
-                                                const PadStrideInfo &info, QuantizationInfo out_quant_info);
+template SimpleTensor<uint8_t> deconvolution_layer(const SimpleTensor<uint8_t> &src,
+                                                   const SimpleTensor<uint8_t> &weights,
+                                                   const SimpleTensor<int32_t> &bias,
+                                                   const TensorShape           &output_shape,
+                                                   const PadStrideInfo         &info,
+                                                   QuantizationInfo             out_quant_info);
+template SimpleTensor<uint8_t> deconvolution_layer(const SimpleTensor<uint8_t> &src,
+                                                   const SimpleTensor<int8_t>  &weights,
+                                                   const SimpleTensor<int32_t> &bias,
+                                                   const TensorShape           &output_shape,
+                                                   const PadStrideInfo         &info,
+                                                   QuantizationInfo             out_quant_info);
+template SimpleTensor<int8_t>  deconvolution_layer(const SimpleTensor<int8_t>  &src,
+                                                   const SimpleTensor<int8_t>  &weights,
+                                                   const SimpleTensor<int32_t> &bias,
+                                                   const TensorShape           &output_shape,
+                                                   const PadStrideInfo         &info,
+                                                   QuantizationInfo             out_quant_info);
+template SimpleTensor<float>   deconvolution_layer(const SimpleTensor<float> &src,
+                                                   const SimpleTensor<float> &weights,
+                                                   const SimpleTensor<float> &bias,
+                                                   const TensorShape         &output_shape,
+                                                   const PadStrideInfo       &info,
+                                                   QuantizationInfo           out_quant_info);
+template SimpleTensor<half>    deconvolution_layer(const SimpleTensor<half> &src,
+                                                   const SimpleTensor<half> &weights,
+                                                   const SimpleTensor<half> &bias,
+                                                   const TensorShape        &output_shape,
+                                                   const PadStrideInfo      &info,
+                                                   QuantizationInfo          out_quant_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

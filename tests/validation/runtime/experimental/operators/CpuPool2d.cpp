@@ -24,7 +24,7 @@
 
 #include "arm_compute/runtime/experimental/operators/CpuPool2d.h"
 
-#include "arm_compute/core/Types.h"  // required for PoolingLayerInfo
+#include "arm_compute/core/Types.h" // required for PoolingLayerInfo
 #include "arm_compute/runtime/Tensor.h"
 
 #include "src/core/helpers/MemoryHelpers.h"
@@ -51,36 +51,29 @@ namespace validation
 {
 using framework::dataset::make;
 
-const auto pool_data_layout_dataset = make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC });
+const auto pool_data_layout_dataset = make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC});
 
-const auto SmokePoolingDatasetFP32 = combine(
-    datasets::SmallNoneUnitShapes(),
-    datasets::PoolingTypes(),
-    make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(7, 7) }),
-    make("PadStride", {
-        PadStrideInfo(1, 1, 0, 0),
-        PadStrideInfo(2, 2, 0, 0),
-        PadStrideInfo(1, 2, 1, 1)
-    }),
-    make("ExcludePadding", { true, false }),
-    make("DataType", DataType::F32),
-    pool_data_layout_dataset
-);
+const auto SmokePoolingDatasetFP32 =
+    combine(datasets::SmallNoneUnitShapes(),
+            datasets::PoolingTypes(),
+            make("PoolingSize", {Size2D(2, 2), Size2D(3, 3), Size2D(7, 7)}),
+            make("PadStride", {PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 2, 0, 0), PadStrideInfo(1, 2, 1, 1)}),
+            make("ExcludePadding", {true, false}),
+            make("DataType", DataType::F32),
+            pool_data_layout_dataset);
 
-const auto SmokePoolingDatasetQASYMM8 = combine(
-    datasets::SmallNoneUnitShapes(),
-    make("PoolingType", { PoolingType::MAX, PoolingType::AVG }),
-    make("PoolingSize",  { Size2D(2, 2), Size2D(3, 3) }),
-    make("PadStride",    { PadStrideInfo(1,1,0,0) }),
-    make("ExcludePadding",{ false }),
-    make("DataType",        DataType::QASYMM8),
-    pool_data_layout_dataset,
-    make("InputQuantInfo",  { QuantizationInfo(0.2f, 10) }),
-    make("OutputQuantInfo", { QuantizationInfo(0.2f, 10) })
-);
+const auto SmokePoolingDatasetQASYMM8 = combine(datasets::SmallNoneUnitShapes(),
+                                                make("PoolingType", {PoolingType::MAX, PoolingType::AVG}),
+                                                make("PoolingSize", {Size2D(2, 2), Size2D(3, 3)}),
+                                                make("PadStride", {PadStrideInfo(1, 1, 0, 0)}),
+                                                make("ExcludePadding", {false}),
+                                                make("DataType", DataType::QASYMM8),
+                                                pool_data_layout_dataset,
+                                                make("InputQuantInfo", {QuantizationInfo(0.2f, 10)}),
+                                                make("OutputQuantInfo", {QuantizationInfo(0.2f, 10)}));
 
- /** Tolerance for float operations */
-constexpr AbsoluteTolerance<float> tolerance_f32(0.000001f);
+/** Tolerance for float operations */
+constexpr AbsoluteTolerance<float>   tolerance_f32(0.000001f);
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(
     1); /**< Tolerance value for comparing reference's output against implementation's output for unsigned 8-bit asymmetric type */
 
@@ -88,7 +81,7 @@ TEST_SUITE(NEON)
 TEST_SUITE(OPERATORS)
 TEST_SUITE(CpuPool2d)
 
- // clang-format off
+// clang-format off
  DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
     make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching data type
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Window shrink
@@ -135,12 +128,11 @@ TEST_SUITE(CpuPool2d)
 // clang-format on
 
 template <typename T>
- using CpuPool2dQuantizedFixture =
-     CpuPool2dValidationQuantizedFixture<Tensor, Accessor, arm_compute::experimental::op::CpuPool2d, T>;
+using CpuPool2dQuantizedFixture =
+    CpuPool2dValidationQuantizedFixture<Tensor, Accessor, arm_compute::experimental::op::CpuPool2d, T>;
 
 template <typename T>
-using CpuPool2dFP32Fixture = CpuPool2dValidationFixture<
-    Tensor, Accessor, arm_compute::experimental::op::CpuPool2d, T>;
+using CpuPool2dFP32Fixture = CpuPool2dValidationFixture<Tensor, Accessor, arm_compute::experimental::op::CpuPool2d, T>;
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(SmokeFP32,

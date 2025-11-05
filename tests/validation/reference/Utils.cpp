@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,8 @@ namespace validation
 {
 // Return the bilinear value at a specified coordinate with different border modes
 template <typename T>
-T bilinear_policy(const SimpleTensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, T constant_border_value)
+T bilinear_policy(
+    const SimpleTensor<T> &in, Coordinates id, float xn, float yn, BorderMode border_mode, T constant_border_value)
 {
     const int idx = std::floor(xn);
     const int idy = std::floor(yn);
@@ -61,11 +62,36 @@ T bilinear_policy(const SimpleTensor<T> &in, Coordinates id, float xn, float yn,
     return static_cast<T>(tl * (dx_1 * dy_1) + tr * (dx * dy_1) + bl * (dx_1 * dy) + br * (dx * dy));
 }
 
-template int8_t bilinear_policy(const SimpleTensor<int8_t> &in, Coordinates id, float xn, float yn, BorderMode border_mode, int8_t constant_border_value);
-template uint8_t bilinear_policy(const SimpleTensor<uint8_t> &in, Coordinates id, float xn, float yn, BorderMode border_mode, uint8_t constant_border_value);
-template int16_t bilinear_policy(const SimpleTensor<int16_t> &in, Coordinates id, float xn, float yn, BorderMode border_mode, int16_t constant_border_value);
-template half bilinear_policy(const SimpleTensor<half> &in, Coordinates id, float xn, float yn, BorderMode border_mode, half constant_border_value);
-template float bilinear_policy(const SimpleTensor<float> &in, Coordinates id, float xn, float yn, BorderMode border_mode, float constant_border_value);
+template int8_t  bilinear_policy(const SimpleTensor<int8_t> &in,
+                                 Coordinates                 id,
+                                 float                       xn,
+                                 float                       yn,
+                                 BorderMode                  border_mode,
+                                 int8_t                      constant_border_value);
+template uint8_t bilinear_policy(const SimpleTensor<uint8_t> &in,
+                                 Coordinates                  id,
+                                 float                        xn,
+                                 float                        yn,
+                                 BorderMode                   border_mode,
+                                 uint8_t                      constant_border_value);
+template int16_t bilinear_policy(const SimpleTensor<int16_t> &in,
+                                 Coordinates                  id,
+                                 float                        xn,
+                                 float                        yn,
+                                 BorderMode                   border_mode,
+                                 int16_t                      constant_border_value);
+template half    bilinear_policy(const SimpleTensor<half> &in,
+                                 Coordinates               id,
+                                 float                     xn,
+                                 float                     yn,
+                                 BorderMode                border_mode,
+                                 half                      constant_border_value);
+template float   bilinear_policy(const SimpleTensor<float> &in,
+                                 Coordinates                id,
+                                 float                      xn,
+                                 float                      yn,
+                                 BorderMode                 border_mode,
+                                 float                      constant_border_value);
 
 RawTensor transpose(const RawTensor &src, int chunk_width)
 {
@@ -74,12 +100,12 @@ RawTensor transpose(const RawTensor &src, int chunk_width)
     dst_shape.set(0, src.shape().y() * chunk_width);
     dst_shape.set(1, std::ceil(src.shape().x() / static_cast<float>(chunk_width)));
 
-    RawTensor dst{ dst_shape, src.data_type() };
+    RawTensor dst{dst_shape, src.data_type()};
 
     // Compute reference
     uint8_t *out_ptr = dst.data();
 
-    for(int i = 0; i < dst.num_elements(); i += chunk_width)
+    for (int i = 0; i < dst.num_elements(); i += chunk_width)
     {
         Coordinates coord   = index2coord(dst.shape(), i);
         size_t      coord_x = coord.x();
@@ -98,11 +124,11 @@ RawTensor transpose(const RawTensor &src, int chunk_width)
 
 bool valid_bilinear_policy(float xn, float yn, int width, int height, BorderMode border_mode)
 {
-    if(border_mode != BorderMode::UNDEFINED)
+    if (border_mode != BorderMode::UNDEFINED)
     {
         return true;
     }
-    if((0 <= yn + 1) && (yn + 1 < height) && (0 <= xn + 1) && (xn + 1 < width))
+    if ((0 <= yn + 1) && (yn + 1 < height) && (0 <= xn + 1) && (xn + 1 < width))
     {
         return true;
     }

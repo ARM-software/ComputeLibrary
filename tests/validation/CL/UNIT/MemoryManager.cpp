@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+
 #include "tests/AssetsLibrary.h"
 #include "tests/CL/CLAccessor.h"
-#include "tests/Globals.h"
-#include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 #include "tests/validation/fixtures/UNIT/MemoryManagerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -49,10 +50,8 @@ TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(MemoryManager)
 
-using CLBlobMemoryManagerSimpleWithinFunctionLevelFixture = BlobMemoryManagerSimpleTestCaseFixture<CLTensor,
-      CLAccessor,
-      CLBufferAllocator,
-      CLFullyConnectedLayer>;
+using CLBlobMemoryManagerSimpleWithinFunctionLevelFixture =
+    BlobMemoryManagerSimpleTestCaseFixture<CLTensor, CLAccessor, CLBufferAllocator, CLFullyConnectedLayer>;
 FIXTURE_TEST_CASE(BlobMemoryManagerSimpleWithinFunctionLevel,
                   CLBlobMemoryManagerSimpleWithinFunctionLevelFixture,
                   framework::DatasetMode::ALL)

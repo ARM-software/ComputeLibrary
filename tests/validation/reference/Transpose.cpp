@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "Transpose.h"
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -38,17 +39,17 @@ template <typename T>
 SimpleTensor<T> transpose(const SimpleTensor<T> &src)
 {
     // Make rows the columns of the original shape
-    TensorShape dst_shape{ src.shape().y(), src.shape().x() };
+    TensorShape dst_shape{src.shape().y(), src.shape().x()};
 
     // Create reference
-    SimpleTensor<T> dst{ dst_shape, src.data_type() };
+    SimpleTensor<T> dst{dst_shape, src.data_type()};
 
     // Compute reference
     const uint32_t num_elements = src.num_elements();
-    for(uint32_t i = 0; i < num_elements; ++i)
+    for (uint32_t i = 0; i < num_elements; ++i)
     {
         const Coordinates coord = index2coord(src.shape(), i);
-        const Coordinates dst_coord{ coord.y(), coord.x() };
+        const Coordinates dst_coord{coord.y(), coord.x()};
         const size_t      dst_index = coord2index(dst.shape(), dst_coord);
 
         dst[dst_index] = src[i];
@@ -57,11 +58,11 @@ SimpleTensor<T> transpose(const SimpleTensor<T> &src)
     return dst;
 }
 
-template SimpleTensor<uint8_t> transpose(const SimpleTensor<uint8_t> &src);
+template SimpleTensor<uint8_t>  transpose(const SimpleTensor<uint8_t> &src);
 template SimpleTensor<uint16_t> transpose(const SimpleTensor<uint16_t> &src);
 template SimpleTensor<uint32_t> transpose(const SimpleTensor<uint32_t> &src);
-template SimpleTensor<half> transpose(const SimpleTensor<half> &src);
-template SimpleTensor<float> transpose(const SimpleTensor<float> &src);
+template SimpleTensor<half>     transpose(const SimpleTensor<half> &src);
+template SimpleTensor<float>    transpose(const SimpleTensor<float> &src);
 } // namespace reference
 } // namespace validation
 } // namespace test

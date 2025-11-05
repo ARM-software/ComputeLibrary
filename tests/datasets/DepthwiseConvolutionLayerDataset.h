@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,10 +24,10 @@
 #ifndef ACL_TESTS_DATASETS_DEPTHWISECONVOLUTIONLAYERDATASET_H
 #define ACL_TESTS_DATASETS_DEPTHWISECONVOLUTIONLAYERDATASET_H
 
-#include "utils/TypePrinter.h"
-
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -46,10 +46,10 @@ public:
                  std::vector<Size2D>::const_iterator        weights_it,
                  std::vector<PadStrideInfo>::const_iterator infos_it,
                  std::vector<Size2D>::const_iterator        dilation_it)
-            : _src_it{ std::move(src_it) },
-              _weights_it{ std::move(weights_it) },
-              _infos_it{ std::move(infos_it) },
-              _dilation_it{ std::move(dilation_it) }
+            : _src_it{std::move(src_it)},
+              _weights_it{std::move(weights_it)},
+              _infos_it{std::move(infos_it)},
+              _dilation_it{std::move(dilation_it)}
         {
         }
 
@@ -92,7 +92,8 @@ public:
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_weight_shapes.size(), std::min(_infos.size(), _dilations.size())));
+        return std::min(_src_shapes.size(),
+                        std::min(_weight_shapes.size(), std::min(_infos.size(), _dilations.size())));
     }
 
     void add_config(TensorShape src, Size2D weights, PadStrideInfo info, Size2D dilation = Size2D(1U, 1U))
@@ -124,10 +125,13 @@ public:
         add_config(TensorShape(3U, 3U, 2U), Size2D(2U, 2U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(33U, 27U, 7U), Size2D(7U, 3U), PadStrideInfo(3, 2, 1, 0));
         // Asymmetric padding
-        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 1, 2, 0, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 1, 0, 2, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U),
+                   PadStrideInfo(3, 2, 1, 1, 2, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U),
+                   PadStrideInfo(3, 2, 1, 1, 0, 2, DimensionRoundingType::FLOOR));
         // Ceil rounding
-        add_config(TensorShape(7U, 8U, 5U, 9U), Size2D(8U, 6U), PadStrideInfo(2, 3, 1, 1, 1, 3, DimensionRoundingType::CEIL));
+        add_config(TensorShape(7U, 8U, 5U, 9U), Size2D(8U, 6U),
+                   PadStrideInfo(2, 3, 1, 1, 1, 3, DimensionRoundingType::CEIL));
     }
 };
 
@@ -148,12 +152,17 @@ public:
         add_config(TensorShape(333U, 79U, 77U), Size2D(3U, 4U), PadStrideInfo(2, 3, 0, 1));
         add_config(TensorShape(67U, 211U, 22U), Size2D(3U, 4U), PadStrideInfo(2, 1, 1, 1));
         // Asymmetric padding
-        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 2, 1, 2, 0, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 3, 0, 2, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 0, 1, 0, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U),
+                   PadStrideInfo(3, 2, 2, 1, 2, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U),
+                   PadStrideInfo(3, 2, 1, 3, 0, 2, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U),
+                   PadStrideInfo(3, 2, 1, 0, 1, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U),
+                   PadStrideInfo(3, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
         // Padding greater than kernel size.
-        add_config(TensorShape(128, 56, 56), Size2D(4, 4), PadStrideInfo(2, 2, 0, 10, 0, 10, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(128, 56, 56), Size2D(4, 4),
+                   PadStrideInfo(2, 2, 0, 10, 0, 10, DimensionRoundingType::FLOOR));
     }
 };
 
@@ -165,8 +174,10 @@ public:
     {
         add_config(TensorShape(33U, 27U, 11U), Size2D(3U, 4U), PadStrideInfo(1, 2, 0, 1));
         // Asymmetric padding
-        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 2, 1, 2, 0, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 3, 0, 2, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U),
+                   PadStrideInfo(3, 2, 2, 1, 2, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U),
+                   PadStrideInfo(3, 2, 1, 3, 0, 2, DimensionRoundingType::FLOOR));
         // Unlike LargeDepthwiseConvolutionLayerDataset, this does not have padding greater than kernel size.
     }
 };
@@ -182,10 +193,13 @@ public:
         add_config(TensorShape(177U, 111U, 22U), Size2D(3U, 4U), PadStrideInfo(1, 2, 1, 1));
         add_config(TensorShape(67U, 211U, 22U), Size2D(3U, 4U), PadStrideInfo(2, 1, 1, 1));
         // Asymmetric padding
-        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 3, 0, 2, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U), PadStrideInfo(3, 2, 1, 0, 1, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U),
+                   PadStrideInfo(3, 2, 1, 3, 0, 2, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 7U), Size2D(5U, 7U),
+                   PadStrideInfo(3, 2, 1, 0, 1, 0, DimensionRoundingType::FLOOR));
         // Padding greater than kernel size.
-        add_config(TensorShape(128, 56, 56), Size2D(4, 4), PadStrideInfo(2, 2, 0, 10, 0, 10, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(128, 56, 56), Size2D(4, 4),
+                   PadStrideInfo(2, 2, 0, 10, 0, 10, DimensionRoundingType::FLOOR));
     }
 };
 
@@ -209,7 +223,8 @@ public:
         add_config(TensorShape(7U, 8U, 3U, 2U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(32U, 31U, 9U, 4U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0));
         // Asymmetric padding
-        add_config(TensorShape(33U, 27U, 11U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 11U), Size2D(3U, 3U),
+                   PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
     }
 };
 
@@ -220,7 +235,8 @@ public:
     {
         add_config(TensorShape(33U, 27U, 11U), Size2D(3U, 3U), PadStrideInfo(3, 2, 1, 1));
         // Asymmetric padding
-        add_config(TensorShape(33U, 27U, 11U), Size2D(3U, 3U), PadStrideInfo(2, 2, 3, 1, 2, 1, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 11U), Size2D(3U, 3U),
+                   PadStrideInfo(2, 2, 3, 1, 2, 1, DimensionRoundingType::FLOOR));
     }
 };
 
@@ -275,12 +291,15 @@ public:
     {
         // Stride 1
         add_config(TensorShape(7U, 7U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL));
-        add_config(TensorShape(7U, 7U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL), Size2D(2U, 2U));
+        add_config(TensorShape(7U, 7U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL),
+                   Size2D(2U, 2U));
         add_config(TensorShape(7U, 7U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL));
-        add_config(TensorShape(7U, 7U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 2, 2, DimensionRoundingType::CEIL), Size2D(2U, 2U));
+        add_config(TensorShape(7U, 7U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 2, 2, DimensionRoundingType::CEIL),
+                   Size2D(2U, 2U));
         // Stride 2
         add_config(TensorShape(9U, 9U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL));
-        add_config(TensorShape(9U, 9U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), Size2D(2U, 2U));
+        add_config(TensorShape(9U, 9U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL),
+                   Size2D(2U, 2U));
         add_config(TensorShape(9U, 9U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 1, 1, DimensionRoundingType::CEIL));
     }
 };
@@ -291,18 +310,23 @@ public:
     LargeOptimizedDepthwiseConvolutionLayerDataset3x3()
     {
         // Stride 1
-        add_config(TensorShape(233U, 173U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL));
+        add_config(TensorShape(233U, 173U, 16U), Size2D(3U, 3U),
+                   PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL));
         add_config(TensorShape(133U, 7U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL));
         add_config(TensorShape(7U, 7U, 21U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL));
         add_config(TensorShape(28U, 28U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL));
         add_config(TensorShape(28U, 28U, 16U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL));
         // Stride 2
         add_config(TensorShape(133U, 97U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL));
-        add_config(TensorShape(153U, 77U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 1, 1, 1, 1, DimensionRoundingType::CEIL));
+        add_config(TensorShape(153U, 77U, 32U), Size2D(3U, 3U),
+                   PadStrideInfo(2, 2, 1, 1, 1, 1, DimensionRoundingType::CEIL));
         add_config(TensorShape(8U, 8U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(8U, 8U, 32U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL));
-        add_config(TensorShape(8U, 8U, 33U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL));
-        add_config(TensorShape(64U, 64U, 128U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL));
+        add_config(TensorShape(8U, 8U, 32U), Size2D(3U, 3U),
+                   PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL));
+        add_config(TensorShape(8U, 8U, 33U), Size2D(3U, 3U),
+                   PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL));
+        add_config(TensorShape(64U, 64U, 128U), Size2D(3U, 3U),
+                   PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL));
     }
 };
 
@@ -314,14 +338,19 @@ public:
     {
         // Stride 1
         add_config(TensorShape(7U, 7U, 16U), Size2D(5U, 5U), PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL));
-        add_config(TensorShape(11U, 11U, 16U), Size2D(5U, 5U), PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL), Size2D(2U, 2U));
+        add_config(TensorShape(11U, 11U, 16U), Size2D(5U, 5U), PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL),
+                   Size2D(2U, 2U));
         add_config(TensorShape(7U, 7U, 16U), Size2D(5U, 5U), PadStrideInfo(1, 1, 2, 2, DimensionRoundingType::CEIL));
-        add_config(TensorShape(7U, 7U, 16U), Size2D(5U, 5U), PadStrideInfo(1, 1, 4, 4, DimensionRoundingType::CEIL), Size2D(2U, 2U));
+        add_config(TensorShape(7U, 7U, 16U), Size2D(5U, 5U), PadStrideInfo(1, 1, 4, 4, DimensionRoundingType::CEIL),
+                   Size2D(2U, 2U));
         // Stride 2
         add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL));
-        add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), Size2D(2U, 2U));
-        add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U), PadStrideInfo(2, 2, 2, 2, 2, 2, DimensionRoundingType::CEIL));
-        add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U), PadStrideInfo(2, 2, 4, 4, 4, 4, DimensionRoundingType::CEIL), Size2D(2U, 2U));
+        add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL),
+                   Size2D(2U, 2U));
+        add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U),
+                   PadStrideInfo(2, 2, 2, 2, 2, 2, DimensionRoundingType::CEIL));
+        add_config(TensorShape(9U, 9U, 32U), Size2D(5U, 5U),
+                   PadStrideInfo(2, 2, 4, 4, 4, 4, DimensionRoundingType::CEIL), Size2D(2U, 2U));
     }
 };
 

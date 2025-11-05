@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_NEON_HELPER_H
-#define ARM_COMPUTE_TEST_NEON_HELPER_H
+#ifndef ACL_TESTS_NEON_HELPER_H
+#define ACL_TESTS_NEON_HELPER_H
 
 #include "arm_compute/runtime/Array.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 #include "arm_compute/runtime/NEON/INESimpleFunctionNoBorder.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 #include "src/cpu/ICpuOperator.h"
 #include "tests/Globals.h"
@@ -42,13 +43,13 @@ namespace arm_compute
 namespace test
 {
 template <typename D, typename T, typename... Ts>
-void fill_tensors(D &&dist, std::initializer_list<int> seeds, T &&tensor, Ts &&... other_tensors)
+void fill_tensors(D &&dist, std::initializer_list<int> seeds, T &&tensor, Ts &&...other_tensors)
 {
-    const std::array < T, 1 + sizeof...(Ts) > tensors{ { std::forward<T>(tensor), std::forward<Ts>(other_tensors)... } };
-    std::vector<int> vs(seeds);
+    const std::array<T, 1 + sizeof...(Ts)> tensors{{std::forward<T>(tensor), std::forward<Ts>(other_tensors)...}};
+    std::vector<int>                       vs(seeds);
     ARM_COMPUTE_ERROR_ON(vs.size() != tensors.size());
     int k = 0;
-    for(auto tp : tensors)
+    for (auto tp : tensors)
     {
         library->fill(Accessor(*tp), std::forward<D>(dist), vs[k++]);
     }
@@ -64,7 +65,7 @@ public:
      * @param[in] args Configuration arguments.
      */
     template <typename... Args>
-    void configure(Args &&... args)
+    void configure(Args &&...args)
     {
         auto k = std::make_unique<K>();
         k->configure(std::forward<Args>(args)...);
@@ -75,7 +76,7 @@ public:
      * @param[in] args Configuration arguments.
      */
     template <typename... Args>
-    static Status validate(Args &&... args)
+    static Status validate(Args &&...args)
     {
         return K::validate(std::forward<Args>(args)...);
     }
@@ -92,7 +93,7 @@ public:
      * @param[in] args  Rest of the configuration arguments.
      */
     template <typename T, typename... Args>
-    void configure(T first, Args &&... args)
+    void configure(T first, Args &&...args)
     {
         auto k = std::make_unique<K>();
         k->configure(first, std::forward<Args>(args)...);
@@ -115,7 +116,7 @@ public:
      * @param[in] args  Rest of the configuration arguments.
      */
     template <typename T, typename... Args>
-    void configure(T first, Args &&... args)
+    void configure(T first, Args &&...args)
     {
         auto k = std::make_unique<K>();
         k->configure(first, std::forward<Args>(args)...);
@@ -133,9 +134,9 @@ public:
     }
 
 private:
-    std::unique_ptr<INEKernel> _border_handler{ nullptr };
+    std::unique_ptr<INEKernel> _border_handler{nullptr};
 };
 
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_NEON_HELPER_H */
+#endif // ACL_TESTS_NEON_HELPER_H

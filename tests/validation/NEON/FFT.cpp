@@ -26,13 +26,14 @@
 #include "arm_compute/runtime/NEON/functions/NEFFT2D.h"
 #include "arm_compute/runtime/NEON/functions/NEFFTConvolutionLayer.h"
 #include "arm_compute/runtime/Tensor.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/datasets/SmallConvolutionLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/FFTFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -44,28 +45,22 @@ using framework::dataset::make;
 
 namespace
 {
-const auto data_types = make("DataType", { DataType::F32 });
-const auto shapes_1d  = make("TensorShape", { TensorShape(2U, 2U, 3U), TensorShape(3U, 2U, 3U),
-                                                                  TensorShape(4U, 2U, 3U), TensorShape(5U, 2U, 3U),
-                                                                  TensorShape(7U, 2U, 3U), TensorShape(8U, 2U, 3U),
-                                                                  TensorShape(9U, 2U, 3U), TensorShape(25U, 2U, 3U),
-                                                                  TensorShape(49U, 2U, 3U), TensorShape(64U, 2U, 3U),
-                                                                  TensorShape(16U, 2U, 3U), TensorShape(32U, 2U, 3U),
-                                                                  TensorShape(96U, 2U, 2U)
-                                                                });
+const auto data_types = make("DataType", {DataType::F32});
+const auto shapes_1d =
+    make("TensorShape",
+         {TensorShape(2U, 2U, 3U), TensorShape(3U, 2U, 3U), TensorShape(4U, 2U, 3U), TensorShape(5U, 2U, 3U),
+          TensorShape(7U, 2U, 3U), TensorShape(8U, 2U, 3U), TensorShape(9U, 2U, 3U), TensorShape(25U, 2U, 3U),
+          TensorShape(49U, 2U, 3U), TensorShape(64U, 2U, 3U), TensorShape(16U, 2U, 3U), TensorShape(32U, 2U, 3U),
+          TensorShape(96U, 2U, 2U)});
 
-const auto shapes_2d = make("TensorShape", { TensorShape(2U, 2U, 3U), TensorShape(3U, 6U, 3U),
-                                                                 TensorShape(4U, 5U, 3U), TensorShape(5U, 7U, 3U),
-                                                                 TensorShape(7U, 25U, 3U), TensorShape(8U, 2U, 3U),
-                                                                 TensorShape(9U, 16U, 3U), TensorShape(25U, 32U, 3U),
-                                                                 TensorShape(192U, 128U, 2U)
-                                                               });
+const auto shapes_2d = make("TensorShape",
+                            {TensorShape(2U, 2U, 3U), TensorShape(3U, 6U, 3U), TensorShape(4U, 5U, 3U),
+                             TensorShape(5U, 7U, 3U), TensorShape(7U, 25U, 3U), TensorShape(8U, 2U, 3U),
+                             TensorShape(9U, 16U, 3U), TensorShape(25U, 32U, 3U), TensorShape(192U, 128U, 2U)});
 
-const auto ActivationFunctionsSmallDataset = make("ActivationInfo",
-{
-    ActivationLayerInfo(),
-    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
-});
+const auto ActivationFunctionsSmallDataset =
+    make("ActivationInfo",
+         {ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)});
 
 RelativeTolerance<float> tolerance_f32(0.1f);   /**< Relative tolerance value for FP32 */
 constexpr float          tolerance_num = 0.07f; /**< Tolerance number */
@@ -109,7 +104,10 @@ using NEFFT1DFixture = FFTValidationFixture<Tensor, Accessor, NEFFT1D, FFT1DInfo
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFFT1DFixture<float>, framework::DatasetMode::ALL, combine(shapes_1d, make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEFFT1DFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(shapes_1d, make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32, tolerance_num);
@@ -149,7 +147,10 @@ using NEFFT2DFixture = FFTValidationFixture<Tensor, Accessor, NEFFT2D, FFT2DInfo
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFFT2DFixture<float>, framework::DatasetMode::ALL, combine(shapes_2d, make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEFFT2DFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(shapes_2d, make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32, tolerance_num);
@@ -163,22 +164,29 @@ TEST_SUITE(FFTConvolutionLayer)
 template <typename T>
 using NEFFTConvolutionLayerFixture = FFTConvolutionValidationFixture<Tensor, Accessor, NEFFTConvolutionLayer, T>;
 template <typename T>
-using NEFFTConvolutionLayerMixedDataLayoutFixture = FFTConvolutionValidationFixture<Tensor, Accessor, NEFFTConvolutionLayer, T, true>;
+using NEFFTConvolutionLayerMixedDataLayoutFixture =
+    FFTConvolutionValidationFixture<Tensor, Accessor, NEFFTConvolutionLayer, T, true>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFFTConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFFTConvolutionLayerDataset(),
-                                                                                                                 make("DataType", DataType::F32),
-                                                                                                                 make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                                 ActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEFFTConvolutionLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallFFTConvolutionLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               ActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32, tolerance_num);
 }
-FIXTURE_DATA_TEST_CASE(RunMixedDataLayout, NEFFTConvolutionLayerMixedDataLayoutFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallFFTConvolutionLayerDataset(),
-                                                                                                                 make("DataType", DataType::F32),
-                                                                                                                 make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                                                                                                 ActivationFunctionsSmallDataset))
+FIXTURE_DATA_TEST_CASE(RunMixedDataLayout,
+                       NEFFTConvolutionLayerMixedDataLayoutFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallFFTConvolutionLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               ActivationFunctionsSmallDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32, tolerance_num);

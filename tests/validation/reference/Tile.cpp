@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "Tile.h"
 
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -41,10 +42,10 @@ SimpleTensor<T> tile(const SimpleTensor<T> &src, const Multiples &multiples)
     const auto src_shape   = src.shape();
     const auto tiled_shape = misc::shape_calculator::compute_tiled_shape(src.shape(), multiples);
 
-    SimpleTensor<T> dst{ tiled_shape, src.data_type() };
+    SimpleTensor<T> dst{tiled_shape, src.data_type()};
 
     const uint32_t num_elements = dst.num_elements();
-    for(uint32_t idx = 0; idx < num_elements; idx++)
+    for (uint32_t idx = 0; idx < num_elements; idx++)
     {
         Coordinates coord = index2coord(tiled_shape, idx);
 
@@ -53,7 +54,7 @@ SimpleTensor<T> tile(const SimpleTensor<T> &src, const Multiples &multiples)
         const size_t z = coord.z();
         const size_t w = coord[3];
 
-        Coordinates src_coords{ x % src_shape[0], y % src_shape[1], z % src_shape[2], w % src_shape[3] };
+        Coordinates src_coords{x % src_shape[0], y % src_shape[1], z % src_shape[2], w % src_shape[3]};
         int         src_idx = coord2index(src_shape, src_coords);
 
         dst[idx] = src[src_idx];
@@ -62,14 +63,14 @@ SimpleTensor<T> tile(const SimpleTensor<T> &src, const Multiples &multiples)
     return dst;
 }
 
-template SimpleTensor<uint8_t> tile(const SimpleTensor<uint8_t> &src, const Multiples &multiples);
-template SimpleTensor<int8_t> tile(const SimpleTensor<int8_t> &src, const Multiples &multiples);
+template SimpleTensor<uint8_t>  tile(const SimpleTensor<uint8_t> &src, const Multiples &multiples);
+template SimpleTensor<int8_t>   tile(const SimpleTensor<int8_t> &src, const Multiples &multiples);
 template SimpleTensor<uint16_t> tile(const SimpleTensor<uint16_t> &src, const Multiples &multiples);
-template SimpleTensor<int16_t> tile(const SimpleTensor<int16_t> &src, const Multiples &multiples);
+template SimpleTensor<int16_t>  tile(const SimpleTensor<int16_t> &src, const Multiples &multiples);
 template SimpleTensor<uint32_t> tile(const SimpleTensor<uint32_t> &src, const Multiples &multiples);
-template SimpleTensor<int32_t> tile(const SimpleTensor<int32_t> &src, const Multiples &multiples);
-template SimpleTensor<half> tile(const SimpleTensor<half> &src, const Multiples &multiples);
-template SimpleTensor<float> tile(const SimpleTensor<float> &src, const Multiples &multiples);
+template SimpleTensor<int32_t>  tile(const SimpleTensor<int32_t> &src, const Multiples &multiples);
+template SimpleTensor<half>     tile(const SimpleTensor<half> &src, const Multiples &multiples);
+template SimpleTensor<float>    tile(const SimpleTensor<float> &src, const Multiples &multiples);
 
 } // namespace reference
 } // namespace validation

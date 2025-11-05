@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,17 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GEMMRESHAPELHSMATRIX_FIXTURE
-#define ARM_COMPUTE_TEST_GEMMRESHAPELHSMATRIX_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_GEMMRESHAPELHSMATRIXFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_GEMMRESHAPELHSMATRIXFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/GEMMReshapeLHSMatrix.h"
 #include "tests/validation/reference/Utils.h"
@@ -46,11 +47,22 @@ namespace validation
 {
 using namespace arm_compute::misc::shape_calculator;
 
-template <typename TensorType, typename AccessorType, typename OperatorType, typename T, bool reinterpret_input_as_3d = false>
+template <typename TensorType,
+          typename AccessorType,
+          typename OperatorType,
+          typename T,
+          bool reinterpret_input_as_3d = false>
 class GEMMReshapeLHSMatrixValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape_in, unsigned int batch_size, DataType data_type, unsigned int m0, unsigned int k0, unsigned int v0, bool interleave, bool transpose)
+    void setup(TensorShape  shape_in,
+               unsigned int batch_size,
+               DataType     data_type,
+               unsigned int m0,
+               unsigned int k0,
+               unsigned int v0,
+               bool         interleave,
+               bool         transpose)
     {
         GEMMLHSMatrixInfo lhs_info;
         lhs_info.m0         = m0;
@@ -60,9 +72,7 @@ public:
         lhs_info.transpose  = transpose;
 
         // Set the tensor shape
-        const TensorShape shape_src(shape_in[0],
-                                    shape_in[1],
-                                    reinterpret_input_as_3d ? shape_in[2] : batch_size,
+        const TensorShape shape_src(shape_in[0], shape_in[1], reinterpret_input_as_3d ? shape_in[2] : batch_size,
                                     reinterpret_input_as_3d ? batch_size : 1);
 
         _target    = compute_target(shape_src, data_type, lhs_info);
@@ -90,7 +100,7 @@ protected:
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
 
-        add_padding_x({ &src, &dst });
+        add_padding_x({&src, &dst});
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -103,29 +113,31 @@ protected:
         fill(AccessorType(src));
 
         // Compute GEMM LHS matrix reshape function
-        ITensorPack tensors = { { ACL_SRC, &src }, { ACL_DST, &dst } };
+        ITensorPack tensors = {{ACL_SRC, &src}, {ACL_DST, &dst}};
         gemm_lhs_reshape.run(tensors);
 
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, DataType data_type, const GEMMLHSMatrixInfo &lhs_info)
+    SimpleTensor<T>
+    compute_reference(const TensorShape &input_shape, DataType data_type, const GEMMLHSMatrixInfo &lhs_info)
     {
         TensorShape src_shape = input_shape;
 
         // If the input has to be reinterpreted as 3D, collapse the second dimension with the 3rd
-        if(reinterpret_input_as_3d)
+        if (reinterpret_input_as_3d)
         {
             src_shape.collapse(2U, 1U);
         }
 
         // Create reference
-        SimpleTensor<T> src{ src_shape, data_type, 1 };
+        SimpleTensor<T> src{src_shape, data_type, 1};
 
         // Fill reference
         fill(src);
 
-        TensorShape output_shape = compute_lhs_reshaped_shape(TensorInfo(input_shape, 1, data_type), lhs_info, reinterpret_input_as_3d);
+        TensorShape output_shape =
+            compute_lhs_reshaped_shape(TensorInfo(input_shape, 1, data_type), lhs_info, reinterpret_input_as_3d);
 
         return reference::gemm_reshape_lhs_matrix<T>(src, output_shape, lhs_info);
     }
@@ -136,4 +148,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GEMMRESHAPELHSMATRIX_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_GEMMRESHAPELHSMATRIXFIXTURE_H

@@ -25,13 +25,14 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLGather.h"
+
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/GatherDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/GatherFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -211,7 +212,6 @@ FIXTURE_DATA_TEST_CASE(RunSmallMultiDimIndices,
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-
 
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLGatherFixture<uint16_t>,

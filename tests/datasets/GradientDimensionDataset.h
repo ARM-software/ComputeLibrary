@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GRADIENT_DIMENSION_DATASET_H
-#define ARM_COMPUTE_TEST_GRADIENT_DIMENSION_DATASET_H
+#ifndef ACL_TESTS_DATASETS_GRADIENTDIMENSIONDATASET_H
+#define ACL_TESTS_DATASETS_GRADIENTDIMENSIONDATASET_H
 
-#include "tests/Types.h"
 #include "tests/framework/datasets/ContainerDataset.h"
+#include "tests/Types.h"
 
 #include <vector>
 
@@ -40,15 +40,11 @@ class GradientDimensions final : public framework::dataset::ContainerDataset<std
 public:
     GradientDimensions()
         : ContainerDataset("GradientDimension",
-    {
-        GradientDimension::GRAD_X,
-                          GradientDimension::GRAD_Y,
-                          GradientDimension::GRAD_XY
-    })
+                           {GradientDimension::GRAD_X, GradientDimension::GRAD_Y, GradientDimension::GRAD_XY})
     {
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GRADIENT_DIMENSION_DATASET_H */
+#endif // ACL_TESTS_DATASETS_GRADIENTDIMENSIONDATASET_H

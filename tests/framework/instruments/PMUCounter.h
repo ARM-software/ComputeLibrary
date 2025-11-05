@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PMU_COUNTER
-#define ARM_COMPUTE_TEST_PMU_COUNTER
+#ifndef ACL_TESTS_FRAMEWORK_INSTRUMENTS_PMUCOUNTER_H
+#define ACL_TESTS_FRAMEWORK_INSTRUMENTS_PMUCOUNTER_H
 
 #include "Instrument.h"
 #include "PMU.h"
@@ -43,7 +43,7 @@ public:
      */
     PMUCounter(ScaleFactor scale_factor)
     {
-        switch(scale_factor)
+        switch (scale_factor)
         {
             case ScaleFactor::NONE:
                 _scale_factor = 1;
@@ -68,13 +68,13 @@ public:
     MeasurementsMap measurements() const override;
 
 private:
-    PMU       _pmu_cycles{ PERF_COUNT_HW_CPU_CYCLES };
-    PMU       _pmu_instructions{ PERF_COUNT_HW_INSTRUCTIONS };
-    long long _cycles{ 0 };
-    long long _instructions{ 0 };
+    PMU       _pmu_cycles{PERF_COUNT_HW_CPU_CYCLES};
+    PMU       _pmu_instructions{PERF_COUNT_HW_INSTRUCTIONS};
+    long long _cycles{0};
+    long long _instructions{0};
     int       _scale_factor{};
 };
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PMU_COUNTER */
+#endif // ACL_TESTS_FRAMEWORK_INSTRUMENTS_PMUCOUNTER_H

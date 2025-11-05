@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/TransposeFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -90,14 +91,20 @@ template <typename T>
 using NETransposeFixture = TransposeValidationFixture<Tensor, Accessor, NETranspose, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NETransposeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
-                                                                                                         make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NETransposeFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
+                               make("DataType", DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
-                                                                                                       make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NETransposeFixture<uint8_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
+                               make("DataType", DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -105,14 +112,20 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint8_t>, framework::Dataset
 TEST_SUITE_END()
 
 TEST_SUITE(U16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NETransposeFixture<uint16_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
-                                                                                                          make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NETransposeFixture<uint16_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
+                               make("DataType", DataType::U16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint16_t>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
-                                                                                                        make("DataType", DataType::U16)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NETransposeFixture<uint16_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
+                               make("DataType", DataType::U16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -120,14 +133,20 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint16_t>, framework::Datase
 TEST_SUITE_END()
 
 TEST_SUITE(U32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NETransposeFixture<uint32_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
-                                                                                                          make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NETransposeFixture<uint32_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
+                               make("DataType", DataType::U32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NETransposeFixture<uint32_t>, framework::DatasetMode::NIGHTLY, combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
-                                                                                                        make("DataType", DataType::U32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NETransposeFixture<uint32_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(concat(datasets::Large1DShapes(), datasets::Large2DShapes()),
+                               make("DataType", DataType::U32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

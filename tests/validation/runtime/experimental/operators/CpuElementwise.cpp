@@ -44,33 +44,28 @@ namespace validation
 using framework::dataset::make;
 namespace
 {
-constexpr RelativeTolerance<float> tolerance_div_fp32{0.000001f};
+constexpr RelativeTolerance<float>   tolerance_div_fp32{0.000001f};
 constexpr AbsoluteTolerance<uint8_t> abs_tolerance_qasymm8{1};
 
-const auto ElementwiseFP32Dataset = combine(
-    make("DataType", DataType::F32), make("DataType", DataType::F32),
-    make("DataType", DataType::F32));
+const auto ElementwiseFP32Dataset =
+    combine(make("DataType", DataType::F32), make("DataType", DataType::F32), make("DataType", DataType::F32));
 
-const auto ElementwiseFP16Dataset = combine(
-    make("DataType", DataType::F16), make("DataType", DataType::F16),
-    make("DataType", DataType::F16));
+const auto ElementwiseFP16Dataset =
+    combine(make("DataType", DataType::F16), make("DataType", DataType::F16), make("DataType", DataType::F16));
 
-const auto ElementwiseS32Dataset = combine(
-    make("DataType", DataType::S32), make("DataType", DataType::S32),
-    make("DataType", DataType::S32));
+const auto ElementwiseS32Dataset =
+    combine(make("DataType", DataType::S32), make("DataType", DataType::S32), make("DataType", DataType::S32));
 
 const auto ElementwiseQuantizedDataset = combine(
-    make("DataType", DataType::QASYMM8), make("DataType", DataType::QASYMM8),
-    make("DataType", DataType::QASYMM8));
+    make("DataType", DataType::QASYMM8), make("DataType", DataType::QASYMM8), make("DataType", DataType::QASYMM8));
 
-const auto ElementwiseQuantizedSignedDataset = combine(
-    make("DataType", DataType::QASYMM8_SIGNED), make("DataType", DataType::QASYMM8_SIGNED),
-    make("DataType", DataType::QASYMM8_SIGNED));
+const auto ElementwiseQuantizedSignedDataset = combine(make("DataType", DataType::QASYMM8_SIGNED),
+                                                       make("DataType", DataType::QASYMM8_SIGNED),
+                                                       make("DataType", DataType::QASYMM8_SIGNED));
 
-const auto ElementwiseQuantizationInfo = combine(
-    make("QuantizationInfoIn1", {QuantizationInfo(0.5f, 10)}),
-    make("QuantizationInfoIn2", {QuantizationInfo(0.5f, 20)}),
-    make("QuantizationInfoOut", {QuantizationInfo(0.5f, 50)}));
+const auto ElementwiseQuantizationInfo = combine(make("QuantizationInfoIn1", {QuantizationInfo(0.5f, 10)}),
+                                                 make("QuantizationInfoIn2", {QuantizationInfo(0.5f, 20)}),
+                                                 make("QuantizationInfoOut", {QuantizationInfo(0.5f, 50)}));
 
 const auto InPlaceDataSet    = make("InPlace", {false, true});
 const auto OutOfPlaceDataSet = make("InPlace", {false});
@@ -86,7 +81,7 @@ using CpuElementwiseDivisionFixture =
 
 template <typename T>
 using CpuElementwiseDivisionThreadSafeFixture =
-    CpuElementwiseDivisionThreadSafeValidationFixture<Tensor, Accessor,  experimental::op::CpuElementwiseDivision, T>;
+    CpuElementwiseDivisionThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuElementwiseDivision, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(F32)
@@ -96,7 +91,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
                        combine(datasets::SmallShapes(), ElementwiseFP32Dataset, InPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], tolerance_div_fp32, 0.01);
     }
@@ -113,7 +108,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     if (CPUInfo::get().has_fp16())
     {
         // Validate output
-        for(int i = 0; i < _num_parallel_runs; ++i)
+        for (int i = 0; i < _num_parallel_runs; ++i)
         {
             validate(Accessor(_target[i]), _reference[i], tolerance_div_fp32, 0.01);
         }
@@ -125,7 +120,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     }
 }
 TEST_SUITE_END() // F16
-#endif // ARM_COMPUTE_ENABLE_FP16
+#endif           // ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE_END() // Float
 
 #ifndef BARE_METAL
@@ -139,7 +134,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                        combine(datasets::SmallShapes(), ElementwiseFP32Dataset, InPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], tolerance_div_fp32, 0.01);
     }
@@ -156,7 +151,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     if (CPUInfo::get().has_fp16())
     {
         // Validate output
-        for(int i = 0; i < _num_parallel_runs; ++i)
+        for (int i = 0; i < _num_parallel_runs; ++i)
         {
             validate(Accessor(_target[i]), _reference[i], tolerance_div_fp32, 0.01);
         }
@@ -168,10 +163,10 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     }
 }
 TEST_SUITE_END() // F16
-#endif // ARM_COMPUTE_ENABLE_FP16
+#endif           // ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE_END() // Float
 TEST_SUITE_END() // ThreadSafety
-#endif // #ifndef BARE_METAL
+#endif           // #ifndef BARE_METAL
 TEST_SUITE_END() // CpuElementwiseDivision
 
 TEST_SUITE(CpuElementwiseMax)
@@ -185,7 +180,7 @@ using CpuElementwiseMaxThreadSafeFixture =
 
 template <typename T>
 using CpuElementwiseMaxQuantizedThreadSafeFixture =
-    CpuElementwiseMaxQuantizedThreadSafeValidationFixture<Tensor, Accessor,  experimental::op::CpuElementwiseMax, T>;
+    CpuElementwiseMaxQuantizedThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuElementwiseMax, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(F32)
@@ -195,7 +190,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
                        combine(datasets::SmallShapes(), ElementwiseFP32Dataset, InPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i]);
     }
@@ -211,7 +206,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     if (CPUInfo::get().has_fp16())
     {
         // Validate output
-        for(int i = 0; i < _num_parallel_runs; ++i)
+        for (int i = 0; i < _num_parallel_runs; ++i)
         {
             validate(Accessor(_target[i]), _reference[i], tolerance_div_fp32, 0.01);
         }
@@ -223,7 +218,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     }
 }
 TEST_SUITE_END() // F16
-#endif // ARM_COMPUTE_ENABLE_FP16
+#endif           // ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE_END() // Float
 #ifndef BARE_METAL
 TEST_SUITE(ThreadSafety)
@@ -235,7 +230,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                        combine(datasets::SmallShapes(), ElementwiseFP32Dataset, InPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], tolerance_div_fp32, 0.01);
     }
@@ -252,7 +247,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     if (CPUInfo::get().has_fp16())
     {
         // Validate output
-        for(int i = 0; i < _num_parallel_runs; ++i)
+        for (int i = 0; i < _num_parallel_runs; ++i)
         {
             validate(Accessor(_target[i]), _reference[i], tolerance_div_fp32, 0.01);
         }
@@ -264,7 +259,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     }
 }
 TEST_SUITE_END() // F16
-#endif // ARM_COMPUTE_ENABLE_FP16
+#endif           // ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE_END() // Float
 
 TEST_SUITE(Integer)
@@ -275,7 +270,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                        combine(datasets::SmallShapes(), ElementwiseS32Dataset, InPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i]);
     }
@@ -285,26 +280,28 @@ TEST_SUITE_END() // Integer
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
-                       CpuElementwiseMaxQuantizedThreadSafeFixture<int8_t>,
-                       framework::DatasetMode::ALL,
-                       combine(datasets::SmallShapes(), ElementwiseQuantizedSignedDataset, ElementwiseQuantizationInfo, OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(
+    ConfigureOnceUseFromDifferentThreads,
+    CpuElementwiseMaxQuantizedThreadSafeFixture<int8_t>,
+    framework::DatasetMode::ALL,
+    combine(datasets::SmallShapes(), ElementwiseQuantizedSignedDataset, ElementwiseQuantizationInfo, OutOfPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], abs_tolerance_qasymm8);
     }
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
-                       CpuElementwiseMaxQuantizedThreadSafeFixture<uint8_t>,
-                       framework::DatasetMode::ALL,
-                       combine(datasets::SmallShapes(), ElementwiseQuantizedDataset, ElementwiseQuantizationInfo, OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(
+    ConfigureOnceUseFromDifferentThreads,
+    CpuElementwiseMaxQuantizedThreadSafeFixture<uint8_t>,
+    framework::DatasetMode::ALL,
+    combine(datasets::SmallShapes(), ElementwiseQuantizedDataset, ElementwiseQuantizationInfo, OutOfPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], abs_tolerance_qasymm8);
     }
@@ -312,7 +309,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // ThreadSafety
-#endif // #ifndef BARE_METAL
+#endif           // #ifndef BARE_METAL
 TEST_SUITE_END() // CpuElementwiseMax
 
 TEST_SUITE(CpuElementwiseMin)
@@ -327,7 +324,7 @@ using CpuElementwiseMinThreadSafeFixture =
 
 template <typename T>
 using CpuElementwiseMinQuantizedThreadSafeFixture =
-    CpuElementwiseMinQuantizedThreadSafeValidationFixture<Tensor, Accessor,  experimental::op::CpuElementwiseMin, T>;
+    CpuElementwiseMinQuantizedThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuElementwiseMin, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(F32)
@@ -337,7 +334,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
                        combine(datasets::SmallShapes(), ElementwiseFP32Dataset, InPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i]);
     }
@@ -353,7 +350,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     if (CPUInfo::get().has_fp16())
     {
         // Validate output
-        for(int i = 0; i < _num_parallel_runs; ++i)
+        for (int i = 0; i < _num_parallel_runs; ++i)
         {
             validate(Accessor(_target[i]), _reference[i], tolerance_div_fp32, 0.01);
         }
@@ -365,7 +362,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     }
 }
 TEST_SUITE_END() // F16
-#endif // ARM_COMPUTE_ENABLE_FP16
+#endif           // ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE_END() // Float
 #ifndef BARE_METAL
 TEST_SUITE(ThreadSafety)
@@ -377,7 +374,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                        combine(datasets::SmallShapes(), ElementwiseFP32Dataset, InPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], tolerance_div_fp32, 0.01);
     }
@@ -394,7 +391,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     if (CPUInfo::get().has_fp16())
     {
         // Validate output
-        for(int i = 0; i < _num_parallel_runs; ++i)
+        for (int i = 0; i < _num_parallel_runs; ++i)
         {
             validate(Accessor(_target[i]), _reference[i], tolerance_div_fp32, 0.01);
         }
@@ -406,7 +403,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
     }
 }
 TEST_SUITE_END() // F16
-#endif // ARM_COMPUTE_ENABLE_FP16
+#endif           // ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE_END() // Float
 TEST_SUITE(Integer)
 TEST_SUITE(S32)
@@ -416,7 +413,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                        combine(datasets::SmallShapes(), ElementwiseS32Dataset, InPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i]);
     }
@@ -425,26 +422,28 @@ TEST_SUITE_END() // S32
 TEST_SUITE_END() // Integer
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
-                       CpuElementwiseMinQuantizedThreadSafeFixture<int8_t>,
-                       framework::DatasetMode::ALL,
-                       combine(datasets::SmallShapes(), ElementwiseQuantizedSignedDataset, ElementwiseQuantizationInfo, OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(
+    ConfigureOnceUseFromDifferentThreads,
+    CpuElementwiseMinQuantizedThreadSafeFixture<int8_t>,
+    framework::DatasetMode::ALL,
+    combine(datasets::SmallShapes(), ElementwiseQuantizedSignedDataset, ElementwiseQuantizationInfo, OutOfPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], abs_tolerance_qasymm8);
     }
 }
 TEST_SUITE_END() // QASYMM8_SIGNED
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
-                       CpuElementwiseMinQuantizedThreadSafeFixture<uint8_t>,
-                       framework::DatasetMode::ALL,
-                       combine(datasets::SmallShapes(), ElementwiseQuantizedDataset, ElementwiseQuantizationInfo, OutOfPlaceDataSet))
+FIXTURE_DATA_TEST_CASE(
+    ConfigureOnceUseFromDifferentThreads,
+    CpuElementwiseMinQuantizedThreadSafeFixture<uint8_t>,
+    framework::DatasetMode::ALL,
+    combine(datasets::SmallShapes(), ElementwiseQuantizedDataset, ElementwiseQuantizationInfo, OutOfPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], abs_tolerance_qasymm8);
     }
@@ -452,14 +451,13 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // ThreadSafety
-#endif // #ifndef BARE_METAL
+#endif           // #ifndef BARE_METAL
 TEST_SUITE_END() // CpuElementwiseMin
 
 TEST_SUITE(CpuPRelu)
 
 template <typename T>
-using CpuPReluFixture =
-    CpuPReluValidationFixture<Tensor, Accessor, experimental::op::CpuPRelu, T>;
+using CpuPReluFixture = CpuPReluValidationFixture<Tensor, Accessor, experimental::op::CpuPRelu, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(F32)
@@ -469,7 +467,7 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
                        combine(datasets::SmallShapes(), ElementwiseFP32Dataset, InPlaceDataSet))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i]);
     }

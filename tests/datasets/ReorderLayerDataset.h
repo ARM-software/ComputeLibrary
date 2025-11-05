@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -45,9 +46,7 @@ public:
         iterator(std::vector<TensorShape>::const_iterator  in_it,
                  std::vector<TensorShape>::const_iterator  out_it,
                  std::vector<WeightFormat>::const_iterator _wf_in_it)
-            : _in_it{ std::move(in_it) },
-              _out_it{ std::move(out_it) },
-              _wf_in_it{ std::move(_wf_in_it) }
+            : _in_it{std::move(in_it)}, _out_it{std::move(out_it)}, _wf_in_it{std::move(_wf_in_it)}
         {
         }
 
@@ -101,7 +100,7 @@ public:
     ReorderLayerDataset()                       = default;
     ReorderLayerDataset(ReorderLayerDataset &&) = default;
 
-    private:
+private:
     std::vector<TensorShape>  _in_shapes{};
     std::vector<TensorShape>  _out_shapes{};
     std::vector<WeightFormat> _in_wfs{};
@@ -111,7 +110,7 @@ public:
 
 class ReorderLayerDatasetInterleave4 final : public ReorderLayerDataset
 {
-    public:
+public:
     ReorderLayerDatasetInterleave4()
     {
         add_config(TensorShape(10U, 9U), TensorShape(10U, 12U), WeightFormat::OHWI);
@@ -129,7 +128,7 @@ class ReorderLayerDatasetInterleave4 final : public ReorderLayerDataset
 
 class ReorderLayerDatasetInterleave8 final : public ReorderLayerDataset
 {
-    public:
+public:
     ReorderLayerDatasetInterleave8()
     {
         add_config(TensorShape(10U, 9U), TensorShape(10U, 16U), WeightFormat::OHWI);
@@ -147,7 +146,7 @@ class ReorderLayerDatasetInterleave8 final : public ReorderLayerDataset
 
 class ReorderLayerDatasetInterleave4Block4 final : public ReorderLayerDataset
 {
-    public:
+public:
     ReorderLayerDatasetInterleave4Block4()
     {
         add_config(TensorShape(12U, 9U), TensorShape(12U, 12U), WeightFormat::OHWI);
@@ -159,7 +158,7 @@ class ReorderLayerDatasetInterleave4Block4 final : public ReorderLayerDataset
 
 class ReorderLayerDatasetInterleave8Block4 final : public ReorderLayerDataset
 {
-    public:
+public:
     ReorderLayerDatasetInterleave8Block4()
     {
         add_config(TensorShape(16U, 9U), TensorShape(16U, 16U), WeightFormat::OHWI);

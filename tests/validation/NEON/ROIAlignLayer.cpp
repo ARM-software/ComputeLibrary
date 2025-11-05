@@ -22,18 +22,18 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-
 #include "arm_compute/runtime/NEON/functions/NEROIAlignLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/Globals.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/datasets/ROIDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/Globals.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/ROIAlignLayerFixture.h"
+#include "tests/validation/Validation.h"
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -55,7 +55,7 @@ AbsoluteTolerance<float> absolute_tolerance_f16(0.001f);
 #endif // ARM_COMPUTE_ENABLE_FP16
 
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
-constexpr AbsoluteTolerance<int8_t> tolerance_qasymm8_s(1);
+constexpr AbsoluteTolerance<int8_t>  tolerance_qasymm8_s(1);
 } // namespace
 
 TEST_SUITE(NEON)
@@ -110,22 +110,26 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 using NEROIAlignLayerFloatFixture = ROIAlignLayerFixture<Tensor, Accessor, NEROIAlignLayer, float, float>;
 
 TEST_SUITE(Float)
-FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerFloat, NEROIAlignLayerFloatFixture, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerFloat,
+                       NEROIAlignLayerFloatFixture,
+                       framework::DatasetMode::ALL,
                        framework::dataset::combine(framework::dataset::combine(datasets::SmallROIDataset(),
-                                                                               make("DataType", { DataType::F32 })),
-                                                   make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                               make("DataType", {DataType::F32})),
+                                                   make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
     // Validate output
     validate(Accessor(_target), _reference, relative_tolerance_f32, .02f, absolute_tolerance_f32);
 }
 #ifdef ARM_COMPUTE_ENABLE_FP16
 using NEROIAlignLayerHalfFixture = ROIAlignLayerFixture<Tensor, Accessor, NEROIAlignLayer, half, half>;
-FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerHalf, NEROIAlignLayerHalfFixture, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(SmallROIAlignLayerHalf,
+                       NEROIAlignLayerHalfFixture,
+                       framework::DatasetMode::ALL,
                        framework::dataset::combine(framework::dataset::combine(datasets::SmallROIDataset(),
-                                                                               make("DataType", { DataType::F16 })),
-                                                   make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+                                                                               make("DataType", {DataType::F16})),
+                                                   make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, relative_tolerance_f16, .02f, absolute_tolerance_f16);
@@ -145,12 +149,14 @@ template <typename T>
 using NEROIAlignLayerQuantizedFixture = ROIAlignLayerQuantizedFixture<Tensor, Accessor, NEROIAlignLayer, T, uint16_t>;
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(Small, NEROIAlignLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(Small,
+                       NEROIAlignLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallROIDataset(),
-                                                       make("DataType", { DataType::QASYMM8 }),
-                                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) }),
-                               make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
+                               make("DataType", {DataType::QASYMM8}),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("InputQuantizationInfo", {QuantizationInfo(1.f / 255.f, 127)}),
+                               make("OutputQuantizationInfo", {QuantizationInfo(2.f / 255.f, 120)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
@@ -158,12 +164,14 @@ FIXTURE_DATA_TEST_CASE(Small, NEROIAlignLayerQuantizedFixture<uint8_t>, framewor
 TEST_SUITE_END() // QASYMM8
 
 TEST_SUITE(QASYMM8_SIGNED)
-FIXTURE_DATA_TEST_CASE(Small, NEROIAlignLayerQuantizedFixture<int8_t>, framework::DatasetMode::ALL,
+FIXTURE_DATA_TEST_CASE(Small,
+                       NEROIAlignLayerQuantizedFixture<int8_t>,
+                       framework::DatasetMode::ALL,
                        combine(datasets::SmallROIDataset(),
-                                                       make("DataType", { DataType::QASYMM8_SIGNED }),
-                                               make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                                       make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) }),
-                               make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
+                               make("DataType", {DataType::QASYMM8_SIGNED}),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("InputQuantizationInfo", {QuantizationInfo(1.f / 255.f, 127)}),
+                               make("OutputQuantizationInfo", {QuantizationInfo(2.f / 255.f, 120)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_s);

@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLInstanceNormalizationLayer.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/InstanceNormalizationLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -87,14 +88,17 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo",  { T
 // *INDENT-ON*
 
 template <typename T>
-using CLInstanceNormalizationLayerFixture = InstanceNormalizationLayerValidationFixture<CLTensor, CLAccessor, CLInstanceNormalizationLayer, T>;
+using CLInstanceNormalizationLayerFixture =
+    InstanceNormalizationLayerValidationFixture<CLTensor, CLAccessor, CLInstanceNormalizationLayer, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLInstanceNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLInstanceNormalizationLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
                        combine(datasets::Small4DShapes(),
-                                               make("DataType", DataType::F32),
-                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                               make("InPlace", { false, true })))
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("InPlace", {false, true})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -102,11 +106,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLInstanceNormalizationLayerFixture<float>, fra
 
 TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLInstanceNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLInstanceNormalizationLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallShapes(),
-                                               make("DataType", DataType::F16),
-                                       make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
-                               make("InPlace", { false, true })))
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("InPlace", {false, true})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);

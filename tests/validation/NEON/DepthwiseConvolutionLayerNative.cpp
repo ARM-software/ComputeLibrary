@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/cpu/kernels/CpuDepthwiseConv2dNativeKernel.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
-#include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/DepthwiseConvolutionLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -41,11 +42,13 @@ using framework::dataset::make;
 using namespace arm_compute::misc::shape_calculator;
 
 // Create function for CpuDepthwiseConvolutionKernel
-using CpuDepthwiseConvolutionNative = NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuDepthwiseConv2dNativeKernel>;
+using CpuDepthwiseConvolutionNative =
+    NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuDepthwiseConv2dNativeKernel>;
 
 // Fixture for NEDepthwiseConvolutionLayerKernel
 template <typename T>
-using CpuDepthwiseConvolutionNativeFixture = DepthwiseConvolutionLayerNativeValidationFixture<Tensor, Accessor, CpuDepthwiseConvolutionNative, T>;
+using CpuDepthwiseConvolutionNativeFixture =
+    DepthwiseConvolutionLayerNativeValidationFixture<Tensor, Accessor, CpuDepthwiseConvolutionNative, T>;
 
 namespace
 {

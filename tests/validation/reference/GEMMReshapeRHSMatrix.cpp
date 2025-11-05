@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,11 +40,12 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> gemm_reshape_rhs_matrix(const SimpleTensor<T> &in, const TensorShape &output_shape, const GEMMRHSMatrixInfo &rhs_info)
+SimpleTensor<T>
+gemm_reshape_rhs_matrix(const SimpleTensor<T> &in, const TensorShape &output_shape, const GEMMRHSMatrixInfo &rhs_info)
 {
     ARM_COMPUTE_ERROR_ON(in.shape().num_dimensions() > 3);
 
-    SimpleTensor<T> out{ output_shape, in.data_type() };
+    SimpleTensor<T> out{output_shape, in.data_type()};
 
     // Initialize the output tensor with zero
     std::memset(&out[0], 0, out.num_elements() * sizeof(T));
@@ -60,43 +61,48 @@ SimpleTensor<T> gemm_reshape_rhs_matrix(const SimpleTensor<T> &in, const TensorS
     const TensorShape tile_dims_transposed(rhs_info.k0, rhs_info.n0);
 
     // Simple tensor for the input tile
-    SimpleTensor<T> src_tile{ tile_dims, in.data_type() };
+    SimpleTensor<T> src_tile{tile_dims, in.data_type()};
 
     // Simple tensor for the input tile
-    SimpleTensor<T> src_tile_transposed{ tile_dims_transposed, in.data_type() };
+    SimpleTensor<T> src_tile_transposed{tile_dims_transposed, in.data_type()};
 
     // Simple tensor to use when storing the values
     SimpleTensor<T> *tile_to_use = rhs_info.transpose ? &src_tile_transposed : &src_tile;
 
-    const unsigned int offset_output_x = rhs_info.interleave ? tile_to_use->shape()[0] : tile_to_use->shape()[0] * tile_to_use->shape()[1];
-    const unsigned int step_output_x   = rhs_info.interleave ? tile_to_use->shape()[0] * rhs_info.h0 : tile_to_use->shape()[0];
+    const unsigned int offset_output_x =
+        rhs_info.interleave ? tile_to_use->shape()[0] : tile_to_use->shape()[0] * tile_to_use->shape()[1];
+    const unsigned int step_output_x =
+        rhs_info.interleave ? tile_to_use->shape()[0] * rhs_info.h0 : tile_to_use->shape()[0];
 #ifdef ARM_COMPUTE_OPENMP
-    #pragma omp parallel for schedule(dynamic, 1) collapse(3)
+#pragma omp parallel for schedule(dynamic, 1) collapse(3)
 #endif /* _OPENMP */
-    for(unsigned int z = 0; z < B; ++z)
+    for (unsigned int z = 0; z < B; ++z)
     {
-        for(unsigned int y = 0; y < num_tiles_y; ++y)
+        for (unsigned int y = 0; y < num_tiles_y; ++y)
         {
-            for(unsigned int x = 0; x < num_tiles_x; ++x)
+            for (unsigned int x = 0; x < num_tiles_x; ++x)
             {
                 // Get the tile from the input tensor
                 get_tile<T>(in, src_tile, Coordinates(x * rhs_info.n0, y * rhs_info.k0, z, 0));
 
-                if(rhs_info.transpose)
+                if (rhs_info.transpose)
                 {
                     // Transpose matrix
                     transpose_matrix<T>(src_tile, src_tile_transposed);
                 }
 
                 // Store
-                const unsigned int offset_output = (y * rhs_info.k0 * rhs_info.n0 * rhs_info.h0) + ((x % rhs_info.h0) * offset_output_x) + ((x / rhs_info.h0) * out.shape()[0]) + (z * out.shape()[0] * out.shape()[1]);
+                const unsigned int offset_output =
+                    (y * rhs_info.k0 * rhs_info.n0 * rhs_info.h0) + ((x % rhs_info.h0) * offset_output_x) +
+                    ((x / rhs_info.h0) * out.shape()[0]) + (z * out.shape()[0] * out.shape()[1]);
 
-                for(unsigned int i = 0; i < tile_to_use->shape()[1]; ++i)
+                for (unsigned int i = 0; i < tile_to_use->shape()[1]; ++i)
                 {
                     const unsigned int offset_tile = i * tile_to_use->shape()[0];
 
                     // Copy per row
-                    std::copy(&(*tile_to_use)[offset_tile], &(*tile_to_use)[offset_tile + tile_to_use->shape()[0]], &out[offset_output + i * step_output_x]);
+                    std::copy(&(*tile_to_use)[offset_tile], &(*tile_to_use)[offset_tile + tile_to_use->shape()[0]],
+                              &out[offset_output + i * step_output_x]);
                 }
             }
         }
@@ -104,9 +110,15 @@ SimpleTensor<T> gemm_reshape_rhs_matrix(const SimpleTensor<T> &in, const TensorS
 
     return out;
 }
-template SimpleTensor<int> gemm_reshape_rhs_matrix(const SimpleTensor<int> &in, const TensorShape &output_shape, const GEMMRHSMatrixInfo &rhs_info);
-template SimpleTensor<short> gemm_reshape_rhs_matrix(const SimpleTensor<short> &in, const TensorShape &output_shape, const GEMMRHSMatrixInfo &rhs_info);
-template SimpleTensor<char> gemm_reshape_rhs_matrix(const SimpleTensor<char> &in, const TensorShape &output_shape, const GEMMRHSMatrixInfo &rhs_info);
+template SimpleTensor<int>   gemm_reshape_rhs_matrix(const SimpleTensor<int> &in,
+                                                     const TensorShape       &output_shape,
+                                                     const GEMMRHSMatrixInfo &rhs_info);
+template SimpleTensor<short> gemm_reshape_rhs_matrix(const SimpleTensor<short> &in,
+                                                     const TensorShape         &output_shape,
+                                                     const GEMMRHSMatrixInfo   &rhs_info);
+template SimpleTensor<char>  gemm_reshape_rhs_matrix(const SimpleTensor<char> &in,
+                                                     const TensorShape        &output_shape,
+                                                     const GEMMRHSMatrixInfo  &rhs_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

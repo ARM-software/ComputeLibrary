@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CONVERT_POLICY_DATASETS_H
-#define ARM_COMPUTE_TEST_CONVERT_POLICY_DATASETS_H
+#ifndef ACL_TESTS_DATASETS_CONVERTPOLICYDATASET_H
+#define ACL_TESTS_DATASETS_CONVERTPOLICYDATASET_H
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/framework/datasets/ContainerDataset.h"
 
 namespace arm_compute
@@ -36,16 +37,11 @@ namespace datasets
 class ConvertPolicies final : public framework::dataset::ContainerDataset<std::vector<ConvertPolicy>>
 {
 public:
-    ConvertPolicies()
-        : ContainerDataset("ConvertPolicy",
-    {
-        ConvertPolicy::WRAP,
-                      ConvertPolicy::SATURATE
-    })
+    ConvertPolicies() : ContainerDataset("ConvertPolicy", {ConvertPolicy::WRAP, ConvertPolicy::SATURATE})
     {
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CONVERT_POLICY_DATASETS_H */
+#endif // ACL_TESTS_DATASETS_CONVERTPOLICYDATASET_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,7 @@ void PMUCounter::stop()
     {
         _cycles = _pmu_cycles.get_value<long long>();
     }
-    catch(const std::runtime_error &)
+    catch (const std::runtime_error &)
     {
         _cycles = 0;
     }
@@ -55,7 +55,7 @@ void PMUCounter::stop()
     {
         _instructions = _pmu_instructions.get_value<long long>();
     }
-    catch(const std::runtime_error &)
+    catch (const std::runtime_error &)
     {
         _instructions = 0;
     }
@@ -63,10 +63,9 @@ void PMUCounter::stop()
 
 Instrument::MeasurementsMap PMUCounter::measurements() const
 {
-    return MeasurementsMap
-    {
-        { "CPU cycles", Measurement(_cycles / _scale_factor, _unit + "cycles") },
-        { "CPU instructions", Measurement(_instructions / _scale_factor, _unit + "instructions") },
+    return MeasurementsMap{
+        {"CPU cycles", Measurement(_cycles / _scale_factor, _unit + "cycles")},
+        {"CPU instructions", Measurement(_instructions / _scale_factor, _unit + "instructions")},
     };
 }
 } // namespace framework

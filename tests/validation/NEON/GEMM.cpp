@@ -26,25 +26,26 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/kernels/CpuGemmInterleave4x4Kernel.h"
 #include "src/cpu/kernels/CpuGemmMatrixMultiplyKernel.h"
 #include "src/cpu/kernels/CpuGemmTranspose1xWKernel.h"
 #include "src/cpu/operators/CpuDynamicGemm.h"
 #include "src/cpu/operators/CpuGemm.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/NEON/Helper.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeGEMMDataset.h"
 #include "tests/datasets/SmallGEMMDataset.h"
 #include "tests/datasets/TinyGEMMDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/NEON/Helper.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/GEMMFixture.h"
 #include "tests/validation/fixtures/GEMMInterleave4x4Fixture.h"
 #include "tests/validation/fixtures/GEMMTranspose1xWFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -56,20 +57,23 @@ using framework::dataset::make;
 
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_f(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for FP32 data types */
+constexpr AbsoluteTolerance<float> tolerance_f(
+    0.001f); /**< Tolerance value for comparing reference's output against implementation's output for FP32 data types */
 #ifdef ARM_COMPUTE_ENABLE_FP16
-RelativeTolerance<half_float::half> rel_tolerance_f16(half(0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for FP16 data types */
-const AbsoluteTolerance<float>      abs_tolerance_f16(0.2f);      /**< Absolute tolerance value for comparing reference's output against implementation's output for FP16 data types */
-constexpr float                     tolerance_num = 0.07f;        /**< Tolerance number for FP16 data types */
-#endif                                                            /* ARM_COMPUTE_ENABLE_FP16 */
+RelativeTolerance<half_float::half> rel_tolerance_f16(half(
+    0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for FP16 data types */
+const AbsoluteTolerance<float>      abs_tolerance_f16(
+         0.2f); /**< Absolute tolerance value for comparing reference's output against implementation's output for FP16 data types */
+constexpr float tolerance_num = 0.07f; /**< Tolerance number for FP16 data types */
+#endif                                 /* ARM_COMPUTE_ENABLE_FP16 */
 /** CNN data types */
 const auto CNNDataTypes = make("DataType",
-{
+                               {
 #ifdef ARM_COMPUTE_ENABLE_FP16
-    DataType::F16,
+                                   DataType::F16,
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
-    DataType::F32,
-});
+                                   DataType::F32,
+                               });
 
 const auto data_interleave = make("M", 8, 12) * make("N", 8, 12);
 const auto data_transpose  = make("M", 8, 14) * make("N", 7, 14);
@@ -136,8 +140,8 @@ TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
     rhs.allocator()->allocate();
     c.allocator()->allocate();
 
-    ITensorPack run_pack{ { TensorType::ACL_SRC_0, &lhs }, { TensorType::ACL_SRC_1, &rhs }, { TensorType::ACL_SRC_2, &c } };
-    ITensorPack prep_pack{ { TensorType::ACL_SRC_1, &rhs }, { TensorType::ACL_SRC_2, &c } };
+    ITensorPack run_pack{{TensorType::ACL_SRC_0, &lhs}, {TensorType::ACL_SRC_1, &rhs}, {TensorType::ACL_SRC_2, &c}};
+    ITensorPack prep_pack{{TensorType::ACL_SRC_1, &rhs}, {TensorType::ACL_SRC_2, &c}};
 
     auto mg = MemoryGroup{};
     auto ws = manage_workspace<Tensor>(gemm->workspace(), mg, run_pack, prep_pack);
@@ -158,9 +162,10 @@ TEST_CASE(MemoryInjection, framework::DatasetMode::ALL)
     };
     auto result_0 = run_conv();
     auto result_1 = run_conv();
-    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    for (size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i],
+                           framework::LogLevel::ERRORS);
     }
 }
 
@@ -198,9 +203,10 @@ TEST_CASE(MultipleExecutionWithConfigure, framework::DatasetMode::ALL)
     };
     auto result_0 = run_conv();
     auto result_1 = run_conv();
-    for(size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
+    for (size_t i = 0; i < result_0.info()->tensor_shape().total_size(); ++i)
     {
-        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i], framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(((float *)result_0.buffer())[i] == ((float *)result_1.buffer())[i],
+                           framework::LogLevel::ERRORS);
     }
 }
 
@@ -229,12 +235,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 // clang-format on
 // *INDENT-ON*
 TEST_SUITE(KERNEL_SELECTION)
-DATA_TEST_CASE(KernelSelection_mul_and_add, framework::DatasetMode::ALL,
-               combine(make("CpuExt", std::string("NEON")),
-                       make("DataType", { DataType::F32,
-                                                              DataType::F16
-                                                            })),
-               cpu_ext, data_type)
+DATA_TEST_CASE(KernelSelection_mul_and_add,
+               framework::DatasetMode::ALL,
+               combine(make("CpuExt", std::string("NEON")), make("DataType", {DataType::F32, DataType::F16})),
+               cpu_ext,
+               data_type)
 {
     using namespace cpu::kernels;
 
@@ -242,7 +247,8 @@ DATA_TEST_CASE(KernelSelection_mul_and_add, framework::DatasetMode::ALL,
     cpu_isa.neon = (cpu_ext == "NEON");
     cpu_isa.fp16 = (data_type == DataType::F16);
 
-    const auto *selected_impl_mul = CpuGemmMatrixMultiplyKernel::get_implementation(DataTypeISASelectorData{ data_type, cpu_isa }, cpu::KernelSelectionType::Preferred);
+    const auto *selected_impl_mul = CpuGemmMatrixMultiplyKernel::get_implementation(
+        DataTypeISASelectorData{data_type, cpu_isa}, cpu::KernelSelectionType::Preferred);
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl_mul);
 
@@ -251,7 +257,8 @@ DATA_TEST_CASE(KernelSelection_mul_and_add, framework::DatasetMode::ALL,
 
     ARM_COMPUTE_EXPECT_EQUAL(expected, actual, framework::LogLevel::ERRORS);
 
-    const auto *selected_impl_add = CpuGemmMatrixAdditionKernel::get_implementation(DataTypeISASelectorData{ data_type, cpu_isa }, cpu::KernelSelectionType::Preferred);
+    const auto *selected_impl_add = CpuGemmMatrixAdditionKernel::get_implementation(
+        DataTypeISASelectorData{data_type, cpu_isa}, cpu::KernelSelectionType::Preferred);
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(selected_impl_add);
 
@@ -264,11 +271,11 @@ TEST_SUITE_END() // KERNEL_SELECTION
 
 TEST_SUITE(TRANSPOSE_1XW)
 using CpuGemmTranspose1xW = NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuGemmTranspose1xWKernel>;
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
-                   make("N", { 1, 23, 63, 101 }),
-                   make("K", { 1, 47, 29, 27 })
-                   ),
-               n_value, k_value)
+DATA_TEST_CASE(ValidateZeroPadding,
+               framework::DatasetMode::ALL,
+               zip(make("N", {1, 23, 63, 101}), make("K", {1, 47, 29, 27})),
+               n_value,
+               k_value)
 {
     bool status = validate_zero_padding<CpuGemmTranspose1xW>(n_value, k_value);
     ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
@@ -276,7 +283,10 @@ DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
 
 TEST_SUITE(U32)
 using CpuGemmTranspose1xWFixture = GEMMTranspose1xWValidationFixture<Tensor, Accessor, CpuGemmTranspose1xW, uint32_t>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuGemmTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose * make("DataType", DataType::U32))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuGemmTranspose1xWFixture,
+                       framework::DatasetMode::PRECOMMIT,
+                       data_transpose *make("DataType", DataType::U32))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -285,7 +295,10 @@ TEST_SUITE_END() // U32
 
 TEST_SUITE(U16)
 using CpuGemmTranspose1xWFixture = GEMMTranspose1xWValidationFixture<Tensor, Accessor, CpuGemmTranspose1xW, uint16_t>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuGemmTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose * make("DataType", DataType::U16))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuGemmTranspose1xWFixture,
+                       framework::DatasetMode::PRECOMMIT,
+                       data_transpose *make("DataType", DataType::U16))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -294,7 +307,10 @@ TEST_SUITE_END() // U16
 
 TEST_SUITE(U8)
 using CpuGemmTranspose1xWFixture = GEMMTranspose1xWValidationFixture<Tensor, Accessor, CpuGemmTranspose1xW, uint8_t>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuGemmTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose * make("DataType", DataType::U8))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuGemmTranspose1xWFixture,
+                       framework::DatasetMode::PRECOMMIT,
+                       data_transpose *make("DataType", DataType::U8))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -306,19 +322,23 @@ TEST_SUITE_END() // TRANSPOSE_1XW
 TEST_SUITE(INTERLEAVE_4X4)
 using CpuGemmInterleave4x4 = NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuGemmInterleave4x4Kernel>;
 
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
-                   make("M", { 1, 23, 63, 101 }),
-                   make("K", { 1, 47, 29, 27 })
-                   ),
-               m_value, k_value)
+DATA_TEST_CASE(ValidateZeroPadding,
+               framework::DatasetMode::ALL,
+               zip(make("M", {1, 23, 63, 101}), make("K", {1, 47, 29, 27})),
+               m_value,
+               k_value)
 {
     bool status = validate_zero_padding<cpu::kernels::CpuGemmInterleave4x4Kernel>(m_value, k_value);
     ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE(U32)
-using CpuGemmInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<Tensor, Accessor, CpuGemmInterleave4x4, uint32_t>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuGemmInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * make("DataType", DataType::U32))
+using CpuGemmInterleave4x4Fixture =
+    GEMMInterleave4x4ValidationFixture<Tensor, Accessor, CpuGemmInterleave4x4, uint32_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuGemmInterleave4x4Fixture,
+                       framework::DatasetMode::PRECOMMIT,
+                       data_interleave *make("DataType", DataType::U32))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -326,8 +346,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CpuGemmInterleave4x4Fixture, framework::Dataset
 TEST_SUITE_END() // U32
 
 TEST_SUITE(U16)
-using CpuGemmInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<Tensor, Accessor, CpuGemmInterleave4x4, uint16_t>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuGemmInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * make("DataType", DataType::U16))
+using CpuGemmInterleave4x4Fixture =
+    GEMMInterleave4x4ValidationFixture<Tensor, Accessor, CpuGemmInterleave4x4, uint16_t>;
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuGemmInterleave4x4Fixture,
+                       framework::DatasetMode::PRECOMMIT,
+                       data_interleave *make("DataType", DataType::U16))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -336,7 +360,10 @@ TEST_SUITE_END() // U16
 
 TEST_SUITE(U8)
 using CpuGemmInterleave4x4Fixture = GEMMInterleave4x4ValidationFixture<Tensor, Accessor, CpuGemmInterleave4x4, uint8_t>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CpuGemmInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave * make("DataType", DataType::QASYMM8))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CpuGemmInterleave4x4Fixture,
+                       framework::DatasetMode::PRECOMMIT,
+                       data_interleave *make("DataType", DataType::QASYMM8))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -354,51 +381,49 @@ using NEDynamicGEMMFixture = GEMMDynamicValidationFixture<Tensor, Accessor, NEGE
 
 // Runs twice to exercise code paths with buffer reuse.
 template <typename T>
-using NEDynamicGEMMFixtureRunTwice = GEMMDynamicValidationFixture<Tensor, Accessor, NEGEMM, T, false, false, false, false, false, true>;
+using NEDynamicGEMMFixtureRunTwice =
+    GEMMDynamicValidationFixture<Tensor, Accessor, NEGEMM, T, false, false, false, false, false, true>;
 #endif // __aarch64__
 
 template <typename T>
-using NEBatchedMatMulFixture = GEMMValidationFixture<Tensor, Accessor, NEGEMM, T, true, false, false, false, false, true>;
+using NEBatchedMatMulFixture =
+    GEMMValidationFixture<Tensor, Accessor, NEGEMM, T, true, false, false, false, false, true>;
 
 template <typename T>
 using NEGEMMAccumulateFixture = GEMMAccumulateValidationFixture<Tensor, Accessor, NEGEMM, T>;
 
 TEST_SUITE(Float)
-DATA_TEST_CASE(ValidateZeroPadding, framework::DatasetMode::ALL, zip(
-                                                                                                       make("In0", { TensorShape(21U, 13U),
-                                                                                                       TensorShape(31U, 1U),
-                                                                                                       TensorShape(31U, 1U),
-                                                                                                       TensorShape(8U, 2U),
-                                                                                                       TensorShape(38U, 12U),
-                                                                                                       TensorShape(32U, 1U)
-                                                                                                     }),
-                                                                                                       make("In1", { TensorShape(33U, 21U),
-                                                                                                       TensorShape(23U, 31U),
-                                                                                                       TensorShape(23U, 31U),
-                                                                                                       TensorShape(16U, 8U),
-                                                                                                       TensorShape(21U, 38U),
-                                                                                                       TensorShape(17U, 32U)
-                                                                                                     })
-                                                                                                     ),
-               shape0, shape1)
+DATA_TEST_CASE(ValidateZeroPadding,
+               framework::DatasetMode::ALL,
+               zip(make("In0",
+                        {TensorShape(21U, 13U), TensorShape(31U, 1U), TensorShape(31U, 1U), TensorShape(8U, 2U),
+                         TensorShape(38U, 12U), TensorShape(32U, 1U)}),
+                   make("In1",
+                        {TensorShape(33U, 21U), TensorShape(23U, 31U), TensorShape(23U, 31U), TensorShape(16U, 8U),
+                         TensorShape(21U, 38U), TensorShape(17U, 32U)})),
+               shape0,
+               shape1)
 {
     bool status = validate_gemm_zero_padding(shape0, shape1);
     ARM_COMPUTE_EXPECT(status, framework::LogLevel::ERRORS);
 }
 
-DATA_TEST_CASE(ValidateAccumulate, framework::DatasetMode::ALL, combine(
-                                                                     zip(
-                                                                     make("In0",{ TensorShape(21U, 13U) }),
-                                                                     make("In1", { TensorShape(33U, 21U) }),
-                                                                     make("Dst", { TensorShape(33U, 13U) })
-                                                                     ),
-                                                                     zip(
-                                                                     make("alpha", { 1.0, 100.0, 1.0, 1.0 }),
-                                                                     make("beta", { 0.0, 0.0, 1.0, 1.0 }),
-                                                                     make("is_c_null", { false, false, false, true }),
-                                                                     make("Expected", { true, false, false, true })
-                                                                     )),
-               shape_a, shape_b, shape_dst, alpha, beta, is_c_null, expected)
+DATA_TEST_CASE(ValidateAccumulate,
+               framework::DatasetMode::ALL,
+               combine(zip(make("In0", {TensorShape(21U, 13U)}),
+                           make("In1", {TensorShape(33U, 21U)}),
+                           make("Dst", {TensorShape(33U, 13U)})),
+                       zip(make("alpha", {1.0, 100.0, 1.0, 1.0}),
+                           make("beta", {0.0, 0.0, 1.0, 1.0}),
+                           make("is_c_null", {false, false, false, true}),
+                           make("Expected", {true, false, false, true}))),
+               shape_a,
+               shape_b,
+               shape_dst,
+               alpha,
+               beta,
+               is_c_null,
+               expected)
 {
     /* Accumulation test for GEMM kernels */
     // Create tensors
@@ -412,17 +437,20 @@ DATA_TEST_CASE(ValidateAccumulate, framework::DatasetMode::ALL, combine(
 
     // Validate accumulation
     cpu::CpuGemm gemm;
-    Status status = gemm.validate(&in_a, &in_b, (is_c_null ? nullptr : &in_c), &dst, alpha, beta, gemm_info);
-    ARM_COMPUTE_EXPECT((expected ==  bool(status)), framework::LogLevel::ERRORS);
+    Status       status = gemm.validate(&in_a, &in_b, (is_c_null ? nullptr : &in_c), &dst, alpha, beta, gemm_info);
+    ARM_COMPUTE_EXPECT((expected == bool(status)), framework::LogLevel::ERRORS);
 }
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(),
-                                                                                                         make("ReshapeWeights", { true, false }),
-                                                                                                 make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEGEMMFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallGEMMDataset(),
+                               make("ReshapeWeights", {true, false}),
+                               make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
@@ -432,13 +460,15 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<half>, framework::DatasetMode::PR
         ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
         framework::ARM_COMPUTE_PRINT_INFO();
     }
-
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(),
-                                                                                                       make("ReshapeWeights", { true, false }),
-                                                                                               make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEGEMMFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeGEMMDataset(),
+                               make("ReshapeWeights", {true, false}),
+                               make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
@@ -451,11 +481,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<half>, framework::DatasetMode::NI
 }
 
 TEST_SUITE(BATCHED_MATMUL)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallBatchedMatMulDataset(),
-                                                                                                                  make("ReshapeWeights", { false }),
-                                                                                                          make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEBatchedMatMulFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallBatchedMatMulDataset(),
+                               make("ReshapeWeights", {false}),
+                               make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
@@ -469,19 +502,25 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<half>, framework::Datase
 TEST_SUITE_END() // BATCHED_MATMUL
 
 TEST_SUITE_END() // FP16
-#endif /* ARM_COMPUTE_ENABLE_FP16 */
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(),
-                                                                                                          make("ReshapeWeights", { true, false }),
-                                                                                                  make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEGEMMFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallGEMMDataset(),
+                               make("ReshapeWeights", {true, false}),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(),
-                                                                                                        make("ReshapeWeights", { true, false }),
-                                                                                                make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEGEMMFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeGEMMDataset(),
+                               make("ReshapeWeights", {true, false}),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
@@ -489,23 +528,34 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<float>, framework::DatasetMode::N
 
 #if defined(__aarch64__)
 TEST_SUITE(DynamicShape)
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, combine(
-    zip(
-        make("A", TensorShape{13U, 1U}),
-        make("B", TensorShape{21U, 13U}),
-        make("C", TensorShape{21U, 1U}),
-        make("D", TensorShape{21U, 1U})
-    ),
-    make("DataType", {DataType::U32, DataType::F32}),
-    make("Null_C", {true, false}),
-    make("Alpha", {0.0f, 0.5f, 1.0f}),
-    make("Beta", {0.0f, 0.5f, 1.0f}),
-    make("Dynamic_A", {true, false}),
-    make("Dynamic_B", {true, false}),
-    make("Dynamic_C", {true, false}),
-    make("Dynamic_D", {true, false}),
-    make("ReshapeFirstRun", {true, false})
-), shape_a, shape_b, shape_c, shape_d, data_type, null_c, alpha, beta, dynamic_a, dynamic_b, dynamic_c, dynamic_d, reshape_first_run)
+DATA_TEST_CASE(Validate,
+               framework::DatasetMode::ALL,
+               combine(zip(make("A", TensorShape{13U, 1U}),
+                           make("B", TensorShape{21U, 13U}),
+                           make("C", TensorShape{21U, 1U}),
+                           make("D", TensorShape{21U, 1U})),
+                       make("DataType", {DataType::U32, DataType::F32}),
+                       make("Null_C", {true, false}),
+                       make("Alpha", {0.0f, 0.5f, 1.0f}),
+                       make("Beta", {0.0f, 0.5f, 1.0f}),
+                       make("Dynamic_A", {true, false}),
+                       make("Dynamic_B", {true, false}),
+                       make("Dynamic_C", {true, false}),
+                       make("Dynamic_D", {true, false}),
+                       make("ReshapeFirstRun", {true, false})),
+               shape_a,
+               shape_b,
+               shape_c,
+               shape_d,
+               data_type,
+               null_c,
+               alpha,
+               beta,
+               dynamic_a,
+               dynamic_b,
+               dynamic_c,
+               dynamic_d,
+               reshape_first_run)
 {
     TensorInfo a{shape_a, 1, data_type};
     a.set_dynamic(dynamic_a);
@@ -520,57 +570,64 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, combine(
     d.set_dynamic(dynamic_d);
     d.set_are_values_constant(!dynamic_d);
 
-    GEMMInfo gemm_info{false, false, reshape_first_run};
+    GEMMInfo            gemm_info{false, false, reshape_first_run};
     cpu::CpuDynamicGemm gemm;
-    Status status = gemm.validate(&a, &b, null_c ? nullptr : &c, &d, alpha, beta, gemm_info);
+    Status              status = gemm.validate(&a, &b, null_c ? nullptr : &c, &d, alpha, beta, gemm_info);
 
-    bool valid_data_type = data_type == DataType::F32;
-    bool valid_null_c = !null_c;
-    bool valid_alpha = (alpha == 1.0f);
-    bool valid_beta = (beta == 1.0f);
-    bool valid_dynamic_ab = (dynamic_a || dynamic_b);
-    bool valid_dynamic_d = dynamic_d;
+    bool valid_data_type         = data_type == DataType::F32;
+    bool valid_null_c            = !null_c;
+    bool valid_alpha             = (alpha == 1.0f);
+    bool valid_beta              = (beta == 1.0f);
+    bool valid_dynamic_ab        = (dynamic_a || dynamic_b);
+    bool valid_dynamic_d         = dynamic_d;
     bool valid_reshape_first_run = (!reshape_first_run || (!dynamic_b && !dynamic_c));
-    bool validity = valid_data_type && valid_null_c && valid_alpha && valid_beta && valid_dynamic_ab && valid_dynamic_d && valid_reshape_first_run;
+    bool validity                = valid_data_type && valid_null_c && valid_alpha && valid_beta && valid_dynamic_ab &&
+                    valid_dynamic_d && valid_reshape_first_run;
     ARM_COMPUTE_EXPECT((validity == bool(status)), framework::LogLevel::ERRORS);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDynamicGEMMFixture<float>, framework::DatasetMode::PRECOMMIT,
-        combine(
-            datasets::SmallGEMMVectorBiasDataset(),
-            make("ReshapeWeights", { true, false }),
-            make("DataType", DataType::F32),
-            make("ConstantRHS", false)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEDynamicGEMMFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallGEMMVectorBiasDataset(),
+                               make("ReshapeWeights", {true, false}),
+                               make("DataType", DataType::F32),
+                               make("ConstantRHS", false)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
-FIXTURE_DATA_TEST_CASE(RunSmallConstantRHS, NEDynamicGEMMFixtureRunTwice<float>, framework::DatasetMode::PRECOMMIT,
-        combine(
-            datasets::SmallGEMMVectorBiasDataset(),
-            make("ReshapeWeights", false),
-            make("DataType", DataType::F32),
-            make("ConstantRHS", true)))
+FIXTURE_DATA_TEST_CASE(RunSmallConstantRHS,
+                       NEDynamicGEMMFixtureRunTwice<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallGEMMVectorBiasDataset(),
+                               make("ReshapeWeights", false),
+                               make("DataType", DataType::F32),
+                               make("ConstantRHS", true)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDynamicGEMMFixture<float>, framework::DatasetMode::NIGHTLY,
-        combine(
-            datasets::LargeGEMMVectorBiasDataset(),
-            make("ReshapeWeights", { true, false }),
-            make("DataType", DataType::F32),
-            make("ConstantRHS", false)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEDynamicGEMMFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeGEMMVectorBiasDataset(),
+                               make("ReshapeWeights", {true, false}),
+                               make("DataType", DataType::F32),
+                               make("ConstantRHS", false)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
 TEST_SUITE_END() // DynamicShape
-#endif // __aarch64__
+#endif           // __aarch64__
 
 TEST_SUITE(BATCHED_MATMUL)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallBatchedMatMulDataset(),
-                                                                                                                   make("ReshapeWeights", { false }),
-                                                                                                           make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEBatchedMatMulFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallBatchedMatMulDataset(),
+                               make("ReshapeWeights", {false}),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
@@ -578,16 +635,22 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEBatchedMatMulFixture<float>, framework::Datas
 TEST_SUITE_END() // BATCHED_MATMUL
 
 TEST_SUITE(ACCUMULATE)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMAccumulateFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallAccumulateGEMMDataset(),
-                                                                                                        make("ReshapeWeights", { false }),
-                                                                                                        make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEGEMMAccumulateFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallAccumulateGEMMDataset(),
+                               make("ReshapeWeights", {false}),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMAccumulateFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeAccumulateGEMMDataset(),
-                                                                                                        make("ReshapeWeights", { false }),
-                                                                                                        make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEGEMMAccumulateFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeAccumulateGEMMDataset(),
+                               make("ReshapeWeights", {false}),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f);

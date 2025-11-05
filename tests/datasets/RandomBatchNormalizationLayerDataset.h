@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_RANDOM_BATCH_NORMALIZATION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_RANDOM_BATCH_NORMALIZATION_LAYER_DATASET
-
-#include "tests/datasets/BatchNormalizationLayerDataset.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_RANDOMBATCHNORMALIZATIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_RANDOMBATCHNORMALIZATIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/datasets/BatchNormalizationLayerDataset.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -59,4 +58,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_RANDOM_BATCH_NORMALIZATION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_RANDOMBATCHNORMALIZATIONLAYERDATASET_H

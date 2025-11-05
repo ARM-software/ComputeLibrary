@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,12 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/PadLayer.h"
 
@@ -46,27 +47,31 @@ class PaddingFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType data_type, const PaddingList &padding, const PaddingMode mode)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
         }
 
         PaddingList clamped_padding = padding;
-        if(mode != PaddingMode::CONSTANT)
+        if (mode != PaddingMode::CONSTANT)
         {
             // Clamp padding to prevent applying more than is possible.
-            for(uint32_t i = 0; i < padding.size(); ++i)
+            for (uint32_t i = 0; i < padding.size(); ++i)
             {
-                if(mode == PaddingMode::REFLECT)
+                if (mode == PaddingMode::REFLECT)
                 {
-                    clamped_padding[i].first  = std::min(static_cast<uint64_t>(padding[i].first), static_cast<uint64_t>(shape[i] - 1));
-                    clamped_padding[i].second = std::min(static_cast<uint64_t>(padding[i].second), static_cast<uint64_t>(shape[i] - 1));
+                    clamped_padding[i].first =
+                        std::min(static_cast<uint64_t>(padding[i].first), static_cast<uint64_t>(shape[i] - 1));
+                    clamped_padding[i].second =
+                        std::min(static_cast<uint64_t>(padding[i].second), static_cast<uint64_t>(shape[i] - 1));
                 }
                 else
                 {
-                    clamped_padding[i].first  = std::min(static_cast<uint64_t>(padding[i].first), static_cast<uint64_t>(shape[i]));
-                    clamped_padding[i].second = std::min(static_cast<uint64_t>(padding[i].second), static_cast<uint64_t>(shape[i]));
+                    clamped_padding[i].first =
+                        std::min(static_cast<uint64_t>(padding[i].first), static_cast<uint64_t>(shape[i]));
+                    clamped_padding[i].second =
+                        std::min(static_cast<uint64_t>(padding[i].second), static_cast<uint64_t>(shape[i]));
                 }
             }
         }
@@ -81,10 +86,8 @@ protected:
         library->fill_tensor_uniform(tensor, i);
     }
 
-    TensorType compute_target(const TensorShape &shape,
-                              DataType           data_type,
-                              const PaddingList &paddings,
-                              const PaddingMode  mode)
+    TensorType
+    compute_target(const TensorShape &shape, DataType data_type, const PaddingList &paddings, const PaddingMode mode)
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, data_type);
@@ -117,12 +120,12 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type,
-                                      const PaddingList &paddings, const PaddingMode mode)
+    SimpleTensor<T>
+    compute_reference(const TensorShape &shape, DataType data_type, const PaddingList &paddings, const PaddingMode mode)
     {
         // Create reference tensor
-        SimpleTensor<T> src{ shape, data_type };
-        SimpleTensor<T> const_val{ TensorShape(1), data_type };
+        SimpleTensor<T> src{shape, data_type};
+        SimpleTensor<T> const_val{TensorShape(1), data_type};
 
         // Fill reference tensor
         fill(src, 0);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_BITWISE_NOT_FIXTURE
-#define ARM_COMPUTE_TEST_BITWISE_NOT_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_BITWISENOTFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_BITWISENOTFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/BitwiseNot.h"
 
 namespace arm_compute
@@ -88,7 +89,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type };
+        SimpleTensor<T> src{shape, data_type};
 
         // Fill reference
         fill(src);
@@ -102,4 +103,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_BITWISE_NOT_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_BITWISENOTFIXTURE_H

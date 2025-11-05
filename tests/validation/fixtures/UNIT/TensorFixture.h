@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UNIT_TENSOR_FIXTURE
-#define ARM_COMPUTE_TEST_UNIT_TENSOR_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_UNIT_TENSORFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_UNIT_TENSORFIXTURE_H
 
 #include "arm_compute/Acl.hpp"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/framework/Macros.h"
@@ -113,11 +114,12 @@ public:
         acl::Context ctx(Target);
 
         std::array<char, 256> empty_array{};
-        AclTensor tensor = nullptr;
+        AclTensor             tensor = nullptr;
 
         ARM_COMPUTE_ASSERT(AclDestroyTensor(tensor) == AclStatus::AclInvalidArgument);
         ARM_COMPUTE_ASSERT(AclDestroyTensor(reinterpret_cast<AclTensor>(ctx.get())) == AclStatus::AclInvalidArgument);
-        ARM_COMPUTE_ASSERT(AclDestroyTensor(reinterpret_cast<AclTensor>(empty_array.data())) == AclStatus::AclInvalidArgument);
+        ARM_COMPUTE_ASSERT(AclDestroyTensor(reinterpret_cast<AclTensor>(empty_array.data())) ==
+                           AclStatus::AclInvalidArgument);
         ARM_COMPUTE_ASSERT(tensor == nullptr);
     };
 };
@@ -141,7 +143,7 @@ public:
         acl::Context    ctx(Target, &err);
 
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
-        acl::Tensor tensor(ctx, acl::TensorDescriptor({ 2, 3 }, acl::DataType::Float32), &err);
+        acl::Tensor tensor(ctx, acl::TensorDescriptor({2, 3}, acl::DataType::Float32), &err);
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
     };
 };
@@ -168,9 +170,9 @@ public:
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
 
         const unsigned int num_tensors = 1024;
-        for(unsigned int i = 0; i < num_tensors; ++i)
+        for (unsigned int i = 0; i < num_tensors; ++i)
         {
-            acl::Tensor tensor(ctx, acl::TensorDescriptor({ 1024, 1024 }, acl::DataType::Float32), &err);
+            acl::Tensor tensor(ctx, acl::TensorDescriptor({1024, 1024}, acl::DataType::Float32), &err);
             ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
         }
     };
@@ -197,7 +199,8 @@ public:
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
 
         void *handle = nullptr;
-        ARM_COMPUTE_ASSERT(AclMapTensor(reinterpret_cast<AclTensor>(ctx.get()), &handle) == AclStatus::AclInvalidArgument);
+        ARM_COMPUTE_ASSERT(AclMapTensor(reinterpret_cast<AclTensor>(ctx.get()), &handle) ==
+                           AclStatus::AclInvalidArgument);
     };
 };
 
@@ -222,7 +225,7 @@ public:
         acl::Context ctx(Target, &err);
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
 
-        acl::Tensor tensor(ctx, acl::TensorDescriptor({ 8, 8 }, acl::DataType::Float32), false /* allocate */, &err);
+        acl::Tensor tensor(ctx, acl::TensorDescriptor({8, 8}, acl::DataType::Float32), false /* allocate */, &err);
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
         ARM_COMPUTE_ASSERT(tensor.map() == nullptr);
     };
@@ -249,7 +252,7 @@ public:
         acl::Context ctx(Target, &err);
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
 
-        acl::Tensor tensor(ctx, acl::TensorDescriptor({ 8, 8 }, acl::DataType::Float32), &err);
+        acl::Tensor tensor(ctx, acl::TensorDescriptor({8, 8}, acl::DataType::Float32), &err);
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
 
         void *handle = tensor.map();
@@ -281,7 +284,7 @@ public:
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
 
         const int32_t size = 8;
-        acl::Tensor   tensor(ctx, acl::TensorDescriptor({ size }, acl::DataType::Float32), false /* allocate */, &err);
+        acl::Tensor   tensor(ctx, acl::TensorDescriptor({size}, acl::DataType::Float32), false /* allocate */, &err);
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
 
         std::vector<float> data(size);
@@ -310,7 +313,7 @@ public:
         acl::Context    ctx(Target, &err);
 
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
-        acl::Tensor tensor(ctx, acl::TensorDescriptor({ 2, 3 }, acl::DataType::Float32), &err);
+        acl::Tensor tensor(ctx, acl::TensorDescriptor({2, 3}, acl::DataType::Float32), &err);
 
         // size should be 6 elements (2x3) times 4 bytes (float32) = 24 bytes
         constexpr size_t expected_size = 24;
@@ -332,14 +335,14 @@ public:
     {
         // Null tensor
         AclTensor null_tensor = nullptr;
-        uint64_t  size{ 0 };
+        uint64_t  size{0};
         ARM_COMPUTE_ASSERT(AclGetTensorSize(null_tensor, &size) == AclStatus::AclInvalidArgument);
 
         // Create valid tensor
         acl::StatusCode err = acl::StatusCode::Success;
         acl::Context    ctx(Target, &err);
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
-        acl::Tensor tensor(ctx, acl::TensorDescriptor({ 2, 3 }, acl::DataType::Float32), &err);
+        acl::Tensor tensor(ctx, acl::TensorDescriptor({2, 3}, acl::DataType::Float32), &err);
 
         // Null size argument
         ARM_COMPUTE_ASSERT(AclGetTensorSize(tensor.get(), nullptr) == AclStatus::AclInvalidArgument);
@@ -357,7 +360,7 @@ class DescriptorConversionFixture : public framework::Fixture
         are_descriptors_same &= desc_a.data_type == desc_b.data_type;
         are_descriptors_same &= desc_a.shape != nullptr && desc_b.shape != nullptr;
 
-        for(int32_t d = 0; d < desc_a.ndims; ++d)
+        for (int32_t d = 0; d < desc_a.ndims; ++d)
         {
             are_descriptors_same &= desc_a.shape[d] == desc_b.shape[d];
         }
@@ -370,11 +373,11 @@ class DescriptorConversionFixture : public framework::Fixture
 public:
     void setup()
     {
-        auto err{ acl::StatusCode::Success };
-        auto ctx{ acl::Context(Target, &err) };
+        auto err{acl::StatusCode::Success};
+        auto ctx{acl::Context(Target, &err)};
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
 
-        auto        desc{ acl::TensorDescriptor({ 2, 3 }, acl::DataType::Float32) };
+        auto        desc{acl::TensorDescriptor({2, 3}, acl::DataType::Float32)};
         acl::Tensor tensor(ctx, desc, &err);
 
         auto desc_from_tensor = tensor.get_descriptor();
@@ -386,10 +389,7 @@ public:
         // Note: When c interface used, there are possibility of memory leak
         // if members are not correctly deleted (e.g., shape).
         // Since that is considered user's responsibility, we don't test here.
-        AclTensorDescriptor prepopulated_descriptor
-        {
-            3, nullptr, AclDataType::AclBFloat16, nullptr, 0
-        };
+        AclTensorDescriptor prepopulated_descriptor{3, nullptr, AclDataType::AclBFloat16, nullptr, 0};
 
         ARM_COMPUTE_ASSERT(AclGetTensorDescriptor(tensor.get(), &prepopulated_descriptor) == AclStatus::AclSuccess);
         ARM_COMPUTE_ASSERT(compare_descriptor(*desc.get(), prepopulated_descriptor));
@@ -412,7 +412,7 @@ public:
         acl::StatusCode err = acl::StatusCode::Success;
         acl::Context    ctx(Target, &err);
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
-        acl::Tensor tensor(ctx, acl::TensorDescriptor({ 2, 3 }, acl::DataType::Float32), &err);
+        acl::Tensor tensor(ctx, acl::TensorDescriptor({2, 3}, acl::DataType::Float32), &err);
 
         // Null size argument
         ARM_COMPUTE_ASSERT(AclGetTensorDescriptor(tensor.get(), nullptr) == AclStatus::AclInvalidArgument);
@@ -421,4 +421,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UNIT_TENSOR_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_UNIT_TENSORFIXTURE_H

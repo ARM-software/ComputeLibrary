@@ -60,7 +60,7 @@ struct sequence_generator<0, Ns...>
 };
 
 template <int N, int... Ns>
-struct sequence_generator : sequence_generator < N - 1, N - 1, Ns... >
+struct sequence_generator : sequence_generator<N - 1, N - 1, Ns...>
 {
 };
 
@@ -79,7 +79,7 @@ void apply_impl(O *obj, F &&func, std::tuple<As...> &args, detail::sequence<S...
 {
     (obj->*func)(std::get<S>(args)...);
 }
-} // namespace
+} // namespace detail
 
 template <typename O, typename F, typename... As>
 void apply(O *obj, F &&func, const std::tuple<As...> &args)
@@ -104,10 +104,9 @@ void apply(O *obj, F &&func, std::tuple<As...> &args)
 template <typename T, typename std::enable_if<std::is_same<typename T::value_type, std::string>::value, int>::type = 0>
 std::string join(T first, T last, const std::string &separator)
 {
-    return std::accumulate(std::next(first), last, *first, [&separator](const std::string & base, const std::string & suffix)
-    {
-        return base + separator + suffix;
-    });
+    return std::accumulate(std::next(first), last, *first,
+                           [&separator](const std::string &base, const std::string &suffix)
+                           { return base + separator + suffix; });
 }
 
 /** Helper function to concatenate multiple values.
@@ -128,10 +127,9 @@ std::string join(T first, T last, const std::string &separator)
 template <typename T, typename UnaryOp>
 std::string join(T &&first, T &&last, const std::string &separator, UnaryOp &&op)
 {
-    return std::accumulate(std::next(first), last, op(*first), [&separator, &op](const std::string & base, const typename T::value_type & suffix)
-    {
-        return base + separator + op(suffix);
-    });
+    return std::accumulate(std::next(first), last, op(*first),
+                           [&separator, &op](const std::string &base, const typename T::value_type &suffix)
+                           { return base + separator + op(suffix); });
 }
 
 /** Helper function to concatenate multiple values.
@@ -145,7 +143,7 @@ std::string join(T &&first, T &&last, const std::string &separator, UnaryOp &&op
  * @return String containing all elements joined by @p separator.
  */
 template <typename T, typename std::enable_if<std::is_arithmetic<typename T::value_type>::value, int>::type = 0>
-std::string join(T && first, T && last, const std::string &separator)
+std::string join(T &&first, T &&last, const std::string &separator)
 {
     return join(std::forward<T>(first), std::forward<T>(last), separator, support::cpp11::to_string);
 }
@@ -158,10 +156,7 @@ std::string join(T && first, T && last, const std::string &separator)
  */
 inline std::string tolower(std::string string)
 {
-    std::transform(string.begin(), string.end(), string.begin(), [](unsigned char c)
-    {
-        return std::tolower(c);
-    });
+    std::transform(string.begin(), string.end(), string.begin(), [](unsigned char c) { return std::tolower(c); });
     return string;
 }
 

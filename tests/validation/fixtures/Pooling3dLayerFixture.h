@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,12 +28,14 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/Pooling3dLayer.h"
+
 #include <random>
 namespace arm_compute
 {
@@ -45,9 +47,13 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class Pooling3dLayerValidationGenericFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape, Pooling3dLayerInfo pool_info, DataType data_type, QuantizationInfo input_qinfo = QuantizationInfo(), QuantizationInfo output_qinfo = QuantizationInfo())
+    void setup(TensorShape        shape,
+               Pooling3dLayerInfo pool_info,
+               DataType           data_type,
+               QuantizationInfo   input_qinfo  = QuantizationInfo(),
+               QuantizationInfo   output_qinfo = QuantizationInfo())
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -61,14 +67,14 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(tensor.data_type() == DataType::F32)
+        if (tensor.data_type() == DataType::F32)
         {
             std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
             library->fill(tensor, distribution, 0);
         }
-        else if(tensor.data_type() == DataType::F16)
+        else if (tensor.data_type() == DataType::F16)
         {
-            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
             library->fill(tensor, distribution, 0);
         }
         else // data type is quantized_asymmetric
@@ -77,13 +83,16 @@ protected:
         }
     }
 
-    TensorType compute_target(TensorShape shape, Pooling3dLayerInfo info,
-                              DataType data_type, QuantizationInfo input_qinfo, QuantizationInfo output_qinfo)
+    TensorType compute_target(TensorShape        shape,
+                              Pooling3dLayerInfo info,
+                              DataType           data_type,
+                              QuantizationInfo   input_qinfo,
+                              QuantizationInfo   output_qinfo)
     {
         // Create tensors
         TensorType        src       = create_tensor<TensorType>(shape, data_type, 1, input_qinfo, DataLayout::NDHWC);
         const TensorShape dst_shape = misc::shape_calculator::compute_pool3d_shape((src.info()->tensor_shape()), info);
-        TensorType        dst       = create_tensor<TensorType>(dst_shape, data_type, 1, output_qinfo, DataLayout::NDHWC);
+        TensorType        dst = create_tensor<TensorType>(dst_shape, data_type, 1, output_qinfo, DataLayout::NDHWC);
 
         // Create and configure function
         FunctionType pool_layer;
@@ -108,7 +117,11 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(TensorShape shape, Pooling3dLayerInfo info, DataType data_type, QuantizationInfo input_qinfo, QuantizationInfo output_qinfo)
+    SimpleTensor<T> compute_reference(TensorShape        shape,
+                                      Pooling3dLayerInfo info,
+                                      DataType           data_type,
+                                      QuantizationInfo   input_qinfo,
+                                      QuantizationInfo   output_qinfo)
     {
         // Create reference
         SimpleTensor<T> src(shape, data_type, 1, input_qinfo, DataLayout::NDHWC);
@@ -122,45 +135,65 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class Pooling3dLayerValidationFixture : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class Pooling3dLayerValidationFixture
+    : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, PoolingType pool_type, Size3D pool_size, Size3D stride, Padding3D padding, bool exclude_padding, DataType data_type)
+    void setup(TensorShape shape,
+               PoolingType pool_type,
+               Size3D      pool_size,
+               Size3D      stride,
+               Padding3D   padding,
+               bool        exclude_padding,
+               DataType    data_type)
     {
-        Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, Pooling3dLayerInfo(pool_type, pool_size, stride, padding, exclude_padding),
-                                                                                                 data_type);
+        Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, Pooling3dLayerInfo(pool_type, pool_size, stride, padding, exclude_padding), data_type);
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class Pooling3dLayerValidationQuantizedFixture : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class Pooling3dLayerValidationQuantizedFixture
+    : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, PoolingType pool_type, Size3D pool_size, Size3D stride, Padding3D padding, bool exclude_padding, DataType data_type,
-               QuantizationInfo input_qinfo = QuantizationInfo(), QuantizationInfo output_qinfo = QuantizationInfo())
+    void setup(TensorShape      shape,
+               PoolingType      pool_type,
+               Size3D           pool_size,
+               Size3D           stride,
+               Padding3D        padding,
+               bool             exclude_padding,
+               DataType         data_type,
+               QuantizationInfo input_qinfo  = QuantizationInfo(),
+               QuantizationInfo output_qinfo = QuantizationInfo())
     {
-        Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, Pooling3dLayerInfo(pool_type, pool_size, stride, padding, exclude_padding),
-                                                                                                 data_type, input_qinfo, output_qinfo);
+        Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, Pooling3dLayerInfo(pool_type, pool_size, stride, padding, exclude_padding), data_type, input_qinfo,
+            output_qinfo);
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class Pooling3dLayerGlobalValidationFixture : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class Pooling3dLayerGlobalValidationFixture
+    : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(TensorShape shape, PoolingType pool_type, DataType data_type)
     {
-        Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, Pooling3dLayerInfo(pool_type), data_type);
+        Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, Pooling3dLayerInfo(pool_type), data_type);
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class SpecialPooling3dLayerValidationFixture : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class SpecialPooling3dLayerValidationFixture
+    : public Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(TensorShape src_shape, Pooling3dLayerInfo pool_info, DataType data_type)
     {
-        Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, pool_info, data_type);
+        Pooling3dLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, pool_info,
+                                                                                                 data_type);
     }
 };
 

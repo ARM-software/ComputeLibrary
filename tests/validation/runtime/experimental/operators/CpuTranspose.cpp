@@ -22,11 +22,12 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/experimental/operators/CpuTranspose.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/CpuTransposeFixture.h"
+#include "tests/validation/Validation.h"
 
 /*
  * Tests for arm_compute::experimental::op::CpuTranspose which is a shallow wrapper for
@@ -56,18 +57,21 @@ using CpuTransposeFixture = CpuTransposeValidationFixture<Tensor, Accessor, expe
 
 template <typename T>
 using CpuTransposeThreadSafeFixture =
-    CpuTransposeThreadSafeValidationFixture<Tensor, Accessor,  experimental::op::CpuTranspose, T>;
+    CpuTransposeThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuTranspose, T>;
 
-    template <typename T>
+template <typename T>
 using CpuTransposeQuantizedThreadSafeFixture =
-    CpuTransposeQuantizedThreadSafeValidationFixture<Tensor, Accessor,  experimental::op::CpuTranspose, T>;
+    CpuTransposeQuantizedThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuTranspose, T>;
 
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(SmokeTest, CpuTransposeFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
-                                                                                                          make("DataType", DataType::U8)))
+FIXTURE_DATA_TEST_CASE(SmokeTest,
+                       CpuTransposeFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(concat(datasets::Small1DShapes(), datasets::Small2DShapes()),
+                               make("DataType", DataType::U8)))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i]);
     }
@@ -84,7 +88,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                        combine(datasets::Small2DShapes(), make("DataType", DataType::F32)))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i]);
     }
@@ -100,7 +104,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
     if (CPUInfo::get().has_fp16())
     {
         // Validate output
-        for(int i = 0; i < _num_parallel_runs; ++i)
+        for (int i = 0; i < _num_parallel_runs; ++i)
         {
             validate(Accessor(_target[i]), _reference[i]);
         }
@@ -112,7 +116,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
     }
 }
 TEST_SUITE_END() // F16
-#endif // ARM_COMPUTE_ENABLE_FP16
+#endif           // ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE_END() // Float
 TEST_SUITE(Integer)
 TEST_SUITE(S32)
@@ -122,7 +126,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                        combine(datasets::Tiny4DShapes(), make("DataType", DataType::S32)))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i]);
     }
@@ -134,10 +138,12 @@ TEST_SUITE(QASYMM8_SIGNED)
 FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                        CpuTransposeQuantizedThreadSafeFixture<int8_t>,
                        framework::DatasetMode::ALL,
-                       combine(datasets::Tiny4DShapes(), make("DataType", DataType::QASYMM8_SIGNED), make("QuantizationInfoIn", {QuantizationInfo(0.5f, 0)})))
+                       combine(datasets::Tiny4DShapes(),
+                               make("DataType", DataType::QASYMM8_SIGNED),
+                               make("QuantizationInfoIn", {QuantizationInfo(0.5f, 0)})))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i]);
     }
@@ -147,10 +153,12 @@ TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                        CpuTransposeQuantizedThreadSafeFixture<uint8_t>,
                        framework::DatasetMode::ALL,
-                       combine(datasets::Tiny4DShapes(), make("DataType", DataType::QASYMM8), make("QuantizationInfoIn", {QuantizationInfo(0.5f, 0)})))
+                       combine(datasets::Tiny4DShapes(),
+                               make("DataType", DataType::QASYMM8),
+                               make("QuantizationInfoIn", {QuantizationInfo(0.5f, 0)})))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i]);
     }
@@ -158,7 +166,7 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE_END() // Quantized
 TEST_SUITE_END() // ThreadSafety
-#endif // #ifndef BARE_METAL
+#endif           // #ifndef BARE_METAL
 TEST_SUITE_END() // CpuTranspose
 
 TEST_SUITE_END() // OPERATORS

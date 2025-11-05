@@ -22,17 +22,17 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-
 #include "arm_compute/runtime/NEON/functions/NEBoundingBoxTransform.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
+#include "tests/datasets/ShapeDatasets.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
 #include "tests/Globals.h"
 #include "tests/NEON/Accessor.h"
-#include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/BoundingBoxTransformFixture.h"
+#include "tests/validation/Validation.h"
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -120,8 +120,10 @@ using NEBoundingBoxTransformFixture = BoundingBoxTransformFixture<Tensor, Access
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(BoundingBox, NEBoundingBoxTransformFixture<float>, framework::DatasetMode::ALL,
-                       combine(DeltaDataset, BboxInfoDataset, make("DataType", { DataType::F32 })))
+FIXTURE_DATA_TEST_CASE(BoundingBox,
+                       NEBoundingBoxTransformFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(DeltaDataset, BboxInfoDataset, make("DataType", {DataType::F32})))
 {
     // Validate output
     validate(Accessor(_target), _reference, relative_tolerance_f32, 0.f, absolute_tolerance_f32);
@@ -130,10 +132,12 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(BoundingBox, NEBoundingBoxTransformFixture<half>, framework::DatasetMode::ALL,
-                       combine(DeltaDataset, BboxInfoDataset, make("DataType", { DataType::F16 })))
+FIXTURE_DATA_TEST_CASE(BoundingBox,
+                       NEBoundingBoxTransformFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(DeltaDataset, BboxInfoDataset, make("DataType", {DataType::F16})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, relative_tolerance_f16, 0.03f, absolute_tolerance_f16);
@@ -152,11 +156,16 @@ TEST_SUITE_END() // Float
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM16)
 template <typename T>
-using NEBoundingBoxTransformQuantizedFixture = BoundingBoxTransformQuantizedFixture<Tensor, Accessor, NEBoundingBoxTransform, T>;
+using NEBoundingBoxTransformQuantizedFixture =
+    BoundingBoxTransformQuantizedFixture<Tensor, Accessor, NEBoundingBoxTransform, T>;
 
-FIXTURE_DATA_TEST_CASE(BoundingBox, NEBoundingBoxTransformQuantizedFixture<uint16_t>, framework::DatasetMode::ALL,
-                       combine(DeltaDataset, BboxInfoDataset, make("DataType", { DataType::QASYMM16 }),
-                               make("DeltasQuantInfo", { QuantizationInfo(0.125f, 0) })))
+FIXTURE_DATA_TEST_CASE(BoundingBox,
+                       NEBoundingBoxTransformQuantizedFixture<uint16_t>,
+                       framework::DatasetMode::ALL,
+                       combine(DeltaDataset,
+                               BboxInfoDataset,
+                               make("DataType", {DataType::QASYMM16}),
+                               make("DeltasQuantInfo", {QuantizationInfo(0.125f, 0)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm16);

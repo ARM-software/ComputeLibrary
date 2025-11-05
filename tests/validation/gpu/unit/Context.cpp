@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "tests/validation/fixtures/UNIT/ContextFixture.h"
-
 #include "src/gpu/cl/ClContext.h"
+#include "tests/validation/fixtures/UNIT/ContextFixture.h"
 
 using namespace arm_compute::mlgo;
 
@@ -37,9 +36,15 @@ TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(Context)
 
-EMPTY_BODY_FIXTURE_TEST_CASE(SimpleContextCApi, SimpleContextCApiFixture<AclTarget::AclGpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(SimpleContextCppApi, SimpleContextCppApiFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(MultipleContexts, MultipleContextsFixture<AclTarget::AclGpuOcl>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(SimpleContextCApi,
+                             SimpleContextCApiFixture<AclTarget::AclGpuOcl>,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(SimpleContextCppApi,
+                             SimpleContextCppApiFixture<acl::Target::GpuOcl>,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(MultipleContexts,
+                             MultipleContextsFixture<AclTarget::AclGpuOcl>,
+                             framework::DatasetMode::ALL)
 
 /** Test-case for MLGO kernel configuration file
  *
@@ -92,9 +97,11 @@ TEST_CASE(CheckMLGO, framework::DatasetMode::ALL)
 
     const MLGOHeuristics &heuristics = ctx.mlgo();
 
-    ARM_COMPUTE_EXPECT(heuristics.query_gemm_type(Query{ "g76", DataType::F32, 10, 1024, 20, 1 }).second == GEMMType::RESHAPED,
+    ARM_COMPUTE_EXPECT(heuristics.query_gemm_type(Query{"g76", DataType::F32, 10, 1024, 20, 1}).second ==
+                           GEMMType::RESHAPED,
                        framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT((heuristics.query_gemm_config_reshaped(Query{ "g76", DataType::F16, 100, 100, 20, 32 }).second == GEMMConfigReshaped{ 4, 2, 4, 2, 8, true, false, true, false }),
+    ARM_COMPUTE_EXPECT((heuristics.query_gemm_config_reshaped(Query{"g76", DataType::F16, 100, 100, 20, 32}).second ==
+                        GEMMConfigReshaped{4, 2, 4, 2, 8, true, false, true, false}),
                        framework::LogLevel::ERRORS);
 }
 

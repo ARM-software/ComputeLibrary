@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019,2021 Arm Limited.
+ * Copyright (c) 2017-2019,2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SCHEDULER_TIMER
-#define ARM_COMPUTE_TEST_SCHEDULER_TIMER
+#ifndef ACL_TESTS_FRAMEWORK_INSTRUMENTS_SCHEDULERTIMER_H
+#define ACL_TESTS_FRAMEWORK_INSTRUMENTS_SCHEDULERTIMER_H
 
-#include "Instrument.h"
 #include "arm_compute/graph/Workload.h"
 #include "arm_compute/runtime/Scheduler.h"
 
+#include "Instrument.h"
 #include <list>
 #include <memory>
 #include <vector>
@@ -97,10 +97,10 @@ public:
     };
 
 private:
-    std::list<kernel_info> _kernels;
+    std::list<kernel_info>           _kernels;
     std::map<std::string, LayerData> _layer_data_map;
-    IScheduler     *_real_scheduler;
-    Scheduler::Type _real_scheduler_type;
+    IScheduler                      *_real_scheduler;
+    Scheduler::Type                  _real_scheduler_type;
 #ifdef ARM_COMPUTE_GRAPH_ENABLED
     std::function<decltype(graph::execute_task)> _real_graph_function;
 #endif /* ARM_COMPUTE_GRAPH_ENABLED */
@@ -115,4 +115,4 @@ using SchedulerTimestamps = SchedulerClock<true>;
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SCHEDULER_TIMER */
+#endif // ACL_TESTS_FRAMEWORK_INSTRUMENTS_SCHEDULERTIMER_H

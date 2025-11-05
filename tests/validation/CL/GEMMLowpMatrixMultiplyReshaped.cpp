@@ -23,16 +23,17 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "src/gpu/cl/kernels/ClGemmLowpMatrixMultiplyReshapedKernel.h"
 #include "src/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
 #include "src/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/GEMMLowpFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -53,11 +54,20 @@ using CLGEMMReshapeRHSMatrix = CLSynthetizeOperator<opencl::kernels::ClGemmResha
 using CLGEMMLowpMatrixMultiplyReshaped = CLSynthetizeOperator<opencl::kernels::ClGemmLowpMatrixMultiplyReshapedKernel>;
 
 // Fixture for CLGEMMLowpMatrixMultiplyReshaped
-using CLGEMMLowpMatrixMultiplyReshapedFixture = GEMMLowpMatrixMultiplyReshapedValidationFixture<CLTensor, CLAccessor, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMLowpMatrixMultiplyReshaped>;
+using CLGEMMLowpMatrixMultiplyReshapedFixture =
+    GEMMLowpMatrixMultiplyReshapedValidationFixture<CLTensor,
+                                                    CLAccessor,
+                                                    CLGEMMReshapeLHSMatrix,
+                                                    CLGEMMReshapeRHSMatrix,
+                                                    CLGEMMLowpMatrixMultiplyReshaped>;
 
 // Fixture for CLGEMMMatrixMultiplyReshaped3D
 using CLGEMMLowpMatrixMultiplyReshaped3DFixture =
-    GEMMLowpMatrixMultiplyReshaped3DValidationFixture<CLTensor, CLAccessor, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMLowpMatrixMultiplyReshaped>;
+    GEMMLowpMatrixMultiplyReshaped3DValidationFixture<CLTensor,
+                                                      CLAccessor,
+                                                      CLGEMMReshapeLHSMatrix,
+                                                      CLGEMMReshapeRHSMatrix,
+                                                      CLGEMMLowpMatrixMultiplyReshaped>;
 
 namespace
 {

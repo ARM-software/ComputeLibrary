@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2023 Arm Limited.
+ * Copyright (c) 2017-2018, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DATASET_ZIP
-#define ARM_COMPUTE_TEST_DATASET_ZIP
+#ifndef ACL_TESTS_FRAMEWORK_DATASETS_ZIPDATASET_H
+#define ACL_TESTS_FRAMEWORK_DATASETS_ZIPDATASET_H
 
 #include "Dataset.h"
-
 #include <string>
 #include <tuple>
 #include <utility>
@@ -56,9 +55,7 @@ public:
      * @param[in] dataset1 First dataset.
      * @param[in] dataset2 Second dataset.
      */
-    ZipDataset(T &&dataset1, U &&dataset2)
-        : _dataset1{ std::forward<T>(dataset1) },
-          _dataset2{ std::forward<U>(dataset2) }
+    ZipDataset(T &&dataset1, U &&dataset2) : _dataset1{std::forward<T>(dataset1)}, _dataset2{std::forward<U>(dataset2)}
     {
     }
 
@@ -76,8 +73,7 @@ public:
          * @param[in] iter1 Iterator 1.
          * @param[in] iter2 Iterator 2.
          */
-        iterator(iter1_type iter1, iter2_type iter2)
-            : _iter1{ std::move(iter1) }, _iter2{ std::move(iter2) }
+        iterator(iter1_type iter1, iter2_type iter2) : _iter1{std::move(iter1)}, _iter2{std::move(iter2)}
         {
         }
 
@@ -160,7 +156,8 @@ ZipDataset<T, U> zip(T &&dataset1, U &&dataset2)
  * @return A zip dataset.
  */
 template <typename T1, typename T2, typename... Ts>
-auto zip(T1 &&dataset1, T2 &&dataset2, Ts &&... datasets) -> decltype(zip(std::forward<T1>(dataset1), zip(std::forward<T2>(dataset2), std::forward<Ts>(datasets)...)))
+auto zip(T1 &&dataset1, T2 &&dataset2, Ts &&...datasets)
+    -> decltype(zip(std::forward<T1>(dataset1), zip(std::forward<T2>(dataset2), std::forward<Ts>(datasets)...)))
 {
     return zip(std::forward<T1>(dataset1), zip(std::forward<T2>(dataset2), std::forward<Ts>(datasets)...));
 }
@@ -168,4 +165,4 @@ auto zip(T1 &&dataset1, T2 &&dataset2, Ts &&... datasets) -> decltype(zip(std::f
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DATASET_ZIP */
+#endif // ACL_TESTS_FRAMEWORK_DATASETS_ZIPDATASET_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TESTCASE
-#define ARM_COMPUTE_TEST_TESTCASE
+#ifndef ACL_TESTS_FRAMEWORK_TESTCASE_H
+#define ACL_TESTS_FRAMEWORK_TESTCASE_H
 
 #include <string>
 #include <utility>
@@ -41,13 +41,13 @@ class TestCase
 {
 public:
     /** Setup the test */
-    virtual void do_setup() {};
+    virtual void do_setup(){};
     /** Run the test */
-    virtual void do_run() {};
+    virtual void do_run(){};
     /** Sync the test */
-    virtual void do_sync() {};
+    virtual void do_sync(){};
     /** Teardown the test */
-    virtual void do_teardown() {};
+    virtual void do_teardown(){};
 
     /** Default destructor. */
     virtual ~TestCase() = default;
@@ -67,8 +67,7 @@ protected:
      *
      * @param[in] data Test data.
      */
-    explicit DataTestCase(T data)
-        : _data{ std::move(data) }
+    explicit DataTestCase(T data) : _data{std::move(data)}
     {
     }
 
@@ -77,4 +76,4 @@ protected:
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TESTCASE */
+#endif // ACL_TESTS_FRAMEWORK_TESTCASE_H

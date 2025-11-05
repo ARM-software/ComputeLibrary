@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_QUANTIZATION_LAYER_H
-#define ARM_COMPUTE_TEST_QUANTIZATION_LAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_QUANTIZATIONLAYER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_QUANTIZATIONLAYER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -36,9 +36,10 @@ namespace validation
 namespace reference
 {
 template <typename Tin, typename Tout>
-SimpleTensor<Tout> quantization_layer(const SimpleTensor<Tin> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
+SimpleTensor<Tout>
+quantization_layer(const SimpleTensor<Tin> &src, DataType output_data_type, const QuantizationInfo &quantization_info);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_QUANTIZATION_LAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_QUANTIZATIONLAYER_H
