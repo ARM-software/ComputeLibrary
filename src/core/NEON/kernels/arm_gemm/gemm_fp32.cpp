@@ -56,6 +56,11 @@
 #include "kernels/sve_ffinterleaved_fp32_mla_8x3VL.hpp"
 #include "kernels/sve_ffinterleaved_bf16fp32_mmla_8x3VL.hpp"
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
+
+#ifdef ARM_COMPUTE_ENABLE_SME
+#include "kernels/sme1_interleaved_nomerge_fp32_mopa_2VLx2VL.hpp"
+#endif // ARM_COMPUTE_ENABLE_SME
+
 #ifdef ARM_COMPUTE_ENABLE_SME2
 #include "kernels/sme2_gemv_fp32_mla_16VL.hpp"
 #include "kernels/sme2_gemv_fp32bf16fp32_dot_16VL.hpp"
@@ -118,6 +123,15 @@ GemmImplementation<float, float, float>::with_estimate(
     [](const GemmArgs &args) { return new GemmHybridIndirect<cls_a64_hybrid_fp32bf16fp32_mmla_4x24, float, float, float>(args); }
 ),
 #endif // ARM_COMPUTE_ENABLE_BF16
+#ifdef ARM_COMPUTE_ENABLE_SME
+{
+    GemmMethod::GEMM_INTERLEAVED,
+    "sme1_interleaved_nomerge_fp32_mopa_2VLx2VL",
+    [](const GemmArgs &args) { return args._ci->has_sme() && !args._accumulate; },
+    nullptr,
+    [](const GemmArgs &args) { return new GemmInterleavedNoMerge<cls_sme1_interleaved_nomerge_fp32_mopa_2VLx2VL, float, float>(args); }
+},
+#endif // ARM_COMPUTE_ENABLE_SME
 #ifdef ARM_COMPUTE_ENABLE_SVE
 #ifdef ARM_COMPUTE_ENABLE_SME2
 // SME kernels
@@ -187,6 +201,7 @@ GemmImplementation<float, float, float>::with_estimate(
     nullptr,
     [](const GemmArgs &args) { return new GemmInterleavedNoMerge<cls_sme2_interleaved_nomerge_fp32_mopa_2VLx2VL, float, float>(args); }
 },
+
 #endif // ARM_COMPUTE_ENABLE_SME2
 #ifdef ARM_COMPUTE_ENABLE_BF16
 GemmImplementation<float, float, float>::with_estimate(
