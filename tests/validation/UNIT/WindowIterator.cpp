@@ -35,6 +35,9 @@
 using namespace arm_compute;
 using namespace arm_compute::test;
 using namespace arm_compute::test::validation;
+using framework::dataset::combine;
+using framework::dataset::make;
+using framework::dataset::zip;
 
 TEST_SUITE(UNIT)
 TEST_SUITE(WindowIterator)
@@ -65,16 +68,15 @@ std::vector<T> create_vector(std::initializer_list<T> list_objs)
 DATA_TEST_CASE(
     WholeWindow,
     framework::DatasetMode::ALL,
-    zip(framework::dataset::make(
-            "Window",
-            {create_window(Window::Dimension(0, 1)), create_window(Window::Dimension(1, 5, 2), Window::Dimension(3, 5)),
-             create_window(Window::Dimension(4, 16, 4), Window::Dimension(3, 13, 5), Window::Dimension(1, 3, 2))}),
-        framework::dataset::make("Expected",
-                                 {create_vector({Coordinates(0, 0)}),
-                                  create_vector({Coordinates(1, 3), Coordinates(3, 3), Coordinates(1, 4),
-                                                 Coordinates(3, 4)}),
-                                  create_vector({Coordinates(4, 3, 1), Coordinates(8, 3, 1), Coordinates(12, 3, 1),
-                                                 Coordinates(4, 8, 1), Coordinates(8, 8, 1), Coordinates(12, 8, 1)})})),
+    zip(make("Window",
+             {create_window(Window::Dimension(0, 1)),
+              create_window(Window::Dimension(1, 5, 2), Window::Dimension(3, 5)),
+              create_window(Window::Dimension(4, 16, 4), Window::Dimension(3, 13, 5), Window::Dimension(1, 3, 2))}),
+        make("Expected",
+             {create_vector({Coordinates(0, 0)}),
+              create_vector({Coordinates(1, 3), Coordinates(3, 3), Coordinates(1, 4), Coordinates(3, 4)}),
+              create_vector({Coordinates(4, 3, 1), Coordinates(8, 3, 1), Coordinates(12, 3, 1), Coordinates(4, 8, 1),
+                             Coordinates(8, 8, 1), Coordinates(12, 8, 1)})})),
     window,
     expected)
 {
@@ -108,28 +110,26 @@ DATA_TEST_CASE(
 DATA_TEST_CASE(
     PartialWindow2D,
     framework::DatasetMode::ALL,
-    zip(zip(zip(combine(framework::dataset::make("Window",
-                                                 create_window(Window::Dimension(4, 20, 4),
-                                                               Window::Dimension(3, 32, 5),
-                                                               Window::Dimension(1, 2, 1))),
-                        framework::dataset::make("Start", {0, 1, 3, 2, 4})),
-                framework::dataset::make("End", {0, 2, 5, 8, 7})),
-            framework::dataset::make("RowSize",
-                                     {
-                                         create_vector({4}),
-                                         create_vector({8, 8}),
-                                         create_vector({4, 8, 8}),
-                                         create_vector({8, 8, 16, 16, 16, 16, 4}),
-                                         create_vector({16, 16, 16, 16}),
-                                     })),
-        framework::dataset::make(
-            "Expected",
-            {create_vector({Coordinates(4, 3, 1)}), create_vector({Coordinates(8, 3, 1), Coordinates(12, 3, 1)}),
-             create_vector({Coordinates(16, 3, 1), Coordinates(4, 8, 1), Coordinates(8, 8, 1)}),
-             create_vector({Coordinates(12, 3, 1), Coordinates(16, 3, 1), Coordinates(4, 8, 1), Coordinates(8, 8, 1),
-                            Coordinates(12, 8, 1), Coordinates(16, 8, 1), Coordinates(4, 13, 1)}),
-             create_vector({Coordinates(4, 8, 1), Coordinates(8, 8, 1), Coordinates(12, 8, 1),
-                            Coordinates(16, 8, 1)})})),
+    zip(combine(
+            make("Window",
+                 create_window(Window::Dimension(4, 20, 4), Window::Dimension(3, 32, 5), Window::Dimension(1, 2, 1))),
+            make("Start", {0, 1, 3, 2, 4})),
+        make("End", {0, 2, 5, 8, 7}),
+        make("RowSize",
+             {
+                 create_vector({4}),
+                 create_vector({8, 8}),
+                 create_vector({4, 8, 8}),
+                 create_vector({8, 8, 16, 16, 16, 16, 4}),
+                 create_vector({16, 16, 16, 16}),
+             }),
+        make("Expected",
+             {create_vector({Coordinates(4, 3, 1)}), create_vector({Coordinates(8, 3, 1), Coordinates(12, 3, 1)}),
+              create_vector({Coordinates(16, 3, 1), Coordinates(4, 8, 1), Coordinates(8, 8, 1)}),
+              create_vector({Coordinates(12, 3, 1), Coordinates(16, 3, 1), Coordinates(4, 8, 1), Coordinates(8, 8, 1),
+                             Coordinates(12, 8, 1), Coordinates(16, 8, 1), Coordinates(4, 13, 1)}),
+              create_vector({Coordinates(4, 8, 1), Coordinates(8, 8, 1), Coordinates(12, 8, 1),
+                             Coordinates(16, 8, 1)})})),
     window,
     start,
     end,

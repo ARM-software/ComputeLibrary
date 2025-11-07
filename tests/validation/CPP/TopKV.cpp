@@ -58,7 +58,7 @@ TEST_SUITE(TopKV)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         make("PredictionsInfo", { TensorInfo(TensorShape(20, 10), 1, DataType::F32),
                                                 TensorInfo(TensorShape(10, 20), 1, DataType::F16),  // Mismatching batch_size
                                                 TensorInfo(TensorShape(20, 10), 1, DataType::S8), // Unsupported data type
@@ -68,14 +68,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(10), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10), 1, DataType::U32),
-                                                TensorInfo(TensorShape(10), 1, DataType::U32)})),
+                                                TensorInfo(TensorShape(10), 1, DataType::U32)}),
         make("OutputInfo",{ TensorInfo(TensorShape(10), 1, DataType::U8),
                                                 TensorInfo(TensorShape(10), 1, DataType::U8),
                                                 TensorInfo(TensorShape(10), 1, DataType::U8),
                                                 TensorInfo(TensorShape(10), 1, DataType::U8),
-                                                TensorInfo(TensorShape(1), 1, DataType::U8)})),
-
-        make("k",{ 0, 1, 2, 3, 4 })),
+                                                TensorInfo(TensorShape(1), 1, DataType::U8)}),
+        make("k",{ 0, 1, 2, 3, 4 }),
         make("Expected", {true, false, false, false, false })),
         prediction_info, targets_info, output_info, k, expected)
 {
