@@ -31,13 +31,15 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+using framework::dataset::zip;
 TEST_SUITE(UNIT)
 TEST_SUITE(TensorShapeValidation)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Construction, framework::DatasetMode::ALL, zip(zip(
-               framework::dataset::make("TensorShape", {
+DATA_TEST_CASE(Construction, framework::DatasetMode::ALL, zip(
+               make("TensorShape", {
                TensorShape{},
                TensorShape{ 1U },
                TensorShape{ 2U },
@@ -46,8 +48,8 @@ DATA_TEST_CASE(Construction, framework::DatasetMode::ALL, zip(zip(
                TensorShape{ 2U, 3U, 5U, 7U },
                TensorShape{ 2U, 3U, 5U, 7U, 11U },
                TensorShape{ 2U, 3U, 5U, 7U, 11U, 13U }}),
-               framework::dataset::make("NumDimensions", { 0U, 1U, 1U, 2U, 3U, 4U, 5U, 6U })),
-               framework::dataset::make("TotalSize", { 0U, 1U, 2U, 6U, 30U, 210U, 2310U, 30030U })),
+               make("NumDimensions", { 0U, 1U, 1U, 2U, 3U, 4U, 5U, 6U }),
+               make("TotalSize", { 0U, 1U, 2U, 6U, 30U, 210U, 2310U, 30030U })),
                shape, num_dimensions, total_size)
 {
     ARM_COMPUTE_EXPECT(shape.num_dimensions() == num_dimensions, framework::LogLevel::ERRORS);
@@ -56,10 +58,7 @@ DATA_TEST_CASE(Construction, framework::DatasetMode::ALL, zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-DATA_TEST_CASE(SetEmpty,
-               framework::DatasetMode::ALL,
-               framework::dataset::make("Dimension", {0U, 1U, 2U, 3U, 4U, 5U}),
-               dimension)
+DATA_TEST_CASE(SetEmpty, framework::DatasetMode::ALL, make("Dimension", {0U, 1U, 2U, 3U, 4U, 5U}), dimension)
 {
     TensorShape shape;
 

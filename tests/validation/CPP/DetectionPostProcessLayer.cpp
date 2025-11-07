@@ -200,7 +200,7 @@ TEST_SUITE(DetectionPostProcessLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         make("BoxEncodingsInfo", { TensorInfo(TensorShape(4U, 10U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(4U, 10U, 3U), 1, DataType::F32),  // Mismatching batch_size
                                                 TensorInfo(TensorShape(4U, 10U, 1U), 1, DataType::S8), // Unsupported data type
@@ -214,46 +214,46 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                 TensorInfo(TensorShape(3U ,10U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(3U ,10U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(3U ,10U), 1, DataType::QASYMM8),
-                                                TensorInfo(TensorShape(3U ,10U), 1, DataType::QASYMM8_SIGNED)})),
+                                                TensorInfo(TensorShape(3U ,10U), 1, DataType::QASYMM8_SIGNED)}),
         make("AnchorsInfo",{ TensorInfo(TensorShape(4U, 10U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(4U, 10U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(4U, 10U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(4U, 10U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(4U, 10U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(4U, 10U, 1U), 1, DataType::QASYMM8),
-                                                TensorInfo(TensorShape(4U, 10U, 1U), 1, DataType::QASYMM8_SIGNED)})),
+                                                TensorInfo(TensorShape(4U, 10U, 1U), 1, DataType::QASYMM8_SIGNED)}),
         make("OutputBoxInfo", { TensorInfo(TensorShape(4U, 3U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(4U, 3U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(4U, 3U, 1U), 1, DataType::S8),
                                                 TensorInfo(TensorShape(4U, 3U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(1U, 5U, 1U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(4U, 3U, 1U), 1, DataType::F32)})),
+                                                TensorInfo(TensorShape(4U, 3U, 1U), 1, DataType::F32)}),
         make("OuputClassesInfo",{ TensorInfo(TensorShape(3U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(3U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(3U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(3U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(3U, 1U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(6U, 1U), 1, DataType::F32)})),
+                                                TensorInfo(TensorShape(6U, 1U), 1, DataType::F32)}),
         make("OutputScoresInfo",{ TensorInfo(TensorShape(3U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(3U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(3U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(3U, 1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(3U, 1U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(6U, 1U), 1, DataType::F32)})),
+                                                TensorInfo(TensorShape(6U, 1U), 1, DataType::F32)}),
         make("NumDetectionsInfo",{ TensorInfo(TensorShape(1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(1U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(1U), 1, DataType::F32),
-                                                TensorInfo(TensorShape(1U), 1, DataType::F32)})),
+                                                TensorInfo(TensorShape(1U), 1, DataType::F32)}),
         make("DetectionPostProcessLayerInfo",{ DetectionPostProcessLayerInfo(3, 1, 0.0f, 0.5f, 2, {0.1f,0.1f,0.1f,0.1f}),
                                                 DetectionPostProcessLayerInfo(3, 1, 0.0f, 0.5f, 2, {0.1f,0.1f,0.1f,0.1f}),
                                                 DetectionPostProcessLayerInfo(3, 1, 0.0f, 0.5f, 2, {0.1f,0.1f,0.1f,0.1f}),
                                                 DetectionPostProcessLayerInfo(3, 1, 0.0f, 1.5f, 2, {0.0f,0.1f,0.1f,0.1f}),
                                                 DetectionPostProcessLayerInfo(3, 1, 0.0f, 0.5f, 2, {0.1f,0.1f,0.1f,0.1f}),
-                                                DetectionPostProcessLayerInfo(3, 1, 0.0f, 0.5f, 2, {0.1f,0.1f,0.1f,0.1f})})),
+                                                DetectionPostProcessLayerInfo(3, 1, 0.0f, 0.5f, 2, {0.1f,0.1f,0.1f,0.1f})}),
         make("Expected", {true, false, false, false, false, false })),
-        box_encodings_info, classes_info, anchors_info, output_boxes_info, output_classes_info,output_scores_info, num_detection_info, detect_info, expected)
+        box_encodings_info, classes_info, anchors_info, output_boxes_info, output_classes_info, output_scores_info, num_detection_info, detect_info, expected)
 {
     const Status status = CPPDetectionPostProcessLayer::validate(&box_encodings_info.clone()->set_is_resizable(false),
             &classes_info.clone()->set_is_resizable(false),

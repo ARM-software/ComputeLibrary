@@ -61,70 +61,70 @@ TEST_SUITE(NMS)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
-                                                make("BoundingBox",{
-                                                                                        TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(1U, 4U, 2U), 1, DataType::F32),    // invalid shape
-                                                                                        TensorInfo(TensorShape(4U, 2U), 1, DataType::S32),    // invalid data type
-                                                                                        TensorInfo(TensorShape(4U, 3U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(4U, 66U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
-                                                                                    }),
-                                                make("Scores", {
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32), // invalid shape
-                                                                                        TensorInfo(TensorShape(4U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(3U), 1, DataType::U8),  // invalid data type
-                                                                                        TensorInfo(TensorShape(66U), 1, DataType::F32),  // invalid data type
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::F32),
-                                                                                    })),
-                                                make("Indices", {
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::S32),
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::S32),
-                                                                                        TensorInfo(TensorShape(4U), 1, DataType::S32),
-                                                                                        TensorInfo(TensorShape(3U), 1, DataType::S32),
-                                                                                        TensorInfo(TensorShape(200U), 1, DataType::S32), // indices bigger than max bbs, OK because max_output is 66
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::F32), // invalid data type
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::S32),
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::S32),
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::S32),
-                                                                                        TensorInfo(TensorShape(100U), 1, DataType::S32),
-
-                                                                                    })),
-                                                make("max_output", {
-                                                                                        10U, 2U,4U, 3U,66U, 1U,
-                                                                                        0U, /* invalid, must be greater than 0 */
-                                                                                        10000U, /* OK, clamped to indices' size */
-                                                                                        100U,
-                                                                                        10U,
-                                                                                     })),
-                                                make("score_threshold", {
-                                                                                        0.1f, 0.4f, 0.2f,0.8f,0.3f, 0.01f, 0.5f, 0.45f,
-                                                                                        -1.f, /* invalid value, must be in [0,1] */
-                                                                                        0.5f,
-                                                                                     })),
-                                                make("nms_threshold", {
-                                                                                        0.3f, 0.7f, 0.1f,0.13f,0.2f, 0.97f, 0.76f, 0.87f, 0.1f,
-                                                                                        10.f, /* invalid value, must be in [0,1]*/
-                                                                                     })),
-                                                make("Expected", {
-                                                                                        true, false, false, false, true, false, false,true, false, false
-                                                                                     })),
-
-                                            bbox_info, scores_info, indices_info, max_out, score_threshold, nms_threshold, expected)
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+                                                    make("BoundingBox",{
+                                                                                TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(1U, 4U, 2U), 1, DataType::F32),    // invalid shape
+                                                                                TensorInfo(TensorShape(4U, 2U), 1, DataType::S32),         // invalid data type
+                                                                                TensorInfo(TensorShape(4U, 3U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(4U, 66U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(4U, 100U), 1, DataType::F32),
+                                                                            }),
+                                                    make("Scores", {
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32), // invalid shape
+                                                                                TensorInfo(TensorShape(4U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(3U), 1, DataType::U8),                   // invalid data type
+                                                                                TensorInfo(TensorShape(66U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::F32),
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::F32),
+                                                                            }),
+                                                    make("Indices", {
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::S32),
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::S32),
+                                                                                TensorInfo(TensorShape(4U), 1, DataType::S32),
+                                                                                TensorInfo(TensorShape(3U), 1, DataType::S32),
+                                                                                TensorInfo(TensorShape(200U), 1, DataType::S32), // indices bigger than max bbs, OK because max_output is 66
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::F32), // invalid data type
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::S32),
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::S32),
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::S32),
+                                                                                TensorInfo(TensorShape(100U), 1, DataType::S32),
+                                                                            }),
+                                                    make("max_output", {
+                                                                                10U, 2U, 4U, 3U, 66U, 1U,
+                                                                                0U,      /* invalid, must be greater than 0 */
+                                                                                10000U,  /* OK, clamped to indices' size */
+                                                                                100U,
+                                                                                10U,
+                                                                            }),
+                                                    make("score_threshold", {
+                                                                                0.1f, 0.4f, 0.2f, 0.8f, 0.3f, 0.01f, 0.5f, 0.45f,
+                                                                                -1.f, /* invalid value, must be in [0,1] */
+                                                                                0.5f,
+                                                                            }),
+                                                    make("nms_threshold", {
+                                                                                0.3f, 0.7f, 0.1f, 0.13f, 0.2f, 0.97f, 0.76f, 0.87f, 0.1f,
+                                                                                10.f, /* invalid value, must be in [0,1]*/
+                                                                            }),
+                                                    make("Expected", {
+                                                                                true, false, false, false, true, false, false, true, false, false
+                                                                            })
+                                                ),
+                                                bbox_info, scores_info, indices_info, max_out, score_threshold, nms_threshold, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CPPNonMaximumSuppression::validate(&bbox_info.clone()->set_is_resizable(false),
                                                                &scores_info.clone()->set_is_resizable(false),
                                                                &indices_info.clone()->set_is_resizable(false),
-                                max_out,score_threshold,nms_threshold)) == expected, framework::LogLevel::ERRORS);
+                                                               max_out, score_threshold, nms_threshold)) == expected,
+                       framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*

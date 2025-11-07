@@ -34,14 +34,16 @@
 using namespace arm_compute;
 using namespace arm_compute::test;
 using namespace arm_compute::test::validation;
+using framework::dataset::make;
+using framework::dataset::zip;
 
 TEST_SUITE(UNIT)
 TEST_SUITE(Utils)
 
 DATA_TEST_CASE(RoundHalfUp,
                framework::DatasetMode::ALL,
-               zip(framework::dataset::make("FloatIn", {1.f, 1.2f, 1.5f, 2.5f, 2.9f, -3.f, -3.5f, -3.8f, -4.3f, -4.5f}),
-                   framework::dataset::make("FloatOut", {1.f, 1.f, 2.f, 3.f, 3.f, -3.f, -3.f, -4.f, -4.f, -4.f})),
+               zip(make("FloatIn", {1.f, 1.2f, 1.5f, 2.5f, 2.9f, -3.f, -3.5f, -3.8f, -4.3f, -4.5f}),
+                   make("FloatOut", {1.f, 1.f, 2.f, 3.f, 3.f, -3.f, -3.f, -4.f, -4.f, -4.f})),
                value,
                result)
 {
@@ -50,8 +52,8 @@ DATA_TEST_CASE(RoundHalfUp,
 
 DATA_TEST_CASE(RoundHalfEven,
                framework::DatasetMode::ALL,
-               zip(framework::dataset::make("FloatIn", {1.f, 1.2f, 1.5f, 2.5f, 2.9f, -3.f, -3.5f, -3.8f, -4.3f, -4.5f}),
-                   framework::dataset::make("FloatOut", {1.f, 1.f, 2.f, 2.f, 3.f, -3.f, -4.f, -4.f, -4.f, -4.f})),
+               zip(make("FloatIn", {1.f, 1.2f, 1.5f, 2.5f, 2.9f, -3.f, -3.5f, -3.8f, -4.3f, -4.5f}),
+                   make("FloatOut", {1.f, 1.f, 2.f, 2.f, 3.f, -3.f, -4.f, -4.f, -4.f, -4.f})),
                value,
                result)
 {
@@ -60,9 +62,9 @@ DATA_TEST_CASE(RoundHalfEven,
 
 DATA_TEST_CASE(Index2Coord,
                framework::DatasetMode::ALL,
-               zip(zip(framework::dataset::make("Shape", {TensorShape{1U}, TensorShape{2U}, TensorShape{2U, 3U}}),
-                       framework::dataset::make("Index", {0, 1, 2})),
-                   framework::dataset::make("Coordinates", {Coordinates{0}, Coordinates{1}, Coordinates{0, 1}})),
+               zip(make("Shape", {TensorShape{1U}, TensorShape{2U}, TensorShape{2U, 3U}}),
+                   make("Index", {0, 1, 2}),
+                   make("Coordinates", {Coordinates{0}, Coordinates{1}, Coordinates{0, 1}})),
                shape,
                index,
                ref_coordinate)
@@ -74,8 +76,8 @@ DATA_TEST_CASE(Index2Coord,
 
 DATA_TEST_CASE(RoundFloatToZero,
                framework::DatasetMode::ALL,
-               zip(framework::dataset::make("FloatIn", {1.f, 1.2f, 1.5f, 2.5f, 2.9f, -3.f, -3.5f, -3.8f, -4.3f, -4.5f}),
-                   framework::dataset::make("FloatOut", {1.f, 1.f, 1.f, 2.f, 2.f, -3.f, -3.f, -3.f, -4.f, -4.f})),
+               zip(make("FloatIn", {1.f, 1.2f, 1.5f, 2.5f, 2.9f, -3.f, -3.5f, -3.8f, -4.3f, -4.5f}),
+                   make("FloatOut", {1.f, 1.f, 1.f, 2.f, 2.f, -3.f, -3.f, -3.f, -4.f, -4.f})),
                value,
                result)
 {
@@ -84,8 +86,8 @@ DATA_TEST_CASE(RoundFloatToZero,
 
 DATA_TEST_CASE(RoundFloatToNearestUp,
                framework::DatasetMode::ALL,
-               zip(framework::dataset::make("FloatIn", {1.f, 1.2f, 1.5f, 2.5f, 2.9f, -3.f, -3.5f, -3.8f, -4.3f, -4.5f}),
-                   framework::dataset::make("FloatOut", {1.f, 1.f, 2.f, 3.f, 3.f, -3.f, -4.f, -4.f, -4.f, -5.f})),
+               zip(make("FloatIn", {1.f, 1.2f, 1.5f, 2.5f, 2.9f, -3.f, -3.5f, -3.8f, -4.3f, -4.5f}),
+                   make("FloatOut", {1.f, 1.f, 2.f, 3.f, 3.f, -3.f, -4.f, -4.f, -4.f, -5.f})),
                value,
                result)
 {
@@ -94,9 +96,9 @@ DATA_TEST_CASE(RoundFloatToNearestUp,
 
 DATA_TEST_CASE(Coord2Index,
                framework::DatasetMode::ALL,
-               zip(zip(framework::dataset::make("Shape", {TensorShape{1U}, TensorShape{2U}, TensorShape{2U, 3U}}),
-                       framework::dataset::make("Coordinates", {Coordinates{0}, Coordinates{1}, Coordinates{0, 1}})),
-                   framework::dataset::make("Index", {0, 1, 2})),
+               zip(make("Shape", {TensorShape{1U}, TensorShape{2U}, TensorShape{2U, 3U}}),
+                   make("Coordinates", {Coordinates{0}, Coordinates{1}, Coordinates{0, 1}}),
+                   make("Index", {0, 1, 2})),
                shape,
                coordinate,
                ref_index)
