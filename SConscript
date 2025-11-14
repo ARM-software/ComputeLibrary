@@ -744,6 +744,13 @@ if (env['multi_isa']):
     lib_static_objs, lib_shared_objs = build_multiisa_lib_objects()
     # STATIC library build.
     arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_static_objs, static=True)
+
+    if(env['os'] == 'linux' and not env['opencl']):
+        # -static suffix in static libraries is deprecated, and will be removed in COMPMID-8696.
+        # This additional static binary is provided temporarily for multi-isa builds upon user request,
+        # and after the deprecation notice, the version with -static suffix will be removed in a
+        # future major release.
+        arm_compute_a_wo_suffix = build_library('arm_compute', arm_compute_env, lib_static_objs, static=True)
 else:
     if 'sve2' in env['arch']:
         lib_files += lib_files_sve
@@ -754,6 +761,10 @@ else:
     arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files, static=True)
 
 Export('arm_compute_a')
+
+if (env['multi_isa'] and env['os'] == 'linux' and not env['opencl']):
+    # Remove this part as part of COMPMID-8696
+    Export('arm_compute_a_wo_suffix')
 
 # SHARED library build.
 if env['os'] != 'bare_metal' and not env['standalone']:
