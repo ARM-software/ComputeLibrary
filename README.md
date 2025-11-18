@@ -1,13 +1,9 @@
 > [!IMPORTANT]
-> **Versioning Change: CalVer → SemVer**
+> **Static Library Name Change**
 >
-> We have updated our versioning scheme for the Arm Compute Library.
+> - libarm_compute-static.a will be renamed to libarm_compute.a in distributed pre-built binaries.
+> - This change will be in effect starting from the first release in or after Jan 2026.
 >
-> - **v25.04** is the **last release** using Calendar Versioning (**CalVer**).
-> - Starting from the next release, we are switching to **Semantic Versioning (**SemVer**).
-> - The next version will be: **v52.0.0**
->
-> This change provides clearer version semantics and better compatibility tracking for users and integrators.
 
 <br>
 <div align="center">
