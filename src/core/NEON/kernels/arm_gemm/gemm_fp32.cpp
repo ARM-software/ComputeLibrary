@@ -197,7 +197,7 @@ GemmImplementation<float, float, float>::with_estimate(
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sme_interleaved_nomerge_fp32_mopa_1VLx4VL",
-    [](const GemmArgs &args) { return args._ci->has_sme(); },
+    [](const GemmArgs &args) { return args._ci->has_sme() && !args._accumulate; },
     [](const GemmArgs &args) { const auto VL = sme::get_vector_length<float>();
                                return args._Msize <= VL || (2*VL < args._Msize && args._Msize <= 3*VL); },
     [](const GemmArgs &args) { return new GemmInterleavedNoMerge<cls_sme_interleaved_nomerge_fp32_mopa_1VLx4VL, float, float>(args); }
@@ -205,7 +205,7 @@ GemmImplementation<float, float, float>::with_estimate(
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sme_interleaved_nomerge_fp32_mopa_4VLx1VL",
-    [](const GemmArgs &args) { return args._ci->has_sme(); },
+    [](const GemmArgs &args) { return args._ci->has_sme() && !args._accumulate; },
     [](const GemmArgs &args) { const auto VL = sme::get_vector_length<float>();
                                return args._Nsize <= VL || (2*VL < args._Nsize && args._Nsize <= 3*VL); },
     [](const GemmArgs &args) { return new GemmInterleavedNoMerge<cls_sme_interleaved_nomerge_fp32_mopa_4VLx1VL, float, float>(args); }
@@ -213,7 +213,7 @@ GemmImplementation<float, float, float>::with_estimate(
 {
     GemmMethod::GEMM_INTERLEAVED,
     "sme_interleaved_nomerge_fp32_mopa_2VLx2VL",
-    [](const GemmArgs &args) { return args._ci->has_sme(); },
+    [](const GemmArgs &args) { return args._ci->has_sme() && !args._accumulate; },
     nullptr,
     [](const GemmArgs &args) { return new GemmInterleavedNoMerge<cls_sme_interleaved_nomerge_fp32_mopa_2VLx2VL, float, float>(args); }
 },
