@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorFormat.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
@@ -50,7 +51,8 @@ TensorInfo::TensorInfo()
       _data_layout(DataLayout::NCHW),
       _are_values_constant(true),
       _id(invalid_tensor_id),
-      _lock_paddings(false)
+      _lock_paddings(false),
+      _tensor_format(TensorFormat::Dense)
 {
     _dims_state.fill(ITensorInfo::get_static_state_value());
 }
@@ -73,6 +75,7 @@ TensorInfo::TensorInfo(const ITensorInfo &info) : TensorInfo()
     _are_values_constant           = info.are_values_constant();
     _id                            = info.id();
     _lock_paddings                 = info.lock_paddings();
+    _tensor_format                 = info.tensor_format();
 }
 
 TensorInfo::TensorInfo(const TensorInfo &info) : TensorInfo()
@@ -93,6 +96,7 @@ TensorInfo::TensorInfo(const TensorInfo &info) : TensorInfo()
     _are_values_constant           = info.are_values_constant();
     _id                            = info.id();
     _lock_paddings                 = false;
+    _tensor_format                 = info.tensor_format();
 }
 TensorInfo::TensorInfo(Format format) : TensorInfo(TensorShape(), format)
 {
