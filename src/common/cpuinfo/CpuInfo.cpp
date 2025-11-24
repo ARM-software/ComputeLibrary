@@ -442,8 +442,6 @@ CpuInfo CpuInfo::build()
         isainfo.fp16 = IsProcessorFeaturePresent(PF_ARM_SVE_INSTRUCTIONS_AVAILABLE);
         isainfo.sve  = IsProcessorFeaturePresent(PF_ARM_SVE_INSTRUCTIONS_AVAILABLE);
         isainfo.i8mm = IsProcessorFeaturePresent(PF_ARM_SVE_I8MM_INSTRUCTIONS_AVAILABLE);
-        isainfo.sme  = IsProcessorFeaturePresent(PF_ARM_SME_INSTRUCTIONS_AVAILABLE);
-        isainfo.sme2 = IsProcessorFeaturePresent(PF_ARM_SME2_INSTRUCTIONS_AVAILABLE);
     }
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
