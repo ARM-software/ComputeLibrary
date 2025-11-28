@@ -103,7 +103,7 @@ vars.AddVariables(
                   allowed_values=("armv7a", "armv7a-hf", "arm64-v8a", "arm64-v8.2-a", "arm64-v8.2-a-sve", "arm64-v8.2-a-sve2", "x86_32", "x86_64",
                                   "armv8a", "armv8.2-a", "armv8.2-a-sve", "armv8.6-a", "armv8.6-a-sve", "armv8.6-a-sve2", "armv8.6-a-sve2-sme2", "armv8r64", "x86")),
     EnumVariable("estate", "Execution State", "auto", allowed_values=("auto", "32", "64")),
-    EnumVariable("os", "Target OS. With bare metal selected, only Arm® Neon™ (not OpenCL) can be used, static libraries get built and Neon™'s multi-threading support is disabled.", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal", "openbsd","windows", "qnx")),
+    EnumVariable("os", "Target OS. With bare metal selected, only Arm® Neon™ (not OpenCL) can be used, static libraries get built and Neon™'s multi-threading support is disabled.", "linux", allowed_values=("linux", "android", "tizen", "macos", "bare_metal", "openbsd", "freebsd","windows", "qnx")),
     EnumVariable("build", "Either build directly on your device (native) or cross compile from your desktop machine (cross-compile). In both cases make sure the compiler is available in your path.", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("gemm_tuner", "Build gemm_tuner programs", True),
@@ -282,11 +282,11 @@ if env['profile']:
 
 cpp_tool = {'linux': 'g++', 'android' : 'clang++',
              'tizen': 'g++', 'macos':'clang++',
-             'bare_metal':'g++', 'openbsd':'g++','windows':'clang-cl', 'qnx':'qcc -Vgcc_ntoaarch64le'}
+             'bare_metal':'g++', 'openbsd':'g++', 'freebsd':'clang++', 'windows':'clang-cl', 'qnx':'qcc -Vgcc_ntoaarch64le'}
 
 c_tool = {'linux':'gcc', 'android': 'clang', 'tizen':'gcc',
           'macos':'clang','bare_metal':'gcc',
-          'openbsd':'gcc','windows':'clang-cl', 'qnx':'qcc -Vgcc_ntoaarch64le'}
+          'openbsd':'gcc', 'freebsd':'clang++', 'windows':'clang-cl', 'qnx':'qcc -Vgcc_ntoaarch64le'}
 
 default_cpp_compiler = cpp_tool[env['os']]
 default_c_compiler = c_tool[env['os']]
@@ -567,7 +567,7 @@ if env['opencl']:
 if env["os"] not in ["windows","android", "bare_metal", "qnx"] and (env['opencl'] or env['cppthreads']):
     env.Append(LIBS = ['pthread'])
 
-if env['os'] == 'openbsd':
+if env['os'] == 'openbsd' or 'freebsd':
     env.Append(LIBS = ['c'])
     env.Append(CCFLAGS = ['-fPIC'])
 
