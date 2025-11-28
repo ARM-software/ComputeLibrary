@@ -25,6 +25,8 @@
 
 #include "arm_compute/runtime/Scheduler.h"
 
+#include "tests/framework/instruments/OpenCLMemoryUsage.h"
+#include "tests/framework/instruments/OpenCLTimer.h"
 #include "tests/framework/ParametersLibrary.h"
 #include "tests/framework/TestFilter.h"
 
