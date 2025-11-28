@@ -12,8 +12,8 @@
 
 # Compute Library [![acl-release-shield]][acl-release]
 
-[acl-release-shield]: https://img.shields.io/github/v/release/ARM-software/ComputeLibrary?label=latest&color=green
-[acl-release]: https://github.com/ARM-software/ComputeLibrary/releases/latest
+[acl-release-shield]: https://img.shields.io/badge/version-52.7.0-green
+[acl-release]: https://github.com/ARM-software/ComputeLibrary/releases/v52.7.0
 
 The Compute Library is a collection of low-level machine learning functions optimized for Arm® Cortex®-A, Arm® Neoverse™ and Arm® Mali™ GPUs architectures.<br>
 
@@ -33,8 +33,8 @@ Key Features:
 ## Documentation
 [![docs-shield]][docs-index]
 
-[docs-shield]: https://img.shields.io/badge/documentation-latest-green
-[docs-index]: https://artificial-intelligence.sites.arm.com/computelibrary/latest/index.xhtml
+[docs-shield]: https://img.shields.io/badge/documentation-52.7.0-green
+[docs-index]: https://artificial-intelligence.sites.arm.com/computelibrary/v52.7.0/index.xhtml
 
 > Note: The documentation includes the reference API, changelogs, build guide, contribution guide, errata, etc.
 
@@ -88,7 +88,7 @@ Pre-build binaries are generated with the following security / good coding pract
 
 **⚠ Important** Bazel and CMake builds are experimental CPU only builds, please see the [documentation][docs-howtobuild] for more details.
 
-[docs-howtobuild]: https://artificial-intelligence.sites.arm.com/computelibrary/latest/how_to_build.xhtml
+[docs-howtobuild]: https://artificial-intelligence.sites.arm.com/computelibrary/v52.7.0/how_to_build.xhtml
 
 <br>
 
@@ -97,7 +97,7 @@ Pre-build binaries are generated with the following security / good coding pract
 Contributions to the Compute Library are more than welcome.
 If you are interested in contributing, please have a look at our [how to contribute guidelines][docs-contributionguidelines].
 
-[docs-contributionguidelines]: https://artificial-intelligence.sites.arm.com/computelibrary/latest/contribution_guidelines.xhtml
+[docs-contributionguidelines]: https://artificial-intelligence.sites.arm.com/computelibrary/v52.7.0/contribution_guidelines.xhtml
 
 ### Developer Certificate of Origin (DCO)
 Before the Compute Library accepts your contribution, you need to certify its origin and give us your permission. To manage this process we use the Developer Certificate of Origin (DCO) V1.1 (https://developercertificate.org/)
