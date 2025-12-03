@@ -531,6 +531,11 @@ Available build options:
 	- ARM_COMPUTE_ENABLE_CPPTHREADS: Enable C++11 threads backend
 	- ARM_COMPUTE_ENABLE_OPENMP: Enable OpenMP backend
 	- ARM_COMPUTE_ENABLE_ASSERTS: Enable runtime asserts
+	- ARM_COMPUTE_ENABLE_CODE_COVERAGE: Enable code coverage.
+	- ARM_COMPUTE_ENABLE_SANITIZERS: Enable sanitizers.
+	- ARM_COMPUTE_USE_LIBCXX: Use libcxx instead of the default stdlib.
+	- ACL_MULTI_ISA: Build Multi-ISA (defaults to enabled)
+	- ACL_ARCH_FEATURES: Comma separated features list (sve,sve2,sme2). Only applies if ACL_MULTI_ISA is disabled
 
 @subsubsection S1_8_2_3_example_builds Example builds
 
@@ -538,6 +543,34 @@ To build libraries, examples and tests:
 
 	cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release -DARM_COMPUTE_ENABLE_OPENMP=1 -DARM_COMPUTE_BUILD_EXAMPLES=1 -DARM_COMPUTE_BUILD_TESTING=1
 	cmake --build build -j32
+
+@subsubsection S1_8_2_4_single_isa_builds Single ISA builds
+
+CMake also supports building for a single ISA. Effectively it guarantees to use the same -march argument for all of the libraries built. Some of the libs require certain features to build, so if they aren't available for the selected march, they will not be built.
+
+To achieve a single-ISA build:
+	- ACL_MULTI_ISA option must be disabled (OFF).
+	- ACL_ARCH_ISA must be set to the desired ISA.
+	- (optional) ACL_ARCH_FEATURES should contain the optional features desired.
+
+To build single-ISA libraries for armv8-a:
+
+	cmake -S . -B build-v8a  -DCMAKE_BUILD_TYPE=Release \
+      -DACL_MULTI_ISA=OFF -DACL_ARCH_ISA=armv8-a
+	cmake --build build-v8a -j
+
+To build single-ISA libraries for armv8.2-a with SVE support:
+
+	cmake -S . -B build-v82+sve  -DCMAKE_BUILD_TYPE=Release \
+		-DACL_MULTI_ISA=OFF -DACL_ARCH_ISA=armv8.2-a -DACL_ARCH_FEATURES=sve
+	cmake --build build-v82+sve -j
+
+To build single-ISA libraries for armv8.6-a with SVE, SVE2, and SME2 support:
+
+	cmake -S . -B build-v86+sve+sve2+sme2 -DCMAKE_BUILD_TYPE=Release \
+		-DACL_MULTI_ISA=OFF -DACL_ARCH_ISA=armv8.6-a -DACL_ARCH_FEATURES="sve, sve2, sme2"
+	cmake --build build-v86+sve+sve2+sme2 -j
+
 
 @section S1_9_fixed_format Building with support for fixed format kernels
 
