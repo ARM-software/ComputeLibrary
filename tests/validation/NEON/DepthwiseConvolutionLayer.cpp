@@ -61,8 +61,9 @@ constexpr AbsoluteTolerance<int8_t> tolerance_qasymm8_signed(
 #ifdef ARM_COMPUTE_ENABLE_FP16
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(
     0.02)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr float                     tolerance_num = 0.05f; /**< Tolerance number */
-#endif                                                     // ARM_COMPUTE_ENABLE_FP16
+constexpr float                     abs_tolerance_f16 = 0.015f;
+constexpr float                     tolerance_num     = 0.05f; /**< Tolerance number */
+#endif                                                         // ARM_COMPUTE_ENABLE_FP16
 
 const auto depth_multipliers       = make("DepthMultiplier", {1, 2, 8});
 const auto large_depth_multipliers = make("DepthMultiplier", {5, 32});
@@ -792,7 +793,7 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmallW5x5,
 {
     if (CPUInfo::get().has_fp16())
     {
-        validate(Accessor(_target), _reference, tolerance_f16);
+        validate(Accessor(_target), _reference, tolerance_f16, 0.0, abs_tolerance_f16);
     }
     else
     {
