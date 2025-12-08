@@ -745,6 +745,11 @@ void Framework::set_seed(unsigned int seed)
 {
     _seed = seed;
 }
+
+unsigned int Framework::get_seed() const
+{
+    return _seed;
+}
 } // namespace framework
 } // namespace test
 } // namespace arm_compute

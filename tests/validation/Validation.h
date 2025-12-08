@@ -498,6 +498,12 @@ void validate(const IAccessor       &tensor,
         ARM_COMPUTE_TEST_INFO(num_mismatches << " values (" << std::fixed << std::setprecision(2) << percent_mismatches
                                              << "%) mismatched (maximum tolerated " << std::setprecision(2)
                                              << tolerance_number * 100 << "%)");
+        if (framework::Framework::get().num_iterations() > 1)
+        {
+            // If number of test iterations > 1, the initially printed seed is dynamic.
+            // Print the seed for each failing test/information printout.
+            ARM_COMPUTE_TEST_INFO("Seed: " << framework::Framework::get().get_seed());
+        }
         ARM_COMPUTE_EXPECT(num_mismatches <= absolute_tolerance_number, framework::LogLevel::ERRORS);
     }
 }
