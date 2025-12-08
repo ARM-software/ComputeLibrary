@@ -350,6 +350,12 @@ public:
      */
     void set_seed(unsigned int seed);
 
+    /** Get the seed set by the framework.
+     *
+     * @return the seed
+     */
+    unsigned int get_seed() const;
+
 private:
     Framework();
     ~Framework() = default;
