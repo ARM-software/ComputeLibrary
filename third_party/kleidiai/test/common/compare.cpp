@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <sstream>
 #include <tuple>
 #include <type_traits>
 
@@ -50,13 +51,17 @@ template <typename Data>
 bool compare_raw(
     const void* imp_data, const void* ref_data, const DataFormat& format, size_t full_height, size_t full_width,
     const Rect& rect, MismatchHandler& handler) {
-    const auto block_height = format.actual_block_height(full_height);
-    const auto block_width = format.actual_block_width(full_width);
-    const auto subblock_height = format.actual_subblock_height(full_height);
-    const auto subblock_width = format.actual_subblock_width(full_width);
+    const size_t block_height = format.actual_block_height(full_height);
+    const size_t block_width = format.actual_block_width(full_width);
+    const size_t subblock_height = format.actual_subblock_height(full_height);
+    const size_t subblock_width = format.actual_subblock_width(full_width);
 
     size_t idx = 0;
 
+    bool block_heading_written = false;
+    bool subblock_heading_written = false;
+    bool row_heading_written = false;
+    std::ostringstream sstream;
     for (size_t y_block = 0; y_block < full_height; y_block += block_height) {
         for (size_t x_block = 0; x_block < full_width; x_block += block_width) {
             for (size_t y_subblock = 0; y_subblock < block_height; y_subblock += subblock_height) {
@@ -73,24 +78,48 @@ bool compare_raw(
                             const auto [abs_err, rel_err] = calculate_error(imp_value, ref_value);
 
                             if (abs_err != 0 || rel_err != 0) {
+                                if (!in_roi) {
+                                    handler.mark_as_failed();
+                                }
+
                                 const auto notifying = !in_roi || handler.handle_data(abs_err, rel_err);
 
                                 if (notifying) {
-                                    KAI_LOGE(
-                                        "Mismatched data at (", y, ", ", x, "): actual = ", imp_value,
-                                        ", expected: ", ref_value);
+                                    if (!block_heading_written) {
+                                        sstream << "block @ (" << y_block << ", " << x_block << "):\n";
+                                        block_heading_written = true;
+                                    }
+                                    if (!subblock_heading_written) {
+                                        sstream << "  sub-block @ (" << y_subblock << ", " << x_subblock << "):\n";
+                                        subblock_heading_written = true;
+                                    }
+                                    if (!row_heading_written) {
+                                        sstream << "    row=" << y_element << ": ";
+                                        row_heading_written = true;
+                                    }
+                                    sstream << x_element << ", ";
                                 }
                             }
 
                             ++idx;
                         }
+                        if (row_heading_written) {
+                            sstream << "\n";
+                        }
+                        row_heading_written = false;
                     }
+                    subblock_heading_written = false;
                 }
             }
+            block_heading_written = false;
         }
     }
 
-    return handler.success(full_height * full_width);
+    const bool success = handler.success(full_height * full_width);
+    if (!success) {
+        KAI_LOGE("mismatches:\n", sstream.str());
+    }
+    return success;
 }
 
 /// Compares matrices with per-row bias or per-row quantization.
@@ -105,10 +134,10 @@ bool compare_per_row(
     const auto subblock_height = format.actual_subblock_height(full_height);
     const auto subblock_width = format.actual_subblock_width(full_width);
 
-    KAI_ASSUME(format.scheduler_block_height(full_height) == block_height);
-    KAI_ASSUME(format.scheduler_block_width(full_width) == full_width);
-    KAI_ASSUME(rect.start_col() == 0);
-    KAI_ASSUME(rect.width() == full_width);
+    KAI_ASSUME_ALWAYS(format.scheduler_block_height(full_height) == block_height);
+    KAI_ASSUME_ALWAYS(format.scheduler_block_width(full_width) == full_width);
+    KAI_ASSUME_ALWAYS(rect.start_col() == 0);
+    KAI_ASSUME_ALWAYS(rect.width() == full_width);
 
     const size_t row_block_zero_points_bytes = block_height * sizeof(Offset);
     const size_t row_block_scales_bytes = has_scale ? block_height * sizeof(Scale) : 0;
@@ -123,7 +152,7 @@ bool compare_per_row(
         // Checks the zero points.
         for (size_t i = 0; i < block_height; ++i) {
             const auto imp_zero_point = reinterpret_cast<const Offset*>(imp_ptr)[i];
-            const Offset ref_zero_point = in_roi ? reinterpret_cast<const Offset*>(ref_ptr)[i] : 0;
+            const Offset ref_zero_point = in_roi ? reinterpret_cast<const Offset*>(ref_ptr)[i] : static_cast<Offset>(0);
             const auto [abs_err, rel_err] = calculate_error(imp_zero_point, ref_zero_point);
 
             if (abs_err != 0 || rel_err != 0) {
@@ -145,18 +174,22 @@ bool compare_per_row(
                     for (size_t y = 0; y < subblock_height; ++y) {
                         for (size_t x = 0; x < subblock_width; ++x) {
                             const auto offset = (y_subblock + y) * full_width + x_block + x_subblock + x;
-                            const auto imp_data = read_array<Data>(imp_ptr, offset);
-                            const Data ref_data = in_roi ? read_array<Data>(ref_ptr, offset) : static_cast<Data>(0);
-                            const auto [abs_err, rel_err] = calculate_error(imp_data, ref_data);
+                            const auto imp_value = read_array<Data>(imp_ptr, offset);
+                            const Data ref_value = in_roi ? read_array<Data>(ref_ptr, offset) : static_cast<Data>(0);
+                            const auto [abs_err, rel_err] = calculate_error(imp_value, ref_value);
 
                             if (abs_err != 0 || rel_err != 0) {
+                                if (!in_roi) {
+                                    handler.mark_as_failed();
+                                }
+
                                 const auto notifying = !in_roi || handler.handle_data(abs_err, rel_err);
 
                                 if (notifying) {
                                     const auto raw_index = y_block * block_height * block_width + offset;
                                     KAI_LOGE(
-                                        "Mismatched data ", raw_index, ": actual = ", imp_data,
-                                        ", expected: ", ref_data);
+                                        "Mismatched data ", raw_index, ": actual = ", imp_value,
+                                        ", expected: ", ref_value);
                                 }
                             }
                         }
@@ -211,7 +244,7 @@ bool compare(
                     return compare_raw<Float16>(imp_data, ref_data, format, full_height, full_width, rect, handler);
 
                 case DataType::BF16:
-                    return compare_raw<BFloat16>(imp_data, ref_data, format, full_height, full_width, rect, handler);
+                    return compare_raw<BFloat16<>>(imp_data, ref_data, format, full_height, full_width, rect, handler);
 
                 default:
                     break;
@@ -227,17 +260,18 @@ bool compare(
                 return compare_per_row<float, std::nullptr_t, float>(
                     imp_data, ref_data, format, full_height, full_width, rect, handler);
             } else if (data_type == DataType::BF16 && offset_dt == DataType::FP32) {
-                return compare_per_row<BFloat16, std::nullptr_t, float>(
+                return compare_per_row<BFloat16<>, std::nullptr_t, float>(
                     imp_data, ref_data, format, full_height, full_width, rect, handler);
             }
 
             break;
 
         case DataFormat::PackFormat::QUANTIZE_PER_ROW:
-            if (data_type == DataType::QAI8 && scale_dt == DataType::FP32 && offset_dt == DataType::I32) {
+            if (data_type_is_quantized_int8(data_type) && scale_dt == DataType::FP32 && offset_dt == DataType::I32) {
                 return compare_per_row<int8_t, float, int32_t>(
                     imp_data, ref_data, format, full_height, full_width, rect, handler);
-            } else if (data_type == DataType::QSI4 && scale_dt == DataType::FP32 && offset_dt == DataType::I32) {
+            } else if (
+                data_type_is_quantized_int4(data_type) && scale_dt == DataType::FP32 && offset_dt == DataType::I32) {
                 return compare_per_row<Int4, float, int32_t>(
                     imp_data, ref_data, format, full_height, full_width, rect, handler);
             }
@@ -272,15 +306,15 @@ DefaultMismatchHandler::DefaultMismatchHandler(const DefaultMismatchHandler& rhs
     _num_mismatches(0),
     _failed(false) {
     // Cannot copy mismatch handler that is already in use.
-    KAI_ASSUME(rhs._num_mismatches == 0);
-    KAI_ASSUME(!rhs._failed);
+    KAI_ASSUME_ALWAYS(rhs._num_mismatches == 0);
+    KAI_ASSUME_ALWAYS(!rhs._failed);
 }
 
 DefaultMismatchHandler& DefaultMismatchHandler::operator=(const DefaultMismatchHandler& rhs) {
     if (this != &rhs) {
         // Cannot copy mismatch handler that is already in use.
-        KAI_ASSUME(rhs._num_mismatches == 0);
-        KAI_ASSUME(!rhs._failed);
+        KAI_ASSUME_ALWAYS(rhs._num_mismatches == 0);
+        KAI_ASSUME_ALWAYS(!rhs._failed);
 
         _abs_error_threshold = rhs._abs_error_threshold;
         _rel_error_threshold = rhs._rel_error_threshold;

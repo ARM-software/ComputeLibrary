@@ -111,7 +111,8 @@ size_t kai_get_dst_size_matmul_clamp_f16_bf16p8x4_bf16p12x4b_8x12_neon_mmla(size
 /// @param[in]  rhs_packed Packed RHS buffer.
 /// @param[out] dst Output matrix buffer.
 /// @param[in]  dst_stride_row Stride in bytes between two rows of the DST matrix.
-/// @param[in]  dst_stride_col Stride in bytes between two columns of the DST matrix. For now, it must be sizeof(__fp16)
+/// @param[in]  dst_stride_col Stride in bytes between two columns of the DST matrix. For now, it must be
+///             sizeof(uint16_t)
 /// @param[in]  clamp_min Minimum value to clamp the final result.
 /// @param[in]  clamp_max Maximum value to clamp the final result.
 void kai_run_matmul_clamp_f16_bf16p8x4_bf16p12x4b_8x12_neon_mmla(

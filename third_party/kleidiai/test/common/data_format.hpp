@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 
 #include "test/common/data_type.hpp"
 
@@ -34,9 +35,9 @@ public:
     /// @param[in] subblock_height Sub-block height.
     /// @param[in] subblock_width Sub-block width.
     DataFormat(
-        DataType data_type, size_t block_height = 0, size_t block_width = 0, PackFormat pack_format = PackFormat::NONE,
-        DataType zero_point_dt = DataType::UNKNOWN, DataType scale_dt = DataType::UNKNOWN, size_t subblock_height = 0,
-        size_t subblock_width = 0) noexcept;
+        DataType data_type = DataType::UNKNOWN, size_t block_height = 0, size_t block_width = 0,
+        PackFormat pack_format = PackFormat::NONE, DataType zero_point_dt = DataType::UNKNOWN,
+        DataType scale_dt = DataType::UNKNOWN, size_t subblock_height = 0, size_t subblock_width = 0) noexcept;
 
     /// Equality operator.
     [[nodiscard]] bool operator==(const DataFormat& rhs) const;
@@ -141,6 +142,11 @@ public:
     /// @return The size in bytes of the matrix.
     [[nodiscard]] size_t default_size_in_bytes(size_t height, size_t width) const;
 
+    /// Hash functor
+    struct Hash {
+        size_t operator()(const DataFormat& format) const;
+    };
+
 private:
     DataType _data_type;
     PackFormat _pack_format;
@@ -153,3 +159,18 @@ private:
 };
 
 }  // namespace kai::test
+
+template <>
+struct std::hash<kai::test::DataFormat> {
+    size_t operator()(const kai::test::DataFormat& df) const {
+        return kai::test::DataFormat::Hash{}(df);
+    }
+};
+
+template <>
+struct std::hash<kai::test::DataFormat::PackFormat> {
+    size_t operator()(const kai::test::DataFormat::PackFormat& pf) const {
+        using PF = std::underlying_type_t<kai::test::DataFormat::PackFormat>;
+        return std::hash<PF>{}(static_cast<PF>(pf));
+    }
+};

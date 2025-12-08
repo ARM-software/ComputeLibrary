@@ -1,5 +1,5 @@
 #
-# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -29,6 +29,10 @@ config_setting(
 
 cc_library(
     name = "common",
+    srcs = [
+        "kai/kai_common_sme_asm.S",
+        "kai/kai_common_sve_asm.S",
+    ],
     hdrs = ["kai/kai_common.h"],
 )
 
@@ -36,6 +40,7 @@ kai_c_library(
     name = "kleidiai",
     visibility = ["//visibility:public"],
     deps = [
+        "//kai/ukernels/dwconv",
         "//kai/ukernels/matmul",
     ],
 )

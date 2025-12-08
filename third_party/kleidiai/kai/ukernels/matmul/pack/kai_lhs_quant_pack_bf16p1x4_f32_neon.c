@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,6 +7,8 @@
 #if !defined(__aarch64__) || !defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC)
 #error This file must be compiled for AArch64, FEAT_BF16.
 #else  // Architectural features check.
+
+#include "kai_lhs_quant_pack_bf16p1x4_f32_neon.h"
 
 #include <arm_neon.h>
 #include <stddef.h>
@@ -64,8 +66,8 @@ void kai_run_lhs_quant_pack_bf16p1x4_f32_neon(
 
     KAI_ASSUME(m_idx_start == 0);
 
-    const float* lhs_ptr = (float*)(lhs);
-    uint16_t* lhs_packed_ptr = (uint16_t*)(lhs_packed);
+    const float* lhs_ptr = lhs;
+    uint16_t* lhs_packed_ptr = lhs_packed;
 
     // Unroll two 256-bit loops
     size_t i = 0;

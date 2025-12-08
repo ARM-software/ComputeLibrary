@@ -17,6 +17,7 @@
 
 // Include micro-kernel variants
 #include "kai_lhs_quant_pack_qai8dxp_f32.h"
+#include "kai_matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod.h"
 #include "kai_matmul_clamp_f32_qai8dxp1x8_qsi4c32p4x8_1x4x32_neon_dotprod.h"
 #include "kai_matmul_clamp_f32_qai8dxp1x8_qsi4c32p8x8_1x8x32_neon_dotprod.h"
 #include "kai_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_neon_i8mm.h"
@@ -39,7 +40,7 @@ struct mnk {
     size_t k = 0;
     size_t bl = 0;
 };
-mnk matmul_shapes[] = {{13, 33, 32, 32}, {37, 75, 256, 64}, {16, 32, 64, 32}, {8, 32, 64, 64}};
+mnk matmul_shapes[] = {{1, 33, 32, 32}, {13, 33, 32, 32}, {37, 75, 256, 64}, {16, 32, 64, 32}, {8, 32, 64, 64}};
 // Micro-kernel interface
 struct kai_matmul_ukernel_f32_qa8dxp_qs4c32p {
     kai_matmul_clamp_f32_qai8dxp_qsi4c32p_ukernel ukernel;
@@ -107,6 +108,18 @@ kai_matmul_ukernel_f32_qa8dxp_qs4c32p ukernel_variants[] = {
       kai_get_dst_size_matmul_clamp_f32_qai8dxp4x8_qsi4c32p8x8_4x8x32_neon_i8mm,
       kai_run_matmul_clamp_f32_qai8dxp4x8_qsi4c32p8x8_4x8x32_neon_i8mm},
      "matmul_clamp_f32_qai8dxp4x8_qsi4c32p8x8_4x8x32_neon_i8mm"},
+    {{kai_get_m_step_matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod,
+      kai_get_n_step_matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod,
+      kai_get_mr_matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod,
+      kai_get_nr_matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod,
+      kai_get_kr_matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod,
+      kai_get_sr_matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod,
+      kai_get_lhs_packed_offset_matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod,
+      kai_get_rhs_packed_offset_matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod,
+      kai_get_dst_offset_matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod,
+      kai_get_dst_size_matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod,
+      kai_run_matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod},
+     "matmul_clamp_f32_qai8dxp1x4_qsi4c32p4x4_1x4_neon_dotprod"},
 };
 
 // Number of micro-kernel variants stored in the array

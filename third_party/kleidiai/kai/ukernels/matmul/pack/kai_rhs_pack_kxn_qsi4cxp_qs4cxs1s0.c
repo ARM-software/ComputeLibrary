@@ -69,7 +69,7 @@ void kai_run_rhs_pack_kxn_qsi4cxp_qs4cxs1s0(
     KAI_ASSERT(params->lhs_zero_point == 1);
     KAI_ASSERT(params->rhs_zero_point == 0 || params->rhs_zero_point == 8);
 
-    const size_t rhs_zero_point = params->rhs_zero_point;
+    const uint8_t rhs_zero_point = params->rhs_zero_point;
     const size_t rhs_packed_stride = kai_get_rhs_packed_stride_rhs_pack_kxn_qsi4cxp_qs4cxs1s0(k, nr, kr, sr);
     const size_t k_internal = kai_k_roundedup(k);
     const size_t dst_num_rows = kai_roundup(n, nr) / nr;
@@ -106,7 +106,7 @@ void kai_run_rhs_pack_kxn_qsi4cxp_qs4cxs1s0(
 
             const size_t shift_right_x0 = (n0_idx % 2) * 4;
 
-            if (params->rhs_zero_point == 8) {
+            if (rhs_zero_point == 8) {
                 uint8_t byte0 = rhs_zero_point | rhs_zero_point << 4;
                 uint8_t byte1 = rhs_zero_point | rhs_zero_point << 4;
 

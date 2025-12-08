@@ -1,9 +1,12 @@
-
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
+// Do not flag up inline assembly blocks
+#pragma GCC diagnostic ignored "-Woverlength-strings"
+
 #if !defined(__ARM_FEATURE_MATMUL_INT8)
 #error "i8mm extension required to compile this micro-kernel"
 #else
@@ -84,7 +87,7 @@ size_t kai_get_lhs_packed_offset_matmul_clamp_f32_qsi8d32p4x8_qsi4c32p4x8_16x4_n
     KAI_ASSUME((k % bl) == 0);
     KAI_ASSUME((m_idx % kai_m_step) == 0);
 
-    return (m_idx / kai_m_step) * kai_lhs_packed_stride(k);
+    return (m_idx / kai_mr) * kai_lhs_packed_stride(k);
 }
 
 size_t kai_get_rhs_packed_offset_matmul_clamp_f32_qsi8d32p4x8_qsi4c32p4x8_16x4_neon_i8mm(
@@ -95,7 +98,7 @@ size_t kai_get_rhs_packed_offset_matmul_clamp_f32_qsi8d32p4x8_qsi4c32p4x8_16x4_n
     KAI_ASSUME((k % bl) == 0);
     KAI_ASSUME((n_idx % kai_n_step) == 0);
 
-    return (n_idx / kai_n_step) * kai_rhs_packed_stride(k);
+    return (n_idx / kai_nr) * kai_rhs_packed_stride(k);
 }
 
 size_t kai_get_dst_offset_matmul_clamp_f32_qsi8d32p4x8_qsi4c32p4x8_16x4_neon_i8mm(

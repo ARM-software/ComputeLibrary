@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,8 +7,8 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
-#include <vector>
+
+#include "test/common/buffer.hpp"
 
 namespace kai::test {
 
@@ -66,7 +66,6 @@ namespace kai::test {
 /// @param[in] The reordered matrix.
 /// ```
 template <typename T>
-std::vector<uint8_t> reorder_block(
-    const void* src, size_t height, size_t width, size_t block_height, size_t block_width);
+Buffer reorder_block(const void* src, size_t height, size_t width, size_t block_height, size_t block_width);
 
 }  // namespace kai::test

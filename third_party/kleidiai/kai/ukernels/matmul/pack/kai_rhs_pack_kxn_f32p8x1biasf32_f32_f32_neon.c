@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,6 +7,8 @@
 #if !defined(__aarch64__)
 #error This file must be compiled for AArch64.
 #else  // Architectural features check.
+
+#include "kai_rhs_pack_kxn_f32p8x1biasf32_f32_f32_neon.h"
 
 #include <stddef.h>
 #include <stdint.h>

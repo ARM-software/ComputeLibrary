@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -12,12 +12,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-struct kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0_params {
-    int8_t lhs_zero_point;
-    uint8_t rhs_zero_point;
-    enum kai_datatype scale_dt;
-};
 
 /// Get the n step value.
 /// The micro-kernel can process any N values. However, the starting N index to

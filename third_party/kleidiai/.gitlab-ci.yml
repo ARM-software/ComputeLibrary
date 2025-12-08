@@ -1,14 +1,79 @@
 #
-# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+# Summary:
+#   Run builds using different compilers, runs unit & example tests, performs static analysis,
+#   gathers multi-variant coverage and publishes HTML/JUnit/Cobertura reports.
+# Purpose and scope:
+#   - Provide public-facing CI validating portability and feature coverage of the library.
+#   - Ensure all warnings are treated as errors across compilers.
+#   - Model negative/positive feature scenarios (illegal instruction paths, SME variants).
+#   - Collect code coverage across distinct environments & feature sets.
+#   - Offer reproducible pre-commit formatting / lint checks.
+# Main jobs (high-level):
+#   - build-* : compile core library/tests/examples with different toolchains.
+#   - test-*  : execute unit tests (sharded), examples, FVP feature model tests, clang-tidy.
+#   - coverage-* : produce per-variant JSON coverage traces.
+#   - coverage : aggregate traces into Cobertura + HTML.
+#   - pages : publish coverage reports via Pages.
+# Usage notes:
+#   - FVP jobs simulate CPU feature sets; failures (Illegal instruction) are expected in negative tests.
+#   - CI caching policy switches to pull-push on default branch to warm shared caches.
 
 stages:
   - build
   - test
   - analyze
   - deploy
+
+variables:
+  # Set of KUBERNETES_* variables applies only to dynamic EKS cluster and do not work
+  # with other runners
+  #
+  # KUBERNETES_NODE_SELECTOR_ARCH selects architecture for job container.
+  # For arm64, it should be: 'kubernetes.io/arch=arm64'. This is default if possible
+  # For amd64 it should be: 'kubernetes.io/arch=amd64'
+  KUBERNETES_NODE_SELECTOR_ARCH: "kubernetes.io/arch=arm64"
+
+  # Define what type of node to use (on-demand or spot). Spot is recommended and is MUCH less expensive than on-demand.
+  # But it can be reclaimed by cloud at any time causing the pod to lose the node.
+  # on-demand is used for a longer runs to avoid retries
+  KUBERNETES_NODE_SELECTOR_TYPE: "karpenter.sh/capacity-type=spot"
+
+  # Define what generation of node to use
+  # For performance nodes - use 'karpenter.k8s.aws/instance-generation=8'
+  #   faster execution for jobs relying on CPU like compilation or on-host testing
+  #   and results in lower total cost
+  #
+  # For cost-efficient nodes - use 'karpenter.k8s.aws/instance-generation=7'
+  #   slower execution, but could be used for jobs waiting for different kind of
+  #   remote infrastructure like on-device testing or accessing servers
+  #
+  KUBERNETES_NODE_SELECTOR_INSTANCE_GENERATION: "karpenter.k8s.aws/instance-generation=8"
+
+  # KUBERNETES_CPU_REQUEST reserves the amount CPUs on a node. The amount is guaranteed for a container
+  KUBERNETES_CPU_REQUEST: 4
+  # KUBERNETES_CPU_LIMIT limits maximum limit of CPU the job container can use. This is not reserved or guaranteed
+  KUBERNETES_CPU_LIMIT: 6
+
+  # KUBERNETES_MEMORY_REQUEST reserves the amount memory on a node. The amount is guaranteed for a container
+  KUBERNETES_MEMORY_REQUEST: 4Gi
+  # KUBERNETES_MEMORY_LIMIT limits maximum limit of memory the job container can use. This is not reserved or guaranteed
+  KUBERNETES_MEMORY_LIMIT: 6Gi
+
+  # This variable defines a number of parallel jobs (-j) which should be used.
+  # We could not rely on `nproc` or any other standard detection result as it would return
+  # number of ALL host CPUs, not only reserved.
+  # Parallel build/test level matching reserved CPUs (prevents OOM from over-sharding).
+  PARALLEL_JOBS: ${KUBERNETES_CPU_REQUEST}
+
+  # Enable more verbose script section content printout
+  FF_SCRIPT_SECTIONS: true
+
+  # Default cache policy is to pull only
+  CACHE_POLICY: pull
 
 default:
   image: registry.gitlab.arm.com/kleidi/kleidiai/image:latest
@@ -20,167 +85,201 @@ default:
     when:
       - job_execution_timeout
       - stuck_or_timeout_failure
+      - runner_system_failure
 
+# Base template: .standard-rules
+# Purpose: Common rules & timeout setting
 .standard-rules:
-  timeout: 10m
+  timeout: 30m
   rules:
+    # Run a job for merge requests
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    # Run a job for default (main) branch
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        CACHE_POLICY: pull-push
+    # Run a job for protected tags (release and rc ones)
     - if: $CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED == "true"
 
 workflow:
   auto_cancel:
+    # Interrupt old pipeline when new one pushed for MR
     on_new_commit: interruptible
 
+# Purpose: Build library tests.
 build-clang:
   extends:
     - .standard-rules
   stage: build
   script:
-    - cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DKLEIDIAI_BUILD_TESTS=ON -S . -B ${CI_JOB_NAME_SLUG}
-    - cmake --build ${CI_JOB_NAME_SLUG} -j$(nproc)
+    # Enforce strict warning-as-error policy
+    - cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_BUILD_TYPE=Release -DKLEIDIAI_BUILD_TESTS=ON -DKLEIDIAI_BUILD_BENCHMARK=ON -S . -B ${CI_JOB_NAME_SLUG}
+    # Parallel build capped to reserved CPUs.
+    - cmake --build ${CI_JOB_NAME_SLUG} -j${PARALLEL_JOBS} --verbose
   artifacts:
     expire_in: 1 day
     paths:
       - ${CI_JOB_NAME_SLUG}/kleidiai_test
+      - ${CI_JOB_NAME_SLUG}/kleidiai_benchmark
 
-build-clang-cov:
-  extends:
-    - .standard-rules
-  stage: build
-  script:
-    - cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DKLEIDIAI_BUILD_TESTS=ON -DCMAKE_C_FLAGS="--coverage" -DCMAKE_CXX_FLAGS="--coverage" -S . -B build
-    - cmake --build ./build -j$(nproc)
-    # save coverage build job path for later use since coverage processing requires files in exactly same location
-    - echo "COVERAGE_PROJECT_PATH=${PWD}" > build/coverage_path.env
-  artifacts:
-    expire_in: 1 day
-    paths:
-      - build
-    reports:
-      dotenv: build/coverage_path.env
-
+# Purpose: Build library tests.
 build-gcc:
   extends:
     - .standard-rules
   stage: build
   script:
-    - cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release -DKLEIDIAI_BUILD_TESTS=ON -S . -B ${CI_JOB_NAME_SLUG}
-    - cmake --build ${CI_JOB_NAME_SLUG} -j$(nproc)
+    # Enforce strict warning-as-error policy
+    - cmake -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_BUILD_TYPE=Release -DKLEIDIAI_BUILD_TESTS=ON -DKLEIDIAI_BUILD_BENCHMARK=ON -S . -B ${CI_JOB_NAME_SLUG}
+    # Parallel build capped to reserved CPUs with verbose
+    - cmake --build ${CI_JOB_NAME_SLUG} -j${PARALLEL_JOBS} --verbose
   artifacts:
     expire_in: 1 day
     paths:
       - ${CI_JOB_NAME_SLUG}/kleidiai_test
+      - ${CI_JOB_NAME_SLUG}/kleidiai_benchmark
 
+# Purpose: Build library tests.
 build-gcc-bazel:
   extends:
     - .standard-rules
   stage: build
+  variables:
+    # Cache Bazelisk files in local folder
+    BAZELISK_HOME: '.cache/bazelisk'
   cache:
     - key: cache-bazelisk
       paths:
-      - /cache/bazelisk
+        - $BAZELISK_HOME
+      policy: $CACHE_POLICY
   script:
-    - bazelisk clean --expunge
-    - bazelisk build -c opt --jobs=HOST_CPUS -k --verbose_failures --curses=no //...
+    # Ensure deterministic build state.
+    - bazelisk clean
+    # Enforce strict warning-as-error policy, cap parallel build and continues to gather full failure set
+    - bazelisk build -c opt --copt="-Werror" --cxxopt="-Werror" --jobs=${PARALLEL_JOBS} -k --subcommands --verbose_failures --curses=no //...
+    # Copy build artifacts to separate folder
     - mkdir -p ${CI_JOB_NAME_SLUG} && cp bazel-bin/test/kleidiai_test ${CI_JOB_NAME_SLUG}/
   artifacts:
     expire_in: 1 day
     paths:
       - ${CI_JOB_NAME_SLUG}/kleidiai_test
 
+# Purpose: Build library tests
 build-clang-bazel:
   extends:
     - .standard-rules
   stage: build
+  variables:
+    # Cache Bazelisk files in local folder
+    BAZELISK_HOME: '.cache/bazelisk'
   cache:
     - key: cache-bazelisk
       paths:
-      - /cache/bazelisk
+        - $BAZELISK_HOME
+      policy: $CACHE_POLICY
   script:
-    - bazelisk clean --expunge
-    # explicitly disable layering_check feature
-    - CC=clang bazelisk build -c opt --jobs=HOST_CPUS -k --verbose_failures --compiler=clang --features=no-layering_check --curses=no //...
+    # Ensure deterministic build state.
+    - bazelisk clean
+    # Enforce strict warning-as-error policy, cap parallel build and continues to gather full failure set.
+    # Also disable explicit layering_check feature supported by the compiler
+    - CC=clang bazelisk build -c opt --copt="-Werror" --cxxopt="-Werror" --jobs=${PARALLEL_JOBS} -k --subcommands --verbose_failures --compiler=clang --features=no-layering_check --curses=no //...
+    # Copy build artifacts to separate folder
     - mkdir -p ${CI_JOB_NAME_SLUG} && cp bazel-bin/test/kleidiai_test ${CI_JOB_NAME_SLUG}/
   artifacts:
     expire_in: 1 day
     paths:
       - ${CI_JOB_NAME_SLUG}/kleidiai_test
 
+# Purpose: Build examples
 build-examples:
   stage: build
   extends:
     - .standard-rules
-  parallel:
-    matrix:
-      - EXAMPLE:
-          - matmul_clamp_f16_f16_f16p
-          - matmul_clamp_f32_bf16p_bf16p
-          - matmul_clamp_f32_qai8dxp_qsi4cxp
-          - matmul_clamp_f32_qsi8d32p_qsi4c32p
-          - matmul_clamp_f32_qai8dxp_qsi4c32p
   script:
-    - mkdir -p build/$EXAMPLE
-    - cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -S examples/$EXAMPLE -B build/$EXAMPLE
-    - cmake --build build/$EXAMPLE -j$(nproc)
+    - mkdir -p build
+    - |
+      for EXAMPLE in `ls examples -1`; do
+        # Validate that each example has a build script
+        if [ -f examples/${EXAMPLE}/CMakeLists.txt ]; then
+          echo "-----------------------------------------------------------"
+          echo "Build examples/${EXAMPLE}"
+          echo "-----------------------------------------------------------"
+          mkdir -p build_${EXAMPLE}
+          cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_BUILD_TYPE=Release -S examples/$EXAMPLE -B build_${EXAMPLE}
+          cmake --build build_${EXAMPLE} -j${PARALLEL_JOBS} --verbose
+          # Store in top level build/ folder, assuming output binary name is same as folder
+          cp build_${EXAMPLE}/${EXAMPLE} build/
+        else
+          # Guard against missing build config.
+          echo "No build file found for ${EXAMPLE}"
+          exit 1
+        fi
+      done
   artifacts:
     expire_in: 1 day
     paths:
-      - build/$EXAMPLE/$EXAMPLE
+      - build
 
+# Purpose: Run non-SME examples; skip SME variants (handled in dedicated job) and log output.
 test-examples:
   stage: test
   extends:
     - .standard-rules
   needs:
-  - build-examples
-  parallel:
-    matrix:
-      - EXAMPLE:
-          - matmul_clamp_f16_f16_f16p
-          - matmul_clamp_f32_bf16p_bf16p
-          - matmul_clamp_f32_qai8dxp_qsi4cxp
-          - matmul_clamp_f32_qsi8d32p_qsi4c32p
-          - matmul_clamp_f32_qai8dxp_qsi4c32p
+    - build-examples
   script:
-    - build/${EXAMPLE}/${EXAMPLE} | tee -a ${EXAMPLE}.log
+    - |
+      for EXAMPLE in `ls build -1`; do
+          # Skip SME examples (run separately).
+          [[ $EXAMPLE == *sme* ]] && continue
+          echo "-----------------------------------------------------------"
+          echo "Run ${EXAMPLE}"
+          echo "-----------------------------------------------------------"
+          # Run and preserve separate log
+          build/${EXAMPLE} | tee -a example_${EXAMPLE}.log
+      done
   artifacts:
     expire_in: 1 day
     paths:
-      - ${EXAMPLE}.log
+      - "example_*.log"
 
+# Purpose: clang-tidy static analysis of library C/C++ sources.
 test-clang-tidy:
   extends:
     - .standard-rules
   stage: test
   needs: []
   script:
-    - cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Release -DKLEIDIAI_BUILD_TESTS=ON -DKLEIDIAI_BUILD_BENCHMARK=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -B build/${CI_JOB_NAME_SLUG}
-    # Only test the main library.
-    - run-clang-tidy -header-filter ".*" -warnings-as-errors "*" -p build/${CI_JOB_NAME_SLUG} kai
+    # Build and generate compilation_database.json for proper flags propagation to post processing tools
+    - cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_C_FLAGS="-Werror" -DCMAKE_BUILD_TYPE=Release -DKLEIDIAI_BUILD_TESTS=ON -DKLEIDIAI_BUILD_BENCHMARK=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -B build/${CI_JOB_NAME_SLUG}
+    # Only test the main library with C/C++ files.
+    - clang-tidy --header-filter ".*" --warnings-as-errors "*" -p build/${CI_JOB_NAME_SLUG} $(find kai -type f \( -name \*.c -o -name \*.cpp \))
 
+# Purpose: Run pre-commit hooks (formatting, linting) with cached tool downloads.
 pre-commit-hooks:
   variables:
-    PRE_COMMIT_HOME: '/cache/pre-commit'
+    PRE_COMMIT_HOME: '.cache/pre-commit'
   extends:
     - .standard-rules
   stage: build
+  # Cache downloaded pre-commit checkers
   cache:
     - key: cache-pre-commit
       paths:
-      - $PRE_COMMIT_HOME
+        - $PRE_COMMIT_HOME
+      policy: $CACHE_POLICY
   script:
     - PRE_COMMIT_HOME=$PRE_COMMIT_HOME pre-commit run --all-files
 
+# Purpose: Manual gate job to record external pipeline status.
 test-remote:
   # Part of the pipeline is executed in a separate system.
   #
-  # When the remote pipeline has been completed, this job is manually triggered
+  # When the remote pipeline has been completed, this job is triggered automatically
   # with the information about the remote pipeline including whether it's passed or failed.
-  # Run the job only for a public pipeline
   rules:
+    # Run the job only for a public pipeline
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_SERVER_HOST == 'gitlab.arm.com'
-  # Longer timeout than rest of jobs to account for remote
+  # Longer timeout than rest of jobs to account for external system load
   timeout: 1h
   stage: test
   needs: []
@@ -201,182 +300,97 @@ test-remote:
     paths:
       - remote_result.txt
 
+# Script anchor: run-unit-tests
+# Purpose: Sharded GoogleTest execution producing multiple XML reports to be below CI limits.
+# Input variables:
+# * UT_VARIANT_NAME - base name used to find path to unit test binaries and generate report name
+# * UT_PARALLEL - number of separate executions, default 4 since 100MB / 30MB = 3.(3) and rounded up
+# * UT_BINARY_PATH - path to folder with unit test binaries, default is ./build-${UT_VARIANT_NAME}/
+# * UT_REPORT_PATH - prefix to unit test report file path, default is ./kleidiai_results-${UT_VARIANT_NAME}
+# * UT_EXTRA_ARGS - extra arguments for test binary, default is none
+.run-unit-tests: &run-unit-tests
+  - echo "Run unit test from ${UT_BINARY_PATH:-./build-${UT_VARIANT_NAME}}"
+  - export GTEST_TOTAL_SHARDS=${UT_PARALLEL:-4}
+  - |
+    for GTEST_SHARD_INDEX in `seq 0 $((GTEST_TOTAL_SHARDS - 1))` ; do
+      # Export index variable to child process
+      export GTEST_SHARD_INDEX
+      echo "Running iteration $GTEST_SHARD_INDEX of $GTEST_TOTAL_SHARDS"
+      ${UT_BINARY_PATH:-./build-${UT_VARIANT_NAME}}/kleidiai_test --gtest_brief=1 --gtest_output=xml:${UT_REPORT_PATH:-kleidiai_results-${UT_VARIANT_NAME}}${GTEST_SHARD_INDEX}.xml ${UT_EXTRA_ARGS:-}
+    done
+
+# Purpose: Sharded unit tests for each build provider.
 test-linux-aarch64:
   extends:
     - .standard-rules
   stage: test
   parallel:
     matrix:
+      # All current build jobs
       - BUILD_JOB_PROVIDER: [ clang, gcc, clang-bazel, gcc-bazel ]
   needs:
+      # A CI system limitation does not allow usage of matrix variables to avoid fetching unnecessary artifacts.
+      # So make sure to fetch artifacts from all jobs required.
     - build-gcc
     - build-gcc-bazel
     - build-clang
     - build-clang-bazel
   script:
-    - ./build-${BUILD_JOB_PROVIDER}/kleidiai_test --gtest_output=xml:kleidiai_test_results-${BUILD_JOB_PROVIDER}.xml
+    - |
+      UT_VARIANT_NAME=$BUILD_JOB_PROVIDER
+      UT_REPORT_PATH=kleidiai_test_results-${BUILD_JOB_PROVIDER}
+      # Export UT_REPORT_PATH to CI env to use in artifacts
+      echo "UT_REPORT_PATH=$UT_REPORT_PATH" >> $GITLAB_ENV
+    - *run-unit-tests
   artifacts:
     when: always
     expire_in: 1 day
     paths:
-      - kleidiai_test_results-${BUILD_JOB_PROVIDER}.xml
+      - ${UT_REPORT_PATH}*.xml
     reports:
-      junit: kleidiai_test_results-${BUILD_JOB_PROVIDER}.xml
+      junit: ${UT_REPORT_PATH}*.xml
 
-# This job template is used to mimic same location of source files used to build binary with coverage.
-# It is required because coverage post-processing tooling used expects source files to be in exactly
-# same location as during build. But it's not always possible in case of CI runner change or version
-# update.
-.coverage-post-processing:
-  before_script:
-    - >
-      if [ "${CI_PROJECT_DIR}" != "${COVERAGE_PROJECT_PATH}" ]; then
-        echo "Workaround for build location active"
-        echo "Cleanup old artifacts"
-        rm -rf ${COVERAGE_PROJECT_PATH}
-        echo "Copy current job files into path used to build coverage binary"
-        mkdir -vp ${COVERAGE_PROJECT_PATH}
-        cp -a -t ${COVERAGE_PROJECT_PATH}/ *
-      fi
-    - |
-      echo -e "
-      root=${COVERAGE_PROJECT_PATH}
-      exclude=${COVERAGE_PROJECT_PATH}/build
-      exclude=${COVERAGE_PROJECT_PATH}/test
-      gcov-executable=llvm-cov gcov
-      exclude-unreachable-branches=yes
-      exclude-lines-by-pattern=.*KAI_(?:ASSERT|ASSUME|ERROR).*
-      exclude-branches-by-pattern=.*KAI_(?:ASSERT|ASSUME).*" > gcovr.cfg
-  after_script:
-    - >
-      if [ "${CI_PROJECT_DIR}" != "${COVERAGE_PROJECT_PATH}" ]; then
-        echo "Cleanup workaround for build location"
-        rm -rf ${COVERAGE_PROJECT_PATH}
-        rm -f gcovr.cfg
-      fi
-
-# Script to run binary provided in FVP environment
-# * FVP_TEST_EXECUTABLE - mandatory path in CI for file and parameters to execute
-# * FVP_MODEL_EXTRA - optional additional FVP parameters, default is nothing
-# * FVP_HOST_PATH - optional path to share via P9 FS, default is $PWD
-.test-linux-fvp: &test-linux-fvp
-  - if [ ! -f /opt/devtools/linux-rootfs.img ]; then tar xJf /opt/devtools/linux-rootfs.img.xz; fi
-  - >
-    echo "#!/bin/bash
-      set -x
-      echo '=================================================='
-      echo '== START                                        =='
-      echo '=================================================='
-      echo '== CPU INFO                                     =='
-      if [ ! -f /proc/cpuinfo ]; then mount -vt proc -o rw,nosuid,nodev,noexec proc /proc; fi
-      cat /proc/cpuinfo
-      echo '=================================================='
-
-      mkdir -vp '$PWD'
-      mount -vt 9p -o trans=virtio,version=9p2000.L FM '$PWD'
-
-      cd '$PWD'
-      ${FVP_TEST_EXECUTABLE} && echo 'FINISHED WITHOUT ERROR'
-      sync
-
-      echo '=================================================='
-      echo '== END                                          =='
-      echo '=================================================='
-      " > startup
-  - e2cp -O 0 -G 0 -P 755 startup linux-rootfs.img:/root/startup
-  - >
-    /opt/devtools/fvp_base_aemva/models/Linux64*GCC-9.3/FVP_Base_RevC-2xAEMvA \
-      -C cache_state_modelled=0 \
-      -C bp.refcounter.non_arch_start_at_default=1 \
-      -C bp.secure_memory=0 \
-      -C bp.pl011_uart0.out_file=- \
-      -C bp.pl011_uart0.shutdown_tag="System halted" \
-      -C bp.terminal_0.mode=telnet \
-      -C bp.terminal_0.start_telnet=0 \
-      -C bp.terminal_1.mode=raw \
-      -C bp.terminal_1.start_telnet=0 \
-      -C bp.terminal_2.mode=raw \
-      -C bp.terminal_2.start_telnet=0 \
-      -C bp.terminal_3.mode=raw \
-      -C bp.terminal_3.start_telnet=0 \
-      -C cluster0.NUM_CORES=1 \
-      -C cluster0.has_arm_v8-1=1 \
-      -C cluster0.has_arm_v8-2=1 \
-      -C cluster0.has_arm_v8-3=1 \
-      -C cluster0.has_arm_v8-4=1 \
-      -C cluster0.has_arm_v8-5=1 \
-      -C cluster0.has_arm_v8-6=1 \
-      -C cluster0.has_arm_v8-7=1 \
-      -C cluster0.has_arm_v8-8=1 \
-      -C cluster0.has_arm_v9-0=1 \
-      -C cluster0.has_arm_v9-1=1 \
-      -C cluster0.has_arm_v9-2=1 \
-      -C cluster0.has_arm_v9-3=1 \
-      -C cluster0.has_arm_v9-4=1 \
-      -C cluster0.has_arm_v9-5=1 \
-      -C cluster0.has_sve=1 \
-      -C cluster0.sve.has_b16b16=1 \
-      -C cluster0.sve.has_sve2=1 \
-      -C cluster0.sve.has_sme=1 \
-      -C cluster0.sve.has_sme2=1 \
-      -C cluster0.sve.has_sme_f16f16=1 \
-      -C cluster0.sve.has_sme_fa64=1 \
-      -C cluster0.sve.has_sme_lutv2=1 \
-      -C cluster0.sve.sme2_version=1 \
-      -C cluster0.sve.veclen=2 \
-      -C cluster0.sve.sme_veclens_implemented=4 \
-      -C bp.virtio_rng.enabled=1 \
-      -C bp.virtioblockdevice.image_path=linux-rootfs.img \
-      -C bp.vis.disable_visualisation=1 \
-      -C bp.virtiop9device.root_path=${FVP_HOST_PATH:-$PWD} \
-      -a cluster*.cpu*=/opt/devtools/linux-system.axf \
-      ${FVP_MODEL_EXTRA:-} \
-      |& tee output.txt
-  - grep -q "FINISHED WITHOUT ERROR" output.txt
-
-test-linux-aarch64-cov:
+test-benchmark-dry-run:
   extends:
     - .standard-rules
-    - .coverage-post-processing
   stage: test
+  parallel:
+    matrix:
+      - BUILD_JOB_PROVIDER: [ clang, gcc ]
   needs:
-    - build-clang-cov
+    - build-clang
+    - build-gcc
   script:
-    - ./build/kleidiai_test --gtest_output=xml:kleidiai_test_results.xml
-    - mkdir -p build/coverage
-    - gcovr --json=build/coverage/linux-aarch64.json -j --config gcovr.cfg
+    - BENCHMARK_LOG_FILE="benchmark_dry_run_${BUILD_JOB_PROVIDER}.log"
+    - BENCHMARK_BINARY="build-${BUILD_JOB_PROVIDER}/kleidiai_benchmark"
+    - test -x "${BENCHMARK_BINARY}"
+    - (${BENCHMARK_BINARY} --benchmark_dry_run=true -m 1 -n 30 -k 64) |& tee ${BENCHMARK_LOG_FILE}
+    - (${BENCHMARK_BINARY} matmul --benchmark_dry_run=true -m 1 -n 30 -k 64) |& tee -a ${BENCHMARK_LOG_FILE}
+    - (${BENCHMARK_BINARY} imatmul --benchmark_dry_run=true -m 1 -n 30 -c 4 -l 15) |& tee -a ${BENCHMARK_LOG_FILE}
+    - (${BENCHMARK_BINARY} --benchmark_list_tests) |& tee -a ${BENCHMARK_LOG_FILE}
+    - (${BENCHMARK_BINARY} matmul --benchmark_list_tests) |& tee -a ${BENCHMARK_LOG_FILE}
+    - (${BENCHMARK_BINARY} imatmul --benchmark_list_tests) |& tee -a ${BENCHMARK_LOG_FILE}
+    - (${BENCHMARK_BINARY} || true) |& tee -a ${BENCHMARK_LOG_FILE}
+    - (${BENCHMARK_BINARY} matmul || true) |& tee -a ${BENCHMARK_LOG_FILE}
+    - (${BENCHMARK_BINARY} imatmul || true) |& tee -a ${BENCHMARK_LOG_FILE}
   artifacts:
+    when: always
     expire_in: 1 day
     paths:
-      - kleidiai_test_results.xml
-      - build/coverage/linux-aarch64.json
-      - build/coverage_path.env
-    reports:
-      junit: kleidiai_test_results.xml
-      # Reexport coverage information for final 'coverage' job
-      dotenv: build/coverage_path.env
+      - "benchmark_dry_run_${BUILD_JOB_PROVIDER}.log"
 
-.test-linux-aarch64-cov-fvp:
+# Purpose: Specialization of test-linux-aarch64 to run only SVE 256-bit VL unit test subset
+test-linux-aarch64-sve256:
   extends:
-    - .standard-rules
-    - .coverage-post-processing
-  stage: test
-  needs:
-    - build-clang-cov
+    - test-linux-aarch64
   variables:
-    FVP_TEST_EXECUTABLE: "./build/kleidiai_test --gtest_output=xml:kleidiai_test_results.xml"
-  script:
-    - *test-linux-fvp
-    - mkdir -p build/coverage
-    - gcovr --json=build/coverage/linux-aarch64-fvp.json -j --config gcovr.cfg
-  artifacts:
-    expire_in: 1 day
-    paths:
-      - build/coverage/linux-aarch64-fvp.json
-      - kleidiai_test_results.xml
-    reports:
-      junit: kleidiai_test_results.xml
+    # Generation 7 is the instance with SVE VL 256
+    KUBERNETES_NODE_SELECTOR_INSTANCE_GENERATION: "karpenter.k8s.aws/instance-generation=7"
+    # Run only SVE unit tests
+    GTEST_FILTER: "*_sve_*"
 
+# Purpose: FVP feature tests with disabled SVE/SVE2 but enabled SME/SME2
+# Disabled at the moment due to huge amount of SME/SME2 kernels
 .test-linux-aarch64-fvp-nosve:
   extends:
     - .standard-rules
@@ -390,10 +404,13 @@ test-linux-aarch64-cov:
     - build-clang
     - build-clang-bazel
   variables:
+    # Long test requires more stable node
+    KUBERNETES_NODE_SELECTOR_TYPE: "karpenter.sh/capacity-type=on-demand"
+    # Disable SVE/SVE2, but keep SME/SME2
     FVP_MODEL_EXTRA: "-C cluster0.sve.has_sve2=0 -C cluster0.sve.sme_only=1"
     FVP_TEST_EXECUTABLE: "./build-${BUILD_JOB_PROVIDER}/kleidiai_test --gtest_output=xml:kleidiai_test_results-${BUILD_JOB_PROVIDER}.xml"
   script:
-    - *test-linux-fvp
+    - ./tools/fvp.sh ${FVP_TEST_EXECUTABLE}
   artifacts:
     when: always
     expire_in: 1 day
@@ -402,37 +419,277 @@ test-linux-aarch64-cov:
     reports:
       junit: kleidiai_test_results-${BUILD_JOB_PROVIDER}.xml
 
+# Purpose: FVP v8-only model; expect Illegal instruction for examples; validates CPU feature detection path.
+test-linux-aarch64-v8only-fvp:
+  extends:
+    - .standard-rules
+  stage: test
+  needs:
+    - build-clang
+    - build-examples
+  script:
+    # Make sure to match disabled V8 and V9 version to enabled in tools/fvp.sh, otherwise the test would fail
+    - >
+      export FVP_MODEL_EXTRA="
+        -C cluster0.has_arm_v8-1=0
+        -C cluster0.has_arm_v8-2=0
+        -C cluster0.has_arm_v8-3=0
+        -C cluster0.has_arm_v8-4=0
+        -C cluster0.has_arm_v8-5=0
+        -C cluster0.has_arm_v8-6=0
+        -C cluster0.has_arm_v8-7=0
+        -C cluster0.has_arm_v8-8=0
+        -C cluster0.has_arm_v8-9=0
+        -C cluster0.has_arm_v9-0=0
+        -C cluster0.has_arm_v9-1=0
+        -C cluster0.has_arm_v9-2=0
+        -C cluster0.has_arm_v9-3=0
+        -C cluster0.has_arm_v9-4=0
+        -C cluster0.has_arm_v9-5=0
+        -C cluster0.has_arm_v9-6=0
+        -C cluster0.has_sve=0"
+    # Generate test script with negative and positive tests
+    - |
+      echo -e "#\!/bin/bash -ex"                                      > run_tests.sh
+      echo "echo Perform a negative test with illegal instructions"  >> run_tests.sh
+      find build -type f -perm -a=x -print0 | \
+      while read -d '' EXAMPLE; do
+        echo -e "echo \"Run '${EXAMPLE}'\""                          >> run_tests.sh
+        echo -e "./'${EXAMPLE}' || true"                             >> run_tests.sh  # Allow failure (expected crash).
+      done
+      echo "echo Perform a positive test with CPU feature detection" >> run_tests.sh
+      echo "./build-clang/kleidiai_test --gtest_brief=1 || exit 1"   >> run_tests.sh  # Must succeed.
+    # Dump content for debugging purposes
+    - |
+      echo "Test script content:"
+      cat run_tests.sh
+    # Execute test script in FVP and capture output for feature assertions
+    - chmod a+x run_tests.sh
+    - ./tools/fvp.sh ./run_tests.sh | tee output.txt
+    # Verify that no extra features enabled and CPU variant is v8.0
+    - "grep -qE 'Features\\s+: fp asimd evtstrm cpuid' output.txt"
+    - "grep -qE 'CPU variant\\s+: 0' output.txt"
+    # Verify that all examples crashed with Illegal instruction (negative path coverage)
+    - test $(grep -cE "Illegal instruction\s+./'build/" output.txt) -eq $(ls -1 build | wc -l | tr -d ' ')
+
+# Purpose: FVP with only SME enabled (SME2 disabled); negative SME example runs + positive filtered unit tests.
+test-linux-aarch64-sme1only-fvp:
+  extends:
+    - .standard-rules
+  stage: test
+  needs:
+    - build-clang
+    - build-examples
+  script:
+    # Disable SME2 in FVP
+    - >
+      export FVP_MODEL_EXTRA="
+        -C cluster0.sve.has_sme2=0
+        -C cluster0.sve.sme2_version=0"  # Disable SME2.
+    # Generate test script with negative and positive tests
+    - |
+      echo -e "#\!/bin/bash -ex"                                          > run_tests.sh
+      echo "echo Perform a negative test with illegal instructions"      >> run_tests.sh
+      # Find avaiable SME examples and execute them
+      find build -type f -perm -a=x \( -name \*_sme -o -name \*_sme_\* \) -print0 | \
+      while read -d '' EXAMPLE; do
+        echo -e "echo \"Run '${EXAMPLE}'\""                              >> run_tests.sh
+        echo -e "./'${EXAMPLE}' || true"                                 >> run_tests.sh  # Allow expected failure.
+      done
+      echo "echo Perform a positive test with CPU feature detection"     >> run_tests.sh
+      echo "export GTEST_OUTPUT=xml:kleidiai-${CI_JOB_NAME_SLUG}.xml"    >> run_tests.sh
+      echo "export GTEST_BRIEF=1"                                        >> run_tests.sh
+      echo "./build-clang/kleidiai_test --gtest_filter=*sme_* || exit 1" >> run_tests.sh
+    # Dump content for debugging purposes
+    - |
+      echo "Test script content:"
+      cat run_tests.sh
+    - chmod a+x run_tests.sh
+    # Execute test script in FVP and capture output for feature assertions
+    - FVP_TEST_EXECUTABLE="./run_tests.sh"
+    - ./tools/fvp.sh ${FVP_TEST_EXECUTABLE} | tee output.txt
+    # Verify that SME2 is not available
+    - "grep -qv 'sme2' output.txt"
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - kleidiai-${CI_JOB_NAME_SLUG}.xml
+    reports:
+      junit: kleidiai-${CI_JOB_NAME_SLUG}.xml
+
+# Purpose: Execute all SME examples under FVP; consolidate output into single log.
+test-examples-sme-fvp:
+  extends:
+    - .standard-rules
+  stage: test
+  needs:
+    - build-examples
+  script:
+    # Generate test script with negative and positive tests
+    - |
+      echo -e "#\!/bin/bash -ex"                                         > run_tests.sh
+      find build -type f -perm -a=x -name \*_sme\* -print0 | \
+      while read -d '' EXAMPLE; do
+        echo "echo ---------------------------------------------------" >> run_tests.sh
+        echo "echo Run '${EXAMPLE}'"                                    >> run_tests.sh
+        echo "echo ---------------------------------------------------" >> run_tests.sh
+        echo "./'${EXAMPLE}' | tee -a example.log"                      >> run_tests.sh
+      done
+    # Dump content for debugging purposes
+    - |
+      echo "Test script content:"
+      cat run_tests.sh
+    # Execute test script in FVP and capture output for feature assertions
+    - chmod a+x run_tests.sh
+    - ./tools/fvp.sh ./run_tests.sh
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - example.log
+
+# Base template: .coverage-base
+# Purpose: Instrumented build & diversified benchmark/test execution producing per-job JSON coverage trace.
+.coverage-base:
+  extends:
+    - .standard-rules
+  needs: []
+  variables:
+    GCOV_EXECUTABLE: ""
+  script:
+    # Configure and build with coverage instrumentation
+    - cmake -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+      -DCMAKE_CXX_FLAGS="-Werror --coverage" -DCMAKE_C_FLAGS="-Werror --coverage" -DCMAKE_BUILD_TYPE=Release
+      -DKLEIDIAI_BUILD_TESTS=ON -DKLEIDIAI_BUILD_BENCHMARK=ON
+      ${CMAKE_EXTRA_FLAGS}
+      -S . -B ${CI_JOB_NAME_SLUG}
+    - cmake --build ${CI_JOB_NAME_SLUG} -j${PARALLEL_JOBS} --verbose
+    # Run kleidiai_test to generate coverage report for unit tests
+    - ./${CI_JOB_NAME_SLUG}/kleidiai_test --gtest_brief=1
+    # Run combined benchmark three times (backwards compatibility, matmul and imatmul)
+    - ./${CI_JOB_NAME_SLUG}/kleidiai_benchmark --benchmark_dry_run=true -m 1 -n 30 -k 64
+    - ./${CI_JOB_NAME_SLUG}/kleidiai_benchmark matmul  --benchmark_dry_run=true -m 1 -n 30 -k 64
+    - ./${CI_JOB_NAME_SLUG}/kleidiai_benchmark imatmul --benchmark_dry_run=true -m 1 -n 30 -c 4 -l 15
+    # List benchmarks to generate coverage
+    - ./${CI_JOB_NAME_SLUG}/kleidiai_benchmark --benchmark_list_tests
+    - ./${CI_JOB_NAME_SLUG}/kleidiai_benchmark matmul --benchmark_list_tests
+    - ./${CI_JOB_NAME_SLUG}/kleidiai_benchmark imatmul --benchmark_list_tests
+    # Run info message with no subcommand to hit print_global_usage, but don't fail the job
+    - ./${CI_JOB_NAME_SLUG}/kleidiai_benchmark || true
+    - ./${CI_JOB_NAME_SLUG}/kleidiai_benchmark matmul || true
+    - ./${CI_JOB_NAME_SLUG}/kleidiai_benchmark imatmul || true
+    # Generate gcovr configuration tuned to exclude build dir, unreachable branches, and assertion macros.
+    - mkdir -p build/coverage
+    - |
+      echo -e "
+      root=${PWD}
+      exclude=${PWD}/${CI_JOB_NAME_SLUG}
+      gcov-ignore-parse-errors=suspicious_hits.warn
+      gcov-executable=$GCOV_EXECUTABLE
+      exclude-unreachable-branches=yes
+      exclude-lines-by-pattern=.*KAI_(?:ASSERT|ASSUME|ERROR).*
+      exclude-branches-by-pattern=.*KAI_(?:ASSERT|ASSUME).*" > build/gcovr.cfg
+    # Post-process generated coverage report into JSON for later aggregation.
+    - gcovr --json=build/coverage/${CI_JOB_NAME_SLUG}.json -j ${PARALLEL_JOBS} --config build/gcovr.cfg
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - build/coverage/${CI_JOB_NAME_SLUG}.json
+
+# Purpose: Coverage generation using llvm-cov gcov with cached gcovr install.
+coverage-linux:
+  extends:
+    - .coverage-base
+  stage: analyze
+  variables:
+    GCOV_EXECUTABLE: "llvm-cov gcov"
+    PIP_CACHE_DIR: ".cache/pip3"
+  cache:
+    - key: cache-pip3
+      paths:
+        - $PIP_CACHE_DIR
+      policy: $CACHE_POLICY
+  before_script:
+    # Install latest gcovr to keep it in sync with other systems
+    - pip3 install --cache-dir=$PIP_CACHE_DIR -U --break-system-packages --user gcovr
+
+# Purpose: SVE256 coverage variant (focus on *_sve_* tests) to extend line/function coverage set.
+coverage-linux-sve256:
+  extends:
+    - coverage-linux
+  variables:
+    # Use instance with SVE VL 256
+    KUBERNETES_NODE_SELECTOR_INSTANCE_GENERATION: "karpenter.k8s.aws/instance-generation=7"
+    GTEST_FILTER: "*_sve_*"
+
+# Purpose: Coverage build for SME/SME2 architecture.
+coverage-clang:
+  extends:
+    - .coverage-base
+  stage: analyze
+  tags:
+    - apple_silicon
+  variables:
+    GCOV_EXECUTABLE: "xcrun llvm-cov gcov"
+    CMAKE_EXTRA_FLAGS: "-DKLEIDIAI_INTERNAL_EXTRA_ARCH='+sme'"
+
+# Purpose: Aggregate all JSON coverage traces into Cobertura & HTML reports for publication.
 coverage:
   extends:
     - .standard-rules
-    - .coverage-post-processing
-  stage: analyze
+  stage: deploy
   needs:
-    - test-linux-aarch64-cov
-    # - test-linux-aarch64-cov-fvp  # disabled job
+    - coverage-linux
+    - coverage-linux-sve256
+    - coverage-clang
+  tags:
+    - apple_silicon
   script:
+    # Generage Cobertura and HTML reports merging coverage across variants,
+    # where each variant artifact should be stored in JSON file at build/coverage/
+    # Merge different reports with merge-lines and separate function coverage with same name.
+    # It's required to handle different build/OS options properly.
     - mkdir -p build/html/coverage
-    - gcovr --json-add-tracefile "build/coverage/*.json" --print-summary --cobertura=build/coverage.xml --html-details=build/html/coverage/coverage_report.html --html-title="KleidiAI Coverage Report" -j
+    - gcovr --json-add-tracefile "build/coverage/*.json" --print-summary
+      --cobertura=build/coverage.xml --html-details=build/html/coverage/coverage_report.html
+      --html-title="KleidiAI Coverage Report" --merge-mode-functions=separate --merge-lines
+      -j ${PARALLEL_JOBS}
+  # Publish line coverage metric for pipeline reports
+  coverage: '/^lines:\s+(\d+.\d)%\s+/'
   artifacts:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     expire_in: 1 day
     reports:
+      # Publish coverage report for MR visualisation
       coverage_report:
         coverage_format: cobertura
         path: build/coverage.xml
     paths:
-      - build/coverage.xml
-      - build/html/coverage
+      - build
 
+# Purpose: Publish coverage HTML via Pages (index auto-redirects to detailed report).
 pages:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-  timeout: 10m
+  timeout: 30m
   stage: deploy
+  tags:
+    - apple_silicon
   needs:
     - coverage
   script:
-    - pwd > /dev/null
+    # Generate simple redirect page
+    - |
+      echo '
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta http-equiv="refresh" content="5; url=coverage/coverage_report.html" />
+            <title>Redirecting...</title>
+          </head>
+          <body>
+            <p>If you are not redirected soon, <a href="coverage/coverage_report.html">click here</a>.</p>
+          </body>
+        </html>' > build/html/index.html
   artifacts:
     paths:
       - build/html

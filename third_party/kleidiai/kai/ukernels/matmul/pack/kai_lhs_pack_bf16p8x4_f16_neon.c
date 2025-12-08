@@ -1,13 +1,18 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
+// Do not flag up inline assembly blocks
+#pragma GCC diagnostic ignored "-Woverlength-strings"
 
 #if !defined(__aarch64__) || !defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || \
     !defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 #error This file must be compiled for AArch64, FEAT_BF16, FEAT_FP16.
 #else  // Architectural features check.
+
+#include "kai_lhs_pack_bf16p8x4_f16_neon.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -69,7 +74,7 @@ void kai_run_lhs_pack_bf16p8x4_f16_neon(
         size_t width = k;
 
         for (size_t y = 0; y < height; y++) {
-            in[y] = (char*)lhs + (block_y + y) * lhs_stride;
+            in[y] = (const char*)lhs + (block_y + y) * lhs_stride;
         }
 
         __asm__ __volatile__(
