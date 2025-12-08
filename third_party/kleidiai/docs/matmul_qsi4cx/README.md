@@ -1,5 +1,5 @@
 <!--
-    SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+    SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 
     SPDX-License-Identifier: Apache-2.0
 -->
@@ -19,7 +19,7 @@ In this guide, we will explore the use of the integer 4-bit (int4) matrix multip
 
 ## Target Arm® CPUs
 
-Arm® CPUs with <strong>FEAT_I8MM</strong> extension.
+Arm® CPUs with **FEAT_I8MM** extension.
 
 ## Introduction
 

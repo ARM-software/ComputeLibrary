@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -23,6 +23,13 @@
 
 #include <string_view>
 #endif  // defined(__aarch64__) && defined(__APPLE__)
+
+#if (defined(__aarch64__) && defined(_WIN64)) || defined(_M_ARM64)
+#include <Windows.h>
+#include <processthreadsapi.h>
+#include <sysinfoapi.h>
+#include <winnt.h>
+#endif  // (defined(__aarch64__) && defined(_WIN64)) || defined(_M_ARM64)
 
 namespace kai::test {
 
@@ -87,11 +94,11 @@ const std::array<std::tuple<CpuFeatures, uint64_t, uint64_t>, CpuFeatures::LAST_
 }};
 
 bool get_cap_support(CpuFeatures feature) {
-    KAI_ASSERT(feature < cpu_caps.size());
+    KAI_ASSERT_ALWAYS(feature < cpu_caps.size());
 
     auto [cpu_feature, cap_id, cap_bits] = cpu_caps[static_cast<int>(feature)];
     // Make sure CPU feature is correctly initialized
-    KAI_ASSERT(feature == cpu_feature);
+    KAI_ASSERT_ALWAYS(feature == cpu_feature);
 
     const uint64_t hwcaps = getauxval(cap_id);
 
@@ -99,7 +106,7 @@ bool get_cap_support(CpuFeatures feature) {
 }
 #elif defined(__aarch64__) && defined(__APPLE__)
 const std::array<std::tuple<CpuFeatures, std::string_view>, CpuFeatures::LAST_ELEMENT> cpu_caps{{
-    {CpuFeatures::ADVSIMD, "hw.optional.AdvSIMD"},
+    {CpuFeatures::ADVSIMD, "hw.optional.arm64"},  // Advanced SIMD is always present on arm64
     {CpuFeatures::DOTPROD, "hw.optional.arm.FEAT_DotProd"},
     {CpuFeatures::I8MM, "hw.optional.arm.FEAT_I8MM"},
     {CpuFeatures::FP16, "hw.optional.arm.FEAT_FP16"},
@@ -111,24 +118,79 @@ const std::array<std::tuple<CpuFeatures, std::string_view>, CpuFeatures::LAST_EL
 }};
 
 bool get_cap_support(CpuFeatures feature) {
-    KAI_ASSERT(feature < CpuFeatures::LAST_ELEMENT);
+    KAI_ASSERT_ALWAYS(feature < CpuFeatures::LAST_ELEMENT);
 
     auto [cpu_feature, cap_name] = cpu_caps[static_cast<int>(feature)];
-    KAI_ASSERT(feature == cpu_feature);
+    KAI_ASSERT_ALWAYS(feature == cpu_feature);
 
     uint32_t value{};
 
     if (cap_name.length() > 0) {
         size_t size = sizeof(value);
 
-        KAI_ASSERT(sysctlbyname(cap_name.data(), nullptr, &size, nullptr, 0) == 0);
-        KAI_ASSERT(size == sizeof(value));
+        KAI_ASSERT_ALWAYS(sysctlbyname(cap_name.data(), nullptr, &size, nullptr, 0) == 0);
+        KAI_ASSERT_ALWAYS(size == sizeof(value));
 
         [[maybe_unused]] int status = sysctlbyname(cap_name.data(), &value, &size, nullptr, 0);
-        KAI_ASSERT(status == 0);
+        KAI_ASSERT_ALWAYS(status == 0);
     }
 
     return value == 1;
+}
+#elif (defined(__aarch64__) && defined(_WIN64)) || defined(_M_ARM64)
+// Some system registers are provided in HARDWARE\DESCRIPTION\System\CentralProcessor\* registry.
+//
+// The registry name is encoded as
+//   CP {op0 & 1, op1, CRn, CRm, op2}
+//
+// These can be used to detect architectural features that are unable to detect reliably
+// using IsProcessorFeaturePresent. It must not be used to detect architectural features
+// that require operating system support such as SVE and SME.
+const char* ID_AA64PFR0_EL1 = "CP 4020";
+const char* ID_AA64ISAR1_EL1 = "CP 4031";
+
+const std::array<std::tuple<CpuFeatures, DWORD, const char*, uint64_t>, CpuFeatures::LAST_ELEMENT> cpu_caps{{
+    {CpuFeatures::ADVSIMD, PF_ARM_NEON_INSTRUCTIONS_AVAILABLE, nullptr, 0},
+    {CpuFeatures::DOTPROD, PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE, nullptr, 0},
+    {CpuFeatures::I8MM, 0, ID_AA64ISAR1_EL1, 0x00f0000000000000ULL},
+    {CpuFeatures::FP16, 0, ID_AA64PFR0_EL1, 0x00000000000f0000ULL},
+    {CpuFeatures::BF16, 0, ID_AA64ISAR1_EL1, 0x0000f00000000000ULL},
+    {CpuFeatures::SVE, 46, nullptr, 0},
+    {CpuFeatures::SVE2, 47, nullptr, 0},
+    {CpuFeatures::SME, 0, nullptr, 0},
+    {CpuFeatures::SME2, 0, nullptr, 0},
+}};
+
+uint64_t read_sysreg(const char* name) {
+    uint64_t value = 0;
+    DWORD size = sizeof(value);
+
+    const LSTATUS status = RegGetValueA(
+        HKEY_LOCAL_MACHINE, "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", name, RRF_RT_REG_QWORD, nullptr,
+        &value, &size);
+
+    KAI_ASSERT_ALWAYS(status == ERROR_SUCCESS);
+
+    return value;
+}
+
+bool get_cap_support(CpuFeatures feature) {
+    KAI_ASSERT_ALWAYS(feature < CpuFeatures::LAST_ELEMENT);
+    auto [cpu_feature, cap_id, reg_name, reg_mask] = cpu_caps[static_cast<int>(feature)];
+
+    if (cap_id != 0) {
+        return IsProcessorFeaturePresent(cap_id);
+    }
+
+    if (reg_name != nullptr) {
+        const uint64_t value = read_sysreg(reg_name);
+        const bool is_aarch64 = IsProcessorFeaturePresent(PF_ARM_V8_INSTRUCTIONS_AVAILABLE);
+        const bool has_feature = (value & reg_mask) != 0;
+
+        return is_aarch64 && has_feature;
+    }
+
+    return false;
 }
 #elif defined(__aarch64__)
 #error Please add a way how to check implemented CPU features
@@ -181,8 +243,16 @@ bool cpu_has_dotprod() {
     return CpuInfo::current().has_dotprod;
 }
 
+bool cpu_has_dotprod_and_fp16() {
+    return cpu_has_dotprod() && cpu_has_fp16();
+}
+
 bool cpu_has_i8mm() {
     return CpuInfo::current().has_i8mm;
+}
+
+bool cpu_has_i8mm_and_fp16() {
+    return cpu_has_i8mm() && cpu_has_fp16();
 }
 
 bool cpu_has_fp16() {
@@ -197,6 +267,13 @@ bool cpu_has_sve() {
     return CpuInfo::current().has_sve;
 }
 
+bool cpu_has_sve_vl256() {
+    if (CpuInfo::current().has_sve) {
+        return (kai_get_sve_vector_length_u8() == 32);
+    }
+    return false;
+}
+
 bool cpu_has_sve2() {
     return CpuInfo::current().has_sve2;
 }
@@ -207,6 +284,14 @@ bool cpu_has_sme() {
 
 bool cpu_has_sme2() {
     return CpuInfo::current().has_sme2;
+}
+
+bool cpu_has_dotprod_and_bf16() {
+    return cpu_has_dotprod() && cpu_has_bf16();
+}
+
+bool cpu_has_i8mm_and_bf16() {
+    return cpu_has_i8mm() && cpu_has_bf16();
 }
 
 }  // namespace kai::test

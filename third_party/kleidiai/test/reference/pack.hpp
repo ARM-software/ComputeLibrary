@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,8 +7,8 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
-#include <vector>
+
+#include "test/common/buffer.hpp"
 
 namespace kai::test {
 
@@ -21,7 +21,7 @@ class DataFormat;
 /// @param[in] src_format Data format of the source matrix.
 /// @param[in] height Number of rows of the source matrix.
 /// @param[in] width Number of columns of the source matrix.
-std::vector<uint8_t> pack(
+Buffer pack(
     const DataFormat& dst_format, const void* src, const void* scales, const void* bias, const DataFormat& src_format,
     size_t height, size_t width);
 
@@ -76,8 +76,7 @@ std::vector<uint8_t> pack(
 ///
 /// @return The packed data buffer.
 template <typename Data, typename Scale>
-std::vector<uint8_t> pack_data_scales(
-    const void* data, const void* scales, size_t height, size_t width, size_t quant_width);
+Buffer pack_data_scales(const void* data, const void* scales, size_t height, size_t width, size_t quant_width);
 
 /// Packs the zero point, data and scale into a single buffer.
 ///
@@ -139,7 +138,7 @@ std::vector<uint8_t> pack_data_scales(
 ///
 /// @return The packed data buffer.
 template <typename ZeroPoint, typename Data, typename Scale>
-std::vector<uint8_t> pack_zero_points_data_scales_per_block(
+Buffer pack_zero_points_data_scales_per_block(
     const void* zero_points, const void* data, const void* scales, size_t num_blocks, size_t block_num_zero_points,
     size_t block_num_data, size_t block_num_scales);
 
@@ -197,7 +196,7 @@ std::vector<uint8_t> pack_zero_points_data_scales_per_block(
 ///
 /// @return The packed data buffer.
 template <typename Data, typename Scale>
-std::vector<uint8_t> pack_data_scales_interleave_block(
+Buffer pack_data_scales_interleave_block(
     const void* data, const void* scales, size_t height, size_t width, size_t quant_width);
 
 /// Packs the quantized data with two halves of a block interleaved.
@@ -235,7 +234,7 @@ std::vector<uint8_t> pack_data_scales_interleave_block(
 ///
 /// @return The packed data buffer.
 template <typename Data>
-std::vector<uint8_t> pack_data_interleave_block(const void* data, size_t height, size_t width, size_t block_width) {
+Buffer pack_data_interleave_block(const void* data, size_t height, size_t width, size_t block_width) {
     return pack_data_scales_interleave_block<Data, std::nullptr_t>(data, nullptr, height, width, block_width);
 }
 

@@ -1,5 +1,5 @@
 #
-# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,12 +18,12 @@ http_archive(
 
 kai_local_archive(
     name = "com_google_googletest",
-    archive = "//:third_party/googletest-v1.14.0.zip",
-    strip_prefix = "googletest-1.14.0",
+    archive = "//:third_party/googletest-v1.17.0.zip",
+    strip_prefix = "googletest-1.17.0",
 )
 
 kai_local_archive(
     name = "com_google_benchmark",
-    archive = "//:third_party/benchmark-v1.8.4.zip",
-    strip_prefix = "benchmark-v1.8.4",
+    archive = "//:third_party/benchmark-v1.9.4.zip",
+    strip_prefix = "benchmark-v1.9.4",
 )

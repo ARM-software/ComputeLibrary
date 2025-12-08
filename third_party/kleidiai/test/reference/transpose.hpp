@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,9 +7,8 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
-#include <vector>
 
+#include "test/common/buffer.hpp"
 #include "test/common/data_type.hpp"
 
 namespace kai::test {
@@ -22,7 +21,7 @@ namespace kai::test {
 /// @param[in] width Number of columns.
 ///
 /// @return The transposed matrix.
-std::vector<uint8_t> transpose(const void* data, DataType data_type, size_t height, size_t width);
+Buffer transpose(const void* data, DataType data_type, size_t height, size_t width);
 
 /// Transposes the matrix.
 /// Works for non-packed and packed using provided strides.
@@ -37,7 +36,7 @@ std::vector<uint8_t> transpose(const void* data, DataType data_type, size_t heig
 /// @return The transposed matrix.
 ///
 template <typename T>
-std::vector<uint8_t> transpose_with_padding(
+Buffer transpose_with_padding(
     const void* data, size_t height, size_t width, size_t src_stride, size_t dst_stride, size_t dst_size);
 
 ///
@@ -49,6 +48,6 @@ std::vector<uint8_t> transpose_with_padding(
 ///
 /// @return The transposed matrix.
 template <typename T>
-std::vector<uint8_t> transpose(const void* src, size_t height, size_t width);
+Buffer transpose(const void* src, size_t height, size_t width);
 
 }  // namespace kai::test

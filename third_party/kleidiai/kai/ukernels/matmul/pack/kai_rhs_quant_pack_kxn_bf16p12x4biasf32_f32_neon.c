@@ -1,14 +1,19 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
+// Do not flag up inline assembly blocks
+#pragma GCC diagnostic ignored "-Woverlength-strings"
 
 #if !defined(__aarch64__) || !defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC)
 #error This file must be compiled for AArch64, FEAT_BF16.
 #else  // Architectural features check.
 
 #define MAX_NR 12
+
+#include "kai_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon.h"
 
 #include <arm_neon.h>
 #include <stddef.h>
@@ -21,9 +26,8 @@ static const size_t kai_nr = 12;
 static const size_t kai_kr = 4;
 static const size_t kai_sr = 1;
 
-size_t kai_get_n_step_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon(size_t nr) {
-    KAI_ASSUME(kai_nr == nr);
-    return nr;
+size_t kai_get_n_step_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon(void) {
+    return kai_nr;
 }
 
 size_t kai_get_rhs_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon(size_t n_idx) {
@@ -66,7 +70,7 @@ void kai_run_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon(
 
     size_t height = k;
     const size_t width = n;
-    const void* in = (void*)rhs;
+    const void* in = rhs;
     void* out = rhs_packed;
     const size_t in_stride = rhs_stride;
     const float* pad_row = rhs;
@@ -80,7 +84,7 @@ void kai_run_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon(
         bias_step = 0;
     }
 
-    const void* bias_ptr = bias == NULL ? (void*)zero_bias : (void*)bias;
+    const void* bias_ptr = bias == NULL ? (const void*)zero_bias : bias;
 
     const size_t out_stride = nr * kai_roundup(height, kr) * sizeof(uint16_t) + nr * sizeof(uint32_t);
 

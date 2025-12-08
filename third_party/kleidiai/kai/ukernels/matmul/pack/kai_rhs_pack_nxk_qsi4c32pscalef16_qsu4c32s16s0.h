@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -13,6 +13,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/// Gets the row stride in bytes to the packed RHS matrix.
+///
+/// @param[in] k The number of columns in the RHS matrix (not packed).
+/// @param[in] nr The number of columns written by the matmul micro-kernel.
+/// @param[in] kr The number of columns loaded in the single innermost loop of the matmul micro-kernel.
+/// @param[in] bl The block length, which defines the number of K values stored in a single block. It must be equivalent
+/// to 32.
+///
+/// @return Row stride in bytes to the packed RHS matrix.
+size_t kai_get_rhs_packed_stride_rhs_pack_nxk_qsi4c32pscalef16_qsu4c32s16s0(size_t k, size_t nr, size_t kr, size_t bl);
 
 /// Gets the offset in bytes for the RHS matrix (not packed), which holds
 /// the int4 values in a N x K matrix, where N is number of rows and K is the number of columns.

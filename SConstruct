@@ -452,6 +452,8 @@ env['AS'] = toolchain_prefix + "as"
 if env['os'] == 'windows':
     env['AR'] = "llvm-lib"
     env['RANLIB'] = "llvm-ranlib"
+    env['AS'] = env['CC']
+    env['ASFLAGS'] = []
 else:
     env['AR'] = toolchain_prefix + "ar"
 

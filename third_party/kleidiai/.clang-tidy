@@ -1,5 +1,5 @@
 #
-# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -21,6 +21,8 @@ Checks: >
   -bugprone-easily-swappable-parameters,
   -cppcoreguidelines-avoid-magic-numbers,
   -llvm-header-guard,
+  -modernize-use-trailing-return-type,
   -readability-function-cognitive-complexity,
   -readability-identifier-length,
   -readability-magic-numbers,
+  -readability-math-missing-parentheses,

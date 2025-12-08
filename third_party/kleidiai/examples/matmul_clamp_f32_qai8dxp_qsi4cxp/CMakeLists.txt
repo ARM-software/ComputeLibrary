@@ -32,6 +32,7 @@ add_executable(matmul_clamp_f32_qai8dxp_qsi4cxp
     ${MATMUL_PATH}/kai_matmul_clamp_f32_qai8dxp4x8_qsi4cxp8x8_8x8x32_neon_i8mm.c
     ${MATMUL_PATH}/kai_matmul_clamp_f32_qai8dxp4x4_qsi4cxp8x4_8x8x32_neon_dotprod.c
     ${MATMUL_PATH}/kai_matmul_clamp_f32_qai8dxp4x8_qsi4cxp4x4_16x4x32_neon_dotprod.c
+    ${MATMUL_PATH}/kai_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod.c
     )
 
 # Compile with DotProd and I8MM features enabled

@@ -1,14 +1,9 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 #pragma once
-
-#if !defined(__aarch64__) || !defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC) || \
-    !defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
-#error This file must be compiled for AArch64, FEAT_FP16.
-#else  // Architectural features check.
 
 #include <stddef.h>
 
@@ -33,7 +28,7 @@ typedef size_t (*kai_matmul_clamp_f16_f16_f16p_get_dst_size_func_t)(size_t m, si
 /// Micro-kernel core function ("run" method)
 typedef void (*kai_matmul_clamp_f16_f16_f16p_run_matmul_func_t)(
     size_t m, size_t n, size_t k, const void* lhs, size_t lhs_stride, const void* rhs_packed, void* dst,
-    size_t dst_stride_row, size_t dst_stride_col, __fp16 scalar_min, __fp16 scalar_max);
+    size_t dst_stride_row, size_t dst_stride_col, float scalar_min, float scalar_max);
 
 /// Micro-kernel interface
 struct kai_matmul_clamp_f16_f16_f16p_ukernel {
@@ -52,5 +47,3 @@ struct kai_matmul_clamp_f16_f16_f16p_ukernel {
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // Architectural features check.

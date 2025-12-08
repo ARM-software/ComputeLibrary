@@ -1,8 +1,10 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
+#include "test/common/printer.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -26,7 +28,7 @@ inline void print_data(std::ostream& os, const uint8_t* data, size_t len, DataTy
             const auto [low, high] = UInt4::unpack_u8(data[i]);
             os << static_cast<int32_t>(low) << ", " << static_cast<int32_t>(high) << ", ";
         }
-    } else if (data_type == DataType::QSI4) {
+    } else if (data_type == DataType::QSI4 || data_type == DataType::QAI4) {
         for (size_t i = 0; i < len / 2; ++i) {
             const auto [low, high] = Int4::unpack_u8(data[i]);
             os << static_cast<int32_t>(low) << ", " << static_cast<int32_t>(high) << ", ";
@@ -43,7 +45,7 @@ inline void print_data(std::ostream& os, const uint8_t* data, size_t len, DataTy
                     break;
 
                 case DataType::BF16:
-                    os << reinterpret_cast<const BFloat16*>(data)[i];
+                    os << reinterpret_cast<const BFloat16<>*>(data)[i];
                     break;
 
                 case DataType::I32:
@@ -51,6 +53,7 @@ inline void print_data(std::ostream& os, const uint8_t* data, size_t len, DataTy
                     break;
 
                 case DataType::QAI8:
+                case DataType::QSI8:
                     os << static_cast<int32_t>(reinterpret_cast<const int8_t*>(data)[i]);
                     break;
 
@@ -129,7 +132,7 @@ void print_matrix_per_row(
 
     const auto num_blocks = (height + block_height - 1) / block_height;
 
-    KAI_ASSUME(format.default_size_in_bytes(height, width) % num_blocks == 0);
+    KAI_ASSUME_ALWAYS(format.default_size_in_bytes(height, width) % num_blocks == 0);
     const auto block_data_bytes = block_height * width * data_type_size_in_bits(format.data_type()) / 8;
     const auto block_offsets_bytes = block_height * data_type_size_in_bits(format.zero_point_data_type()) / 8;
     const auto block_scales_bytes = has_scale ? block_height * data_type_size_in_bits(format.scale_data_type()) / 8 : 0;

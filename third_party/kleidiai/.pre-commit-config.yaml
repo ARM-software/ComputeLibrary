@@ -1,5 +1,5 @@
 #
-# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -8,16 +8,18 @@ default_install_hook_types: [ pre-commit, pre-push ]
 fail_fast: false
 repos:
   - repo: https://github.com/fsfe/reuse-tool
-    rev: v3.0.1
+    rev: v5.0.2
     hooks:
-      - id: reuse
+      - id: reuse-lint-file
         stages: [ pre-commit ]
         name: "REUSE Compliant Copyright and License"
+        args: [ "--no-multiprocessing", "lint-file" ]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
       - id: check-added-large-files
-        args: [ '--maxkb=200' ]
+        args: [ '--maxkb=200', '--enforce-all' ]
+        exclude: 'third_party/.*\.zip$'
         stages: [ pre-commit ]
         name: "File size limit not exceeded"
       - id: check-yaml

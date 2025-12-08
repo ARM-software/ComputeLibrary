@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -33,18 +33,25 @@ size_t kai_get_rhs_offset_rhs_pack_kxn_bf16p12x4biasf16_f16_neon(size_t n_idx);
 /// @return The offset in bytes to the data element.
 size_t kai_get_bias_offset_rhs_pack_kxn_bf16p12x4biasf16_f16_neon(size_t n_idx);
 
+/// Gets the row stride in bytes to the packed RHS matrix.
+///
+/// @param[in] k Number of rows.
+///
+/// @return Row stride in bytes to the packed RHS matrix.
+size_t kai_get_rhs_packed_stride_rhs_pack_kxn_bf16p12x4biasf16_f16_neon(size_t k);
+
 /// Gets the offset in bytes to the data element in the packed RHS buffer.
 ///
-/// @param[in] n_idx Row index.
-/// @param[in] k Number of columns.
+/// @param[in] n_idx Column index.
+/// @param[in] k Number of rows.
 ///
 /// @return The offset in bytes to the data element.
 size_t kai_get_rhs_packed_offset_rhs_pack_kxn_bf16p12x4biasf16_f16_neon(size_t n_idx, size_t k);
 
 /// Gets the size in bytes of the packed RHS buffer.
 ///
-/// @param[in] n Number of rows.
-/// @param[in] k Number of columns.
+/// @param[in] n Number of columns.
+/// @param[in] k Number of rows.
 ///
 /// @return The size in bytes of the packed RHS buffer.
 size_t kai_get_rhs_packed_size_rhs_pack_kxn_bf16p12x4biasf16_f16_neon(size_t n, size_t k);

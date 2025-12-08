@@ -1,25 +1,24 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
-#include <arm_neon.h>
 #include <gtest/gtest.h>
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
-#include <iosfwd>
 #include <limits>
 #include <map>
 #include <string_view>
 #include <tuple>
 #include <utility>
-#include <vector>
 
 #include "kai/kai_common.h"
+#include "test/common/abi_checker.hpp"
+#include "test/common/buffer.hpp"
 #include "test/common/compare.hpp"
 #include "test/common/cpu_info.hpp"
 #include "test/common/data_format.hpp"
@@ -27,6 +26,8 @@
 #include "test/common/matmul_test_common.hpp"
 #include "test/common/matrix_portion.hpp"
 #include "test/common/printer.hpp"
+#include "test/common/sme.hpp"
+#include "test/reference/cast.hpp"
 #include "test/reference/fill.hpp"
 #include "test/reference/matmul.hpp"
 #include "test/reference/pack.hpp"
@@ -39,287 +40,278 @@
 #include "kai/ukernels/matmul/pack/kai_lhs_quant_pack_bf16p8x4_f32_neon.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_bf16p12x4biasf32_f16_neon.h"
 #include "kai/ukernels/matmul/pack/kai_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon.h"
+
+// SME files here.
+#include "kai/ukernels/matmul/matmul_clamp_fp32_bf16p_bf16p/kai_matmul_clamp_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa.h"
+#include "kai/ukernels/matmul/pack/kai_lhs_pack_bf16p2vlx2_f32_sme.h"
+#include "kai/ukernels/matmul/pack/kai_rhs_pack_kxn_bf16p2vlx2b_f32_x32_sme.h"
+
 namespace kai::test {
 
 /// List of supported matrix multiplication methods.
 namespace {
-const std::array gemm_methods = {
-    MatMulMethod{
-        .name = "matmul_nt_nt_f32_bf16p_bf16p_8x12_neon_mla",
 
-        .m0 = 8,
-        .n0 = 12,
-        .k0 = 4,
+static const std::array<MatMulMethod, 5>& get_gemm_methods() {
+    static std::array<MatMulMethod, 5> gemm_methods{};
+    gemm_methods[0].name = "matmul_nt_nt_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa";
+    gemm_methods[0].m0 = 2 * get_sme_vector_length<float>();
+    gemm_methods[0].n0 = 2 * get_sme_vector_length<float>();
+    gemm_methods[0].k0 = 2;
+    gemm_methods[0].dst_format = DataFormat(DataType::FP32);
+    gemm_methods[0].lhs_format = DataFormat(DataType::FP32);
+    gemm_methods[0].packed_lhs_format = DataFormat(
+        DataType::BF16, 2 * get_sme_vector_length<float>(), 2, DataFormat::PackFormat::NONE, DataType::FP32,
+        DataType::UNKNOWN, 2 * get_sme_vector_length<float>(), 2);
+    gemm_methods[0].rhs_format = DataFormat(DataType::FP32);
+    gemm_methods[0].packed_rhs_format = DataFormat(
+        DataType::BF16, 2 * get_sme_vector_length<float>(), 2, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32,
+        DataType::UNKNOWN, 2 * get_sme_vector_length<float>(), 2);
+    gemm_methods[0].bias_format = DataFormat(DataType::FP32);
+    gemm_methods[0].fn_is_supported = cpu_has_sme2;
+    gemm_methods[0].fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa;
+    gemm_methods[0].fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa;
+    gemm_methods[0].fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa;
+    gemm_methods[0].fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa;
+    gemm_methods[0].fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa;
+    gemm_methods[0].fn_get_pack_rhs_n_step = kai_get_n_step_rhs_pack_kxn_bf16p2vlx2b_f32_x32_sme;
+    gemm_methods[0].fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa;
+    gemm_methods[0].fn_get_lhs_offset = kai_get_lhs_offset_lhs_pack_bf16p2vlx2_f32_sme;
+    gemm_methods[0].fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_pack_bf16p2vlx2_f32_sme;
+    gemm_methods[0].fn_get_packed_lhs_offset =
+        kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa;
+    gemm_methods[0].fn_pack_lhs = kai_run_lhs_pack_bf16p2vlx2_f32_sme;
+    gemm_methods[0].fn_get_rhs_offset = kai_get_rhs_offset_rhs_pack_kxn_bf16p2vlx2b_f32_x32_sme;
+    gemm_methods[0].fn_get_packed_rhs_size = kai_get_rhs_packed_size_rhs_pack_kxn_bf16p2vlx2b_f32_x32_sme;
+    gemm_methods[0].fn_get_main_packed_rhs_offset =
+        kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa;
+    gemm_methods[0].fn_pack_rhs = kai_run_rhs_pack_kxn_bf16p2vlx2b_f32_x32_sme;
+    gemm_methods[0].fn_get_bias_offset = kai_get_bias_offset_rhs_pack_kxn_bf16p2vlx2b_f32_x32_sme;
+    gemm_methods[0].fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa;
+    gemm_methods[0].fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa;
+    gemm_methods[0].fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p2vlx2_bf16p2vlx2_2vlx2vl_sme2_mopa;
 
-        .dst_format = DataFormat(DataType::FP32),
-        .lhs_format = DataFormat(DataType::FP32),
-        .packed_lhs_format =
-            DataFormat(DataType::BF16, 8, 4, DataFormat::PackFormat::NONE, DataType::FP32, DataType::UNKNOWN, 8, 4),
-        .rhs_format = DataFormat(DataType::FP32),
-        .packed_rhs_format = DataFormat(
-            DataType::BF16, 12, 4, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32, DataType::UNKNOWN, 12, 4),
-        .bias_format = DataFormat(DataType::FP32),
-        .fn_is_supported = cpu_has_bf16,
+    gemm_methods[1].name = "matmul_nt_nt_f32_bf16p_bf16p_8x12_neon_mla";
+    gemm_methods[1].m0 = 8;
+    gemm_methods[1].n0 = 12;
+    gemm_methods[1].k0 = 4;
+    gemm_methods[1].dst_format = DataFormat(DataType::FP32);
+    gemm_methods[1].lhs_format = DataFormat(DataType::FP32);
+    gemm_methods[1].packed_lhs_format =
+        DataFormat(DataType::BF16, 8, 4, DataFormat::PackFormat::NONE, DataType::FP32, DataType::UNKNOWN, 8, 4);
+    gemm_methods[1].rhs_format = DataFormat(DataType::FP32);
+    gemm_methods[1].packed_rhs_format = DataFormat(
+        DataType::BF16, 12, 4, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32, DataType::UNKNOWN, 12, 4);
+    gemm_methods[1].bias_format = DataFormat(DataType::FP32);
+    gemm_methods[1].fn_is_supported = cpu_has_bf16;
+    gemm_methods[1].fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[1].fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[1].fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[1].fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[1].fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[1].fn_get_pack_rhs_n_step = kai_get_n_step_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemm_methods[1].fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[1].fn_get_lhs_offset = kai_get_lhs_offset_lhs_quant_pack_bf16p8x4_f32_neon;
+    gemm_methods[1].fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_quant_pack_bf16p8x4_f32_neon;
+    gemm_methods[1].fn_get_packed_lhs_offset =
+        kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[1].fn_pack_lhs = kai_run_lhs_quant_pack_bf16p8x4_f32_neon;
+    gemm_methods[1].fn_get_rhs_offset = kai_get_rhs_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemm_methods[1].fn_get_packed_rhs_size_generic_block_size =
+        kai_get_rhs_packed_size_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemm_methods[1].fn_get_main_packed_rhs_offset =
+        kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[1].fn_pack_rhs = kai_run_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemm_methods[1].fn_get_bias_offset = kai_get_bias_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemm_methods[1].fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[1].fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[1].fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
 
-        .fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
+    gemm_methods[2].name = "matmul_nt_nt_f32_bf16p_bf16p_8x12_neon_mla_f16_inputs_f32_bias_and_output";
+    gemm_methods[2].m0 = 8;
+    gemm_methods[2].n0 = 12;
+    gemm_methods[2].k0 = 4;
+    gemm_methods[2].dst_format = DataFormat(DataType::FP32);
+    gemm_methods[2].lhs_format = DataFormat(DataType::FP16);
+    gemm_methods[2].packed_lhs_format =
+        DataFormat(DataType::BF16, 8, 4, DataFormat::PackFormat::NONE, DataType::FP16, DataType::UNKNOWN, 8, 4);
+    gemm_methods[2].rhs_format = DataFormat(DataType::FP16);
+    gemm_methods[2].packed_rhs_format = DataFormat(
+        DataType::BF16, 12, 4, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32, DataType::UNKNOWN, 12, 4);
+    gemm_methods[2].bias_format = DataFormat(DataType::FP32);
+    gemm_methods[2].fn_is_supported = cpu_has_bf16;
+    gemm_methods[2].fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[2].fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[2].fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[2].fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[2].fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[2].fn_get_pack_rhs_n_step = kai_get_n_step_rhs_pack_kxn_bf16p12x4biasf32_f16_neon;
+    gemm_methods[2].fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[2].fn_get_lhs_offset = kai_get_lhs_offset_lhs_pack_bf16p8x4_f16_neon;
+    gemm_methods[2].fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_pack_bf16p8x4_f16_neon;
+    gemm_methods[2].fn_get_packed_lhs_offset =
+        kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[2].fn_pack_lhs = kai_run_lhs_pack_bf16p8x4_f16_neon;
+    gemm_methods[2].fn_get_rhs_offset = kai_get_rhs_offset_rhs_pack_kxn_bf16p12x4biasf32_f16_neon;
+    gemm_methods[2].fn_get_packed_rhs_size = kai_get_rhs_packed_size_rhs_pack_kxn_bf16p12x4biasf32_f16_neon;
+    gemm_methods[2].fn_get_main_packed_rhs_offset =
+        kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[2].fn_pack_rhs = kai_run_rhs_pack_kxn_bf16p12x4biasf32_f16_neon;
+    gemm_methods[2].fn_get_bias_offset = kai_get_bias_offset_rhs_pack_kxn_bf16p12x4biasf32_f16_neon;
+    gemm_methods[2].fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[2].fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[2].fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
 
-        .fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_pack_rhs_n_step = kai_get_n_step_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-        .fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
+    gemm_methods[3].name = "matmul_nt_nt_f32_bf16p_bf16p_8x12_neon_mla_f16_inputs_f32_bias_and_output_opt_bias";
+    gemm_methods[3].m0 = 8;
+    gemm_methods[3].n0 = 12;
+    gemm_methods[3].k0 = 4;
+    gemm_methods[3].dst_format = DataFormat(DataType::FP32);
+    gemm_methods[3].lhs_format = DataFormat(DataType::FP16);
+    gemm_methods[3].packed_lhs_format =
+        DataFormat(DataType::BF16, 8, 4, DataFormat::PackFormat::NONE, DataType::FP16, DataType::UNKNOWN, 8, 4);
+    gemm_methods[3].rhs_format = DataFormat(DataType::FP16);
+    gemm_methods[3].packed_rhs_format = DataFormat(
+        DataType::BF16, 12, 4, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32, DataType::UNKNOWN, 12, 4);
+    gemm_methods[3].bias_format = DataFormat(DataType::UNKNOWN);
+    gemm_methods[3].fn_is_supported = cpu_has_bf16;
+    gemm_methods[3].fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[3].fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[3].fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[3].fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[3].fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[3].fn_get_pack_rhs_n_step = kai_get_n_step_rhs_pack_kxn_bf16p12x4biasf32_f16_neon;
+    gemm_methods[3].fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[3].fn_get_lhs_offset = kai_get_lhs_offset_lhs_pack_bf16p8x4_f16_neon;
+    gemm_methods[3].fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_pack_bf16p8x4_f16_neon;
+    gemm_methods[3].fn_get_packed_lhs_offset =
+        kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[3].fn_pack_lhs = kai_run_lhs_pack_bf16p8x4_f16_neon;
+    gemm_methods[3].fn_get_rhs_offset = kai_get_rhs_offset_rhs_pack_kxn_bf16p12x4biasf32_f16_neon;
+    gemm_methods[3].fn_get_packed_rhs_size = kai_get_rhs_packed_size_rhs_pack_kxn_bf16p12x4biasf32_f16_neon;
+    gemm_methods[3].fn_get_main_packed_rhs_offset =
+        kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[3].fn_pack_rhs = kai_run_rhs_pack_kxn_bf16p12x4biasf32_f16_neon;
+    gemm_methods[3].fn_get_bias_offset = kai_get_bias_offset_rhs_pack_kxn_bf16p12x4biasf32_f16_neon;
+    gemm_methods[3].fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[3].fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[3].fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
 
-        .fn_get_lhs_offset = kai_get_lhs_offset_lhs_quant_pack_bf16p8x4_f32_neon,
-        .fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_quant_pack_bf16p8x4_f32_neon,
-        .fn_get_packed_lhs_offset = kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_pack_lhs = kai_run_lhs_quant_pack_bf16p8x4_f32_neon,
+    gemm_methods[4].name = "matmul_nt_nt_f32_bf16p_bf16p_8x12_neon_mla_opt_bias";
+    gemm_methods[4].m0 = 8;
+    gemm_methods[4].n0 = 12;
+    gemm_methods[4].k0 = 4;
+    gemm_methods[4].dst_format = DataFormat(DataType::FP32);
+    gemm_methods[4].lhs_format = DataFormat(DataType::FP32);
+    gemm_methods[4].packed_lhs_format =
+        DataFormat(DataType::BF16, 8, 4, DataFormat::PackFormat::NONE, DataType::FP32, DataType::UNKNOWN, 8, 4);
+    gemm_methods[4].rhs_format = DataFormat(DataType::FP32);
+    gemm_methods[4].packed_rhs_format = DataFormat(
+        DataType::BF16, 12, 4, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32, DataType::UNKNOWN, 12, 4);
+    gemm_methods[4].bias_format = DataFormat(DataType::UNKNOWN);
+    gemm_methods[4].fn_is_supported = cpu_has_bf16;
+    gemm_methods[4].fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[4].fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[4].fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[4].fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[4].fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[4].fn_get_pack_rhs_n_step = kai_get_n_step_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemm_methods[4].fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[4].fn_get_lhs_offset = kai_get_lhs_offset_lhs_quant_pack_bf16p8x4_f32_neon;
+    gemm_methods[4].fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_quant_pack_bf16p8x4_f32_neon;
+    gemm_methods[4].fn_get_packed_lhs_offset =
+        kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[4].fn_pack_lhs = kai_run_lhs_quant_pack_bf16p8x4_f32_neon;
+    gemm_methods[4].fn_get_rhs_offset = kai_get_rhs_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemm_methods[4].fn_get_packed_rhs_size_generic_block_size =
+        kai_get_rhs_packed_size_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemm_methods[4].fn_get_main_packed_rhs_offset =
+        kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[4].fn_pack_rhs = kai_run_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemm_methods[4].fn_get_bias_offset = kai_get_bias_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemm_methods[4].fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[4].fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
+    gemm_methods[4].fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla;
 
-        .fn_get_rhs_offset = kai_get_rhs_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-        .fn_get_packed_rhs_size = nullptr,
-        .fn_get_packed_rhs_size_generic_block_size =
-            kai_get_rhs_packed_size_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-        .fn_get_pack_rhs_packed_rhs_offset = nullptr,
-        .fn_get_main_packed_rhs_offset = kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_pack_rhs = kai_run_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
+    return gemm_methods;
+}
 
-        .fn_get_bias_offset = kai_get_bias_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
+static const std::array<MatMulMethod, 2>& get_gemv_methods() {
+    static std::array<MatMulMethod, 2> gemv_methods{};
+    gemv_methods[0].name = "matmul_nt_nt_f32_bf16p_bf16p_1x36_neon_dot";
+    gemv_methods[0].m0 = 1;
+    gemv_methods[0].n0 = 12;
+    gemv_methods[0].k0 = 4;
+    gemv_methods[0].dst_format = DataFormat(DataType::FP32);
+    gemv_methods[0].lhs_format = DataFormat(DataType::FP32);
+    gemv_methods[0].packed_lhs_format =
+        DataFormat(DataType::BF16, 1, 4, DataFormat::PackFormat::NONE, DataType::FP32, DataType::UNKNOWN, 1, 4);
+    gemv_methods[0].rhs_format = DataFormat(DataType::FP32);
+    gemv_methods[0].packed_rhs_format = DataFormat(
+        DataType::BF16, 12, 4, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32, DataType::UNKNOWN, 12, 4);
+    gemv_methods[0].bias_format = DataFormat(DataType::FP32);
+    gemv_methods[0].fn_is_supported = cpu_has_bf16;
+    gemv_methods[0].fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[0].fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[0].fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[0].fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[0].fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[0].fn_get_pack_rhs_n_step = kai_get_n_step_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemv_methods[0].fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[0].fn_get_lhs_offset = kai_get_lhs_offset_lhs_quant_pack_bf16p1x4_f32_neon;
+    gemv_methods[0].fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_quant_pack_bf16p1x4_f32_neon;
+    gemv_methods[0].fn_get_packed_lhs_offset =
+        kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[0].fn_pack_lhs = kai_run_lhs_quant_pack_bf16p1x4_f32_neon;
+    gemv_methods[0].fn_get_rhs_offset = kai_get_rhs_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemv_methods[0].fn_get_packed_rhs_size_generic_block_size =
+        kai_get_rhs_packed_size_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemv_methods[0].fn_get_main_packed_rhs_offset =
+        kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[0].fn_pack_rhs = kai_run_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemv_methods[0].fn_get_bias_offset = kai_get_bias_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemv_methods[0].fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[0].fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[0].fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
 
-        .fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
+    gemv_methods[1].name = "matmul_nt_nt_f32_bf16p_bf16p_1x36_neon_dot_opt_bias";
+    gemv_methods[1].m0 = 1;
+    gemv_methods[1].n0 = 12;
+    gemv_methods[1].k0 = 4;
+    gemv_methods[1].dst_format = DataFormat(DataType::FP32);
+    gemv_methods[1].lhs_format = DataFormat(DataType::FP32);
+    gemv_methods[1].packed_lhs_format =
+        DataFormat(DataType::BF16, 1, 4, DataFormat::PackFormat::NONE, DataType::FP32, DataType::UNKNOWN, 1, 4);
+    gemv_methods[1].rhs_format = DataFormat(DataType::FP32);
+    gemv_methods[1].packed_rhs_format = DataFormat(
+        DataType::BF16, 12, 4, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32, DataType::UNKNOWN, 12, 4);
+    gemv_methods[1].bias_format = DataFormat(DataType::UNKNOWN);
+    gemv_methods[1].fn_is_supported = cpu_has_bf16;
+    gemv_methods[1].fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[1].fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[1].fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[1].fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[1].fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[1].fn_get_pack_rhs_n_step = kai_get_n_step_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemv_methods[1].fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[1].fn_get_lhs_offset = kai_get_lhs_offset_lhs_quant_pack_bf16p1x4_f32_neon;
+    gemv_methods[1].fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_quant_pack_bf16p1x4_f32_neon;
+    gemv_methods[1].fn_get_packed_lhs_offset =
+        kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[1].fn_pack_lhs = kai_run_lhs_quant_pack_bf16p1x4_f32_neon;
+    gemv_methods[1].fn_get_rhs_offset = kai_get_rhs_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemv_methods[1].fn_get_packed_rhs_size_generic_block_size =
+        kai_get_rhs_packed_size_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemv_methods[1].fn_get_main_packed_rhs_offset =
+        kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[1].fn_pack_rhs = kai_run_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemv_methods[1].fn_get_bias_offset = kai_get_bias_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon;
+    gemv_methods[1].fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[1].fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
+    gemv_methods[1].fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot;
 
-        .fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-    },
-    MatMulMethod{
-        .name = "matmul_nt_nt_f32_bf16p_bf16p_8x12_neon_mla_f16_inputs_f32_bias_and_output",
+    return gemv_methods;
+}
 
-        .m0 = 8,
-        .n0 = 12,
-        .k0 = 4,
-
-        .dst_format = DataFormat(DataType::FP32),
-        .lhs_format = DataFormat(DataType::FP16),
-        .packed_lhs_format =
-            DataFormat(DataType::BF16, 8, 4, DataFormat::PackFormat::NONE, DataType::FP16, DataType::UNKNOWN, 8, 4),
-        .rhs_format = DataFormat(DataType::FP16),
-        .packed_rhs_format = DataFormat(
-            DataType::BF16, 12, 4, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32, DataType::UNKNOWN, 12, 4),
-        .bias_format = DataFormat(DataType::FP32),
-        .fn_is_supported = cpu_has_bf16,
-
-        .fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-
-        .fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_pack_rhs_n_step = kai_get_n_step_rhs_pack_kxn_bf16p12x4biasf32_f16_neon,
-        .fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-
-        .fn_get_lhs_offset = kai_get_lhs_offset_lhs_pack_bf16p8x4_f16_neon,
-        .fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_pack_bf16p8x4_f16_neon,
-        .fn_get_packed_lhs_offset = kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_pack_lhs = kai_run_lhs_pack_bf16p8x4_f16_neon,
-
-        .fn_get_rhs_offset = kai_get_rhs_offset_rhs_pack_kxn_bf16p12x4biasf32_f16_neon,
-        .fn_get_packed_rhs_size = kai_get_rhs_packed_size_rhs_pack_kxn_bf16p12x4biasf32_f16_neon,
-        .fn_get_packed_rhs_size_generic_block_size = nullptr,
-        .fn_get_pack_rhs_packed_rhs_offset = nullptr,
-        .fn_get_main_packed_rhs_offset = kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_pack_rhs = kai_run_rhs_pack_kxn_bf16p12x4biasf32_f16_neon,
-
-        .fn_get_bias_offset = kai_get_bias_offset_rhs_pack_kxn_bf16p12x4biasf32_f16_neon,
-
-        .fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-
-        .fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-    },
-    MatMulMethod{
-        .name = "matmul_nt_nt_f32_bf16p_bf16p_8x12_neon_mla_f16_inputs_f32_bias_and_output_opt_bias",
-
-        .m0 = 8,
-        .n0 = 12,
-        .k0 = 4,
-
-        .dst_format = DataFormat(DataType::FP32),
-        .lhs_format = DataFormat(DataType::FP16),
-        .packed_lhs_format =
-            DataFormat(DataType::BF16, 8, 4, DataFormat::PackFormat::NONE, DataType::FP16, DataType::UNKNOWN, 8, 4),
-        .rhs_format = DataFormat(DataType::FP16),
-        .packed_rhs_format = DataFormat(
-            DataType::BF16, 12, 4, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32, DataType::UNKNOWN, 12, 4),
-        .bias_format = DataFormat(DataType::UNKNOWN),
-        .fn_is_supported = cpu_has_bf16,
-
-        .fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-
-        .fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_pack_rhs_n_step = kai_get_n_step_rhs_pack_kxn_bf16p12x4biasf32_f16_neon,
-        .fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-
-        .fn_get_lhs_offset = kai_get_lhs_offset_lhs_pack_bf16p8x4_f16_neon,
-        .fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_pack_bf16p8x4_f16_neon,
-        .fn_get_packed_lhs_offset = kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_pack_lhs = kai_run_lhs_pack_bf16p8x4_f16_neon,
-
-        .fn_get_rhs_offset = kai_get_rhs_offset_rhs_pack_kxn_bf16p12x4biasf32_f16_neon,
-        .fn_get_packed_rhs_size = kai_get_rhs_packed_size_rhs_pack_kxn_bf16p12x4biasf32_f16_neon,
-        .fn_get_packed_rhs_size_generic_block_size = nullptr,
-        .fn_get_pack_rhs_packed_rhs_offset = nullptr,
-        .fn_get_main_packed_rhs_offset = kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_pack_rhs = kai_run_rhs_pack_kxn_bf16p12x4biasf32_f16_neon,
-
-        .fn_get_bias_offset = kai_get_bias_offset_rhs_pack_kxn_bf16p12x4biasf32_f16_neon,
-
-        .fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-
-        .fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-    },
-    MatMulMethod{
-        .name = "matmul_nt_nt_f32_bf16p_bf16p_8x12_neon_mla_opt_bias",
-
-        .m0 = 8,
-        .n0 = 12,
-        .k0 = 4,
-
-        .dst_format = DataFormat(DataType::FP32),
-        .lhs_format = DataFormat(DataType::FP32),
-        .packed_lhs_format =
-            DataFormat(DataType::BF16, 8, 4, DataFormat::PackFormat::NONE, DataType::FP32, DataType::UNKNOWN, 8, 4),
-        .rhs_format = DataFormat(DataType::FP32),
-        .packed_rhs_format = DataFormat(
-            DataType::BF16, 12, 4, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32, DataType::UNKNOWN, 12, 4),
-        .bias_format = DataFormat(DataType::UNKNOWN),
-        .fn_is_supported = cpu_has_bf16,
-
-        .fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-
-        .fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_pack_rhs_n_step = kai_get_n_step_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-        .fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-
-        .fn_get_lhs_offset = kai_get_lhs_offset_lhs_quant_pack_bf16p8x4_f32_neon,
-        .fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_quant_pack_bf16p8x4_f32_neon,
-        .fn_get_packed_lhs_offset = kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_pack_lhs = kai_run_lhs_quant_pack_bf16p8x4_f32_neon,
-
-        .fn_get_rhs_offset = kai_get_rhs_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-        .fn_get_packed_rhs_size = nullptr,
-        .fn_get_packed_rhs_size_generic_block_size =
-            kai_get_rhs_packed_size_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-        .fn_get_pack_rhs_packed_rhs_offset = nullptr,
-        .fn_get_main_packed_rhs_offset = kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_pack_rhs = kai_run_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-
-        .fn_get_bias_offset = kai_get_bias_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-
-        .fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-        .fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-
-        .fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla,
-    }};
-
-const std::array gemv_methods = {
-    MatMulMethod{
-        .name = "matmul_nt_nt_f32_bf16p_bf16p_1x36_neon_dot",
-
-        .m0 = 1,
-        .n0 = 12,
-        .k0 = 4,
-
-        .dst_format = DataFormat(DataType::FP32),
-        .lhs_format = DataFormat(DataType::FP32),
-        .packed_lhs_format =
-            DataFormat(DataType::BF16, 1, 4, DataFormat::PackFormat::NONE, DataType::FP32, DataType::UNKNOWN, 1, 4),
-        .rhs_format = DataFormat(DataType::FP32),
-        .packed_rhs_format = DataFormat(
-            DataType::BF16, 12, 4, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32, DataType::UNKNOWN, 12, 4),
-        .bias_format = DataFormat(DataType::FP32),
-        .fn_is_supported = cpu_has_bf16,
-
-        .fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-
-        .fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_get_pack_rhs_n_step = kai_get_n_step_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-        .fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-
-        .fn_get_lhs_offset = kai_get_lhs_offset_lhs_quant_pack_bf16p1x4_f32_neon,
-        .fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_quant_pack_bf16p1x4_f32_neon,
-        .fn_get_packed_lhs_offset = kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_pack_lhs = kai_run_lhs_quant_pack_bf16p1x4_f32_neon,
-
-        .fn_get_rhs_offset = kai_get_rhs_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-        .fn_get_packed_rhs_size = nullptr,
-        .fn_get_packed_rhs_size_generic_block_size =
-            kai_get_rhs_packed_size_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-        .fn_get_pack_rhs_packed_rhs_offset = nullptr,
-        .fn_get_main_packed_rhs_offset = kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_pack_rhs = kai_run_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-
-        .fn_get_bias_offset = kai_get_bias_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-
-        .fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-
-        .fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-    },
-    MatMulMethod{
-        .name = "matmul_nt_nt_f32_bf16p_bf16p_1x36_neon_dot_opt_bias",
-
-        .m0 = 1,
-        .n0 = 12,
-        .k0 = 4,
-
-        .dst_format = DataFormat(DataType::FP32),
-        .lhs_format = DataFormat(DataType::FP32),
-        .packed_lhs_format =
-            DataFormat(DataType::BF16, 1, 4, DataFormat::PackFormat::NONE, DataType::FP32, DataType::UNKNOWN, 1, 4),
-        .rhs_format = DataFormat(DataType::FP32),
-        .packed_rhs_format = DataFormat(
-            DataType::BF16, 12, 4, DataFormat::PackFormat::BIAS_PER_ROW, DataType::FP32, DataType::UNKNOWN, 12, 4),
-        .bias_format = DataFormat(DataType::UNKNOWN),
-        .fn_is_supported = cpu_has_bf16,
-
-        .fn_get_mr = kai_get_mr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_get_nr = kai_get_nr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_get_kr = kai_get_kr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_get_sr = kai_get_sr_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-
-        .fn_get_main_m_step = kai_get_m_step_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_get_pack_rhs_n_step = kai_get_n_step_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-        .fn_get_main_n_step = kai_get_n_step_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-
-        .fn_get_lhs_offset = kai_get_lhs_offset_lhs_quant_pack_bf16p1x4_f32_neon,
-        .fn_get_packed_lhs_size = kai_get_lhs_packed_size_lhs_quant_pack_bf16p1x4_f32_neon,
-        .fn_get_packed_lhs_offset = kai_get_lhs_packed_offset_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_pack_lhs = kai_run_lhs_quant_pack_bf16p1x4_f32_neon,
-
-        .fn_get_rhs_offset = kai_get_rhs_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-        .fn_get_packed_rhs_size = nullptr,
-        .fn_get_packed_rhs_size_generic_block_size =
-            kai_get_rhs_packed_size_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-        .fn_get_pack_rhs_packed_rhs_offset = nullptr,
-        .fn_get_main_packed_rhs_offset = kai_get_rhs_packed_offset_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_pack_rhs = kai_run_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-
-        .fn_get_bias_offset = kai_get_bias_offset_rhs_quant_pack_kxn_bf16p12x4biasf32_f32_neon,
-
-        .fn_get_dst_offset = kai_get_dst_offset_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-        .fn_get_dst_size = kai_get_dst_size_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-
-        .fn_matmul_f32_bf16p_bf16p = kai_run_matmul_clamp_f32_bf16p1x4_bf16p12x4b_1x36_neon_dot,
-    }};
 }  // namespace
 
 /// Matrix multiplication test fixture.
@@ -331,18 +323,18 @@ private:
 protected:
     /// Cached test data that is shared between multiple test case.
     struct TestData {
-        std::vector<uint8_t> lhs{};             ///< LHS operand.
-        std::vector<uint8_t> ref_packed_lhs{};  ///< Reference packed LHS.
-        std::vector<uint8_t> rhs{};             ///< RHS operand.
-        std::vector<uint8_t> rhs_scales{};      ///< RHS per-row quantization scales.
-        std::vector<uint8_t> bias{};            ///< Bias.
-        std::vector<uint8_t> ref_packed_rhs{};  ///< Reference packed RHS.
-        std::vector<uint8_t> ref_dst{};         ///< Reference output.
+        Buffer lhs{};             ///< LHS operand.
+        Buffer ref_packed_lhs{};  ///< Reference packed LHS.
+        Buffer rhs{};             ///< RHS operand.
+        Buffer rhs_scales{};      ///< RHS per-row quantization scales.
+        Buffer bias{};            ///< Bias.
+        Buffer ref_packed_rhs{};  ///< Reference packed RHS.
+        Buffer ref_dst{};         ///< Reference output.
     };
 
     /// Gets the test data for the current test case.
     static const TestData& test_data() {
-        const auto& [method, info, portion] = GetParam();
+        const auto& [method, info, portion, bias_mode] = GetParam();
         const TestDataId data_id{info.m, info.n, info.k, method.name};
 
         // If the test data is already available, returns it.
@@ -360,7 +352,7 @@ protected:
         const auto lhs_h = info.m;
         const auto lhs_w = info.k;
         auto lhs = fill_matrix_random(lhs_h, lhs_w, method.lhs_format, 0);
-        std::vector<uint8_t> ref_packed_lhs;
+        Buffer ref_packed_lhs;
 
         if (has_lhs_pack) {
             ref_packed_lhs =
@@ -371,7 +363,7 @@ protected:
         const auto rhs_w = info.n;
         auto rhs = fill_matrix_random(rhs_h, rhs_w, method.rhs_format, 1);
 
-        std::vector<uint8_t> rhs_scales;
+        Buffer rhs_scales;
         if (data_type_is_quantized(method.rhs_format.data_type()) &&
             method.rhs_format.pack_format() == DataFormat::PackFormat::NONE) {
             rhs_scales = fill_matrix_random(rhs_h, 1, DataFormat(DataType::FP32), 2);
@@ -379,7 +371,7 @@ protected:
 
         const auto bias_h = 1;
         const auto bias_w = info.n;
-        std::vector<uint8_t> bias;
+        Buffer bias;
 
         if (has_bias) {
             bias = fill_matrix_random(bias_h, bias_w, method.bias_format, 3);
@@ -388,14 +380,17 @@ protected:
         constexpr size_t nr = 12;
         constexpr size_t kr = 4;
 
-        std::vector<uint8_t> packed_rhs;
+        size_t packed_rhs_size = 0;
+
         if (method.fn_get_packed_rhs_size) {
-            packed_rhs.resize(method.fn_get_packed_rhs_size(rhs_w, rhs_h));
+            packed_rhs_size = method.fn_get_packed_rhs_size(rhs_w, rhs_h);
         } else if (method.fn_get_packed_rhs_size_generic_block_size) {
-            packed_rhs.resize(method.fn_get_packed_rhs_size_generic_block_size(rhs_w, rhs_h, nr, kr));
+            packed_rhs_size = method.fn_get_packed_rhs_size_generic_block_size(rhs_w, rhs_h, nr, kr);
         } else {
             KAI_ERROR("No function to calculate Packed Rhs Matrix Size");
         }
+
+        Buffer packed_rhs(packed_rhs_size);
 
         if (has_rhs_pack) {
             const auto ref_rhs_row_stride = method.rhs_format.default_row_stride(rhs_w);
@@ -404,26 +399,37 @@ protected:
                 packed_rhs.data());
         }
 
-        KAI_ASSUME(method.lhs_format.is_raw());
-        KAI_ASSUME(method.rhs_format.is_raw());
-        KAI_ASSUME(method.dst_format.is_raw());
+        KAI_ASSUME_ALWAYS(method.lhs_format.is_raw());
+        KAI_ASSUME_ALWAYS(method.rhs_format.is_raw());
+        KAI_ASSUME_ALWAYS(method.dst_format.is_raw());
 
-        auto ref_dst = matmul(
-            lhs.data(), nullptr, nullptr, method.lhs_format.data_type(),                         //
-            rhs.data(), rhs_scales.data(), nullptr, method.rhs_format.data_type(),               //
-            has_bias ? bias.data() : nullptr, nullptr, nullptr, method.bias_format.data_type(),  //
-            method.dst_format.data_type(),                                                       //
-            info.m, info.n, info.k, false, false);
+        Buffer tmp_lhs;
+        Buffer tmp_rhs;
+        const void* p_lhs_buff = lhs.data();
+        const void* p_rhs_buff = rhs.data();
 
-        const auto& data = _data[data_id] = {
-            .lhs = std::move(lhs),
-            .ref_packed_lhs = std::move(ref_packed_lhs),
-            .rhs = std::move(rhs),
-            .rhs_scales = std::move(rhs_scales),
-            .bias = std::move(bias),
-            .ref_packed_rhs = std::move(packed_rhs),
-            .ref_dst = std::move(ref_dst),
-        };
+        if (method.lhs_format.data_type() == DataType::FP32 || method.lhs_format.data_type() == DataType::FP16) {
+            tmp_lhs = cast(p_lhs_buff, method.lhs_format.data_type(), DataType::BF16, lhs_h, lhs_w);
+            p_lhs_buff = tmp_lhs.data();
+        }
+        if (method.rhs_format.data_type() == DataType::FP32 || method.rhs_format.data_type() == DataType::FP16) {
+            tmp_rhs = cast(p_rhs_buff, method.rhs_format.data_type(), DataType::BF16, rhs_h, rhs_w);
+            p_rhs_buff = tmp_rhs.data();
+        }
+
+        auto ref_dst =
+            matmul_nt_nt_quantized<BFloat16<>, float, float, BFloat16<>, float, float, float, float, float, float>(
+                info.m, info.n, info.k, p_lhs_buff, nullptr, nullptr, 1, info.k, p_rhs_buff, nullptr, nullptr, 1,
+                info.k, bias.data(), nullptr, nullptr, info.k);
+
+        auto& data = _data[data_id] = {};
+        data.lhs = std::move(lhs);
+        data.ref_packed_lhs = std::move(ref_packed_lhs);
+        data.rhs = std::move(rhs);
+        data.rhs_scales = std::move(rhs_scales);
+        data.bias = std::move(bias);
+        data.ref_packed_rhs = std::move(packed_rhs);
+        data.ref_dst = std::move(ref_dst);
 
         return data;
     }
@@ -440,14 +446,14 @@ std::map<MatMulTestBf16::TestDataId, MatMulTestBf16::TestData> MatMulTestBf16::_
 
 /// Tests the output.
 TEST_P(MatMulTestBf16, Output) {
-    const auto& [method, info, portion] = GetParam();
+    const auto& [method, info, portion, bias_mode] = GetParam();
 
     if (method.fn_is_supported && !method.fn_is_supported()) {
-        GTEST_SKIP();
+        GTEST_SKIP() << "Unsupported CPU feature";
     }
 
     if (!method.has_main_kernel()) {
-        GTEST_SKIP();
+        GTEST_SKIP() << "No main kernel available";
     }
 
     const auto& data = test_data();
@@ -460,7 +466,7 @@ TEST_P(MatMulTestBf16, Output) {
     const auto rect = portion.compute_portion(info.m, info.n, m_step, n_step);
 
     if (rect.height() == 0 || rect.width() == 0) {
-        GTEST_SKIP();
+        GTEST_SKIP() << "Empty dimension of matrix(" << rect.width() << "," << rect.height() << ")";
     }
 
     const size_t lhs_w = info.k;
@@ -472,30 +478,28 @@ TEST_P(MatMulTestBf16, Output) {
     const auto lhs_start_row = rect.start_row();
     const auto lhs_stride = method.lhs_format.default_row_stride(lhs_w);
 
-    std::vector<uint8_t> lhs_data;
     const size_t lhs_packed_size = method.fn_get_packed_lhs_size(info.m, info.k, method.m0, method.k0, 1 /* sr */);
-    lhs_data.resize(lhs_packed_size);
+    Buffer lhs_data(lhs_packed_size);
 
     uintptr_t lhs_offset = method.fn_get_lhs_offset(lhs_start_row, lhs_stride);
     uintptr_t lhs_packed_offset = method.fn_get_packed_lhs_offset(lhs_start_row, info.k);
 
     KAI_UNUSED(lhs_offset);
-    method.fn_pack_lhs(
-        rect.height(), info.k, method.m0, method.k0, 1 /* sr */, 0 /* m_idx_start */, data.lhs.data() + lhs_offset,
-        lhs_stride, lhs_data.data() + lhs_packed_offset);
+    abi_check(
+        method.fn_pack_lhs, rect.height(), info.k, method.m0, method.k0, 1 /* sr */, 0 /* m_idx_start */,
+        data.lhs.data() + lhs_offset, lhs_stride, lhs_data.data() + lhs_packed_offset);
 
     const auto rhs_stride = method.rhs_format.default_row_stride(info.n);
 
-    std::vector<uint8_t> rhs_data;
+    size_t rhs_packed_size = 0;
 
     if (method.fn_get_packed_rhs_size_generic_block_size) {
-        const size_t rhs_packed_size =
-            method.fn_get_packed_rhs_size_generic_block_size(info.n, info.k, method.n0, method.k0);
-        rhs_data.resize(rhs_packed_size);
+        rhs_packed_size = method.fn_get_packed_rhs_size_generic_block_size(info.n, info.k, method.n0, method.k0);
     } else if (method.fn_get_packed_rhs_size) {
-        const size_t rhs_packed_size = method.fn_get_packed_rhs_size(info.n, info.k);
-        rhs_data.resize(rhs_packed_size);
+        rhs_packed_size = method.fn_get_packed_rhs_size(info.n, info.k);
     }
+
+    Buffer rhs_data(rhs_packed_size);
 
     const auto packed_rhs_start_row = rect.start_col();
     const auto packed_rhs_start_col = 0;
@@ -509,13 +513,14 @@ TEST_P(MatMulTestBf16, Output) {
 
     uintptr_t bias_offset = sizeof(float) * rect.start_col();
 
-    method.fn_pack_rhs(
+    abi_check(
+        method.fn_pack_rhs,
         1,  // num_groups
         rhs_w, info.k, method.n0, method.k0,
         1,  // sr
         rhs_stride, data.rhs.data() + rhs_offset, has_bias ? data.bias.data() + bias_offset : nullptr,
-        NULL,  // Scale
-        rhs_data.data() + rhs_packed_offset, 0, NULL);
+        nullptr,  // Scale
+        rhs_data.data() + rhs_packed_offset, 0, nullptr);
 
     if (has_bias) {
         const auto ref_bias_offset = method.bias_format.default_offset_in_bytes(0, rect.start_col(), bias_w);
@@ -531,12 +536,11 @@ TEST_P(MatMulTestBf16, Output) {
     const auto ref_dst_size = method.dst_format.default_size_in_bytes(info.m, info.n);
     ASSERT_EQ(dst_size, ref_dst_size);
 
-    std::vector<uint8_t> dst;
-    dst.resize(dst_size);
-    method.main_kernel(
-        rect.height(), rect.width(), info.k, lhs_data.data() + lhs_packed_offset, rhs_data.data() + rhs_packed_offset,
-        NULL, dst.data() + dst_offset, lhs_stride, rhs_stride, dst_stride, -std::numeric_limits<float>::infinity(),
-        std::numeric_limits<float>::infinity());
+    Buffer dst(dst_size);
+    abi_check(
+        &MatMulMethod::main_kernel, method, rect.height(), rect.width(), info.k, lhs_data.data() + lhs_packed_offset,
+        rhs_data.data() + rhs_packed_offset, nullptr, dst.data() + dst_offset, lhs_stride, rhs_stride, dst_stride,
+        -std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
 
     DefaultMismatchHandler handler(0, 0.02, 0, 0.05);
     const auto success = compare(dst.data(), data.ref_dst.data(), method.dst_format, info.m, info.n, rect, handler);
@@ -547,7 +551,7 @@ TEST_P(MatMulTestBf16, Output) {
 INSTANTIATE_TEST_SUITE_P(
     MatMulGemm, MatMulTestBf16,
     testing::Combine(
-        testing::ValuesIn(gemm_methods),
+        testing::ValuesIn(get_gemm_methods()),
         testing::Values(
             MatMulShape{1, 1, 1},        // Smallest Possible Shape
             MatMulShape{3, 7, 3},        // Smaller than block size
@@ -566,13 +570,14 @@ INSTANTIATE_TEST_SUITE_P(
             MatrixPortion(0.75, 0.75, 1, 1),   // Bottom-right corner.
             MatrixPortion(0.75, 0, 1, 1),      // Partial rows
             MatrixPortion(0.4, 0.5, 0.6, 0.8)  // Somewhere Middle
-            )),
+            ),
+        testing::Values(BiasMode::PROVIDED)),
     testing::PrintToStringParamName());
 
 INSTANTIATE_TEST_SUITE_P(
     MatMulGemv, MatMulTestBf16,
     testing::Combine(
-        testing::ValuesIn(gemv_methods),
+        testing::ValuesIn(get_gemv_methods()),
         testing::Values(
             MatMulShape{1, 1, 1},        // Smallest Possible Shape
             MatMulShape{1, 1, 1023},     // Long K
@@ -592,6 +597,7 @@ INSTANTIATE_TEST_SUITE_P(
             MatrixPortion(0, 0, 1, 0.25),  // Leftmost portion.
             MatrixPortion(0, 0.75, 1, 1),  // Rightmost portion.
             MatrixPortion(0, 0.5, 1, 0.8)  // Somewhere Middle
-            )),
+            ),
+        testing::Values(BiasMode::PROVIDED)),
     testing::PrintToStringParamName());
 }  // namespace kai::test

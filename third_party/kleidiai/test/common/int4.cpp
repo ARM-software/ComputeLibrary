@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -8,19 +8,22 @@
 
 #include <cstdint>
 #include <tuple>
+#include <vector>
 
 #include "kai/kai_common.h"
+#include "test/common/buffer.hpp"
+#include "test/common/memory.hpp"
 
 namespace kai::test {
 
 UInt4& UInt4::operator=(uint8_t value) {
-    KAI_ASSUME(value >= 0 && value < 16);
+    KAI_ASSUME_ALWAYS(value >= 0 && value < 16);
     _value = value;
     return *this;
 }
 
 UInt4& UInt4::operator=(int value) {
-    KAI_ASSUME(value >= 0 && value < 16);
+    KAI_ASSUME_ALWAYS(value >= 0 && value < 16);
     _value = static_cast<uint8_t>(value);
     return *this;
 }
@@ -63,13 +66,13 @@ std::tuple<UInt4, UInt4> UInt4::unpack_u8(uint8_t value) {
 // =====================================================================================================================
 
 Int4& Int4::operator=(int8_t value) {
-    KAI_ASSUME(value >= -8 && value < 8);
+    KAI_ASSUME_ALWAYS(value >= -8 && value < 8);
     _value = value;
     return *this;
 }
 
 Int4& Int4::operator=(int value) {
-    KAI_ASSUME(value >= -8 && value < 8);
+    KAI_ASSUME_ALWAYS(value >= -8 && value < 8);
     _value = static_cast<int8_t>(value);
     return *this;
 }
@@ -99,7 +102,9 @@ Int4 Int4::operator/(Int4 rhs) const {
 }
 
 uint8_t Int4::pack_u8(Int4 low, Int4 high) {
-    return (low._value & 0x0F) | (high._value << 4);
+    const uint8_t lo = low._value & 0x0F;
+    const uint8_t hi = high._value & 0x0F;
+    return (lo << 0) | (hi << 4);
 }
 
 std::tuple<Int4, Int4> Int4::unpack_u8(uint8_t value) {
@@ -109,6 +114,21 @@ std::tuple<Int4, Int4> Int4::unpack_u8(uint8_t value) {
     // NOLINTEND(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions)
 
     return {Int4(low), Int4(high)};
+}
+
+// =====================================================================================================================
+
+Buffer convert_s0s1_s1s0(const Buffer& src) {
+    const auto length = src.size();
+    Buffer dst(length);
+
+    for (size_t i = 0; i < length; ++i) {
+        uint8_t val = read_array<uint8_t>(src.data(), i);
+        const auto [low, high] = UInt4::unpack_u8(val);
+        auto rev_val = UInt4::pack_u8(high, low);
+        write_array<uint8_t>(dst.data(), i, rev_val);
+    }
+    return dst;
 }
 
 }  // namespace kai::test
