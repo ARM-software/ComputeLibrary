@@ -22,12 +22,11 @@
  * SOFTWARE.
  */
 #include "src/core/helpers/LUTManager.h"
+#include "support/Half.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
-
-#include "include/half/half.hpp"
 
 namespace arm_compute
 {
