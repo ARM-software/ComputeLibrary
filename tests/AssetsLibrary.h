@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <fstream>
+#include <numeric>
 #include <random>
 #include <string>
 #include <type_traits>
@@ -358,6 +359,27 @@ public:
      */
     template <typename T, typename D>
     void fill_tensor_uniform(T &&tensor, std::random_device::result_type seed_offset, D low, D high) const;
+
+    /** Fill a tensor with zeros and randomly modify a portion of its elements
+    *
+    * This function sets all elements of the tensor to zero and then modifies
+    * approximately @p modification_ratio fraction of them with random values 
+    * uniformly sampled from the range [1, 255].
+    *
+    * The modified elements are selected randomly across the entire tensor.
+    *
+    * @tparam T Type of the tensor (e.g., Tensor, ITensor).
+    *
+    * @param[in, out] tensor              Tensor to be filled and modified. Must be allocated.
+    * @param[in]      modification_ratio  Fraction [0,1] of elements to randomly assign a non-zero value.
+    *
+    * @note The tensor will be completely filled with zeros, and then @p modification_ratio * total_elements
+    *       positions will be overwritten with random values. The rest remain zero.
+    *       For floating point types, random values are drawn from a uniform real distribution.
+    *       For integral types, a uniform integer distribution is used.
+    */
+    template <typename T>
+    void fill_tensor_sparse_random(T &&tensor, float modification_ratio) const;
 
     /** Fill a tensor with uniform distribution across the specified range
      *
@@ -1021,6 +1043,48 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
         }
         default:
             ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+    }
+}
+
+template <typename T>
+void AssetsLibrary::fill_tensor_sparse_random(T &&tensor, float modification_ratio) const
+{
+    if(modification_ratio < 0.0f) modification_ratio = 0.0f;
+    if(modification_ratio > 1.0f) modification_ratio = 1.0f;
+
+    const unsigned        min = 1;
+    const unsigned        max = 255;
+    const size_t num_elements = tensor.shape().total_size();
+    const size_t      num_mod = static_cast<size_t>(modification_ratio * num_elements);
+
+    std::vector<size_t> indices(num_elements);
+    std::iota(indices.begin(), indices.end(), 0);
+    std::shuffle(indices.begin(), indices.end(), std::mt19937{std::random_device{}()});
+    indices.resize(num_mod);
+
+    std::mt19937 rng{std::random_device{}()};
+
+    if(tensor.data_type() == DataType::F32)
+    {
+        std::vector<float> zero_filled(num_elements, float{0});
+        std::uniform_real_distribution<float> dist_real(static_cast<float>(min), static_cast<float>(max));
+        for(size_t idx : indices)
+        {
+            zero_filled[idx] = static_cast<float>(dist_real(rng));
+        }
+        fill_static_values(std::forward<T>(tensor), zero_filled);
+    }
+    else
+    {
+        // Signed types will interpret numbers >= 128 as negative;
+        // for our purposes, it doesn't matter, as long as they are different from 0.
+        std::vector<unsigned> zero_filled(num_elements, unsigned{0});
+        std::uniform_int_distribution<unsigned> dist_int(min, max);
+        for(size_t idx : indices)
+        {
+            zero_filled[idx] = static_cast<unsigned>(dist_int(rng));
+        }
+        fill_static_values(std::forward<T>(tensor), zero_filled);
     }
 }
 
