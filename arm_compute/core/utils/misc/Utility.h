@@ -36,6 +36,7 @@
 #include <limits>
 #include <numeric>
 #include <vector>
+#include <cstdint>
 
 namespace arm_compute
 {
