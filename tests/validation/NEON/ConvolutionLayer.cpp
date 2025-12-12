@@ -93,8 +93,8 @@ constexpr float                tolerance_num = 0.07f;   /**< Tolerance number fo
 #endif                                                  /* ARM_COMPUTE_ENABLE_FP16 */
 
 #if __aarch64__
-constexpr float tolerance_num_dequantize_f32 = 0.07f; /**< Tolerance number for the FP32 dequantization */
-#endif                                                // #if __aarch64__
+constexpr float tolerance_num_dequantize_f32 = 1e-5; /**< Tolerance number for the FP32 dequantization */
+#endif                                               // #if __aarch64__
 
 constexpr AbsoluteTolerance<float> tolerance_qasymm8(
     0.0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */

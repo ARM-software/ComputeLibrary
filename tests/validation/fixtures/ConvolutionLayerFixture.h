@@ -124,29 +124,59 @@ public:
                             QuantizationInfo &weights_q_info,
                             DataType          data_type)
     {
-        const int32_t t_max = static_cast<int32_t>(std::numeric_limits<T>::max());
-        const int32_t t_min = static_cast<int32_t>(std::numeric_limits<T>::min());
+        std::mt19937 generator(library->seed() + _hash);
 
-        std::mt19937                           generator(library->seed() + _hash);
-        std::uniform_real_distribution<float>  distribution_float(-5.0f, 3.0f);
+        const int32_t                          t_max = static_cast<int32_t>(std::numeric_limits<T>::max());
+        const int32_t                          t_min = static_cast<int32_t>(std::numeric_limits<T>::min());
         std::uniform_int_distribution<int32_t> distribution_t(t_min, t_max);
 
-        const float scale_lhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
-        const float scale_rhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
+        if (T_is_q && !TO_is_f32)
+        {
+            std::uniform_real_distribution<float> distribution_float(-5.0f, 3.0f);
 
-        const int32_t offset_lhs = distribution_t(generator);
-        const int32_t offset_rhs = distribution_t(generator);
+            const float scale_lhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
+            const float scale_rhs = pow(2, distribution_float(generator)); // [2^-5, 2^3]
 
-        _quantization_info        = QuantizationInfo(scale_lhs, offset_lhs);
-        _weight_quantization_info = QuantizationInfo(scale_rhs, offset_rhs);
+            const int32_t offset_lhs = distribution_t(generator);
+            const int32_t offset_rhs = distribution_t(generator);
 
-        QuantizationHint q_hint = suggest_conv_dst_q_info_and_bias(
-            input_q_info, weights_q_info, weights_shape.y() /* heights */, weights_shape.x() /* width */,
-            input_shape.z() /* channels */, data_type, 0.5f /* bias_fraction */);
+            _quantization_info        = QuantizationInfo(scale_lhs, offset_lhs);
+            _weight_quantization_info = QuantizationInfo(scale_rhs, offset_rhs);
 
-        _dst_q_info = q_hint.q_info;
-        _min_bias   = q_hint.bias_min;
-        _max_bias   = q_hint.bias_max;
+            QuantizationHint q_hint = suggest_conv_dst_q_info_and_bias(
+                input_q_info, weights_q_info, weights_shape.y() /* heights */, weights_shape.x() /* width */,
+                input_shape.z() /* channels */, data_type, 0.5f /* bias_fraction */);
+
+            _dst_q_info = q_hint.q_info;
+            _min_bias   = q_hint.bias_min;
+            _max_bias   = q_hint.bias_max;
+        }
+        else if (T_is_q && TO_is_f32)
+        {
+            // Create Input & Weight quantization such that bias ends up being
+            // close to multiplication output without offset contributions, otherwise
+            // bias is rounded away. For example, If bias range is [-M, M], we choose
+            // mult. output "close" to this range, too. For this, pick approx.
+            // [-sqrt(M), sqrt(M)] range for each multiplicand, so that their multiplication
+            // will be in [-M, M] range. Due to offset choices, this range can be a bit
+            // asymmetric, but it won't be worse than [0, 2sqrt(M)] --> [0, 4M]. In this case,
+            // bias is still close enough.
+            const float                           sqrt_float_mag = std::sqrt(_float_mag);
+            std::uniform_real_distribution<float> distribution_float(0.f, sqrt_float_mag / 128.f);
+
+            const float scale_lhs = distribution_float(generator);
+            const float scale_rhs = distribution_float(generator);
+
+            const int32_t offset_lhs = distribution_t(generator);
+            const int32_t offset_rhs = distribution_t(generator);
+
+            _quantization_info        = QuantizationInfo(scale_lhs, offset_lhs);
+            _weight_quantization_info = QuantizationInfo(scale_rhs, offset_rhs);
+        }
+        else
+        {
+            ARM_COMPUTE_ERROR("setup_quantization() shouldn't be called in non-quantized tests");
+        }
     }
 
 public:
@@ -261,7 +291,8 @@ protected:
                 else
                 {
                     // Legacy initialization in case the output quantization info can't be reliably estimated
-                    std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                    std::pair<int, int> bounds =
+                        get_quantized_bounds(tensor.quantization_info(), -_float_mag, _float_mag);
                     std::uniform_int_distribution<uint32_t> distribution(bounds.first, bounds.second);
                     library->fill(tensor, distribution, i);
                 }
@@ -281,7 +312,7 @@ protected:
                 {
                     // Legacy initialization in case the output quantization info can't be reliably estimated
                     std::pair<int, int> bounds =
-                        get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                        get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -_float_mag, _float_mag);
                     std::uniform_int_distribution<int32_t> distribution(bounds.first, bounds.second);
                     library->fill(tensor, distribution, i);
                 }
@@ -294,7 +325,7 @@ protected:
                 for (size_t i = 0; i < _weight_quantization_info.scale().size(); i++)
                 {
                     std::pair<int, int> bounds =
-                        get_symm_quantized_per_channel_bounds(tensor.quantization_info(), -1.0f, 1.0f, i);
+                        get_symm_quantized_per_channel_bounds(tensor.quantization_info(), -_float_mag, _float_mag, i);
                     if (bounds.first < min_bound)
                     {
                         min_bound = bounds.first;
@@ -316,19 +347,19 @@ protected:
             }
             case DataType::BFLOAT16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution{-1.0f, 1.0f};
+                arm_compute::utils::uniform_real_distribution_16bit<bfloat16> distribution{-_float_mag, _float_mag};
                 library->fill(tensor, distribution, i);
                 break;
             }
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-_float_mag, _float_mag};
                 library->fill(tensor, distribution, i);
                 break;
             }
             case DataType::F32:
             {
-                std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
+                std::uniform_real_distribution<float> distribution(-_float_mag, _float_mag);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -643,6 +674,7 @@ protected:
     int32_t          _hash{0};
     int32_t          _min_bias{-100};
     int32_t          _max_bias{100};
+    float            _float_mag{1.0f};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
