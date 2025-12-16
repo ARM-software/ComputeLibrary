@@ -75,7 +75,7 @@ const auto m_values = make("M", {49});
 
 /** N values to test */
 const auto n_values              = make("N", {257, 64, 48});
-const auto n_values_fp16         = make("N", {79, 32, 80});
+const auto n_values_fp16         = make("N", {65, 80});
 const auto n_values_texture_fp16 = make("N", {128, 96, 48});
 
 /** K values to test */

@@ -100,8 +100,8 @@ Status validate_arguments(const ITensorInfo       *src0,
         if (arm_matrix_multiply_fp16_supported(CLKernelLibrary::get().get_device()))
         {
             // These error messages are for FP16 acc.
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG((n > rhs_info.n0 * mmul_n0),
-                                            "N must be greater than N0 * MMUL_N0 in the FP16 MMUL Kernel");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG((n < rhs_info.n0 * mmul_n0),
+                                            "N must be greater than or equal to N0 * MMUL_N0 in the FP16 MMUL Kernel");
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(((k % 4) != 0), "K must be multiple of 4 in the FP16 MMUL Kernel");
             ARM_COMPUTE_RETURN_ERROR_ON_MSG((m < 4), "M must be greater than or equal to 4 in the FP16 MMUL Kernel");
             ARM_COMPUTE_RETURN_ERROR_ON_MSG((lhs_info.k0 != 1), "k0 must be equal to 1 in the FP16 MMUL Kernel");
