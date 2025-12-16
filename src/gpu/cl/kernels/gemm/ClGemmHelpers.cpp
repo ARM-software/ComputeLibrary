@@ -185,7 +185,7 @@ bool is_mmul_kernel_preferred_fp16_acc(const unsigned int m,
 {
     if (data_type == DataType::F16 && arm_matrix_multiply_fp16_supported(CLKernelLibrary::get().get_device()))
     {
-        ARM_COMPUTE_UNUSED(n, k, b);
+        ARM_COMPUTE_UNUSED(b);
 
         const unsigned int mmul_k0 = 4;
         const unsigned int mmul_n0 = 4;
@@ -198,7 +198,7 @@ bool is_mmul_kernel_preferred_fp16_acc(const unsigned int m,
         const unsigned int m_div_m0                          = ceil_to_multiple_m_m0 / best_m0;
         const unsigned int ceil_to_multiple_m_div_m0_mmul_k0 = ceil_to_multiple(m_div_m0, mmul_k0);
         const unsigned int gws_y                             = ceil_to_multiple_m_div_m0_mmul_k0 / mmul_k0;
-        return ((k % mmul_k0) == 0) && (gws_y >= 4);
+        return ((k % mmul_k0) == 0) && (gws_y >= 4) && (n >= best_n0 * mmul_n0);
     }
 
     return false;
