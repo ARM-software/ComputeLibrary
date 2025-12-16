@@ -28,6 +28,7 @@
 
 #include "support/StringSupport.h"
 #include "support/ToolchainSupport.h"
+#include "support/WindowsSupport.h"
 
 #include <map>
 #include <sstream>
@@ -435,14 +436,23 @@ CpuInfo CpuInfo::build()
     return info;
 #elif defined(__aarch64__) && defined(_WIN64)    /* #elif defined(__aarch64__) && defined(__APPLE__) */
     CpuIsaInfo isainfo;
+
     isainfo.neon = IsProcessorFeaturePresent(PF_ARM_NEON_INSTRUCTIONS_AVAILABLE);
-    isainfo.dot  = IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
-    if (NTDDI_VERSION >= NTDDI_WIN11_GE)
-    {
-        isainfo.fp16 = IsProcessorFeaturePresent(PF_ARM_SVE_INSTRUCTIONS_AVAILABLE);
-        isainfo.sve  = IsProcessorFeaturePresent(PF_ARM_SVE_INSTRUCTIONS_AVAILABLE);
-        isainfo.i8mm = IsProcessorFeaturePresent(PF_ARM_SVE_I8MM_INSTRUCTIONS_AVAILABLE);
-    }
+    isainfo.sve  = IsProcessorFeaturePresent(PF_ARM_SVE_INSTRUCTIONS_AVAILABLE);
+    isainfo.sve2 = IsProcessorFeaturePresent(PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE);
+    isainfo.sme  = IsProcessorFeaturePresent(PF_ARM_SME_INSTRUCTIONS_AVAILABLE);
+    isainfo.sme2 = IsProcessorFeaturePresent(PF_ARM_SME2_INSTRUCTIONS_AVAILABLE);
+    isainfo.fhm  = false; // constant not found
+
+    isainfo.fp16    = IsProcessorFeaturePresent(PF_ARM_V82_FP16_INSTRUCTIONS_AVAILABLE);
+    isainfo.bf16    = IsProcessorFeaturePresent(PF_ARM_V86_BF16_INSTRUCTIONS_AVAILABLE);
+    isainfo.svebf16 = IsProcessorFeaturePresent(PF_ARM_SVE_BF16_INSTRUCTIONS_AVAILABLE);
+
+    isainfo.dot      = IsProcessorFeaturePresent(PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE);
+    isainfo.i8mm     = IsProcessorFeaturePresent(PF_ARM_V82_I8MM_INSTRUCTIONS_AVAILABLE);
+    isainfo.svei8mm  = IsProcessorFeaturePresent(PF_ARM_SVE_I8MM_INSTRUCTIONS_AVAILABLE);
+    isainfo.svef32mm = IsProcessorFeaturePresent(PF_ARM_SVE_F32MM_INSTRUCTIONS_AVAILABLE);
+
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
     const int             ncpus = sysinfo.dwNumberOfProcessors;
