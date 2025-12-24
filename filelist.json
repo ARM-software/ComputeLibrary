@@ -21,6 +21,7 @@
     "src/core/ITensorPack.cpp",
     "src/core/Rounding.cpp",
     "src/core/Size2D.cpp",
+    "src/core/SparseTensor.cpp",
     "src/core/SubTensorInfo.cpp",
     "src/core/TensorInfo.cpp",
     "src/core/Utils.cpp",
@@ -67,8 +68,11 @@
     "src/runtime/SchedulerFactory.cpp",
     "src/runtime/SchedulerUtils.cpp",
     "src/runtime/SubTensor.cpp",
+    "src/runtime/COOTensor.cpp",
+    "src/runtime/CSRTensor.cpp",
     "src/runtime/Tensor.cpp",
     "src/runtime/TensorAllocator.cpp",
+    "src/runtime/SparseTensorAllocator.cpp",
     "src/runtime/Utils.cpp",
     "src/runtime/CPP/ICPPSimpleFunction.cpp",
     "src/runtime/CPP/functions/CPPBoxWithNonMaximaSuppressionLimit.cpp",
@@ -1632,7 +1636,7 @@
             "src/runtime/experimental/operators/CpuMul.cpp",
             "src/runtime/experimental/operators/CpuQuantize.cpp",
             "src/runtime/experimental/operators/CpuSoftmax.cpp",
-	    "src/runtime/experimental/operators/CpuPool2d.cpp",
+            "src/runtime/experimental/operators/CpuPool2d.cpp",
             "src/runtime/experimental/operators/CpuSub.cpp",
             "src/runtime/experimental/operators/CpuTranspose.cpp",
             "src/runtime/experimental/operators/CpuWinogradConv2d.cpp"
@@ -1873,7 +1877,7 @@
               "src/core/NEON/kernels/arm_gemm/kernels/sve_ffinterleaved_fp16_mla_8x3VL/generic.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sve_ffinterleaved_fp32_mla_8x3VL/a64fx.cpp",
               "src/core/NEON/kernels/arm_gemm/kernels/sve_ffinterleaved_fp32_mla_8x3VL/generic.cpp"
-	    ]
+            ]
           }
         }
       },

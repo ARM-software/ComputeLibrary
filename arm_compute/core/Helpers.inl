@@ -101,6 +101,7 @@ inline Iterator::Iterator(const ITensor *tensor, const Window &win) : Iterator()
 {
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
     ARM_COMPUTE_ERROR_ON(tensor->info() == nullptr);
+    ARM_COMPUTE_ERROR_ON_MSG(tensor->info()->is_sparse(), "Sparse tensors are not supported by Iterators. Use a SparseIterator instead");
 
     initialize(tensor->info()->num_dimensions(), tensor->info()->strides_in_bytes(), tensor->buffer(),
                tensor->info()->offset_first_element_in_bytes(), win);
@@ -167,6 +168,45 @@ inline void Iterator::reset(const size_t dimension)
     {
         _dims[n]._dim_start = _dims[dimension]._dim_start;
     }
+}
+
+inline SparseIterator::SparseIterator(const SparseTensor &tensor) : _tensor(tensor), _index(0), _nnz(tensor.nnz())
+{
+}
+
+inline bool SparseIterator::has_next() const
+{
+    return _index < _nnz;
+}
+
+inline void SparseIterator::next()
+{
+    ++_index;
+}
+
+inline Coordinates SparseIterator::coordinates() const
+{
+    return _tensor.get_coordinates(_index);
+}
+
+inline const uint8_t *SparseIterator::value() const
+{
+    return _tensor.get_value(coordinates());
+}
+
+inline void SparseIterator::reset()
+{
+    _index = 0;
+}
+
+inline size_t SparseIterator::index() const
+{
+    return _index;
+}
+
+inline size_t SparseIterator::num_left() const
+{
+    return _nnz - _index;
 }
 
 inline Coordinates index2coords(const TensorShape &shape, int index)

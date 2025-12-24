@@ -31,6 +31,7 @@
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/TensorFormat.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/Utility.h"
 
@@ -105,6 +106,13 @@ public:
      * @return Reference to this ITensorInfo object
      */
     virtual ITensorInfo &set_format(Format format) = 0;
+    /** Set the tensor format of an already initialized tensor.
+     *
+     * @param[in] tensor format to distinguish between dense and sparse tensors.
+     *
+     * @return Reference to this ITensorInfo object
+     */
+    virtual ITensorInfo &set_tensor_format(TensorFormat tf) = 0;
     /** Set the shape of an already initialized tensor.
      *
      * @warning Changing the shape requires to recompute the strides and is
@@ -261,6 +269,16 @@ public:
      * @return True if the tensor size can be changed.
      */
     virtual bool is_resizable() const = 0;
+    /** Flag indicating whether the tensor is sparse.
+     *
+     * @return True if the tensor format different from TensorFormat::Dense.
+     */
+    virtual bool is_sparse() const = 0;
+    /** Returns the format of the Tensor
+     *
+     * @return True if the tensor is an instance of SparseTensor.
+     */
+    virtual TensorFormat tensor_format() const = 0;
     /** Set the tensor as dynamic/static
      *
      * @param[in] dynamic True if tensor is dynamic

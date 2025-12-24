@@ -49,6 +49,16 @@ public:
     constexpr Coordinates(Ts... coords) : Dimensions{coords...}
     {
     }
+
+    /** Constructor to initialize the coordinates from a vector.
+     *
+     * @param[in] coords Vector containing the values to initialize the dimensions.
+     */
+    template <typename T>
+    constexpr Coordinates(std::vector<T> coords) : Dimensions(coords)
+    {
+    }
+
     /** Allow instances of this class to be copy constructed */
     constexpr Coordinates(const Coordinates &) = default;
     /** Allow instances of this class to be copied */
