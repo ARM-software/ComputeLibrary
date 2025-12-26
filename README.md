@@ -77,6 +77,7 @@ Pre-build binaries are generated with the following security / good coding pract
 - macOS®
 - Tizen™
 - QNX® (Experimental)
+- FreeBSD® (Experimental)
 
 <br>
 
@@ -164,3 +165,5 @@ Tizen is a registered trademark of The Linux Foundation.
 Windows® is a trademark of the Microsoft group of companies.
 
 QNX® is a trademark of QNX, a division of BlackBerry.
+
+FreeBSD® is a registered trademark of The FreeBSD Foundation.
