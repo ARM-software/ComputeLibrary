@@ -399,7 +399,7 @@ arm_compute_env = env.Clone()
 version_file = arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file)
 arm_compute_env.AlwaysBuild(version_file)
 
-default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos', 'openbsd'] else 'clang++'
+default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos', 'openbsd', 'freebsd'] else 'clang++'
 cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 
 # Generate embed files
