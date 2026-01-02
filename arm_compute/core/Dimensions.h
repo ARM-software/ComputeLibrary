@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2025 Arm Limited.
+ * Copyright (c) 2017-2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -170,7 +170,7 @@ public:
             auto it_first = _id.begin() + first;
             auto it_last  = _id.begin() + last;
             // Collapse dimensions into the first
-            _id[first] = std::accumulate(it_first, it_last, 1, std::multiplies<T>());
+            _id[first] = std::accumulate(it_first, it_last, T(1), std::multiplies<T>());
             // Shift the remaining dimensions down
             std::copy(it_last, _id.begin() + _num_dimensions, it_first + 1);
             // Reduce the number of dimensions

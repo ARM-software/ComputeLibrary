@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2023, 2025 Arm Limited.
+ * Copyright (c) 2017-2020, 2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -348,7 +348,7 @@ SimpleTensor<T> &SimpleTensor<T>::quantization_info(const QuantizationInfo &qinf
 template <typename T>
 size_t SimpleTensor<T>::size() const
 {
-    const size_t size = std::accumulate(_shape.cbegin(), _shape.cend(), 1, std::multiplies<size_t>());
+    const size_t size = std::accumulate(_shape.cbegin(), _shape.cend(), size_t(1), std::multiplies<size_t>());
     return size * element_size();
 }
 

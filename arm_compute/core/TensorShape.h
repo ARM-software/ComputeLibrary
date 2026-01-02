@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023-2025 Arm Limited.
+ * Copyright (c) 2016-2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -176,7 +176,7 @@ public:
      */
     size_t total_size() const
     {
-        return std::accumulate(_id.begin(), _id.end(), 1, std::multiplies<size_t>());
+        return std::accumulate(_id.begin(), _id.end(), size_t(1), std::multiplies<size_t>());
     }
     /** Collapses given dimension and above.
      *
@@ -187,7 +187,7 @@ public:
     size_t total_size_upper(size_t dimension) const
     {
         ARM_COMPUTE_ERROR_ON(dimension >= TensorShape::num_max_dimensions);
-        return std::accumulate(_id.begin() + dimension, _id.end(), 1, std::multiplies<size_t>());
+        return std::accumulate(_id.begin() + dimension, _id.end(), size_t(1), std::multiplies<size_t>());
     }
 
     /** Compute size of dimensions lower than the given one.
@@ -199,7 +199,7 @@ public:
     size_t total_size_lower(size_t dimension) const
     {
         ARM_COMPUTE_ERROR_ON(dimension > TensorShape::num_max_dimensions);
-        return std::accumulate(_id.begin(), _id.begin() + dimension, 1, std::multiplies<size_t>());
+        return std::accumulate(_id.begin(), _id.begin() + dimension, size_t(1), std::multiplies<size_t>());
     }
 
     /** If shapes are broadcast compatible, return the broadcasted shape.

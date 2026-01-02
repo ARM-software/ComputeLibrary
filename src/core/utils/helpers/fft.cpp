@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,7 +82,7 @@ std::vector<unsigned int> digit_reverse_indices(unsigned int N, const std::vecto
 
     // Early exit in case N and fft stages do not match
     const float stages_prod =
-        std::accumulate(std::begin(fft_stages), std::end(fft_stages), 1, std::multiplies<unsigned int>());
+        std::accumulate(std::begin(fft_stages), std::end(fft_stages), (unsigned int)1, std::multiplies<unsigned int>());
     if (stages_prod != N)
     {
         return idx_digit_reverse;
