@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Arm Limited.
+ * Copyright (c) 2021-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -179,7 +179,7 @@ Status CpuGemmDirectConv2d::validate(const ITensorInfo *src,
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, weights);
     }
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.num_groups > 1, "Grouping (num_groups != 1) is not supported on Neon");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.num_groups > 1, "Grouping (num_groups != 1) is not supported on Cpu");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_layout() != DataLayout::NHWC, "Data layout supported is NHWC");
     const DataType    data_type = src->data_type();
     const TensorShape i_shape   = src->tensor_shape();
@@ -187,6 +187,19 @@ Status CpuGemmDirectConv2d::validate(const ITensorInfo *src,
     ARM_COMPUTE_RETURN_ERROR_ON(w_shape[0] != i_shape[0]);
     ARM_COMPUTE_RETURN_ERROR_ON(info.dilation != Size2D(1U, 1U));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
+
+    // Validate Permute
+    TensorInfo perm_weights;
+    ARM_COMPUTE_RETURN_ON_ERROR(CpuPermute::validate(weights, &perm_weights, PermutationVector{3, 0, 1, 2}));
+
+    // Validate Activation
+    const CpuGemmAssemblyDispatch gemm_asm_func;
+    const bool run_activation = info.act_info.enabled() && !gemm_asm_func.is_activation_supported(info.act_info);
+    if (run_activation)
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(CpuActivation::validate(dst, nullptr, info.act_info));
+    }
+
     // Validate biases
     if (biases != nullptr)
     {

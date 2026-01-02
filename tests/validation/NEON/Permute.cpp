@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2024-2025 Arm Limited.
+ * Copyright (c) 2018-2020, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,10 +88,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                                                         TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // permutation not supported
                                                                                         TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // permutation not supported
                                                                                         TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // permutation not supported
-                                                                                        TensorInfo(TensorShape(1024U, 1024U, 511U, 1U), 1, DataType::F32), // valid
-                                                                                        TensorInfo(TensorShape(1024U, 1024U, 512U, 1U), 1, DataType::F32), // big tensor
-                                                                                        TensorInfo(TensorShape(1024U, 1024U, 1023U, 1U), 1, DataType::F16), // valid
-                                                                                        TensorInfo(TensorShape(1024U, 1024U, 1024U, 1U), 1, DataType::F16) // big tensor
+                                                                                        TensorInfo(TensorShape(1024U, 1024U, 511U, 2U), 1, DataType::F32),  // valid
+                                                                                        TensorInfo(TensorShape(1024U, 1024U, 512U, 2U), 1, DataType::F32),  // large penultimate stride
+                                                                                        TensorInfo(TensorShape(1024U, 1024U, 1023U, 2U), 1, DataType::F16), // valid
+                                                                                        TensorInfo(TensorShape(1024U, 1024U, 1024U, 2U), 1, DataType::F16), // large penultimate stride
+                                                                                        TensorInfo(TensorShape(1024U, 1024U, 2U, 1024U), 1, DataType::F16)  // large stride when permuted
 
                                                                                     }),
                                                 make("OutputInfo", {
@@ -106,10 +107,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                                                         TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(37U, 2U, 13U, 27U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(1024U, 1024U, 511U, 1U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(1024U, 1024U, 512U, 1U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(1024U, 1024U, 1023U, 1U), 1, DataType::F16),
-                                                                                        TensorInfo(TensorShape(1024U, 1024U, 1024U, 1U), 1, DataType::F16)
+                                                                                        TensorInfo(TensorShape(1024U, 1024U, 511U, 2U), 1, DataType::F32),
+                                                                                        TensorInfo(TensorShape(1024U, 1024U, 512U, 2U), 1, DataType::F32),
+                                                                                        TensorInfo(TensorShape(1024U, 1024U, 1023U, 2U), 1, DataType::F16),
+                                                                                        TensorInfo(TensorShape(1024U, 1024U, 1024U, 2U), 1, DataType::F16),
+                                                                                        TensorInfo(TensorShape(1024U, 1024U, 1024U, 2U), 1, DataType::F16)
                                                                                     }),
                                                 make("PermutationVector", {
                                                                                                 PermutationVector(2U, 1U, 0U),
@@ -126,9 +128,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                                                                 PermutationVector(1U, 0U),
                                                                                                 PermutationVector(1U, 0U),
                                                                                                 PermutationVector(1U, 0U),
-                                                                                                PermutationVector(1U, 0U)
+                                                                                                PermutationVector(1U, 0U),
+                                                                                                PermutationVector(0U, 1U, 3U, 2U)
                                                                                     }),
-                                                make("Expected", { true, false, false, false, true, true, false,true, false, true, false, true, false, true, false })),
+                                                make("Expected", { true, false, false, false, true, true, false,true, false, true, false, true, false, true, false, false })),
                                             input_info, output_info, perm_vect, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEPermute::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), perm_vect)) == expected, framework::LogLevel::ERRORS);

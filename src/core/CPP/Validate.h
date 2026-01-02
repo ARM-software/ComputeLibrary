@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2025 Arm Limited.
+ * Copyright (c) 2018-2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,8 @@
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Validate.h"
+
+#include <algorithm>
 
 namespace arm_compute
 {
@@ -65,7 +67,10 @@ error_on_unsupported_cpu_fp16(const char *function, const char *file, const int 
 template <typename... Ts>
 inline Status error_on_unsupported_size(const char *function, const char *file, const int line, Ts &&...tensor_infos)
 {
-    constexpr size_t max_size_in_bytes = (1U << 31) - 1;
+    constexpr size_t max_size_in_elements =
+        (1ULL << 31) - 1 - 16; // Subtract one SIMD register size, in case window step causes overflow
+
+    constexpr size_t max_stride = (1U << 31) - 1;
 
     const ITensorInfo *tensor_array[] = {std::forward<Ts>(tensor_infos)...};
 
@@ -73,11 +78,23 @@ inline Status error_on_unsupported_size(const char *function, const char *file, 
     {
         if (tensor_info != nullptr && tensor_info->data_type() != DataType::UNKNOWN)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(
-                (tensor_info->total_size() > max_size_in_bytes ||
-                 (tensor_info->tensor_shape().total_size() * tensor_info->element_size() * tensor_info->num_channels() >
-                  max_size_in_bytes)),
-                function, file, line, "Maximum supported tensor size is 2^31-1 bytes");
+            const TensorShape &tensor_shape   = tensor_info->tensor_shape();
+            const size_t       total_elements = tensor_shape.total_size();
+
+            ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(total_elements > max_size_in_elements, function, file, line,
+                                                "Maximum supported number of tensor elements is 2^31-1-16");
+
+            const size_t num_dimensions = tensor_info->num_dimensions();
+            if (num_dimensions > 1)
+            {
+                const size_t last_dim          = num_dimensions - 1;
+                const size_t penultimate_shape = tensor_shape.total_size_lower(last_dim);
+                const size_t penultimate_stride =
+                    penultimate_shape * tensor_info->num_channels() * tensor_info->element_size();
+
+                ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(penultimate_stride > max_stride, function, file, line,
+                                                    "Maximum supported penultimate tensor stride is 2^31-1");
+            }
         }
     }
 
