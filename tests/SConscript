@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2025 Arm Limited.
+# Copyright (c) 2017-2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -65,8 +65,9 @@ if not build_test_framework:
 else:
     SConscript('./framework/SConscript', duplicate=0)
 
-Import("arm_compute_test_framework")
-test_env.Append(LIBS = arm_compute_test_framework)
+if test_env['validation_tests'] or test_env['benchmark_tests'] or test_env['benchmark_examples'] or test_env['profile']:
+    Import("arm_compute_test_framework")
+    test_env.Append(LIBS = arm_compute_test_framework)
 
 # Disable floating-point expression contraction (e.g. fused multiply-add operations)
 if not 'windows' in env['os']:

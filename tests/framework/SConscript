@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2017-2022, 2024 Arm Limited.
+# Copyright (c) 2017-2022, 2024, 2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -95,7 +95,8 @@ if framework_env['HOST_OS'] == 'posix':
     #Set up directory for temp files. To prevent permission issue, the temp files are in the same directory with output files
     framework_env['TEMPFILEDIR'] = framework_env['build_dir']
 
-arm_compute_test_framework = framework_env.StaticLibrary('arm_compute_test_framework', files)
+if framework_env['validation_tests'] or framework_env['benchmark_tests'] or framework_env['benchmark_examples'] or framework_env['profile']:
+    arm_compute_test_framework = framework_env.StaticLibrary('arm_compute_test_framework', files)
 
-Default(arm_compute_test_framework)
-Export('arm_compute_test_framework')
+    Default(arm_compute_test_framework)
+    Export('arm_compute_test_framework')
