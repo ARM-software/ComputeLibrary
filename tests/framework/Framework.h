@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -176,6 +176,27 @@ public:
      */
     void print_test_info(std::ostream &os) const;
 
+    /** Add warning string for the next expectation/assertion.
+     *
+     * @param[in] info Warning string.
+     */
+    void add_test_warning(std::string warning);
+
+    /** Clear the collected test warning. */
+    void clear_test_warning();
+
+    /** Check if any warning has been registered.
+     *
+     * @return True if there is test warning.
+     */
+    bool has_test_warning() const;
+
+    /** Print test warning.
+     *
+     * @param[out] os Output stream.
+     */
+    void print_test_warning(std::ostream &os) const;
+
     /** Tell the framework that execution of a test starts.
      *
      * @param[in] info Test info.
@@ -205,6 +226,12 @@ public:
      * @param[in] info Description of the log info.
      */
     void log_info(const std::string &info);
+
+    /** Print the warnings that has already been logged
+     *
+     * @param[in] info Description of the log warning.
+     */
+    void log_warning(const std::string &warning);
 
     /** Number of iterations per test case.
      *
@@ -406,6 +433,7 @@ private:
     const TestInfo             *_current_test_info{nullptr};
     TestResult                 *_current_test_result{nullptr};
     std::vector<std::string>    _test_info{};
+    std::vector<std::string>    _test_warning{};
 };
 
 template <typename T>

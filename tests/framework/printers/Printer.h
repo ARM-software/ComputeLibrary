@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018,2021, 2025 Arm Limited.
+ * Copyright (c) 2017-2018,2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -118,6 +118,12 @@ public:
      * @param[in] expected Whether the error was expected or not.
      */
     virtual void print_error(const std::exception &error, bool expected) = 0;
+
+    /** Print test log warning.
+     *
+     * @param[in] warning Description of the log.
+     */
+    virtual void print_warning(const std::string &warning) = 0;
 
     /** Print test log info.
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2025 Arm Limited.
+ * Copyright (c) 2017-2018, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,7 @@ namespace framework
  * NONE == Only for filtering. Not used to tag information.
  * CONFIG == Configuration info.
  * TESTS == Information about the tests.
+ * WARNINGS == Warnings, such as skipped tests.
  * ERRORS == Violated assertions/expectations.
  * DEBUG == More violated assertions/expectations.
  * MEASUREMENTS == Information about measurements.
@@ -53,6 +54,7 @@ enum class LogLevel
     CONFIG,
     TESTS,
     ERRORS,
+    WARNINGS,
     DEBUG,
     MEASUREMENTS,
     ALL,

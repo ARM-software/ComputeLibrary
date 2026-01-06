@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -230,6 +230,34 @@ void Framework::print_test_info(std::ostream &os) const
     }
 }
 
+void Framework::add_test_warning(std::string warning)
+{
+    _test_warning.emplace_back(std::move(warning));
+}
+
+void Framework::clear_test_warning()
+{
+    _test_warning.clear();
+}
+
+bool Framework::has_test_warning() const
+{
+    return !_test_warning.empty();
+}
+
+void Framework::print_test_warning(std::ostream &os) const
+{
+    if (!_test_warning.empty())
+    {
+        os << "CONTEXT:\n";
+
+        for (const auto &str : _test_warning)
+        {
+            os << "    " << str << "\n";
+        }
+    }
+}
+
 template <typename F>
 void Framework::func_on_all_printers(F &&func)
 {
@@ -287,6 +315,14 @@ void Framework::log_info(const std::string &info)
     if (_log_level >= LogLevel::DEBUG)
     {
         func_on_all_printers([&](Printer *p) { p->print_info(info); });
+    }
+}
+
+void Framework::log_warning(const std::string &warning)
+{
+    if (_log_level >= LogLevel::WARNINGS)
+    {
+        func_on_all_printers([&](Printer *p) { p->print_warning(warning); });
     }
 }
 

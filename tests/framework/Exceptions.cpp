@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2025 Arm Limited.
+ * Copyright (c) 2017, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,8 +36,13 @@ namespace framework
 LogLevel log_level_from_name(const std::string &name)
 {
     static const std::map<std::string, LogLevel> levels = {
-        {"none", LogLevel::NONE},     {"config", LogLevel::CONFIG}, {"tests", LogLevel::TESTS},
-        {"errors", LogLevel::ERRORS}, {"debug", LogLevel::DEBUG},   {"measurements", LogLevel::MEASUREMENTS},
+        {"none", LogLevel::NONE},
+        {"config", LogLevel::CONFIG},
+        {"tests", LogLevel::TESTS},
+        {"errors", LogLevel::ERRORS},
+        {"warnings", LogLevel::WARNINGS},
+        {"debug", LogLevel::DEBUG},
+        {"measurements", LogLevel::MEASUREMENTS},
         {"all", LogLevel::ALL},
     };
 
@@ -74,6 +79,9 @@ LogLevel log_level_from_name(const std::string &name)
             break;
         case LogLevel::ERRORS:
             stream << "ERRORS";
+            break;
+        case LogLevel::WARNINGS:
+            stream << "WARNINGS";
             break;
         case LogLevel::DEBUG:
             stream << "DEBUG";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, 2025 Arm Limited.
+ * Copyright (c) 2017-2022, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,11 +68,26 @@ inline void ARM_COMPUTE_PRINT_INFO()
     arm_compute::test::framework::Framework::get().clear_test_info();
 }
 
+inline void ARM_COMPUTE_PRINT_WARNING()
+{
+    std::stringstream msg;
+    arm_compute::test::framework::Framework::get().print_test_warning(msg);
+    arm_compute::test::framework::Framework::get().log_warning(msg.str());
+    arm_compute::test::framework::Framework::get().clear_test_warning();
+}
+
 #define ARM_COMPUTE_TEST_INFO(INFO)                                               \
     {                                                                             \
         std::stringstream info;                                                   \
         info << INFO;                                                             \
         arm_compute::test::framework::Framework::get().add_test_info(info.str()); \
+    }
+
+#define ARM_COMPUTE_TEST_WARNING(WARNING)                                               \
+    {                                                                                   \
+        std::stringstream warning;                                                      \
+        warning << WARNING;                                                             \
+        arm_compute::test::framework::Framework::get().add_test_warning(warning.str()); \
     }
 
 namespace detail

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020,2024-2025 Arm Limited.
+ * Copyright (c) 2018-2020,2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,8 +74,8 @@ CommonOptions::CommonOptions(CommandLineParser &parser)
     };
 
     std::set<LogLevel> supported_log_levels{
-        LogLevel::NONE,  LogLevel::CONFIG,       LogLevel::TESTS, LogLevel::ERRORS,
-        LogLevel::DEBUG, LogLevel::MEASUREMENTS, LogLevel::ALL,
+        LogLevel::NONE,     LogLevel::CONFIG, LogLevel::TESTS,        LogLevel::ERRORS,
+        LogLevel::WARNINGS, LogLevel::DEBUG,  LogLevel::MEASUREMENTS, LogLevel::ALL,
     };
 
     instruments = parser.add_option<EnumListOption<InstrumentsDescription>>(

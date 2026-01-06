@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019,2021, 2025 Arm Limited.
+ * Copyright (c) 2017-2019,2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,6 +100,11 @@ void PrettyPrinter::print_errors_footer()
 void PrettyPrinter::print_info(const std::string &info)
 {
     *_stream << begin_color("1") << "INFO: " << info << end_color() << "\n";
+}
+
+void PrettyPrinter::print_warning(const std::string &warning)
+{
+    *_stream << begin_color("1") << "WARNING: " << warning << end_color() << "\n";
 }
 
 void PrettyPrinter::print_error(const std::exception &error, bool expected)

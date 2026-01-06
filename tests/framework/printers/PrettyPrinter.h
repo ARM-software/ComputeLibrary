@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017,2021, 2025 Arm Limited.
+ * Copyright (c) 2017,2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,7 @@ public:
     void print_errors_header() override;
     void print_errors_footer() override;
     void print_error(const std::exception &error, bool expected) override;
+    void print_warning(const std::string &warning) override;
     void print_info(const std::string &info) override;
     void print_profiler_header(const std::string &header_data) override;
     void print_measurements(const Profiler::MeasurementsMap &measurements) override;

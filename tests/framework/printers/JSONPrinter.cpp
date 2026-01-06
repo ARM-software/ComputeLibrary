@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019,2021, 2025 Arm Limited.
+ * Copyright (c) 2017-2019,2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -132,6 +132,7 @@ void JSONPrinter::print_errors_header()
 {
     _errors.clear();
     _expected_errors.clear();
+    _warnings.clear();
     _infos.clear();
 }
 
@@ -145,6 +146,10 @@ void JSONPrinter::print_errors_footer()
 
     *_stream << R"(, "expected_errors" : [)";
     print_strings(_expected_errors.begin(), _expected_errors.end());
+    *_stream << "]";
+
+    *_stream << R"(, "warnings" : [)";
+    print_strings(_warnings.begin(), _warnings.end());
     *_stream << "]";
 
     *_stream << R"(, "infos" : [)";
@@ -162,6 +167,11 @@ void JSONPrinter::print_error(const std::exception &error, bool expected)
     {
         _errors.emplace_back(error.what());
     }
+}
+
+void JSONPrinter::print_warning(const std::string &warning)
+{
+    _warnings.push_back(warning);
 }
 
 void JSONPrinter::print_info(const std::string &info)
