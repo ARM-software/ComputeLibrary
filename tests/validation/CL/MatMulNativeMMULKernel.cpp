@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, 2025 Arm Limited.
+ * Copyright (c) 2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -144,8 +144,8 @@ TEST_CASE(SupportedBlockSizes, framework::DatasetMode::ALL)
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_arm_matrix_multiply not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_arm_matrix_multiply not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -211,8 +211,8 @@ TEST_CASE(ValidateInputShapes, framework::DatasetMode::ALL)
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_arm_matrix_multiply not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_arm_matrix_multiply not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -266,8 +266,8 @@ TEST_CASE(ValidateDataTypes, framework::DatasetMode::ALL)
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_arm_matrix_multiply not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_arm_matrix_multiply not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 

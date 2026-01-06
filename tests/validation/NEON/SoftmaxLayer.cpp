@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022-2025 Arm Limited.
+ * Copyright (c) 2017-2020, 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -173,8 +173,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall2D,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 FIXTURE_DATA_TEST_CASE(RunNumericalStressTest,
@@ -191,8 +191,8 @@ FIXTURE_DATA_TEST_CASE(RunNumericalStressTest,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 FIXTURE_DATA_TEST_CASE(
@@ -208,8 +208,8 @@ FIXTURE_DATA_TEST_CASE(
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 FIXTURE_DATA_TEST_CASE(
@@ -225,8 +225,8 @@ FIXTURE_DATA_TEST_CASE(
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge,
@@ -244,8 +244,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() //FP16
@@ -270,8 +270,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support SVE. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support SVE. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() //BF16

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025 Arm Limited.
+ * Copyright (c) 2017-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -344,8 +344,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge,
@@ -368,8 +368,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -395,8 +395,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 or FHM vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 or FHM vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -415,8 +415,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 or FHM vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 or FHM vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -446,8 +446,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -470,8 +470,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -509,8 +509,8 @@ FIXTURE_DATA_TEST_CASE(RunSmallFastMath,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support bf16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support bf16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -539,8 +539,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support bf16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support bf16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -564,8 +564,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support bf16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support bf16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 

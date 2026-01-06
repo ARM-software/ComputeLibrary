@@ -82,7 +82,8 @@ DATA_TEST_CASE(TotalSize,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Test SKIPPED as size_t is less than 8 bytes in this system.");
+        ARM_COMPUTE_TEST_WARNING("Test SKIPPED as size_t is less than 8 bytes in this system.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -119,7 +120,8 @@ TEST_CASE(TotalSizeLowerUpperBigShape, framework::DatasetMode::ALL)
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Test SKIPPED as size_t is less than 8 bytes in this system.");
+        ARM_COMPUTE_TEST_WARNING("Test SKIPPED as size_t is less than 8 bytes in this system.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -137,7 +139,8 @@ DATA_TEST_CASE(TotalSizeBigShape,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Test SKIPPED as size_t is less than 8 bytes in this system.");
+        ARM_COMPUTE_TEST_WARNING("Test SKIPPED as size_t is less than 8 bytes in this system.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -188,7 +191,8 @@ TEST_CASE(CollapseBigShape, framework::DatasetMode::ALL)
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Test SKIPPED as size_t is less than 8 bytes in this system.");
+        ARM_COMPUTE_TEST_WARNING("Test SKIPPED as size_t is less than 8 bytes in this system.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 

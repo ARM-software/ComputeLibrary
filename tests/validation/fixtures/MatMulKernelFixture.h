@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, 2025 Arm Limited.
+ * Copyright (c) 2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -125,16 +125,16 @@ public:
         _device_supports_export_to_cl_image = image2d_from_buffer_supported(CLKernelLibrary::get().get_device());
         if (!_device_supports_export_to_cl_image && export_rhs_to_cl_image)
         {
-            ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-            framework::ARM_COMPUTE_PRINT_INFO();
+            ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+            framework::ARM_COMPUTE_PRINT_WARNING();
             return; // Note: Also need to skip the validate in corresponding FIXTURE_DATA_TEST_CASEs.
         }
 
         _device_supports_mmul = arm_matrix_multiply_supported(CLKernelLibrary::get().get_device());
         if (!_device_supports_mmul && use_mmul)
         {
-            ARM_COMPUTE_TEST_INFO("cl_arm_matrix_multiply not supported. TEST skipped");
-            framework::ARM_COMPUTE_PRINT_INFO();
+            ARM_COMPUTE_TEST_WARNING("cl_arm_matrix_multiply not supported. TEST skipped");
+            framework::ARM_COMPUTE_PRINT_WARNING();
             return; // Note: Also need to skip the validate in corresponding FIXTURE_DATA_TEST_CASEs.
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2025 Arm Limited.
+ * Copyright (c) 2022, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -135,8 +135,8 @@ FIXTURE_DATA_TEST_CASE(Signed, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULFixtur
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_arm_matrix_multiply not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_arm_matrix_multiply not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 FIXTURE_DATA_TEST_CASE(Unsigned, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULFixture, framework::DatasetMode::ALL,
@@ -159,8 +159,8 @@ FIXTURE_DATA_TEST_CASE(Unsigned, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULFixt
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_arm_matrix_multiply not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_arm_matrix_multiply not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 FIXTURE_DATA_TEST_CASE(OutputStageSigned, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULOutputStageFixtureSigned, framework::DatasetMode::ALL,
@@ -184,8 +184,8 @@ FIXTURE_DATA_TEST_CASE(OutputStageSigned, CLGEMMLowpMatrixMultiplyReshapedOnlyRH
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_arm_matrix_multiply not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_arm_matrix_multiply not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 FIXTURE_DATA_TEST_CASE(OutputStageUnsigned, CLGEMMLowpMatrixMultiplyReshapedOnlyRHSMMULOutputStageFixtureUnsigned, framework::DatasetMode::ALL,
@@ -209,8 +209,8 @@ FIXTURE_DATA_TEST_CASE(OutputStageUnsigned, CLGEMMLowpMatrixMultiplyReshapedOnly
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_arm_matrix_multiply not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_arm_matrix_multiply not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() // GEMMLowpMatrixMultiplyReshapedOnlyRhsMMUL

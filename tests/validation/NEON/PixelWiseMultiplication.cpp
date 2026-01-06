@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -116,8 +116,8 @@ const auto OutOfPlaceDataSet = make("InPlace", {false});
         }                                                                                                                 \
         else                                                                                                              \
         {                                                                                                                 \
-            ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");                       \
-            framework::ARM_COMPUTE_PRINT_INFO();                                                                          \
+            ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");                       \
+            framework::ARM_COMPUTE_PRINT_WARNING();                                                                          \
         }                                                                                                                 \
     }
 

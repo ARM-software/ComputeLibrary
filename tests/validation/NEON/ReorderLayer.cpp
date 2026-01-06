@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Arm Limited.
+ * Copyright (c) 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -121,8 +121,8 @@ FIXTURE_DATA_TEST_CASE(RunInterleave4Block4,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support bf16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support bf16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -143,8 +143,8 @@ FIXTURE_DATA_TEST_CASE(RunInterleave8Block4,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support bf16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support bf16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 #endif // ARM_COMPUTE_ENABLE_SVE

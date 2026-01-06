@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022-2025 Arm Limited.
+ * Copyright (c) 2017-2020, 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -194,8 +194,8 @@ FIXTURE_DATA_TEST_CASE(SmokeTest, CpuOpSoftmaxFixture<half>, framework::DatasetM
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() //FP16
@@ -240,8 +240,8 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuSoftmaxThreadSaf
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() //F16

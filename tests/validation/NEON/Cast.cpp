@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2025 Arm Limited.
+ * Copyright (c) 2019-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -200,21 +200,21 @@ using NECastToQASYMM8Fixture = CastValidationFixture<Tensor, Accessor, NECast, T
 template <typename T>
 using NECastToQASYMM8_SIGNEDFixture = CastValidationFixture<Tensor, Accessor, NECast, T, int8_t>;
 
-#define CAST_SUITE(NAME, idt, odt, type, dataset, tolerance)                                        \
-    TEST_SUITE(NAME)                                                                                \
-    FIXTURE_DATA_TEST_CASE(RunSmall, type, framework::DatasetMode::PRECOMMIT,                       \
-                           combine(datasets::SmallShapes(), dataset, datasets::ConvertPolicies()))  \
-    {                                                                                               \
-        if ((idt != DataType::F16 && odt != DataType::F16) || CPUInfo::get().has_fp16())            \
-        {                                                                                           \
-            validate(Accessor(_target), _reference, tolerance);                                     \
-        }                                                                                           \
-        else                                                                                        \
-        {                                                                                           \
-            ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED."); \
-            framework::ARM_COMPUTE_PRINT_INFO();                                                    \
-        }                                                                                           \
-    }                                                                                               \
+#define CAST_SUITE(NAME, idt, odt, type, dataset, tolerance)                                           \
+    TEST_SUITE(NAME)                                                                                   \
+    FIXTURE_DATA_TEST_CASE(RunSmall, type, framework::DatasetMode::PRECOMMIT,                          \
+                           combine(datasets::SmallShapes(), dataset, datasets::ConvertPolicies()))     \
+    {                                                                                                  \
+        if ((idt != DataType::F16 && odt != DataType::F16) || CPUInfo::get().has_fp16())               \
+        {                                                                                              \
+            validate(Accessor(_target), _reference, tolerance);                                        \
+        }                                                                                              \
+        else                                                                                           \
+        {                                                                                              \
+            ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED."); \
+            framework::ARM_COMPUTE_PRINT_WARNING();                                                    \
+        }                                                                                              \
+    }                                                                                                  \
     TEST_SUITE_END()
 
 //QASYMM8_SIGNED
