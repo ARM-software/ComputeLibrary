@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, 2024-2025 Arm Limited.
+ * Copyright (c) 2017-2022, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -148,6 +148,26 @@ public:
      * @return true if the cpu supports sme2, false otherwise
      */
     bool has_sme2() const;
+    /** Checks if the cpu model supports sme_i8i32.
+     *
+     * @return true if the cpu supports sme_i8i32, false otherwise
+     */
+    bool has_sme_i8i32() const;
+    /** Checks if the cpu model supports sme_f16f32.
+     *
+     * @return true if the cpu supports sme_f16f32, false otherwise
+     */
+    bool has_sme_f16f32() const;
+    /** Checks if the cpu model supports sme_f32f32.
+     *
+     * @return true if the cpu supports sme_f32f32, false otherwise
+     */
+    bool has_sme_f32f32() const;
+    /** Checks if the cpu model supports sme_b16f32.
+     *
+     * @return true if the cpu supports sme_b16f32, false otherwise
+     */
+    bool has_sme_b16f32() const;
     /** Gets the cpu model for a given cpuid.
      *
      * @param[in] cpuid the id of the cpu core to be retrieved,

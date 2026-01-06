@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, 2024-2025 Arm Limited.
+ * Copyright (c) 2021-2022, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,10 @@ struct CpuIsaInfo
     /* Instruction support */
     bool dot{false};
     bool i8mm{false};
+    bool sme_b16f32{false};
+    bool sme_f16f32{false};
+    bool sme_f32f32{false};
+    bool sme_i8i32{false};
     bool svei8mm{false};
     bool svef32mm{false};
 };
@@ -73,12 +77,13 @@ CpuIsaInfo init_cpu_isa_from_hwcaps(uint64_t hwcaps, uint64_t hwcaps2, uint32_t 
  * @param[in] pfr0   Value of Processor Feature Register 0 (ID_AA64PFR0_EL1)
  * @param[in] pfr1   Value of Processor Feature Register 1 (ID_AA64PFR1_EL1)
  * @param[in] svefr0 Value of SVE feature ID register 0 (ID_AA64ZFR0_EL1)
+ * @param[in] smefr0 Value of SME feature ID register 0 (ID_AA64SMFR0_EL1)
  * @param[in] midr   Value of Main ID Register (MIDR)
  *
  * @return CpuIsaInfo A populated ISA feature structure
  */
-CpuIsaInfo
-init_cpu_isa_from_regs(uint64_t isar0, uint64_t isar1, uint64_t pfr0, uint64_t pfr1, uint64_t svefr0, uint64_t midr);
+CpuIsaInfo init_cpu_isa_from_regs(
+    uint64_t isar0, uint64_t isar1, uint64_t pfr0, uint64_t pfr1, uint64_t svefr0, uint64_t smefr0, uint64_t midr);
 } // namespace cpuinfo
 } // namespace arm_compute
 

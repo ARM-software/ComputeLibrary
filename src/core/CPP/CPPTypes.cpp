@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, 2024-2025 Arm Limited.
+ * Copyright (c) 2018-2022, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -115,6 +115,26 @@ bool CPUInfo::has_sme() const
 bool CPUInfo::has_sme2() const
 {
     return _impl->info.has_sme2();
+}
+
+bool CPUInfo::has_sme_i8i32() const
+{
+    return _impl->info.has_sme_i8i32();
+}
+
+bool CPUInfo::has_sme_f16f32() const
+{
+    return _impl->info.has_sme_f16f32();
+}
+
+bool CPUInfo::has_sme_f32f32() const
+{
+    return _impl->info.has_sme_f32f32();
+}
+
+bool CPUInfo::has_sme_b16f32() const
+{
+    return _impl->info.has_sme_b16f32();
 }
 
 CPUModel CPUInfo::get_cpu_model() const

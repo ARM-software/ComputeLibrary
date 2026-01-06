@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, 2024-2025 Arm Limited.
+ * Copyright (c) 2021-2022, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,6 +82,22 @@ public:
     bool has_sme2() const
     {
         return _isa.sme2;
+    }
+    bool has_sme_i8i32() const
+    {
+        return _isa.sme_i8i32;
+    }
+    bool has_sme_f16f32() const
+    {
+        return _isa.sme_f16f32;
+    }
+    bool has_sme_f32f32() const
+    {
+        return _isa.sme_f32f32;
+    }
+    bool has_sme_b16f32() const
+    {
+        return _isa.sme_b16f32;
     }
     bool has_fp16() const
     {

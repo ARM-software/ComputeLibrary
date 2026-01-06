@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Arm Limited.
+ * Copyright (c) 2021-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -344,6 +344,17 @@ uint64_t get_sve_feature_reg()
                      : "x3");
     return svefr0;
 }
+
+uint64_t get_sme_feature_reg()
+{
+    uint64_t smefr0 = 0;
+    __asm __volatile(".inst 0xd53804a3 // mrs x3, ID_AA64SMFR0_EL1\n"
+                     "MOV  %0, X3"
+                     : "=r"(smefr0)
+                     :
+                     : "x3");
+    return smefr0;
+}
 #endif /* defined(BARE_METAL) && defined(__aarch64__) */
 } // namespace
 
@@ -405,7 +416,7 @@ CpuInfo CpuInfo::build()
         __aarch64__) /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) && (defined(__arm__) || defined(__aarch64__)) */
 
     // Assume single CPU in bare metal mode.  Just read the ID register and feature bits directly.
-    uint64_t isar0 = 0, isar1 = 0, pfr0 = 0, pfr1 = 0, svefr0 = 0, midr = 0;
+    uint64_t isar0 = 0, isar1 = 0, pfr0 = 0, pfr1 = 0, svefr0 = 0, smefr0 = 0, midr = 0;
     ARM_COMPUTE_GET_FEATURE_REG(isar0, ID_AA64ISAR0_EL1);
     ARM_COMPUTE_GET_FEATURE_REG(isar1, ID_AA64ISAR1_EL1);
     ARM_COMPUTE_GET_FEATURE_REG(pfr0, ID_AA64PFR0_EL1);
@@ -415,8 +426,12 @@ CpuInfo CpuInfo::build()
     {
         svefr0 = get_sve_feature_reg();
     }
+    if ((pfr1 >> 24) & 0xf)
+    {
+        smefr0 = get_sme_feature_reg();
+    }
 
-    CpuIsaInfo            isa = init_cpu_isa_from_regs(isar0, isar1, pfr0, pfr1, svefr0, midr);
+    CpuIsaInfo            isa = init_cpu_isa_from_regs(isar0, isar1, pfr0, pfr1, svefr0, smefr0, midr);
     std::vector<CpuModel> cpus_model(1, midr_to_model(midr));
     CpuInfo               info(isa, cpus_model);
     return info;
@@ -425,13 +440,17 @@ CpuInfo CpuInfo::build()
     int                   ncpus = get_hw_capability("hw.perflevel0.logicalcpu");
     CpuIsaInfo            isainfo;
     std::vector<CpuModel> cpus_model(ncpus);
-    isainfo.neon = get_hw_capability("hw.optional.neon");
-    isainfo.fp16 = get_hw_capability("hw.optional.neon_fp16");
-    isainfo.dot  = get_hw_capability("hw.optional.arm.FEAT_DotProd");
-    isainfo.bf16 = get_hw_capability("hw.optional.arm.FEAT_BF16");
-    isainfo.i8mm = get_hw_capability("hw.optional.arm.FEAT_I8MM");
-    isainfo.sme  = get_hw_capability("hw.optional.arm.FEAT_SME");
-    isainfo.sme2 = get_hw_capability("hw.optional.arm.FEAT_SME2");
+    isainfo.neon       = get_hw_capability("hw.optional.neon");
+    isainfo.fp16       = get_hw_capability("hw.optional.neon_fp16");
+    isainfo.dot        = get_hw_capability("hw.optional.arm.FEAT_DotProd");
+    isainfo.bf16       = get_hw_capability("hw.optional.arm.FEAT_BF16");
+    isainfo.i8mm       = get_hw_capability("hw.optional.arm.FEAT_I8MM");
+    isainfo.sme        = get_hw_capability("hw.optional.arm.FEAT_SME");
+    isainfo.sme_f32f32 = get_hw_capability("hw.optional.arm.SME_F32F32");
+    isainfo.sme_b16f32 = get_hw_capability("hw.optional.arm.SME_B16F32");
+    isainfo.sme_f16f32 = get_hw_capability("hw.optional.arm.SME_F16F32");
+    isainfo.sme_i8i32  = get_hw_capability("hw.optional.arm.SME_I8I32");
+    isainfo.sme2       = get_hw_capability("hw.optional.arm.FEAT_SME2");
     CpuInfo info(isainfo, cpus_model);
     return info;
 #elif defined(__aarch64__) && defined(_WIN64)    /* #elif defined(__aarch64__) && defined(__APPLE__) */
@@ -441,6 +460,13 @@ CpuInfo CpuInfo::build()
     isainfo.sve  = IsProcessorFeaturePresent(PF_ARM_SVE_INSTRUCTIONS_AVAILABLE);
     isainfo.sve2 = IsProcessorFeaturePresent(PF_ARM_SVE2_INSTRUCTIONS_AVAILABLE);
     isainfo.sme  = IsProcessorFeaturePresent(PF_ARM_SME_INSTRUCTIONS_AVAILABLE);
+
+    // These features are implied by FEAT_SME
+    isainfo.sme_f32f32 = isainfo.sme;
+    isainfo.sme_b16f32 = isainfo.sme;
+    isainfo.sme_f16f32 = isainfo.sme;
+    isainfo.sme_i8i32  = isainfo.sme;
+
     isainfo.sme2 = IsProcessorFeaturePresent(PF_ARM_SME2_INSTRUCTIONS_AVAILABLE);
     isainfo.fhm  = false; // constant not found
 
