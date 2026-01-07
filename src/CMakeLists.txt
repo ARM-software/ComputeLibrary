@@ -732,6 +732,7 @@ target_sources(
 	cpu/kernels/CpuScatterKernel.cpp
 	cpu/kernels/CpuSoftmaxKernel.cpp
 	cpu/kernels/CpuSubKernel.cpp
+	cpu/kernels/CpuTopKVKernel.cpp
 	cpu/kernels/CpuTransposeKernel.cpp
 	cpu/kernels/CpuWeightsReshapeKernel.cpp
 	cpu/kernels/CpuWinogradConv2dKernel.cpp
@@ -842,6 +843,10 @@ target_sources(
 	cpu/kernels/sub/neon/qasymm8.cpp
 	cpu/kernels/sub/neon/qasymm8_signed.cpp
 	cpu/kernels/sub/neon/qsymm16.cpp
+	cpu/kernels/topkv/generic/neon/fp32.cpp
+	cpu/kernels/topkv/generic/neon/integer.cpp
+	cpu/kernels/topkv/generic/neon/qasymm8.cpp
+	cpu/kernels/topkv/generic/neon/qasymm8_signed.cpp
 	cpu/operators/CpuActivation.cpp
 	cpu/operators/CpuAdd.cpp
 	cpu/operators/CpuAddMulAdd.cpp
@@ -880,6 +885,7 @@ target_sources(
 	cpu/operators/CpuScatter.cpp
 	cpu/operators/CpuSoftmax.cpp
 	cpu/operators/CpuSub.cpp
+	cpu/operators/CpuTopKV.cpp
 	cpu/operators/CpuTranspose.cpp
 	cpu/operators/CpuWinogradConv2d.cpp
 	cpu/operators/internal/CpuGemmAssemblyDispatch.cpp
@@ -988,6 +994,7 @@ target_sources(
 	runtime/NEON/functions/NEStackLayer.cpp
 	runtime/NEON/functions/NEStridedSlice.cpp
 	runtime/NEON/functions/NETile.cpp
+	runtime/NEON/functions/NETopKV.cpp
 	runtime/NEON/functions/NETranspose.cpp
 	runtime/NEON/functions/NEUnstack.cpp
 	runtime/NEON/functions/NEWinogradConvolutionLayer.cpp
@@ -1109,4 +1116,5 @@ target_sources(
 	cpu/kernels/select/generic/neon/fp16.cpp
 	cpu/kernels/softmax/generic/neon/fp16.cpp
 	cpu/kernels/sub/neon/fp16.cpp
+	cpu/kernels/topkv/generic/neon/fp16.cpp
 )

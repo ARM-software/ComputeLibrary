@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, 2024-2025 Arm Limited.
+ * Copyright (c) 2019-2020, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,12 +27,14 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 
 #include "tests/datasets/ShapeDatasets.h"
+#include "tests/datasets/TopKVDataset.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/framework/Macros.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/PermuteFixture.h"
+#include "tests/validation/fixtures/TopKVLayerFixture.h"
 #include "tests/validation/Validation.h"
 
 namespace arm_compute
@@ -247,6 +249,23 @@ TEST_CASE(QASYMM8_SIGNED, framework::DatasetMode::ALL)
     fill_tensor(expected_output, std::vector<int8_t>{0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0});
     validate(Accessor(output), expected_output);
 }
+
+template <typename T>
+using CPPTopKVLayerFixture = TopKVValidationFixture<Tensor, Accessor, CPPTopKV, T>;
+
+const auto                           large_dataset_topkv = combine(datasets::LargeTopKV(), make("K", 3, 5));
+const auto                           f32_large_dataset = combine(large_dataset_topkv, make("DataType", DataType::F32));
+constexpr AbsoluteTolerance<uint8_t> ZeroTolerance{0};
+
+TEST_SUITE(Float)
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunLarge, CPPTopKVLayerFixture<float>, framework::DatasetMode::ALL, f32_large_dataset)
+{
+    // Validate output
+    validate(Accessor(_target), _reference, ZeroTolerance);
+}
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
 
 TEST_SUITE_END() // TopKV
 TEST_SUITE_END() // CPP

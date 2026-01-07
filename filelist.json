@@ -2453,6 +2453,27 @@
           ]
         }
       },
+      "TopKV": {
+        "files": {
+          "common": [
+            "src/cpu/kernels/CpuTopKVKernel.cpp",
+            "src/cpu/operators/CpuTopKV.cpp",
+            "src/runtime/NEON/functions/NETopKV.cpp"
+          ],
+          "neon": {
+            "fp16": [ "src/cpu/kernels/topkv/generic/neon/fp16.cpp" ],
+            "fp32": [ "src/cpu/kernels/topkv/generic/neon/fp32.cpp" ],
+            "integer":["src/cpu/kernels/topkv/generic/neon/integer.cpp"],
+            "qasymm8": [
+              "src/cpu/kernels/topkv/generic/neon/qasymm8.cpp"
+            ],
+            "qasymm8_signed": [
+              "src/cpu/kernels/topkv/generic/neon/qasymm8_signed.cpp"
+            ]
+          }
+
+        }
+      },
       "Transpose": {
         "files": {
           "common": [

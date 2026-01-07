@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, 2025 Arm Limited.
+ * Copyright (c) 2021-2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1030,6 +1030,16 @@
  *
  * Equivalent Android NNAPI Op:
  * ANEURALNETWORKS_TILE
+ *
+ */
+
+/** TopKV
+ *
+ * Description:
+ * Function to compute TopKV
+ *
+ * Equivalent Android NNAPI Op:
+ * ANEURALNETWORKS_TOPK_V2
  *
  */
 
