@@ -28,7 +28,9 @@
 
 #include "src/common/cpuinfo/CpuInfo.h"
 #include "src/common/cpuinfo/CpuIsaInfo.h"
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#ifdef ARM_COMPUTE_CPU_ENABLED
+#include "src/cpu/kernels/assembly/arm_common/internal/utils.hpp"
+#endif // ARM_COMPUTE_CPU_ENABLED
 
 namespace arm_compute
 {

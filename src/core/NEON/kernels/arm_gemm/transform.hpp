@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#include "utils.hpp"
+#include "arm_common/internal/utils.hpp"
 
 namespace arm_gemm {
 
@@ -34,3 +34,4 @@ void Transform(
 );
 
 } // namespace arm_gemm
+

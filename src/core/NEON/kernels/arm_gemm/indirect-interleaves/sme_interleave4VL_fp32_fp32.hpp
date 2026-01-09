@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,17 +22,17 @@
  * SOFTWARE.
  */
 
-#if defined(ARM_COMPUTE_ENABLE_SME)
+#if defined(__aarch64__) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
 
 template <>
 void interleave_block<4, 1, VLType::SME, false>(
   float * &out, const float * const *in,
-  size_t width, size_t height, size_t row_offset, bool
+  size_t width, size_t height, size_t row_offset, bool, int32_t
 )
 {
   __asm__ __volatile__(
       ".inst 0xd503477f  // SMSTART ZA\n"
-      "mov x16, #0x0\n"
+      "mov x16, #0\n"
       "mov x15, %x[row_offset]\n"
       "cntw x14\n"
       "cntw x11\n"
@@ -40,7 +40,7 @@ void interleave_block<4, 1, VLType::SME, false>(
       "cntw x10, ALL, MUL #2\n"
       "cntw x9, ALL, MUL #3\n"
       "csel x14, %x[height], x14, LT\n"
-      "ptrue p4.s\n"
+      "ptrue p4.b\n"
       "sub x14, x14, #0x1\n"
       "whilelt p3.s, XZR, %x[height]\n"
       "whilelt p15.s, x11, %x[height]\n"
@@ -58,7 +58,7 @@ void interleave_block<4, 1, VLType::SME, false>(
       "add x25, %x[in], x10, LSL #3\n"
       "add x20, %x[in], x9, LSL #3\n"
       "ldr x24, [x27], #0x8\n"
-      "mov x13, #0x0\n"
+      "mov x13, #0\n"
       "ldr x23, [x26], #0x8\n"
       "ldr x22, [x25], #0x8\n"
       "ldr x21, [x20], #0x8\n"
@@ -85,7 +85,7 @@ void interleave_block<4, 1, VLType::SME, false>(
       ".inst 0x253165c1  // psel p1.s, p9.s/Z, p14.s[w13]\n"
       "sub x20, %x[width], x16\n"
       "cmp x20, x11\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       ".inst 0xe08f2300  // ld1w { za0h.s[x13] }, p0/Z, [x24, x15, LSL #2]\n"
       ".inst 0x253161a0  // psel p0.s, p8.s/Z, p13.s[w13]\n"
       "csel x20, x20, x11, LT\n"
@@ -112,7 +112,7 @@ void interleave_block<4, 1, VLType::SME, false>(
       "whilelt p10.s, x16, %x[width]\n"
       "whilelt p9.s, x16, %x[width]\n"
       "whilelt p8.s, x16, %x[width]\n"
-      "b.any 1b\n"
+      "b.ne 1b\n"
       "mov %x[out], x28\n"
       ".inst 0xd503467f  // SMSTOP\n"
       : [out] "+&r" (out)
@@ -121,4 +121,5 @@ void interleave_block<4, 1, VLType::SME, false>(
     );
 }
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SME)
+#endif // defined(__aarch64__) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
+

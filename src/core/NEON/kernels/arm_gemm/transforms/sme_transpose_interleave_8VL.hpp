@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(ARM_COMPUTE_ENABLE_SME)
+#if defined(ARM_COMPUTE_ENABLE_SME) && defined(__aarch64__)
 
 namespace {
 
@@ -33,15 +33,16 @@ void sme_transpose_interleave_8VL(uint16_t *out, const uint16_t *in, size_t widt
     size_t out_stride = 8 * height * sme::get_vector_length<uint8_t>();
 
     __asm__ __volatile__(
+      "mov x26, %x[height]\n"
       ".inst 0xd503477f  // SMSTART ZA\n"
-      "cmp %x[height], #0x2\n"
+      "cmp x26, #0x2\n"
       "ptrue p7.b\n"
       "blt 4f\n"
       "1:"  // Main row loop: Head
       "mov x25, %x[in]\n"
       "mov x24, %x[out]\n"
       "add x23, x25, %x[in_stride]\n"
-      "sub %x[height], %x[height], #0x2\n"
+      "sub x26, x26, #0x2\n"
       "add %x[in], x23, %x[in_stride]\n"
       "mov x22, %x[width]\n"
       "2:"  // Main row loop: Column loop
@@ -72,7 +73,7 @@ void sme_transpose_interleave_8VL(uint16_t *out, const uint16_t *in, size_t widt
       "add x24, x24, %x[out_stride]\n"
       "ld1h { z24.h }, p0/Z, [x23]\n"
       "whilelt p0.h, XZR, x21\n"
-      "cmp x22, #0x0\n"
+      "cmp x22, #0\n"
       "ld1h { z23.h }, p0/Z, [x25, #7, MUL VL]\n"
       "addvl x25, x25, #8\n"
       "ld1h { z22.h }, p6/Z, [x23, #1, MUL VL]\n"
@@ -101,17 +102,16 @@ void sme_transpose_interleave_8VL(uint16_t *out, const uint16_t *in, size_t widt
       "st1h { z17.h }, p7, [x20, #-2, MUL VL]\n"
       "st1h { z16.h }, p7, [x20, #-1, MUL VL]\n"
       "bgt 2b\n"
-      "3:"  // Main row loop: Column loop skip
-      "cmp %x[height], #0x2\n"
+      "cmp x26, #0x2\n"
       "addvl %x[out], %x[out], #16\n"
       "bge 1b\n"
-      "cbz %x[height], 8f\n"
+      "cbz x26, 8f\n"
       "4:"  // Main loop skip
       "5:"  // Tail row loop: Head
       "mov x25, %x[in]\n"
       "mov x24, %x[out]\n"
       "add %x[in], x25, %x[in_stride]\n"
-      "sub %x[height], %x[height], #0x1\n"
+      "sub x26, x26, #0x1\n"
       "mov x21, %x[width]\n"
       "6:"  // Tail row loop: Column loop
       "mov x20, x21\n"
@@ -137,7 +137,7 @@ void sme_transpose_interleave_8VL(uint16_t *out, const uint16_t *in, size_t widt
       "dech x20\n"
       "ld1h { z18.h }, p0/Z, [x25, #5, MUL VL]\n"
       "whilelt p0.h, XZR, x20\n"
-      "cmp x21, #0x0\n"
+      "cmp x21, #0\n"
       "ld1h { z17.h }, p1/Z, [x25, #6, MUL VL]\n"
       "ld1h { z16.h }, p0/Z, [x25, #7, MUL VL]\n"
       "addvl x25, x25, #8\n"
@@ -151,15 +151,14 @@ void sme_transpose_interleave_8VL(uint16_t *out, const uint16_t *in, size_t widt
       "st1h { z16.h }, p7, [x24, #7, MUL VL]\n"
       "add x24, x24, %x[out_stride]\n"
       "bgt 6b\n"
-      "7:"  // Tail row loop: Column loop skip
-      "cmp %x[height], #0x1\n"
+      "cmp x26, #0x1\n"
       "addvl %x[out], %x[out], #8\n"
       "bge 5b\n"
       "8:"  // Done
       ".inst 0xd503467f  // SMSTOP\n"
-      : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
-      : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [width] "r" (width)
-      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "x20", "x21", "x22", "x23", "x24", "x25", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
+      : [in] "+&r" (in), [out] "+&r" (out)
+      : [height] "r" (height), [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [width] "r" (width)
+      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
     );
 }
 
@@ -178,19 +177,7 @@ void Transform<8, 1, true, VLType::SME>(
     );
 }
 
-template<>
-void Transform<8, 1, true, VLType::SME>(
-    bfloat16 *out, const bfloat16 *in, int stride, int x0, int xmax, int k0, int kmax)
-{
-    sme_transpose_interleave_8VL(
-        reinterpret_cast<uint16_t *>(out),
-        reinterpret_cast<const uint16_t *>(in + k0 * stride + x0),
-        (xmax-x0) * sizeof(bfloat16) / 2,
-        stride * sizeof(bfloat16),
-        (kmax-k0)
-    );
-}
-
+#if (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
 template<>
 void Transform<8, 1, true, VLType::SME>(
     __fp16 *out, const __fp16 *in, int stride, int x0, int xmax, int k0, int kmax)
@@ -203,6 +190,7 @@ void Transform<8, 1, true, VLType::SME>(
         (kmax-k0)
     );
 }
+#endif // (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
 
+#endif // defined(ARM_COMPUTE_ENABLE_SME) && defined(__aarch64__)
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SME)

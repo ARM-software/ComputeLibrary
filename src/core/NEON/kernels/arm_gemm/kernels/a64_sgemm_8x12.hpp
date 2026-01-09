@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,7 @@
 #include "../std_transforms_fixed_trB.hpp"
 #include "../performance_parameters.hpp"
 
-#include "../bfloat.hpp"
+#include "arm_common/bfloat.hpp"
 
 namespace arm_gemm {
 
@@ -134,3 +134,4 @@ public:
 } // namespace arm_gemm
 
 #endif // __aarch64__
+

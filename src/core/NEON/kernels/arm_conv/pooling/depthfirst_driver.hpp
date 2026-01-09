@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #pragma once
 
 #include "pooling.hpp"
-#include "utils.hpp"
+#include "arm_common/internal/utils.hpp"
 
 namespace arm_conv {
 namespace pooling {

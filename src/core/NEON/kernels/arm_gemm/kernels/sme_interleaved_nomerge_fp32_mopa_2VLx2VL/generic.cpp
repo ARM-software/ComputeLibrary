@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Arm Limited.
+ * Copyright (c) 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifdef ARM_COMPUTE_ENABLE_SME
 
-#include "arm_gemm.hpp"
+#if defined(ARM_COMPUTE_ENABLE_SME) && defined(__aarch64__)
+
+#include "arm_gemm/arm_gemm.hpp"
 
 
-#include "../../asmlib.hpp"
-#include "../../utils.hpp"
+#include "arm_common/internal/utils.hpp"
 
 namespace arm_gemm {
 
@@ -108,7 +108,7 @@ void sme_interleaved_nomerge_fp32_mopa_2VLx2VL(const float *const A, const float
       "ldr x6, [%x[args], %[offsetof_accumulator_buffer]]\n"
       "ldr x7, [%x[args], %[offsetof_accumulator_buffer]]\n"
       "tbz x5, #0, 2f\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       "cntw x26\n"
       "cntw x25\n"
       "cntw x24, ALL, MUL #2\n"
@@ -139,8 +139,8 @@ void sme_interleaved_nomerge_fp32_mopa_2VLx2VL(const float *const A, const float
       "blt 1b\n"
       "2:"  // Initial accumulator load from buffer: End
       "ldr x8, [%x[args], %[offsetof_K]]\n"
-      "mov x17, #0x0\n"
-      "mov x16, #0x0\n"
+      "mov x17, #0\n"
+      "mov x16, #0\n"
       "ldr w15, [%x[args], %[offsetof_M]]\n"
       "ldr w14, [%x[args], %[offsetof_N]]\n"
       "ldr x13, [%x[args], %[offsetof_A]]\n"
@@ -172,7 +172,7 @@ void sme_interleaved_nomerge_fp32_mopa_2VLx2VL(const float *const A, const float
       "cmp x20, x14\n"
       "mov x20, x5\n"
       "csel x21, x17, x21, LT\n"
-      "bfm x5, XZR, #0x0, #0x0  // bfc x5, #0x0, #0x1\n"
+      "bfm x5, XZR, #0, #0  // bfc x5, #0, #0x1\n"
       "cmp x21, x15\n"
       "csel x5, x20, x5, LT\n"
       "6:"  // Prepare accumulators: End
@@ -271,7 +271,7 @@ void sme_interleaved_nomerge_fp32_mopa_2VLx2VL(const float *const A, const float
       "11:"  // K oddments: End
       "tbz x5, #1, 15f\n"
       "tbz x5, #0, 13f\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       "cntw x9\n"
       "cntw x28\n"
       "cntw x27, ALL, MUL #2\n"
@@ -322,7 +322,7 @@ void sme_interleaved_nomerge_fp32_mopa_2VLx2VL(const float *const A, const float
       "blt 12b\n"
       "b 31f\n"
       "13:"  // Store to partial result buffer: Store only
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       "cntw x26\n"
       "cntw x25\n"
       "cntw x24, ALL, MUL #2\n"
@@ -360,7 +360,7 @@ void sme_interleaved_nomerge_fp32_mopa_2VLx2VL(const float *const A, const float
       "madd x26, x17, x24, x26\n"  // C += m * ldc
       "tbz x5, #2, 22f\n"
       "cntw x23\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       "cmp x25, x23\n"
       "csel x22, x25, x23, LT\n"
       "lsr x21, x22, #0x2\n"
@@ -415,7 +415,7 @@ void sme_interleaved_nomerge_fp32_mopa_2VLx2VL(const float *const A, const float
       "subs x25, x25, x22\n"
       "beq 22f\n"
       "cmp x25, x23\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       "csel x22, x25, x23, LT\n"
       "lsr x21, x22, #0x2\n"
       "and x20, x22, #0x3\n"
@@ -472,7 +472,7 @@ void sme_interleaved_nomerge_fp32_mopa_2VLx2VL(const float *const A, const float
       "22:"  // Store to output array: Skip activation: End
       "cntw x23\n"
       "ld1rw { z25.s }, p2/Z, [%x[args], %[offsetof_KernelArgs_min]]\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       "cmp x25, x23\n"
       "ld1rw { z24.s }, p2/Z, [%x[args], %[offsetof_KernelArgs_max]]\n"
       "csel x22, x25, x23, LT\n"
@@ -556,7 +556,7 @@ void sme_interleaved_nomerge_fp32_mopa_2VLx2VL(const float *const A, const float
       "subs x25, x25, x22\n"
       "beq 29f\n"
       "cmp x25, x23\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       "csel x20, x25, x23, LT\n"
       "lsr x21, x20, #0x2\n"
       "and x20, x20, #0x3\n"
@@ -636,7 +636,7 @@ void sme_interleaved_nomerge_fp32_mopa_2VLx2VL(const float *const A, const float
       "28:"  // Store to output array: Accumulator row 1 oddments: End
       "29:"  // Store to output array: End
       "tbz x5, #0, 31f\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       "cntw x26\n"
       "cntw x25\n"
       "cntw x24, ALL, MUL #2\n"
@@ -670,17 +670,18 @@ void sme_interleaved_nomerge_fp32_mopa_2VLx2VL(const float *const A, const float
       "cmp x16, x14\n"
       "blt 4b\n"
       "incw x17, ALL, MUL #2\n"
-      "mov x16, #0x0\n"
+      "mov x16, #0\n"
       "cmp x17, x15\n"
       "mov x13, x10\n"
       "blt 3b\n"
       ".inst 0xd503467f  // SMSTOP\n"
       :
       : [args] "r" (&args), [offsetof_A] "I" (offsetof(KernelArgs, A)), [offsetof_B] "I" (offsetof(KernelArgs, B)), [offsetof_C] "I" (offsetof(KernelArgs, C)), [offsetof_K] "I" (offsetof(KernelArgs, K)), [offsetof_KernelArgs_max] "I" (offsetof(KernelArgs, max)), [offsetof_KernelArgs_min] "I" (offsetof(KernelArgs, min)), [offsetof_M] "I" (offsetof(KernelArgs, M)), [offsetof_N] "I" (offsetof(KernelArgs, N)), [offsetof_accumulator_buffer] "I" (offsetof(KernelArgs, accumulator_buffer)), [offsetof_bias] "I" (offsetof(KernelArgs, bias)), [offsetof_flags] "I" (offsetof(KernelArgs, flags)), [offsetof_ldcb] "I" (offsetof(KernelArgs, ldcb))
-      : "cc", "memory", "p0", "p1", "p10", "p11", "p12", "p13", "p14", "p15", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "x5", "x6", "x7", "x8", "x9", "z0", "z1", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z2", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z3", "z30", "z31", "z4", "z5", "z6", "z7", "z8", "z9"
+      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
     );
 }
 
 }  // namespace arm_gemm
 
-#endif  // ARM_COMPUTE_ENABLE_SME2
+#endif // defined(ARM_COMPUTE_ENABLE_SME) && defined(__aarch64__)
+

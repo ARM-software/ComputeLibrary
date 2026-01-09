@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,10 +22,8 @@
  * SOFTWARE.
  */
 #pragma once
-#ifdef __aarch64__
-
 #include "../std_transforms_fixed.hpp"
-#include "../bfloat.hpp"
+#include "arm_common/bfloat.hpp"
 #include "../kernel_weight_format.hpp"
 #include "../performance_parameters.hpp"
 
@@ -88,10 +86,10 @@ public:
     {
         if (std::is_same<T, float>::value) {
             switch (ci->get_cpu_model()) {
-                case CPUModel::V1:
-                    return { 21.05 };
                 default:
                     return { 15.27 };
+                case CPUModel::V1:
+                    return { 21.05 };
             }
         }
 
@@ -108,4 +106,4 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
-#endif // __aarch64__
+

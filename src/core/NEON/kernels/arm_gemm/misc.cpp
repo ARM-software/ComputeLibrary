@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2022-2023 Arm Limited.
+ * Copyright (c) 2017-2018, 2022-2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,9 +27,9 @@
 #endif
 #include <cstdint>
 
-#include "arm_gemm.hpp"
+#include "arm_gemm/arm_gemm.hpp"
 #include "kernel_weight_format.hpp"
-#include "utils.hpp"
+#include "arm_common/internal/utils.hpp"
 
 namespace arm_gemm {
 
@@ -56,16 +56,15 @@ WeightFormat get_weight_format(const KernelWeightFormat kwf, size_t element_size
         wf_i |= 0x10;
     }
 
-#ifdef ARM_COMPUTE_ENABLE_SVE
-    // Get total bytes in vector output
+    // Get total bytes in vector output.  Populate with NEON default, then
+    // override with SVE if it is an SVE format (AArch64 only).
+    vector_bytes = vector_count * 16;
+
+#ifdef __aarch64__
     if (kwf_i & 0x1) {
         vector_bytes = vector_count * get_vector_length<uint8_t>();
-    } else {
-#else
-    if (1) {
-#endif
-        vector_bytes = vector_count * 16;
     }
+#endif
 
     auto input_blocking = block_bytes / element_size;
     auto output_blocking = vector_bytes / block_bytes;
@@ -77,3 +76,4 @@ WeightFormat get_weight_format(const KernelWeightFormat kwf, size_t element_size
 }
 
 } // namespace arm_gemm
+

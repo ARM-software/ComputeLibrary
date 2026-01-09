@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, 2024 Arm Limited.
+ * Copyright (c) 2017-2022, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,3 +105,4 @@ public:
 } // namespace arm_gemm
 
 #endif // __aarch64__
+

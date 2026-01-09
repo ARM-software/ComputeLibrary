@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +29,7 @@
 
 #include "src/core/common/Macros.h"
 #include "src/cpu/ICpuOperator.h"
-#include "src/cpu/kernels/assembly/gemm_common.hpp"
+#include "src/cpu/kernels/assembly/arm_gemm/gemm_common.hpp"
 #include "src/cpu/kernels/CpuWinogradConv2dKernel.h"
 #include "src/cpu/operators/CpuActivation.h"
 #include "src/cpu/operators/CpuGemm.h"

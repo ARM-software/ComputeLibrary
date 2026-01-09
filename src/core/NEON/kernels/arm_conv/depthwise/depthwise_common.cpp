@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #include "depthwise_common.hpp"
 
-#include "utils.hpp"
+#include "arm_common/internal/utils.hpp"
 
 using arm_gemm::iceildiv;
 

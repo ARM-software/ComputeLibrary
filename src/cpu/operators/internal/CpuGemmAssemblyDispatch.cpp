@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2025 Arm Limited.
+ * Copyright (c) 2018-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,7 @@
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/core/utils/AssemblyUtils.h"
-#include "src/cpu/kernels/assembly/arm_gemm.hpp"
+#include "src/cpu/kernels/assembly/arm_gemm/arm_gemm.hpp"
 #include "src/cpu/kernels/assembly/CpuGemmAssemblyWrapperKernel.h"
 #include "src/cpu/operators/CpuTranspose.h"
 #include "src/cpu/utils/CpuAuxTensorHandler.h"

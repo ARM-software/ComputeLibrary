@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025 Arm Limited.
+ * Copyright (c) 2017-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@
 #include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "src/cpu/kernels/assembly/arm_common/internal/utils.hpp"
 #include "src/graph/mutators/MutatorUtils.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/framework/Asserts.h"

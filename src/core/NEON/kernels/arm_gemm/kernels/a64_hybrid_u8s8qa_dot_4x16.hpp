@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,6 @@
  * SOFTWARE.
  */
 #pragma once
-#ifdef __aarch64__
-
 #include "../std_transforms_fixed.hpp"
 #include "../performance_parameters.hpp"
 
@@ -100,4 +98,4 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
-#endif // __aarch64__
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,10 +28,10 @@
 
 #include <arm_neon.h>
 
-#include "arm_gemm.hpp"
+#include "arm_gemm/arm_gemm.hpp"
 #include "asmlib.hpp"
-#include "bfloat.hpp"
-#include "utils.hpp"
+#include "arm_common/bfloat.hpp"
+#include "arm_common/internal/utils.hpp"
 
 #include "mergeresults.hpp"
 
@@ -40,3 +40,4 @@ namespace arm_gemm {
 #include "merges/list-sve.hpp"
 
 } // namespace arm_gemm
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-#if defined(ARM_COMPUTE_ENABLE_SME)
+#if (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && defined(__aarch64__) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
 
 template <>
 void interleave_block<2, 2, VLType::SME, false>(
   __fp16 * &out, const __fp16 * const *in,
-  size_t width, size_t height, size_t row_offset, bool
+  size_t width, size_t height, size_t row_offset, bool, int32_t
 )
 {
   __asm__ __volatile__(
@@ -47,15 +47,15 @@ void interleave_block<2, 2, VLType::SME, false>(
       "sub x17, x8, #0x2\n"
       "lsl x21, %x[height], #0x1\n"  // height * 2
       "lsl x20, x8, #0x1\n"
-      "mov x16, #0x0\n"
+      "mov x16, #0\n"
       "mov x11, %x[in]\n"
       "add x10, %x[in], x8, LSL #3\n"
       "cntw x9, ALL, MUL #2\n"
       "cntw x28, ALL, MUL #3\n"
-      "ldr x27, [x11, #0x0]\n"
+      "ldr x27, [x11, #0]\n"
       "lsr x13, x13, #0x1\n"  // n_loops = (n_passes - 1) / 2
       "and x26, x22, #0x1\n"  // odd_tail = bool(n_passes & 0x1)
-      "ldr x25, [x10, #0x0]\n"
+      "ldr x25, [x10, #0]\n"
       "lsr x7, x7, #0x1\n"
       "ptrue p12.s\n"
       "ldr x24, [x11, #0x8]\n"
@@ -68,7 +68,7 @@ void interleave_block<2, 2, VLType::SME, false>(
       "whilelt p8.h, x16, %x[width]\n"
       "add x11, x11, #0x10\n"
       "add x10, x10, #0x10\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       "cbz x17, 2f\n"
       "1:"  // K loop: Charge: Loop
       ".inst 0x25286163  // psel p3.h, p8.h/Z, p11.h[w12]\n"
@@ -76,9 +76,9 @@ void interleave_block<2, 2, VLType::SME, false>(
       ".inst 0x25686161  // psel p1.h, p8.h/Z, p11.h[w12, #2]\n"
       ".inst 0x25686140  // psel p0.h, p8.h/Z, p10.h[w12, #2]\n"
       ".inst 0xe0570f60  // ld1h { za0h.h[x12] }, p3/Z, [x27, x23, LSL #1]\n"
-      "ldr x27, [x11, #0x0]\n"
+      "ldr x27, [x11, #0]\n"
       ".inst 0xe0570b28  // ld1h { za1h.h[x12] }, p2/Z, [x25, x23, LSL #1]\n"
-      "ldr x25, [x10, #0x0]\n"
+      "ldr x25, [x10, #0]\n"
       ".inst 0xe0570702  // ld1h { za0h.h[x12, #2] }, p1/Z, [x24, x23, LSL #1]\n"
       "ldr x24, [x11, #0x8]\n"
       "add x11, x11, #0x10\n"
@@ -96,10 +96,10 @@ void interleave_block<2, 2, VLType::SME, false>(
       "mov x11, %x[in]\n"
       "add x10, %x[in], x8, LSL #3\n"
       ".inst 0xe0570f60  // ld1h { za0h.h[x12] }, p3/Z, [x27, x23, LSL #1]\n"
-      "ldr x27, [x11, #0x0]\n"
+      "ldr x27, [x11, #0]\n"
       "inch x16\n"
       ".inst 0xe0570b28  // ld1h { za1h.h[x12] }, p2/Z, [x25, x23, LSL #1]\n"
-      "ldr x25, [x10, #0x0]\n"
+      "ldr x25, [x10, #0]\n"
       ".inst 0xe0570702  // ld1h { za0h.h[x12, #2] }, p1/Z, [x24, x23, LSL #1]\n"
       "ldr x24, [x11, #0x8]\n"
       "add x11, x11, #0x10\n"
@@ -111,8 +111,8 @@ void interleave_block<2, 2, VLType::SME, false>(
       "mov x20, x13\n"
       "3:"  // K loop: Main loop
       "whilelt p8.h, x16, %x[width]\n"
-      "mov x15, #0x0\n"
-      "mov x14, #0x0\n"
+      "mov x15, #0\n"
+      "mov x14, #0\n"
       "cbz x17, 5f\n"
       "4:"  // K loop: Main loop: First: Loop
       ".inst 0x253b6160  // psel p0.h, p8.h/Z, p11.h[w15, #1]\n"
@@ -121,10 +121,10 @@ void interleave_block<2, 2, VLType::SME, false>(
       ".inst 0x257b6143  // psel p3.h, p8.h/Z, p10.h[w15, #3]\n"
       ".inst 0xe0576361  // ld1h { za0h.h[x15, #1] }, p0/Z, [x27, x23, LSL #1]\n"
       ".inst 0x252a7120  // psel p0.h, p12.h/Z, p9.h[w14]\n"
-      "ldr x27, [x11, #0x0]\n"
+      "ldr x27, [x11, #0]\n"
       ".inst 0xe0576b29  // ld1h { za1h.h[x15, #1] }, p2/Z, [x25, x23, LSL #1]\n"
       ".inst 0x252a7122  // psel p2.h, p12.h/Z, p9.h[w14]\n"
-      "ldr x25, [x10, #0x0]\n"
+      "ldr x25, [x10, #0]\n"
       ".inst 0xe0576703  // ld1h { za0h.h[x15, #3] }, p1/Z, [x24, x23, LSL #1]\n"
       ".inst 0x253a7121  // psel p1.h, p12.h/Z, p9.h[w14, #1]\n"
       "ldr x24, [x11, #0x8]\n"
@@ -151,12 +151,12 @@ void interleave_block<2, 2, VLType::SME, false>(
       "add x10, %x[in], x8, LSL #3\n"
       ".inst 0xe0576361  // ld1h { za0h.h[x15, #1] }, p0/Z, [x27, x23, LSL #1]\n"
       ".inst 0x252a7120  // psel p0.h, p12.h/Z, p9.h[w14]\n"
-      "ldr x27, [x11, #0x0]\n"
-      "mov x13, #0x0\n"
+      "ldr x27, [x11, #0]\n"
+      "mov x13, #0\n"
       ".inst 0xe0576b29  // ld1h { za1h.h[x15, #1] }, p2/Z, [x25, x23, LSL #1]\n"
       ".inst 0x252a7122  // psel p2.h, p12.h/Z, p9.h[w14]\n"
-      "ldr x25, [x10, #0x0]\n"
-      "mov x12, #0x0\n"
+      "ldr x25, [x10, #0]\n"
+      "mov x12, #0\n"
       ".inst 0xe0576703  // ld1h { za0h.h[x15, #3] }, p1/Z, [x24, x23, LSL #1]\n"
       ".inst 0x253a7121  // psel p1.h, p12.h/Z, p9.h[w14, #1]\n"
       "ldr x24, [x11, #0x8]\n"
@@ -182,10 +182,10 @@ void interleave_block<2, 2, VLType::SME, false>(
       ".inst 0x25696143  // psel p3.h, p8.h/Z, p10.h[w13, #2]\n"
       ".inst 0xe0572360  // ld1h { za0h.h[x13] }, p0/Z, [x27, x23, LSL #1]\n"
       ".inst 0x25287120  // psel p0.h, p12.h/Z, p9.h[w12]\n"
-      "ldr x27, [x11, #0x0]\n"
+      "ldr x27, [x11, #0]\n"
       ".inst 0xe0572b28  // ld1h { za1h.h[x13] }, p2/Z, [x25, x23, LSL #1]\n"
       ".inst 0x25287122  // psel p2.h, p12.h/Z, p9.h[w12]\n"
-      "ldr x25, [x10, #0x0]\n"
+      "ldr x25, [x10, #0]\n"
       ".inst 0xe0572702  // ld1h { za0h.h[x13, #2] }, p1/Z, [x24, x23, LSL #1]\n"
       ".inst 0x25387121  // psel p1.h, p12.h/Z, p9.h[w12, #1]\n"
       "ldr x24, [x11, #0x8]\n"
@@ -212,10 +212,10 @@ void interleave_block<2, 2, VLType::SME, false>(
       "add x10, %x[in], x8, LSL #3\n"
       ".inst 0xe0572360  // ld1h { za0h.h[x13] }, p0/Z, [x27, x23, LSL #1]\n"
       ".inst 0x25287120  // psel p0.h, p12.h/Z, p9.h[w12]\n"
-      "ldr x27, [x11, #0x0]\n"
+      "ldr x27, [x11, #0]\n"
       ".inst 0xe0572b28  // ld1h { za1h.h[x13] }, p2/Z, [x25, x23, LSL #1]\n"
       ".inst 0x25287122  // psel p2.h, p12.h/Z, p9.h[w12]\n"
-      "ldr x25, [x10, #0x0]\n"
+      "ldr x25, [x10, #0]\n"
       ".inst 0xe0572702  // ld1h { za0h.h[x13, #2] }, p1/Z, [x24, x23, LSL #1]\n"
       ".inst 0x25387121  // psel p1.h, p12.h/Z, p9.h[w12, #1]\n"
       "ldr x24, [x11, #0x8]\n"
@@ -238,8 +238,8 @@ void interleave_block<2, 2, VLType::SME, false>(
       "cbnz x26, 11f\n"
       "mov x11, %x[in]\n"
       "whilelt p8.h, x16, %x[width]\n"
-      "mov x13, #0x0\n"
-      "mov x12, #0x0\n"
+      "mov x13, #0\n"
+      "mov x12, #0\n"
       "9:"  // K loop: Tails: Even: First
       ".inst 0x25307123  // psel p3.s, p12.s/Z, p9.s[w12]\n"
       ".inst 0x25307122  // psel p2.s, p12.s/Z, p9.s[w12]\n"
@@ -249,7 +249,7 @@ void interleave_block<2, 2, VLType::SME, false>(
       ".inst 0xe0a88ac4  // st1w { za1v.s[x12] }, p2/Z, [x22, x8, LSL #2]\n"
       "add x12, x12, #0x1\n"
       "addvl x22, x22, #2\n"
-      "ldr x21, [x11, #0x0]\n"
+      "ldr x21, [x11, #0]\n"
       "cmp x12, x8\n"
       "ldr x20, [x11, x8, LSL #0x3]\n"
       "add x11, x11, #0x8\n"
@@ -259,8 +259,8 @@ void interleave_block<2, 2, VLType::SME, false>(
       "blt 9b\n"
       "whilelt p9.h, x16, %x[width]\n"
       "whilelt p8.h, x16, %x[width]\n"
-      "mov x20, #0x0\n"
-      "mov x12, #0x0\n"
+      "mov x20, #0\n"
+      "mov x12, #0\n"
       "10:"  // K loop: Tails: Even: Second
       ".inst 0x25307121  // psel p1.s, p12.s/Z, p9.s[w12]\n"
       ".inst 0x25307120  // psel p0.s, p12.s/Z, p9.s[w12]\n"
@@ -274,7 +274,7 @@ void interleave_block<2, 2, VLType::SME, false>(
       "whilelt p8.h, x16, %x[width]\n"
       "b 13f\n"
       "11:"  // K loop: Tails: Odd
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       "12:"  // K loop: Tails: Odd: Loop
       ".inst 0x25307121  // psel p1.s, p12.s/Z, p9.s[w12]\n"
       ".inst 0x25307120  // psel p0.s, p12.s/Z, p9.s[w12]\n"
@@ -293,4 +293,5 @@ void interleave_block<2, 2, VLType::SME, false>(
     );
 }
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SME)
+#endif // (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && defined(__aarch64__) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
+

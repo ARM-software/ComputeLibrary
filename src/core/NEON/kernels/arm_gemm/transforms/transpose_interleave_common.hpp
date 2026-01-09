@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#include "../asmlib.hpp"
+#include "asmlib.hpp"
 
 template <unsigned int IntBy, typename TIn, typename TOut>
 struct TransposeInterleaveCommon {
@@ -140,3 +140,4 @@ struct TransposeInterleaveCommon {
     }
 }
 };
+

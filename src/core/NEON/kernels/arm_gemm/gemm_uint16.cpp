@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022-2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,8 @@
  */
 #ifdef __aarch64__
 
-#include "arm_gemm.hpp"
-#include "gemm_common.hpp"
+#include "arm_gemm/arm_gemm.hpp"
+#include "arm_gemm/gemm_common.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
 
@@ -32,16 +32,15 @@
 
 namespace arm_gemm {
 
-static const GemmImplementation<uint16_t, uint16_t, uint32_t> gemm_u16_methods[] = {
+static const GemmImplementation<uint16_t, uint16_t, uint32_t> gemm_u16_methods[] =
 {
-    GemmMethod::GEMM_INTERLEAVED,
+{
     "a64_gemm_u16_8x12",
     nullptr,
     nullptr,
     [](const GemmArgs &args) { return new GemmInterleaved<cls_a64_gemm_u16_8x12, uint16_t, uint16_t, uint32_t>(args); }
 },
 {
-    GemmMethod::DEFAULT,
     "",
     nullptr,
     nullptr,
@@ -54,12 +53,11 @@ const GemmImplementation<uint16_t, uint16_t, uint32_t> *gemm_implementation_list
     return gemm_u16_methods;
 }
 
-/* Explicitly instantiate the external functions for these types. */
-template UniqueGemmCommon<uint16_t, uint16_t, uint32_t> gemm<uint16_t, uint16_t, uint32_t, Nothing>(const GemmArgs &args, const Nothing &);
-template bool has_opt_gemm<uint16_t, uint16_t, uint32_t, Nothing>(WeightFormat &weight_format, const GemmArgs &args, const Nothing &);
-template KernelDescription get_gemm_method<uint16_t, uint16_t, uint32_t, Nothing>(const GemmArgs &args, const Nothing &);
-template std::vector<KernelDescription> get_compatible_kernels<uint16_t, uint16_t, uint32_t, Nothing>(const GemmArgs &args, const Nothing &);
+template UniqueGemmCommon<uint16_t, uint16_t, uint32_t> gemm<uint16_t, uint16_t, uint32_t, Nothing>(const GemmArgs &, const Nothing &);
+template bool has_opt_gemm<uint16_t, uint16_t, uint32_t, Nothing>(WeightFormat &, const GemmArgs &, const Nothing &);
+template std::vector<KernelDescription> get_compatible_kernels<uint16_t, uint16_t, uint32_t, Nothing>(const GemmArgs &, const Nothing &);
 
 } // namespace arm_gemm
 
 #endif // __aarch64__
+

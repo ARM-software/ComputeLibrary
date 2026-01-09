@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, 2024 Arm Limited.
+ * Copyright (c) 2017-2022, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,7 +33,7 @@ namespace arm_gemm {
 // Load the actual kernel
 void a64_gemm_s8_4x4(const int8_t *, const int8_t *, int32_t *, int, int, int);
 
-#include "arm_gemm.hpp"
+#include "arm_gemm/arm_gemm.hpp"
 
 class cls_a64_gemm_s8_4x4 {
 public:
@@ -95,4 +95,5 @@ public:
 } // namespace arm_gemm
 
 #endif // __aarch64__
+
 

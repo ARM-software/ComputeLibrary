@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Arm Limited.
+ * Copyright (c) 2019, 2024, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,18 +23,19 @@
  */
 #if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(ARM_COMPUTE_ENABLE_FP16))
 
-
-#include "arm_gemm.hpp"
-#include "utils.hpp"
+#include "arm_gemm/arm_gemm.hpp"
+#include "arm_common/internal/utils.hpp"
+#include "arm_common/internal/quantized.hpp"
 
 #include <arm_neon.h>
 
 namespace arm_gemm {
 
 // FP16 dequantize
-void dequantize_block_32(const DequantizeFloat &qp, unsigned int width, unsigned int height,
-                         const int32_t * in_ptr, unsigned int in_stride, __fp16 *out_ptr, unsigned int out_stride,
-                         const __fp16 * bias_ptr, bool not_first_pass, const Activation &act)
+template<>
+void dequantize_block_32<__fp16>(const DequantizeFloat &qp, unsigned int width, unsigned int height,
+                                 const int32_t * in_ptr, unsigned int in_stride, __fp16 *out_ptr, unsigned int out_stride,
+                                 const __fp16 * bias_ptr, bool not_first_pass, const Activation &act)
 {
     const float32x4_t vscale = vdupq_n_f32(qp.scale);
     float maxval = std::numeric_limits<float>::infinity();
@@ -61,18 +62,30 @@ void dequantize_block_32(const DequantizeFloat &qp, unsigned int width, unsigned
             for(; col <= (width-8); col+=8) {
                 const int32x4_t vin0 = vld1q_s32(in_ptr + col + (row * in_stride));
                 const int32x4_t vin1 = vld1q_s32(in_ptr + col + 4 + (row * in_stride));
+
                 float32x4_t vdeq0 = vmulq_f32(vcvtq_f32_s32(vin0), vscale);
                 float32x4_t vdeq1 = vmulq_f32(vcvtq_f32_s32(vin1), vscale);
 
-                float16x8_t vdeq16 = vcombine_f16(vcvt_f16_f32(vdeq0), vcvt_f16_f32(vdeq1));
-
                 if(bias_ptr) {
                     const float16x8_t bin = vld1q_f16(bias_ptr + col);
-                    vdeq16 = vaddq_f16(vdeq16, bin);
+                    const float32x4_t bin0 = vcvt_f32_f16(vget_low_f16(bin));
+                    const float32x4_t bin1 = vcvt_f32_f16(vget_high_f16(bin));
+
+                    vdeq0 = vaddq_f32(vdeq0, bin0);
+                    vdeq1 = vaddq_f32(vdeq1, bin1);
                 }
+
                 if(not_first_pass) {
-                    vdeq16 = vaddq_f16(vdeq16, vld1q_f16(out_ptr + col + (row * out_stride)));
+                    const float16x8_t in = vld1q_f16(out_ptr + col + (row * out_stride));
+                    const float32x4_t in0 = vcvt_f32_f16(vget_low_f16(in));
+                    const float32x4_t in1 = vcvt_f32_f16(vget_high_f16(in));
+
+                    vdeq0 = vaddq_f32(vdeq0, in0);
+                    vdeq1 = vaddq_f32(vdeq1, in1);
                 }
+
+                float16x8_t vdeq16 = vcombine_f16(vcvt_f16_f32(vdeq0), vcvt_f16_f32(vdeq1));
+
                 vdeq16 = vminq_f16(vmaxq_f16(vdeq16, vmin), vmax);
                 vst1q_f16(out_ptr + col + (row * out_stride), vdeq16);
             }
@@ -96,4 +109,3 @@ void dequantize_block_32(const DequantizeFloat &qp, unsigned int width, unsigned
 } // namespace arm_gemm
 
 #endif // defined(__aarch64__) && (defined(FP16_KERNELS) || defined(ARM_COMPUTE_ENABLE_FP16))
-

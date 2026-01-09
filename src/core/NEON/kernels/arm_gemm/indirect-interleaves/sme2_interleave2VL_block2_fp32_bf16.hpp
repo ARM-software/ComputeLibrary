@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,18 +22,18 @@
  * SOFTWARE.
  */
 
-#if defined(ARM_COMPUTE_ENABLE_SME2)
+#if defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_SME2) && defined(__aarch64__)
 
 template <>
 void interleave_block<2, 2, VLType::SME, false>(
   bfloat16 * &out, const float * const *in,
-  size_t width, size_t height, size_t row_offset, bool
+  size_t width, size_t height, size_t row_offset, bool, int32_t
 )
 {
   __asm__ __volatile__(
       ".inst 0xd503477f  // SMSTART ZA\n"
       "sub x10, %x[width], #0x1\n"
-      "mov x9, #0x0\n"
+      "mov x9, #0\n"
       "cntw x22, ALL, MUL #2\n"
       "cntw x28\n"
       "cntw x21, ALL, MUL #2\n"
@@ -55,7 +55,7 @@ void interleave_block<2, 2, VLType::SME, false>(
       "mov x23, %x[row_offset]\n"
       "lsr x10, x10, #0x1\n"
       "lsr x27, x27, #0x1\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       ".inst 0x25b44532  // whilelt pn10.s, x9, x20, VLx2\n"
       "add x22, x25, x28, LSL #3\n"
       "1:"  // Width loop: Preamble: Loop
@@ -78,7 +78,7 @@ void interleave_block<2, 2, VLType::SME, false>(
       "2:"  // Width loop
       "mov x20, %x[width]\n"
       "mov x25, %x[in]\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       ".inst 0x25b44532  // whilelt pn10.s, x9, x20, VLx2\n"
       "add x22, x25, x28, LSL #3\n"
       "3:"  // Width loop: Odd: Loop
@@ -103,7 +103,7 @@ void interleave_block<2, 2, VLType::SME, false>(
       "mov x20, %x[width]\n"
       "mov x25, %x[in]\n"
       "incw x23, ALL, MUL #2\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       ".inst 0x25b44532  // whilelt pn10.s, x9, x20, VLx2\n"
       "add x22, x25, x28, LSL #3\n"
       "4:"  // Width loop: Even: Loop
@@ -132,7 +132,7 @@ void interleave_block<2, 2, VLType::SME, false>(
       "cbnz x26, 8f\n"
       "mov x20, %x[width]\n"
       "mov x25, %x[in]\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       ".inst 0x25b44532  // whilelt pn10.s, x9, x20, VLx2\n"
       "add x22, x25, x28, LSL #3\n"
       "6:"  // Width loop: Tails: Even: Odd: Loop
@@ -153,7 +153,7 @@ void interleave_block<2, 2, VLType::SME, false>(
       "add x12, x12, #0x1\n"
       "cmp x12, x28\n"
       "blt 6b\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       "7:"  // Width loop: Tails: Even: Even: Loop
       ".inst 0xc082810e  // mova z14.s, p0/M, za2v.s[x12]\n"
       ".inst 0xc082818f  // mova z15.s, p0/M, za3v.s[x12]\n"
@@ -164,7 +164,7 @@ void interleave_block<2, 2, VLType::SME, false>(
       "blt 7b\n"
       "b 10f\n"
       "8:"  // Width loop: Tails: Odd
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       "9:"  // Width loop: Tails: Odd: Loop
       ".inst 0xc0828014  // mova z20.s, p0/M, za0v.s[x12]\n"
       ".inst 0xc0828095  // mova z21.s, p0/M, za1v.s[x12]\n"
@@ -182,4 +182,5 @@ void interleave_block<2, 2, VLType::SME, false>(
     );
 }
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SME2)
+#endif // defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_SME2) && defined(__aarch64__)
+

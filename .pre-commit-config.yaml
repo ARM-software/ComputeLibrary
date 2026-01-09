@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Arm Limited.
+# Copyright (c) 2023-2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -31,6 +31,8 @@ exclude: |
         src/core/NEON/kernels/convolution/.*|
         src/core/NEON/kernels/arm_gemm/.*|
         src/core/NEON/kernels/arm_conv/.*|
+        src/cpu/kernels/assembly/arm_gemm/.*|
+        src/cpu/kernels/assembly/arm_common/.*|
         third_party/.*|
         LICENSES/.*
     )$
@@ -88,7 +90,7 @@ repos:
         name: Fix header guards in ACL
         stages: [pre-commit]
         language: python
-        entry: python ./scripts/check_header_guards.py --extensions=h,hh,hpp,inl --comment_style=double_slash --prefix=ACL --exclude=src/core/NEON/kernels/convolution/,src/core/NEON/kernels/arm_gemm/,src/core/NEON/kernels/arm_conv/,include/,third_party/ --add_extension
+        entry: python ./scripts/check_header_guards.py --extensions=h,hh,hpp,inl --comment_style=double_slash --prefix=ACL --exclude=src/core/NEON/kernels/convolution/,src/core/NEON/kernels/arm_gemm/,src/core/NEON/kernels/arm_conv/,include/,third_party/,src/cpu/kernels/assembly/arm_gemm,src/cpu/kernels/assembly/arm_common --add_extension
         pass_filenames: true
       - id: pre-push-check
         name: Commit Message Check

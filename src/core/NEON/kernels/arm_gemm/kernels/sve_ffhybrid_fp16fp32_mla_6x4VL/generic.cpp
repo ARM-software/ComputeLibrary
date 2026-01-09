@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Arm Limited.
+ * Copyright (c) 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
 
-#ifdef ARM_COMPUTE_ENABLE_SVE
+#if (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && defined(ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(__aarch64__)
 
-#include "arm_gemm.hpp"
-#include "../../utils.hpp"
+#include "arm_gemm/arm_gemm.hpp"
+#include "arm_common/internal/utils.hpp"
 #include <cassert>
 #include <limits>
 
@@ -124,7 +123,7 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "bgt 3f\n"
       "mov x9, x10\n"
       "3:"  // Height 1: B setup done
-      "mov x20, #0x0\n"
+      "mov x20, #0\n"
       "whilelt p4.s, x20, x13\n"
       "incw x20\n"
       "whilelt p3.s, x20, x13\n"
@@ -147,12 +146,12 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "ld1w { z11.s }, p1/Z, [x11, #3, MUL VL]\n"
       "b 6f\n"
       "5:"  // Height 1: no accumulate
-      "mov z8.b, #0x0\n"
-      "mov z9.b, #0x0\n"
-      "mov z10.b, #0x0\n"
-      "mov z11.b, #0x0\n"
+      "mov z8.b, #0\n"
+      "mov z9.b, #0\n"
+      "mov z10.b, #0\n"
+      "mov z11.b, #0\n"
       "6:"  // Height 1: setup done
-      "mov x28, #0x0\n"
+      "mov x28, #0\n"
       "7:"  // Height 1: String loop
       "ldr x20, [%x[args_ptr], %[offsetof_string_lengths]]\n"
       "ldr x21, [%x[args_ptr], %[offsetof_input_offset]]\n"
@@ -160,7 +159,7 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "tbz %x[flags], #3, 8f\n"
       "ldr x20, [%x[input_ptr], x28, LSL #0x3]\n"
       "add x20, x20, x21, LSL #3\n"
-      "ldr x26, [x20, #0x0]\n"
+      "ldr x26, [x20, #0]\n"
       "cbnz x28, 9f\n"
       "ldr x20, [%x[args_ptr], %[offsetof_input_initial_col]]\n"
       "add x26, x26, x20, LSL #1\n"
@@ -399,7 +398,7 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "bgt 17f\n"
       "mov x9, x10\n"
       "17:"  // Height 2: B setup done
-      "mov x20, #0x0\n"
+      "mov x20, #0\n"
       "whilelt p4.s, x20, x13\n"
       "incw x20\n"
       "whilelt p3.s, x20, x13\n"
@@ -432,16 +431,16 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "ld1w { z15.s }, p1/Z, [x20, #3, MUL VL]\n"
       "b 20f\n"
       "19:"  // Height 2: no accumulate
-      "mov z8.b, #0x0\n"
-      "mov z9.b, #0x0\n"
-      "mov z10.b, #0x0\n"
-      "mov z11.b, #0x0\n"
-      "mov z12.b, #0x0\n"
-      "mov z13.b, #0x0\n"
-      "mov z14.b, #0x0\n"
-      "mov z15.b, #0x0\n"
+      "mov z8.b, #0\n"
+      "mov z9.b, #0\n"
+      "mov z10.b, #0\n"
+      "mov z11.b, #0\n"
+      "mov z12.b, #0\n"
+      "mov z13.b, #0\n"
+      "mov z14.b, #0\n"
+      "mov z15.b, #0\n"
       "20:"  // Height 2: setup done
-      "mov x28, #0x0\n"
+      "mov x28, #0\n"
       "21:"  // Height 2: String loop
       "ldr x20, [%x[args_ptr], %[offsetof_string_lengths]]\n"
       "ldr x21, [%x[args_ptr], %[offsetof_input_offset]]\n"
@@ -449,7 +448,7 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "tbz %x[flags], #3, 22f\n"
       "ldr x20, [%x[input_ptr], x28, LSL #0x3]\n"
       "add x20, x20, x21, LSL #3\n"
-      "ldr x26, [x20, #0x0]\n"
+      "ldr x26, [x20, #0]\n"
       "ldr x25, [x20, #0x8]\n"
       "cbnz x28, 23f\n"
       "ldr x20, [%x[args_ptr], %[offsetof_input_initial_col]]\n"
@@ -772,7 +771,7 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "bgt 31f\n"
       "mov x9, x10\n"
       "31:"  // Height 3: B setup done
-      "mov x20, #0x0\n"
+      "mov x20, #0\n"
       "whilelt p4.s, x20, x13\n"
       "incw x20\n"
       "whilelt p3.s, x20, x13\n"
@@ -814,20 +813,20 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "ld1w { z19.s }, p1/Z, [x20, #3, MUL VL]\n"
       "b 34f\n"
       "33:"  // Height 3: no accumulate
-      "mov z8.b, #0x0\n"
-      "mov z9.b, #0x0\n"
-      "mov z10.b, #0x0\n"
-      "mov z11.b, #0x0\n"
-      "mov z12.b, #0x0\n"
-      "mov z13.b, #0x0\n"
-      "mov z14.b, #0x0\n"
-      "mov z15.b, #0x0\n"
-      "mov z16.b, #0x0\n"
-      "mov z17.b, #0x0\n"
-      "mov z18.b, #0x0\n"
-      "mov z19.b, #0x0\n"
+      "mov z8.b, #0\n"
+      "mov z9.b, #0\n"
+      "mov z10.b, #0\n"
+      "mov z11.b, #0\n"
+      "mov z12.b, #0\n"
+      "mov z13.b, #0\n"
+      "mov z14.b, #0\n"
+      "mov z15.b, #0\n"
+      "mov z16.b, #0\n"
+      "mov z17.b, #0\n"
+      "mov z18.b, #0\n"
+      "mov z19.b, #0\n"
       "34:"  // Height 3: setup done
-      "mov x28, #0x0\n"
+      "mov x28, #0\n"
       "35:"  // Height 3: String loop
       "ldr x20, [%x[args_ptr], %[offsetof_string_lengths]]\n"
       "ldr x21, [%x[args_ptr], %[offsetof_input_offset]]\n"
@@ -835,7 +834,7 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "tbz %x[flags], #3, 36f\n"
       "ldr x20, [%x[input_ptr], x28, LSL #0x3]\n"
       "add x20, x20, x21, LSL #3\n"
-      "ldr x26, [x20, #0x0]\n"
+      "ldr x26, [x20, #0]\n"
       "ldr x25, [x20, #0x8]\n"
       "ldr x24, [x20, #0x10]\n"
       "cbnz x28, 37f\n"
@@ -1241,7 +1240,7 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "bgt 45f\n"
       "mov x9, x10\n"
       "45:"  // Height 4: B setup done
-      "mov x20, #0x0\n"
+      "mov x20, #0\n"
       "whilelt p4.s, x20, x13\n"
       "incw x20\n"
       "whilelt p3.s, x20, x13\n"
@@ -1292,24 +1291,24 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "ld1w { z23.s }, p1/Z, [x20, #3, MUL VL]\n"
       "b 48f\n"
       "47:"  // Height 4: no accumulate
-      "mov z8.b, #0x0\n"
-      "mov z9.b, #0x0\n"
-      "mov z10.b, #0x0\n"
-      "mov z11.b, #0x0\n"
-      "mov z12.b, #0x0\n"
-      "mov z13.b, #0x0\n"
-      "mov z14.b, #0x0\n"
-      "mov z15.b, #0x0\n"
-      "mov z16.b, #0x0\n"
-      "mov z17.b, #0x0\n"
-      "mov z18.b, #0x0\n"
-      "mov z19.b, #0x0\n"
-      "mov z20.b, #0x0\n"
-      "mov z21.b, #0x0\n"
-      "mov z22.b, #0x0\n"
-      "mov z23.b, #0x0\n"
+      "mov z8.b, #0\n"
+      "mov z9.b, #0\n"
+      "mov z10.b, #0\n"
+      "mov z11.b, #0\n"
+      "mov z12.b, #0\n"
+      "mov z13.b, #0\n"
+      "mov z14.b, #0\n"
+      "mov z15.b, #0\n"
+      "mov z16.b, #0\n"
+      "mov z17.b, #0\n"
+      "mov z18.b, #0\n"
+      "mov z19.b, #0\n"
+      "mov z20.b, #0\n"
+      "mov z21.b, #0\n"
+      "mov z22.b, #0\n"
+      "mov z23.b, #0\n"
       "48:"  // Height 4: setup done
-      "mov x28, #0x0\n"
+      "mov x28, #0\n"
       "49:"  // Height 4: String loop
       "ldr x20, [%x[args_ptr], %[offsetof_string_lengths]]\n"
       "ldr x21, [%x[args_ptr], %[offsetof_input_offset]]\n"
@@ -1317,7 +1316,7 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "tbz %x[flags], #3, 50f\n"
       "ldr x20, [%x[input_ptr], x28, LSL #0x3]\n"
       "add x20, x20, x21, LSL #3\n"
-      "ldr x26, [x20, #0x0]\n"
+      "ldr x26, [x20, #0]\n"
       "ldr x25, [x20, #0x8]\n"
       "ldr x24, [x20, #0x10]\n"
       "ldr x23, [x20, #0x18]\n"
@@ -1806,7 +1805,7 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "bgt 59f\n"
       "mov x9, x10\n"
       "59:"  // Height 5: B setup done
-      "mov x20, #0x0\n"
+      "mov x20, #0\n"
       "whilelt p4.s, x20, x13\n"
       "incw x20\n"
       "whilelt p3.s, x20, x13\n"
@@ -1866,28 +1865,28 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "ld1w { z27.s }, p1/Z, [x20, #3, MUL VL]\n"
       "b 62f\n"
       "61:"  // Height 5: no accumulate
-      "mov z8.b, #0x0\n"
-      "mov z9.b, #0x0\n"
-      "mov z10.b, #0x0\n"
-      "mov z11.b, #0x0\n"
-      "mov z12.b, #0x0\n"
-      "mov z13.b, #0x0\n"
-      "mov z14.b, #0x0\n"
-      "mov z15.b, #0x0\n"
-      "mov z16.b, #0x0\n"
-      "mov z17.b, #0x0\n"
-      "mov z18.b, #0x0\n"
-      "mov z19.b, #0x0\n"
-      "mov z20.b, #0x0\n"
-      "mov z21.b, #0x0\n"
-      "mov z22.b, #0x0\n"
-      "mov z23.b, #0x0\n"
-      "mov z24.b, #0x0\n"
-      "mov z25.b, #0x0\n"
-      "mov z26.b, #0x0\n"
-      "mov z27.b, #0x0\n"
+      "mov z8.b, #0\n"
+      "mov z9.b, #0\n"
+      "mov z10.b, #0\n"
+      "mov z11.b, #0\n"
+      "mov z12.b, #0\n"
+      "mov z13.b, #0\n"
+      "mov z14.b, #0\n"
+      "mov z15.b, #0\n"
+      "mov z16.b, #0\n"
+      "mov z17.b, #0\n"
+      "mov z18.b, #0\n"
+      "mov z19.b, #0\n"
+      "mov z20.b, #0\n"
+      "mov z21.b, #0\n"
+      "mov z22.b, #0\n"
+      "mov z23.b, #0\n"
+      "mov z24.b, #0\n"
+      "mov z25.b, #0\n"
+      "mov z26.b, #0\n"
+      "mov z27.b, #0\n"
       "62:"  // Height 5: setup done
-      "mov x28, #0x0\n"
+      "mov x28, #0\n"
       "63:"  // Height 5: String loop
       "ldr x20, [%x[args_ptr], %[offsetof_string_lengths]]\n"
       "ldr x21, [%x[args_ptr], %[offsetof_input_offset]]\n"
@@ -1895,7 +1894,7 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "tbz %x[flags], #3, 64f\n"
       "ldr x20, [%x[input_ptr], x28, LSL #0x3]\n"
       "add x20, x20, x21, LSL #3\n"
-      "ldr x26, [x20, #0x0]\n"
+      "ldr x26, [x20, #0]\n"
       "ldr x25, [x20, #0x8]\n"
       "ldr x24, [x20, #0x10]\n"
       "ldr x23, [x20, #0x18]\n"
@@ -2471,7 +2470,7 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "bgt 73f\n"
       "mov x9, x10\n"
       "73:"  // Height 6: B setup done
-      "mov x20, #0x0\n"
+      "mov x20, #0\n"
       "whilelt p4.s, x20, x13\n"
       "incw x20\n"
       "whilelt p3.s, x20, x13\n"
@@ -2540,32 +2539,32 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "ld1w { z31.s }, p1/Z, [x20, #3, MUL VL]\n"
       "b 76f\n"
       "75:"  // Height 6: no accumulate
-      "mov z8.b, #0x0\n"
-      "mov z9.b, #0x0\n"
-      "mov z10.b, #0x0\n"
-      "mov z11.b, #0x0\n"
-      "mov z12.b, #0x0\n"
-      "mov z13.b, #0x0\n"
-      "mov z14.b, #0x0\n"
-      "mov z15.b, #0x0\n"
-      "mov z16.b, #0x0\n"
-      "mov z17.b, #0x0\n"
-      "mov z18.b, #0x0\n"
-      "mov z19.b, #0x0\n"
-      "mov z20.b, #0x0\n"
-      "mov z21.b, #0x0\n"
-      "mov z22.b, #0x0\n"
-      "mov z23.b, #0x0\n"
-      "mov z24.b, #0x0\n"
-      "mov z25.b, #0x0\n"
-      "mov z26.b, #0x0\n"
-      "mov z27.b, #0x0\n"
-      "mov z28.b, #0x0\n"
-      "mov z29.b, #0x0\n"
-      "mov z30.b, #0x0\n"
-      "mov z31.b, #0x0\n"
+      "mov z8.b, #0\n"
+      "mov z9.b, #0\n"
+      "mov z10.b, #0\n"
+      "mov z11.b, #0\n"
+      "mov z12.b, #0\n"
+      "mov z13.b, #0\n"
+      "mov z14.b, #0\n"
+      "mov z15.b, #0\n"
+      "mov z16.b, #0\n"
+      "mov z17.b, #0\n"
+      "mov z18.b, #0\n"
+      "mov z19.b, #0\n"
+      "mov z20.b, #0\n"
+      "mov z21.b, #0\n"
+      "mov z22.b, #0\n"
+      "mov z23.b, #0\n"
+      "mov z24.b, #0\n"
+      "mov z25.b, #0\n"
+      "mov z26.b, #0\n"
+      "mov z27.b, #0\n"
+      "mov z28.b, #0\n"
+      "mov z29.b, #0\n"
+      "mov z30.b, #0\n"
+      "mov z31.b, #0\n"
       "76:"  // Height 6: setup done
-      "mov x28, #0x0\n"
+      "mov x28, #0\n"
       "77:"  // Height 6: String loop
       "ldr x20, [%x[args_ptr], %[offsetof_string_lengths]]\n"
       "ldr x21, [%x[args_ptr], %[offsetof_input_offset]]\n"
@@ -2573,7 +2572,7 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "tbz %x[flags], #3, 78f\n"
       "ldr x20, [%x[input_ptr], x28, LSL #0x3]\n"
       "add x20, x20, x21, LSL #3\n"
-      "ldr x26, [x20, #0x0]\n"
+      "ldr x26, [x20, #0]\n"
       "ldr x25, [x20, #0x8]\n"
       "ldr x24, [x20, #0x10]\n"
       "ldr x23, [x20, #0x18]\n"
@@ -3224,11 +3223,11 @@ void sve_ffhybrid_fp16fp32_mla_6x4VL (
       "86:"  // Exit
       : [M] "+&r" (M), [input_ptr] "+&r" (input_ptr)
       : [args_ptr] "r" (&ka), [flags] "r" (flags), [offsetof_B_ptr] "I" (offsetof(KernelArgs, B_ptr)), [offsetof_B_stride] "I" (offsetof(KernelArgs, B_stride)), [offsetof_N] "I" (offsetof(KernelArgs, N)), [offsetof_bias] "I" (offsetof(KernelArgs, bias)), [offsetof_cur_B_ptr] "I" (offsetof(KernelArgs, cur_B_ptr)), [offsetof_input_initial_col] "I" (offsetof(KernelArgs, input_initial_col)), [offsetof_input_offset] "I" (offsetof(KernelArgs, input_offset)), [offsetof_maxval] "I" (offsetof(KernelArgs, maxval)), [offsetof_minval] "I" (offsetof(KernelArgs, minval)), [offsetof_num_strings] "I" (offsetof(KernelArgs, num_strings)), [offsetof_output_offset] "I" (offsetof(KernelArgs, output_offset)), [offsetof_output_ptr] "I" (offsetof(KernelArgs, output_ptr)), [offsetof_string_lengths] "I" (offsetof(KernelArgs, string_lengths))
-      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "x10", "x11", "x12", "x13", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "x9", "z0", "z1", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z2", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z3", "z30", "z31", "z4", "z5", "z6", "z7", "z8", "z9"
+      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "x9", "x10", "x11", "x12", "x13", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
     );
 }
 
 } // namespace arm_gemm
-#endif  // ARM_COMPUTE_ENABLE_SVE
 
-#endif // __aarch64__
+#endif // (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && defined(ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(__aarch64__)
+

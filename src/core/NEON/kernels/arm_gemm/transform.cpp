@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Arm Limited.
+ * Copyright (c) 2021-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "utils.hpp"
+#include "arm_common/internal/utils.hpp"
 
-#include "bfloat.hpp"
+#include "arm_common/bfloat.hpp"
 
 #if !defined(_WIN64) && !defined(__OpenBSD__)
 #include <alloca.h>

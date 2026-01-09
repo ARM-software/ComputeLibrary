@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018,2023-2024 Arm Limited.
+ * Copyright (c) 2017-2018,2023-2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #pragma once
 
 #include "convolver.hpp"
+#include "interleave_indirect.hpp"
 #include "mergeresults.hpp"
 #include "transform.hpp"
 
@@ -79,3 +80,4 @@ public:
 };
 
 } // namespace arm_gemm
+

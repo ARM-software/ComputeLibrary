@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2024 Arm Limited.
+ * Copyright (c) 2019-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,10 +22,8 @@
  * SOFTWARE.
  */
 #pragma once
-#ifdef __aarch64__
-
 #include "../std_transforms_fixed.hpp"
-#include "../bfloat.hpp"
+#include "arm_common/bfloat.hpp"
 #include "../performance_parameters.hpp"
 
 #define ARGLIST  \
@@ -113,4 +111,4 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
-#endif // __aarch64__
+

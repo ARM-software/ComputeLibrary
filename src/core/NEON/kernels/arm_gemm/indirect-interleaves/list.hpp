@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2024, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,10 +31,8 @@
 #include "a64_interleave8_block1_fp16_fp32.hpp"
 #include "a64_interleave8_block1_fp32_fp32.hpp"
 #include "a64_interleave8_block1_s16_s16.hpp"
-#include "a64_interleave8_block1_s16_s16_summing.hpp"
 #include "a64_interleave8_block1_s8_s16.hpp"
 #include "a64_interleave8_block1_s8_s16_summing.hpp"
-#include "a64_interleave8_block1_u16_u16_summing.hpp"
 #include "a64_interleave8_block1_u8_u16.hpp"
 #include "a64_interleave8_block1_u8_u16_summing.hpp"
 #include "a64_interleave8_block2_bf16_bf16.hpp"
@@ -47,3 +45,4 @@
 #include "a64_interleave8_block8_s8_s8.hpp"
 #include "a64_interleave8_block8_s8_s8_summing.hpp"
 #include "a64_interleave8_block8_u8_u8_summing.hpp"
+

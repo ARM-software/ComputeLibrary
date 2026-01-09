@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(ARM_COMPUTE_ENABLE_SME)
+#if defined(ARM_COMPUTE_ENABLE_SME2) && defined(__aarch64__)
 
 namespace {
 
@@ -40,20 +40,25 @@ void sme_transpose_interleave_16VL_1x4(uint8_t *out, const uint8_t *in, size_t w
 
     __asm__ __volatile__(
       ".inst 0xd503477f  // SMSTART ZA\n"
+      "mov x28, %x[height]\n"
       "ptrue p4.b\n"
+      "cbz %x[height], 4f\n"
       "1:"  // Main row loop: Head
       "mov x27, %x[in]\n"
-      "cmp %x[height], #0x3\n"
+      "cmp x28, #0x3\n"
       "add x26, x27, %x[in_stride]\n"
       "mov x25, %x[out]\n"
       "add x24, x26, %x[in_stride]\n"
       "mov x23, %x[width]\n"
       "add x22, x24, %x[in_stride]\n"
-      "csel x24, x24, %x[pad_row], GE\n"
       "add %x[in], x22, %x[in_stride]\n"
+      "csel %x[in], %x[in], x22, GT\n"
       "csel x22, x22, %x[pad_row], GT\n"
-      "cmp %x[height], #0x1\n"
-      "sub %x[height], %x[height], #0x4\n"
+      "csel %x[in], %x[in], x24, GE\n"
+      "csel x24, x24, %x[pad_row], GE\n"
+      "cmp x28, #0x1\n"
+      "sub x28, x28, #0x4\n"
+      "csel %x[in], %x[in], x26, GT\n"
       "csel x26, x26, %x[pad_row], GT\n"
       "2:"  // Main row loop: Column loop
       "mov x21, x23\n"
@@ -70,7 +75,7 @@ void sme_transpose_interleave_16VL_1x4(uint8_t *out, const uint8_t *in, size_t w
       "ld1b { z23.b }, p3/Z, [x26]\n"
       "decw x23, ALL, MUL #16\n"
       "ld1b { z20.b }, p2/Z, [x26, #1, MUL VL]\n"
-      "cmp x23, #0x0\n"
+      "cmp x23, #0\n"
       "add x25, x25, %x[out_stride]\n"
       "ld1b { z19.b }, p3/Z, [x24]\n"
       "ld1b { z17.b }, p2/Z, [x24, #1, MUL VL]\n"
@@ -138,14 +143,14 @@ void sme_transpose_interleave_16VL_1x4(uint8_t *out, const uint8_t *in, size_t w
       "st1b { z17.b }, p4, [x20, #-2, MUL VL]\n"
       "st1b { z16.b }, p4, [x20, #-1, MUL VL]\n"
       "bgt 2b\n"
-      "3:"  // Main row loop: Column loop skip
-      "cmp %x[height], #0x1\n"
+      "cmp x28, #0x1\n"
       "addvl %x[out], %x[out], #16\n"
       "bge 1b\n"
+      "4:"  // Done
       ".inst 0xd503467f  // SMSTOP\n"
-      : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
-      : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
-      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
+      : [in] "+&r" (in), [out] "+&r" (out)
+      : [height] "r" (height), [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
+      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
     );
 }
 
@@ -177,5 +182,5 @@ void Transform<16, 4, true, VLType::SME>(
     );
 }
 
+#endif // defined(ARM_COMPUTE_ENABLE_SME2) && defined(__aarch64__)
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SME)

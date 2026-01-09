@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,6 @@
  * SOFTWARE.
  */
 #pragma once
-
-#ifdef ARM_COMPUTE_ENABLE_SME2
 
 #include <cstdint>
 #include "../std_transforms_sme.hpp"
@@ -59,19 +57,9 @@ public:
     return 4;
   }
 
-  static constexpr bool supports_accumulate()
-  {
-    return true;
-  }
-
   static constexpr bool supports_bias()
   {
     return true;
-  }
-
-  static constexpr bool supports_activation()
-  {
-    return false;
   }
 
   static constexpr bool is_sme()
@@ -91,4 +79,3 @@ public:
 
 } // namespace arm_gemm
 
-#endif // ARM_COMPUTE_ENABLE_SME2

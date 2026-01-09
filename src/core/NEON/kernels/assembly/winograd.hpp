@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,9 +22,12 @@
  * SOFTWARE.
  */
 
+#ifndef ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_WINOGRAD_HPP
+#define ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_WINOGRAD_HPP
+
 #pragma once
 
-#include "arm_gemm.hpp"
+#include "arm_gemm/arm_gemm.hpp"
 #include <cstddef>
 
 namespace arm_conv
@@ -263,3 +266,5 @@ bool get_implementation(WinogradImpl &dest, // Destination for the selected impl
 
 } // namespace winograd
 } // namespace arm_conv
+
+#endif // ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_WINOGRAD_HPP

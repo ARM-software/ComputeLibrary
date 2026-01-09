@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2023-2025 Arm Limited.
+# Copyright (c) 2023-2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -95,7 +95,7 @@ def resolve_operator_dependencies(filelist, operators, backend=''):
     return resolved_operators
 
 def get_template_header():
-    return """# Copyright (c) 2023-2025 Arm Limited.
+    return """# Copyright (c) 2023-2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #

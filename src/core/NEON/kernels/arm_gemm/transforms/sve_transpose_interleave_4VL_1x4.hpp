@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(__aarch64__)
 
 namespace {
 
@@ -39,15 +39,16 @@ void sve_transpose_interleave_4VL_1x4(uint8_t *out, const uint8_t *in, size_t wi
     size_t out_stride = 4 * roundup<size_t>(height, 4) * get_vector_length<uint32_t>();
 
     __asm__ __volatile__(
-      "cmp %x[height], #0x8\n"
+      "mov x11, %x[height]\n"
       "ptrue p1.b\n"
+      "cmp x11, #0x8\n"
       "blt 6f\n"
       "1:"  // Main row loop: Head
       "mov x10, %x[in]\n"
       "mov x9, %x[width]\n"
       "cntb x28, ALL, MUL #2\n"
       "mov x27, %x[out]\n"
-      "sub %x[height], %x[height], #0x8\n"
+      "sub x11, x11, #0x8\n"
       "add x26, x10, %x[in_stride]\n"
       "add x25, x26, %x[in_stride]\n"
       "add x24, x25, %x[in_stride]\n"
@@ -152,7 +153,7 @@ void sve_transpose_interleave_4VL_1x4(uint8_t *out, const uint8_t *in, size_t wi
       "ld1b { z23.b }, p0/Z, [x23]\n"
       "ld1b { z22.b }, p0/Z, [x22]\n"
       "ld1b { z17.b }, p0/Z, [x21]\n"
-      "cmp x9, #0x0\n"
+      "cmp x9, #0\n"
       "addvl x23, x23, #1\n"
       "ld1b { z16.b }, p0/Z, [x20]\n"
       "zip1 z21.b, z20.b, z19.b\n"
@@ -185,27 +186,30 @@ void sve_transpose_interleave_4VL_1x4(uint8_t *out, const uint8_t *in, size_t wi
       "add x27, x27, %x[out_stride]\n"
       "bgt 4b\n"
       "5:"  // Main row loop: Column loop skip
-      "cmp %x[height], #0x8\n"
+      "cmp x11, #0x8\n"
       "addvl %x[out], %x[out], #8\n"
       "bge 1b\n"
-      "cbz %x[height], 12f\n"
+      "cbz x11, 12f\n"
       "6:"  // Main loop skip
       "7:"  // Tail row loop: Head
       "mov x10, %x[in]\n"
+      "cmp x11, #0x3\n"
       "mov x21, %x[width]\n"
       "cntb x20, ALL, MUL #2\n"
-      "cmp %x[height], #0x3\n"
       "mov x27, %x[out]\n"
       "add x26, x10, %x[in_stride]\n"
       "add x25, x26, %x[in_stride]\n"
       "add x24, x25, %x[in_stride]\n"
       "add %x[in], x24, %x[in_stride]\n"
+      "csel %x[in], %x[in], x24, GT\n"
       "csel x24, x24, %x[pad_row], GT\n"
+      "csel %x[in], %x[in], x25, GE\n"
       "csel x25, x25, %x[pad_row], GE\n"
-      "cmp %x[height], #0x1\n"
+      "cmp x11, #0x1\n"
+      "sub x11, x11, #0x4\n"
+      "csel %x[in], %x[in], x26, GT\n"
       "csel x26, x26, %x[pad_row], GT\n"
       "cmp x21, x20\n"
-      "sub %x[height], %x[height], #0x4\n"
       "blt 9f\n"
       "8:"  // Tail row loop: Unroll column loop
       "ld1b { z20.b }, p1/Z, [x10]\n"
@@ -262,7 +266,7 @@ void sve_transpose_interleave_4VL_1x4(uint8_t *out, const uint8_t *in, size_t wi
       "addvl x25, x25, #1\n"
       "ld1b { z16.b }, p0/Z, [x24]\n"
       "addvl x24, x24, #1\n"
-      "cmp x21, #0x0\n"
+      "cmp x21, #0\n"
       "zip1 z18.b, z20.b, z17.b\n"
       "zip2 z20.b, z20.b, z17.b\n"
       "zip1 z17.b, z19.b, z16.b\n"
@@ -278,13 +282,13 @@ void sve_transpose_interleave_4VL_1x4(uint8_t *out, const uint8_t *in, size_t wi
       "add x27, x27, %x[out_stride]\n"
       "bgt 10b\n"
       "11:"  // Tail row loop: Column loop skip
-      "cmp %x[height], #0x1\n"
+      "cmp x11, #0x1\n"
       "addvl %x[out], %x[out], #4\n"
       "bge 7b\n"
       "12:"  // Done
-      : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
-      : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
-      : "cc", "memory", "p0", "p1", "x9", "x10", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
+      : [in] "+&r" (in), [out] "+&r" (out)
+      : [height] "r" (height), [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
+      : "cc", "memory", "p0", "p1", "x9", "x10", "x11", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
     );
 }
 
@@ -316,5 +320,5 @@ void Transform<4, 4, true, VLType::SVE>(
     );
 }
 
+#endif // defined(ARM_COMPUTE_ENABLE_SVE) && defined(__aarch64__)
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

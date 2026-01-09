@@ -26,8 +26,8 @@
 #include "arm_compute/runtime/NEON/functions/NEReorderLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 #include "src/core/NEON/kernels/NEReorderKernel.h"
+#include "src/cpu/kernels/assembly/arm_common/internal/utils.hpp"
 #include "tests/datasets/ReorderLayerDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/datasets/Datasets.h"

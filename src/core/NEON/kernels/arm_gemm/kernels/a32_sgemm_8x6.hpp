@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2024 Arm Limited.
+ * Copyright (c) 2017-2018, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ void a32_sgemm_8x6_a55r1(const float *, const float *, float *, int, int, int);
 // All kernels in the family must share these characteristics.  The actual
 // kernel to be used can be chosen at runtime, based on the CPU_type
 // structure.
-class sgemm_8x6 {
+class cls_a32_sgemm_8x6 {
 public:
     typedef float lhs_operand_type;
     typedef float rhs_operand_type;
@@ -68,7 +68,7 @@ public:
 
     kern_type kernel = a32_sgemm_8x6;
 
-    sgemm_8x6(const CPUInfo *ci) {
+    cls_a32_sgemm_8x6(const CPUInfo *ci) {
         switch(ci->get_cpu_model()) {
             case CPUModel::A53:
                 kernel = a32_sgemm_8x6_a53;
@@ -87,3 +87,4 @@ public:
 
 } // namespace arm_gemm
 #endif // __arm__
+

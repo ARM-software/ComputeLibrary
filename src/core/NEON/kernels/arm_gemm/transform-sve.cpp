@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "utils.hpp"
+#include "arm_common/internal/utils.hpp"
 
-#include "bfloat.hpp"
+#include "arm_common/bfloat.hpp"
 #include "transform.hpp"
 
 #if !defined(_WIN64) && !defined(__OpenBSD__)
@@ -36,3 +36,4 @@ namespace arm_gemm {
 #include "transforms/list-sve.hpp"
 
 } // namespace arm_gemm
+

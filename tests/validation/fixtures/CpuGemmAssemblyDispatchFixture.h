@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025 Arm Limited.
+ * Copyright (c) 2017-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,7 @@
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 
 #include "src/core/helpers/MemoryHelpers.h"
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "src/cpu/kernels/assembly/arm_common/internal/utils.hpp"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/SimpleTensor.h"

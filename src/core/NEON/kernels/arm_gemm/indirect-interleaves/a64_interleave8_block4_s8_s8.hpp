@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2019-2021,2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,11 @@
 template<>
 void interleave_block<8, 4, VLType::None, false>(
   int8_t * &out_ptr, const int8_t * const * in, size_t width, size_t height,
-  size_t row_offset, bool
+  size_t row_offset, bool, int32_t
 )
 {
   __asm__ __volatile__(
-      "ldr x28, [%x[in], #0x0]\n"
+      "ldr x28, [%x[in], #0]\n"
       "ldr x27, [%x[in], #0x8]\n"
       "cmp %x[height], #0x8\n"
       "ldr x26, [%x[in], #0x10]\n"
@@ -61,14 +61,14 @@ void interleave_block<8, 4, VLType::None, false>(
       "csel x22, x22, x28, GT\n"
       "1:"  // no_pointer_adj
       "cmp %x[width], #0x10\n"
-      "prfm pldl1keep, [x28, #0x0]\n"
-      "prfm pldl1keep, [x27, #0x0]\n"
-      "prfm pldl1keep, [x26, #0x0]\n"
-      "prfm pldl1keep, [x25, #0x0]\n"
-      "prfm pldl1keep, [x24, #0x0]\n"
-      "prfm pldl1keep, [x23, #0x0]\n"
-      "prfm pldl1keep, [x22, #0x0]\n"
-      "prfm pldl1keep, [x21, #0x0]\n"
+      "prfm pldl1keep, [x28, #0]\n"
+      "prfm pldl1keep, [x27, #0]\n"
+      "prfm pldl1keep, [x26, #0]\n"
+      "prfm pldl1keep, [x25, #0]\n"
+      "prfm pldl1keep, [x24, #0]\n"
+      "prfm pldl1keep, [x23, #0]\n"
+      "prfm pldl1keep, [x22, #0]\n"
+      "prfm pldl1keep, [x21, #0]\n"
       "prfm pldl1keep, [x28, #0x40]\n"
       "prfm pldl1keep, [x27, #0x40]\n"
       "prfm pldl1keep, [x26, #0x40]\n"
@@ -111,7 +111,7 @@ void interleave_block<8, 4, VLType::None, false>(
       "zip2 v20.4s, v18.4s, v17.4s\n"
       "zip1 v19.4s, v26.4s, v25.4s\n"
       "zip1 v18.4s, v24.4s, v23.4s\n"
-      "str q16, [%x[out_ptr], #0x0]\n"
+      "str q16, [%x[out_ptr], #0]\n"
       "zip2 v17.4s, v26.4s, v25.4s\n"
       "zip2 v16.4s, v24.4s, v23.4s\n"
       "str q21, [%x[out_ptr], #0x10]\n"
@@ -275,15 +275,15 @@ void interleave_block<8, 4, VLType::None, false>(
       "ld1 { v22.b }[2], [x21]\n"
       "b 11f\n"
       "10:"  // odd_loads_1_0
-      "ldr b29, [x28, #0x0]\n"
-      "ldr b28, [x27, #0x0]\n"
+      "ldr b29, [x28, #0]\n"
+      "ldr b28, [x27, #0]\n"
       "mov x20, #0x1\n"
-      "ldr b27, [x26, #0x0]\n"
-      "ldr b26, [x25, #0x0]\n"
-      "ldr b25, [x24, #0x0]\n"
-      "ldr b24, [x23, #0x0]\n"
-      "ldr b23, [x22, #0x0]\n"
-      "ldr b22, [x21, #0x0]\n"
+      "ldr b27, [x26, #0]\n"
+      "ldr b26, [x25, #0]\n"
+      "ldr b25, [x24, #0]\n"
+      "ldr b24, [x23, #0]\n"
+      "ldr b23, [x22, #0]\n"
+      "ldr b22, [x21, #0]\n"
       "11:"  // Odd load end
       "zip1 v21.4s, v29.4s, v27.4s\n"
       "zip1 v20.4s, v28.4s, v26.4s\n"
@@ -292,14 +292,14 @@ void interleave_block<8, 4, VLType::None, false>(
       "zip1 v18.4s, v24.4s, v22.4s\n"
       "zip1 v17.4s, v21.4s, v20.4s\n"
       "zip1 v16.4s, v19.4s, v18.4s\n"
-      "str q17, [%x[out_ptr], #0x0]\n"
+      "str q17, [%x[out_ptr], #0]\n"
       "str q16, [%x[out_ptr], #0x10]\n"
       "add %x[out_ptr], %x[out_ptr], #0x20\n"
       "beq 12f\n"
       "subs x20, x20, #0x1\n"
       "zip2 v17.4s, v21.4s, v20.4s\n"
       "zip2 v16.4s, v19.4s, v18.4s\n"
-      "str q17, [%x[out_ptr], #0x0]\n"
+      "str q17, [%x[out_ptr], #0]\n"
       "str q16, [%x[out_ptr], #0x10]\n"
       "add %x[out_ptr], %x[out_ptr], #0x20\n"
       "beq 12f\n"
@@ -310,13 +310,13 @@ void interleave_block<8, 4, VLType::None, false>(
       "zip2 v18.4s, v24.4s, v22.4s\n"
       "zip1 v17.4s, v21.4s, v20.4s\n"
       "zip1 v16.4s, v19.4s, v18.4s\n"
-      "str q17, [%x[out_ptr], #0x0]\n"
+      "str q17, [%x[out_ptr], #0]\n"
       "str q16, [%x[out_ptr], #0x10]\n"
       "add %x[out_ptr], %x[out_ptr], #0x20\n"
       "beq 12f\n"
       "zip2 v17.4s, v21.4s, v20.4s\n"
       "zip2 v16.4s, v19.4s, v18.4s\n"
-      "str q17, [%x[out_ptr], #0x0]\n"
+      "str q17, [%x[out_ptr], #0]\n"
       "str q16, [%x[out_ptr], #0x10]\n"
       "add %x[out_ptr], %x[out_ptr], #0x20\n"
       "12:"  // Odds skip
@@ -329,14 +329,15 @@ void interleave_block<8, 4, VLType::None, false>(
 template<>
 void interleave_block<8, 4, VLType::None, false>(
   uint8_t * &out_ptr, const uint8_t * const * in, size_t width, size_t height,
-  size_t row_offset, bool
+  size_t row_offset, bool, int32_t
 )
 {
   int8_t * &out_cast = reinterpret_cast<int8_t * &>(out_ptr);
   const int8_t * const * in_cast = reinterpret_cast<const int8_t * const *>(in);
 
-  interleave_block<8, 4, VLType::None, false>(out_cast, in_cast, width, height, row_offset, false);
+  interleave_block<8, 4, VLType::None, false>(out_cast, in_cast, width, height, row_offset, false, 0);
 }
 
 
 #endif // __aarch64__
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018,2021 Arm Limited.
+ * Copyright (c) 2017-2018,2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -124,4 +124,5 @@ static inline void prefetch_1x(const T *pfp) {
     : "memory"
     );
 }
+
 

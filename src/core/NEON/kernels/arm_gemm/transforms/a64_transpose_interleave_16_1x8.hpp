@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(__aarch64__)
+#ifdef __aarch64__
 
 namespace {
 
@@ -39,9 +39,11 @@ void a64_transpose_interleave_16_1x8(uint8_t *out, const uint8_t *in, size_t wid
     size_t out_stride = 16 * roundup<size_t>(height, 8) * sizeof(uint8_t);
 
     __asm__ __volatile__(
+      "mov x10, %x[height]\n"
+      "cbz %x[height], 11f\n"
       "1:"  // Main row loop: Head
       "mov x9, %x[in]\n"
-      "cmp %x[height], #0x7\n"
+      "cmp x10, #0x7\n"
       "mov x28, %x[width]\n"
       "mov x27, %x[out]\n"
       "add x26, x9, %x[in_stride]\n"
@@ -51,17 +53,24 @@ void a64_transpose_interleave_16_1x8(uint8_t *out, const uint8_t *in, size_t wid
       "add x22, x23, %x[in_stride]\n"
       "add x21, x22, %x[in_stride]\n"
       "add x20, x21, %x[in_stride]\n"
-      "csel x21, x21, %x[pad_row], GE\n"
       "add %x[in], x20, %x[in_stride]\n"
+      "csel %x[in], %x[in], x20, GT\n"
       "csel x20, x20, %x[pad_row], GT\n"
-      "cmp %x[height], #0x5\n"
+      "csel %x[in], %x[in], x21, GE\n"
+      "csel x21, x21, %x[pad_row], GE\n"
+      "cmp x10, #0x5\n"
+      "csel %x[in], %x[in], x22, GT\n"
       "csel x22, x22, %x[pad_row], GT\n"
+      "csel %x[in], %x[in], x23, GE\n"
       "csel x23, x23, %x[pad_row], GE\n"
-      "cmp %x[height], #0x3\n"
+      "cmp x10, #0x3\n"
+      "csel %x[in], %x[in], x24, GT\n"
       "csel x24, x24, %x[pad_row], GT\n"
+      "csel %x[in], %x[in], x25, GE\n"
       "csel x25, x25, %x[pad_row], GE\n"
-      "cmp %x[height], #0x1\n"
-      "sub %x[height], %x[height], #0x8\n"
+      "cmp x10, #0x1\n"
+      "sub x10, x10, #0x8\n"
+      "csel %x[in], %x[in], x26, GT\n"
       "csel x26, x26, %x[pad_row], GT\n"
       "cmp x28, #0x20\n"
       "blt 3f\n"
@@ -124,7 +133,7 @@ void a64_transpose_interleave_16_1x8(uint8_t *out, const uint8_t *in, size_t wid
       "zip2 v26.16b, v26.16b, v25.16b\n"
       "zip1 v25.16b, v24.16b, v23.16b\n"
       "zip2 v24.16b, v24.16b, v23.16b\n"
-      "str q20, [x27, #0x0]\n"
+      "str q20, [x27, #0]\n"
       "str q19, [x27, #0x10]\n"
       "zip1 v23.16b, v22.16b, v21.16b\n"
       "zip2 v22.16b, v22.16b, v21.16b\n"
@@ -141,7 +150,7 @@ void a64_transpose_interleave_16_1x8(uint8_t *out, const uint8_t *in, size_t wid
       "str q25, [x27, #0x60]\n"
       "str q24, [x27, #0x70]\n"
       "add x27, x27, %x[out_stride]\n"
-      "str q23, [x27, #0x0]\n"
+      "str q23, [x27, #0]\n"
       "str q22, [x27, #0x10]\n"
       "str q21, [x27, #0x20]\n"
       "str q20, [x27, #0x30]\n"
@@ -189,7 +198,7 @@ void a64_transpose_interleave_16_1x8(uint8_t *out, const uint8_t *in, size_t wid
       "zip2 v18.16b, v18.16b, v17.16b\n"
       "zip1 v17.16b, v24.16b, v16.16b\n"
       "zip2 v16.16b, v24.16b, v16.16b\n"
-      "str q23, [x27, #0x0]\n"
+      "str q23, [x27, #0]\n"
       "str q22, [x27, #0x10]\n"
       "str q21, [x27, #0x20]\n"
       "str q20, [x27, #0x30]\n"
@@ -202,8 +211,8 @@ void a64_transpose_interleave_16_1x8(uint8_t *out, const uint8_t *in, size_t wid
       "5:"  // Main row loop: Column loop skip
       "cbz x28, 10f\n"
       "cmp x28, #0x4\n"
-      "movi v16.16b, #0x0\n"
-      "str q16, [x27, #0x0]\n"
+      "movi v16.16b, #0\n"
+      "str q16, [x27, #0]\n"
       "str q16, [x27, #0x10]\n"
       "str q16, [x27, #0x20]\n"
       "str q16, [x27, #0x30]\n"
@@ -231,7 +240,7 @@ void a64_transpose_interleave_16_1x8(uint8_t *out, const uint8_t *in, size_t wid
       "zip1 v16.16b, v19.16b, v16.16b\n"
       "zip1 v17.16b, v18.16b, v16.16b\n"
       "zip2 v16.16b, v18.16b, v16.16b\n"
-      "str q17, [x27, #0x0]\n"
+      "str q17, [x27, #0]\n"
       "str q16, [x27, #0x10]\n"
       "add x27, x27, #0x20\n"
       "bge 6b\n"
@@ -256,17 +265,18 @@ void a64_transpose_interleave_16_1x8(uint8_t *out, const uint8_t *in, size_t wid
       "zip1 v17.16b, v19.16b, v17.16b\n"
       "zip1 v16.16b, v18.16b, v16.16b\n"
       "zip1 v16.16b, v17.16b, v16.16b\n"
-      "str d16, [x27, #0x0]\n"
+      "str d16, [x27, #0]\n"
       "add x27, x27, #0x8\n"
       "bge 8b\n"
       "9:"  // Main row loop: width 1 loop: skip
       "10:"  // Main row loop: odd col skip
-      "cmp %x[height], #0x1\n"
+      "cmp x10, #0x1\n"
       "add %x[out], %x[out], #0x80\n"
       "bge 1b\n"
-      : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
-      : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
-      : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x9", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28"
+      "11:"  // Done
+      : [in] "+&r" (in), [out] "+&r" (out)
+      : [height] "r" (height), [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
+      : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x9", "x10", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28"
     );
 }
 
@@ -298,5 +308,5 @@ void Transform<16, 8, true, VLType::None>(
     );
 }
 
+#endif // __aarch64__
 
-#endif  // defined(__aarch64__)

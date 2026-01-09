@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,9 +25,9 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "convolution_parameters.hpp"
+#include "arm_gemm/convolution_parameters.hpp"
 #include "convolver.hpp"
-#include "utils.hpp"
+#include "arm_common/internal/utils.hpp"
 
 namespace arm_gemm {
 
@@ -41,3 +41,4 @@ template<unsigned int height_vectors, unsigned int block, VLType vlt, typename T
 void Interleave(TOut *out, const TIn *in, size_t in_stride, const unsigned int y0, const unsigned int ymax, const unsigned int k0, const unsigned int kmax, bool, int32_t);
 
 } // namespace arm_gemm
+

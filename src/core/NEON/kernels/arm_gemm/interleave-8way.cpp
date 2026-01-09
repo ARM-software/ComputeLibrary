@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #ifdef __aarch64__
 
 #include <arm_neon.h>
@@ -32,7 +33,7 @@
 #include <cstring>
 
 #include "transform.hpp"
-#include "utils.hpp"
+#include "arm_common/internal/utils.hpp"
 
 namespace arm_gemm {
 
@@ -179,7 +180,7 @@ void a64_interleave_1x4(uint8_t *out, const uint8_t *in, long width, long in_str
             // Process any remaining bytes using transpose_block_32_part()
             if (bytes_left) {
                 Unroll<BLOCKS>::run( [&](unsigned u) {
-                    transpose_block_32_part(in_ptrs[u*4 + 0],  in_ptrs[u*4 + 1],  in_ptrs[u*4 + 2],  in_ptrs[u*4 + 3], 
+                    transpose_block_32_part(in_ptrs[u*4 + 0],  in_ptrs[u*4 + 1],  in_ptrs[u*4 + 2],  in_ptrs[u*4 + 3],
                                             out_ptr + 16*u, bytes_left, total_interleave_depth * 4);
                 });
             }
@@ -265,3 +266,4 @@ void Transform<24, 1, false, VLType::None>(
 } // namespace arm_gemm
 
 #endif // __aarch64__
+

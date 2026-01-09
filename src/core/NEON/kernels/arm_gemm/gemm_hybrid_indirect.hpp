@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025 Arm Limited.
+ * Copyright (c) 2017-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,15 +30,15 @@
 #include <algorithm>
 #include <cassert>
 
-#include "arm_gemm.hpp"
+#include "arm_gemm/arm_gemm.hpp"
 #include "convolver.hpp"
 #include "kernel_weight_format.hpp"
-#include "ndrange.hpp"
+#include "arm_gemm/ndrange.hpp"
 #include "performance_parameters.hpp"
-#include "utils.hpp"
+#include "arm_common/internal/utils.hpp"
 
 #ifdef CYCLE_PROFILING
-#include "profiler.hpp"
+#include "arm_common/profiler.hpp"
 #endif
 
 #ifndef UNUSED
@@ -274,8 +274,8 @@ class GemmHybridIndirect : public GemmCommon<To, Tw, Tr> {
     const unsigned int _rounded_Ksize;
 
     /* Blocking info */
-    unsigned int _n_block;
     const unsigned int _k_block;
+    unsigned int _n_block;
     const unsigned int _Mround;
 
     /* Pretransposed buffer. */
@@ -313,6 +313,15 @@ class GemmHybridIndirect : public GemmCommon<To, Tw, Tr> {
         if (args._cfg && args._cfg->inner_block_size) {
             return roundup(args._cfg->inner_block_size, strategy::k_unroll());
         }
+
+        // Hybrid FP16 kernels running in non-fast mode can't do K blocking
+        // by default due to accuracy issues (but allow explicitly
+        // configured blocking to work with the clause above).
+#if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(ARM_COMPUTE_ENABLE_FP16))
+        if (std::is_same<To, __fp16>::value && std::is_same<Tr, __fp16>::value && !args._fast_mode) {
+            return get_ktotal(args);
+        }
+#endif // defined(__aarch64__) && (defined(FP16_KERNELS) || defined(ARM_COMPUTE_ENABLE_FP16))
 
         // Experimental data suggests an optimal block size of 512 for FP32 (scaling accordingly for other
         // datatypes); but don't divide into blocks until we hit 1.5X this size.
@@ -387,7 +396,7 @@ public:
     GemmHybridIndirect(const GemmArgs &args, const OutputStage &os)
               : _args(args), _os(os), _Ktotal(get_ktotal(args)),
                 _rounded_Ksize(roundup(args._Ksize, strategy::k_unroll())),
-                _n_block(compute_n_block(args, os)), _k_block(compute_k_block(args)),
+                _k_block(compute_k_block(args)), _n_block(compute_n_block(args, os)),
                 _Mround(roundup(args._Msize, strategy::out_height())),
                 _window_range(iceildiv(args._Msize, strategy::out_height()), args._nbatches,
                               iceildiv(args._Nsize, _n_block), args._nmulti)
@@ -401,7 +410,7 @@ public:
     GemmHybridIndirect(const GemmArgs &args)
               : _args(args), _Ktotal(get_ktotal(args)),
                 _rounded_Ksize(roundup(args._Ksize, strategy::k_unroll())),
-                _n_block(compute_n_block(args)), _k_block(compute_k_block(args)),
+                _k_block(compute_k_block(args)), _n_block(compute_n_block(args)),
                 _Mround(roundup(args._Msize, strategy::out_height())),
                 _window_range(iceildiv(args._Msize, strategy::out_height()), args._nbatches,
                               iceildiv(args._Nsize, _n_block), args._nmulti)
@@ -499,6 +508,12 @@ public:
                 const unsigned int nmax    = std::min(n0 + _n_block, _args._Nsize);
                 const unsigned int multi   = p.dim(3);
 
+
+                // We need to select the appropriate part of the column bias
+                // for quantized cases, but not manipulate a nullptr in
+                // other cases.
+                const int32_t * const offset_col_bias = (_col_bias==nullptr) ? nullptr : _col_bias+(multi * _args._Nsize);
+
                 const Troi *b_panel;
                 if (FixedFormat) {
                     b_panel = reinterpret_cast<const Troi *>(g_arrays._Bptr) +
@@ -529,7 +544,7 @@ public:
                                  last_pass ? _args._act : Activation(),
                                  !first_pass || _args._accumulate,
                                  // Quantization parameters
-                                 _os, _col_bias+(multi * _args._Nsize), n0);
+                                 _os, offset_col_bias, n0);
                 } else if (_convolver) {
                     auto conv_cols = _convolver->process_columns(g_arrays._Aptr + (multi * g_arrays._A_multi_stride) + (batch * g_arrays._A_batch_stride), g_arrays._lda, k0, kmax, _rounded_Ksize);
 
@@ -562,7 +577,7 @@ public:
                                  last_pass ? _args._act : Activation(),
                                  !first_pass || _args._accumulate,
                                  // Quantization parameters
-                                 _os, _col_bias+(multi * _args._Nsize), n0);
+                                 _os, offset_col_bias, n0);
                 } else {
                     // Length to process.  This needs to exclude padding, but 'kmax' potentially includes it.
                     const unsigned int len = (std::min(_args._Ksize, kmax) - k0);
@@ -578,7 +593,7 @@ public:
                                  last_pass ? _args._act : Activation(),
                                  !first_pass || _args._accumulate,
                                  // Quantization parameters
-                                 _os, _col_bias+(multi * _args._Nsize), n0);
+                                 _os, offset_col_bias, n0);
                 }
             } while (process_all_rows ? p.next_dim1() : p.next_dim0());
         }
@@ -833,7 +848,6 @@ public:
     GemmConfig get_config() override {
         GemmConfig c;
 
-        c.method = GemmMethod::GEMM_HYBRID;
         c.inner_block_size = _k_block;
         c.outer_block_size = _n_block;
         c.filter = get_type_name<strategy>();
@@ -883,3 +897,4 @@ using GemmHybridIndirectFixedFormat = GemmHybridIndirect<strategy, To, To, Tr, O
 #ifdef __I_DEFINED_UNUSED
 #undef UNUSED
 #endif
+

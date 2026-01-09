@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2024-2025 Arm Limited.
+ * Copyright (c) 2019, 2024, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,8 +23,9 @@
  */
 #ifdef __aarch64__
 
-#include "arm_gemm.hpp"
-#include "utils.hpp"
+#include "arm_gemm/arm_gemm.hpp"
+#include "arm_common/internal/utils.hpp"
+#include "arm_common/internal/quantized.hpp"
 
 #include <arm_neon.h>
 
@@ -43,11 +44,6 @@ namespace {
  * responsibility to ensure that minval/maxval are representable in the
  * target type - the downcast to (u)int8_t is done by simply extracting the
  * LSB.
- *
- * The 'do_shift_correction' template parameter turns on the correction
- * applied to negative values being shifted right to make sure they round
- * properly - if negative values are never output (e.g. fused ReLU) this is
- * unnecessary.
  *
  * The 'per_channel' template parameter selects between per channel and per
  * layer requantization - in the former case we need to load vectors of
@@ -77,10 +73,12 @@ void requantize_block_32_int(const Requantize32 &qp, unsigned int width, unsigne
         unsigned int regs=(width % 16) / 4;
         unsigned int odds=(width % 4);
 
+        /* Pointers to various per-column data.  Take care to avoid manipulating a probably-null
+         * pointer in cases these are not used */
         const int32_t *colptr = col_bias;
-        const int32_t *perch_mul_ptr    = qp.per_channel_muls + start_col;
-        const int32_t *perch_shift_ptr  = qp.per_channel_right_shifts + start_col;
-        const int32_t *perch_shiftl_ptr = qp.per_channel_left_shifts + start_col;
+        const int32_t *perch_mul_ptr    = per_channel ? (qp.per_channel_muls + start_col) : nullptr;
+        const int32_t *perch_shift_ptr  = per_channel ? (qp.per_channel_right_shifts + start_col) : nullptr;
+        const int32_t *perch_shiftl_ptr = (per_channel && do_left_shift) ? (qp.per_channel_left_shifts + start_col) : nullptr;
 
         const int32_t *in_ptr = input + (row * in_stride);
         int8_t *out_ptr = output + (row * out_stride);
@@ -975,7 +973,8 @@ void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int h
 template void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int height, const int8_t *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int multi, unsigned int first_col);
 template void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int height, const uint8_t *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int multi, unsigned int first_col);
 
-void dequantize_block_32(const DequantizeFloat &qp, unsigned int width, unsigned int height,
+template<>
+void dequantize_block_32<float>(const DequantizeFloat &qp, unsigned int width, unsigned int height,
                          const int32_t* in_ptr, unsigned int in_stride, float *out_ptr, unsigned int out_stride,
                          const float* bias_ptr, bool accumulate, const Activation &act)
 {
@@ -1036,3 +1035,4 @@ void dequantize_block_32(const DequantizeFloat &qp, unsigned int width, unsigned
 } // namespace arm_gemm
 
 #endif // __aarch64__
+

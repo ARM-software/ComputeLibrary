@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2025 Arm Limited.
+# Copyright (c) 2016-2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -649,6 +649,8 @@ misa_lib_files_sve2 = []
 misa_lib_files_neon_fp16 = []
 misa_lib_files_sve_fp16 = []
 misa_lib_files_sve2_fp16 = []
+
+arm_compute_env.Append(CPPPATH = ["src/cpu/kernels/assembly/"])
 
 if env['neon']:
     # build winograd/depthwise sources for either v7a / v8a

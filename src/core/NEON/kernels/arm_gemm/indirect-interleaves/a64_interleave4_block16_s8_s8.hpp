@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2019-2021,2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,11 @@
 template<>
 void interleave_block<4, 16, VLType::None, false>(
   int8_t * &out_ptr, const int8_t * const * in, size_t width, size_t height,
-  size_t row_offset, bool
+  size_t row_offset, bool, int32_t
 )
 {
   __asm__ __volatile__(
-      "ldr x23, [%x[in], #0x0]\n"
+      "ldr x23, [%x[in], #0]\n"
       "ldr x22, [%x[in], #0x8]\n"
       "cmp %x[height], #0x4\n"
       "ldr x21, [%x[in], #0x10]\n"
@@ -47,10 +47,10 @@ void interleave_block<4, 16, VLType::None, false>(
       "csel x21, x21, x23, GT\n"
       "1:"  // no_pointer_adj
       "cmp %x[width], #0x10\n"
-      "prfm pldl1keep, [x23, #0x0]\n"
-      "prfm pldl1keep, [x22, #0x0]\n"
-      "prfm pldl1keep, [x21, #0x0]\n"
-      "prfm pldl1keep, [x20, #0x0]\n"
+      "prfm pldl1keep, [x23, #0]\n"
+      "prfm pldl1keep, [x22, #0]\n"
+      "prfm pldl1keep, [x21, #0]\n"
+      "prfm pldl1keep, [x20, #0]\n"
       "prfm pldl1keep, [x23, #0x40]\n"
       "prfm pldl1keep, [x22, #0x40]\n"
       "prfm pldl1keep, [x21, #0x40]\n"
@@ -65,7 +65,7 @@ void interleave_block<4, 16, VLType::None, false>(
       "cmp %x[width], #0x10\n"
       "prfm pldl1keep, [x23, #0x70]\n"
       "prfm pldl1keep, [x22, #0x70]\n"
-      "str q19, [%x[out_ptr], #0x0]\n"
+      "str q19, [%x[out_ptr], #0]\n"
       "str q18, [%x[out_ptr], #0x10]\n"
       "prfm pldl1keep, [x21, #0x70]\n"
       "prfm pldl1keep, [x20, #0x70]\n"
@@ -159,12 +159,12 @@ void interleave_block<4, 16, VLType::None, false>(
       "ld1 { v16.b }[2], [x20]\n"
       "b 11f\n"
       "10:"  // odd_loads_1_0
-      "ldr b19, [x23, #0x0]\n"
-      "ldr b18, [x22, #0x0]\n"
-      "ldr b17, [x21, #0x0]\n"
-      "ldr b16, [x20, #0x0]\n"
+      "ldr b19, [x23, #0]\n"
+      "ldr b18, [x22, #0]\n"
+      "ldr b17, [x21, #0]\n"
+      "ldr b16, [x20, #0]\n"
       "11:"  // Odd load end
-      "str q19, [%x[out_ptr], #0x0]\n"
+      "str q19, [%x[out_ptr], #0]\n"
       "str q18, [%x[out_ptr], #0x10]\n"
       "str q17, [%x[out_ptr], #0x20]\n"
       "str q16, [%x[out_ptr], #0x30]\n"
@@ -179,14 +179,15 @@ void interleave_block<4, 16, VLType::None, false>(
 template<>
 void interleave_block<4, 16, VLType::None, false>(
   uint8_t * &out_ptr, const uint8_t * const * in, size_t width, size_t height,
-  size_t row_offset, bool
+  size_t row_offset, bool, int32_t
 )
 {
   int8_t * &out_cast = reinterpret_cast<int8_t * &>(out_ptr);
   const int8_t * const * in_cast = reinterpret_cast<const int8_t * const *>(in);
 
-  interleave_block<4, 16, VLType::None, false>(out_cast, in_cast, width, height, row_offset, false);
+  interleave_block<4, 16, VLType::None, false>(out_cast, in_cast, width, height, row_offset, false, 0);
 }
 
 
 #endif // __aarch64__
+

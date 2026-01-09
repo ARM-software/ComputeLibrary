@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#include "arm_gemm.hpp"
+#include "arm_gemm/arm_gemm.hpp"
 
 namespace arm_gemm {
 
@@ -58,3 +58,4 @@ enum class KernelWeightFormat {
 WeightFormat get_weight_format(const KernelWeightFormat, size_t);
 
 } // namespace arm_gemm
+

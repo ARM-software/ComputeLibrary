@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
+ * Copyright (c) 2017-2021, 2024, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,20 +27,21 @@
 
 #include <algorithm>
 
-#include "arm_gemm.hpp"
-#include "ndrange.hpp"
-#include "utils.hpp"
+#include "arm_gemm/arm_gemm.hpp"
+#include "arm_gemm/ndrange.hpp"
+#include "arm_common/internal/utils.hpp"
 
 #ifdef CYCLE_PROFILING
-#include "profiler.hpp"
+#include "arm_common/profiler.hpp"
 #endif
 
 namespace arm_gemm {
 
 // Implementation of the GemmCommon abstract class.
-template<typename strategy, typename To, typename Tr>
-class GemmHybridQuantized : public GemmCommon<To, To, Tr> {
-    typedef typename strategy::operand_type Toi;
+template<typename strategy, typename Tlo, typename Tro, typename Tr>
+class GemmHybridQuantized : public GemmCommon<Tlo, Tro, Tr> {
+    typedef typename strategy::operand_type Tloi;
+    typedef typename strategy::operand_type Troi;
     typedef typename strategy::result_type Tri;
 
     /* const properties set by constructor */
@@ -59,7 +60,7 @@ class GemmHybridQuantized : public GemmCommon<To, To, Tr> {
     const unsigned int _Mround;
 
     /* Pretransposed buffer. */
-    const Toi *_B_transposed=nullptr;
+    const Troi *_B_transposed=nullptr;
 
     const NDRange<4> _window_range;
 
@@ -85,7 +86,7 @@ class GemmHybridQuantized : public GemmCommon<To, To, Tr> {
 
         // k_block: Find out how much of the larger array can be loaded into half the cache.
         // This should account for associative caches.
-        unsigned int k_block = (L1_size / 2) / (sizeof(Toi) * (std::max(strategy::out_width(), strategy::out_height())));
+        unsigned int k_block = (L1_size / 2) / (sizeof(Tloi) * (std::max(strategy::out_width(), strategy::out_height())));
 
         // Needs to be (at least a single) multiple of the K unroll level.
         k_block /= strategy::k_unroll();
@@ -120,14 +121,14 @@ class GemmHybridQuantized : public GemmCommon<To, To, Tr> {
         // n_block: Work out how many rows (of length k_block) will fit in the L2
         // Don't allocate more than 90% of the L2 to allow for overheads, and subtract off the L1 contents.
         const unsigned int scaled_l2_size = (L2_size * 9) / 10;
-        const unsigned int k_block_area = k_block * sizeof(Toi) * (strategy::out_width() + strategy::out_height());
+        const unsigned int k_block_area = k_block * ((sizeof(Tloi) * strategy::out_height()) + (sizeof(Troi) * strategy::out_width()));
 
         // .. if the L1 contents is bigger than the L2, just return a minimal size block.
         if (k_block_area > scaled_l2_size) {
             return strategy::out_width();
         }
 
-        unsigned int n_block = (scaled_l2_size - k_block_area) / (sizeof(Toi) * k_block);
+        unsigned int n_block = (scaled_l2_size - k_block_area) / (sizeof(Troi) * k_block);
 
         // Needs to be (at least a single) multiple of the kernel output width.
         n_block /= strategy::out_width();
@@ -182,7 +183,7 @@ public:
 
         /* Make sure we've been set up correctly. */
         assert(_B_transposed);
-        static_assert(std::is_same<To, Toi>::value, "gemm_native: Operand types must be the same.");
+        static_assert(std::is_same<Tlo, Tloi>::value, "gemm_native: LHS operand types must be the same.");
 
         /* For now, each work item implies all the K for a given output
          * pixel (so we don't need to synchronize access to the output
@@ -207,7 +208,7 @@ public:
 
                 int32_t local_row_sums[strategy::out_height()];
 
-                const Toi *b_panel = _B_transposed +
+                const Troi *b_panel = _B_transposed +
                                      (multi * roundup(_Nsize, strategy::out_width()) * roundup(_Ksize, strategy::k_unroll())) +
                                      (k0 * roundup(_Nsize, strategy::out_width())) +
                                      (n0 * kern_k);
@@ -264,10 +265,10 @@ public:
     }
 
     size_t get_B_pretransposed_array_size() const override {
-        return get_col_sum_size() + (roundup(_Nsize, strategy::out_width()) * roundup(_Ksize, strategy::k_unroll()) * _nmulti * sizeof(Toi));
+        return get_col_sum_size() + (roundup(_Nsize, strategy::out_width()) * roundup(_Ksize, strategy::k_unroll()) * _nmulti * sizeof(Troi));
     }
 
-    void requantize_bias(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
+    void requantize_bias(void *in_buffer, const Tro *B, const int ldb, const int B_multi_stride) override {
         col_bias = reinterpret_cast<int32_t *>(in_buffer);
 
         for (unsigned int i=0; i<_nmulti; i++) {
@@ -275,13 +276,13 @@ public:
         }
     }
 
-    void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed) override {
+    void pretranspose_B_array(void *in_buffer, const Tro *B, const int ldb, const int B_multi_stride, bool transposed) override {
         assert(!transposed);
 
         requantize_bias(in_buffer, B, ldb, B_multi_stride);
 
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(in_buffer);
-        Toi *buffer = reinterpret_cast<Toi *>(buffer_int + get_col_sum_size());
+        Troi *buffer = reinterpret_cast<Troi *>(buffer_int + get_col_sum_size());
         _B_transposed = buffer;
         strategy strat(_ci);
 
@@ -306,7 +307,7 @@ public:
 
     void set_pretransposed_B_data(void *in_buffer) override {
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(in_buffer);
-        _B_transposed = reinterpret_cast<Toi *>(buffer_int + get_col_sum_size());
+        _B_transposed = reinterpret_cast<Troi *>(buffer_int + get_col_sum_size());
         col_bias = reinterpret_cast<int32_t *>(in_buffer);
     }
 
@@ -318,7 +319,6 @@ public:
     GemmConfig get_config() override {
         GemmConfig c;
 
-        c.method = GemmMethod::GEMM_HYBRID;
         c.inner_block_size = _k_block;
         c.outer_block_size = _n_block;
         c.filter = get_type_name<strategy>();
@@ -344,3 +344,4 @@ public:
 };
 
 } // namespace arm_gemm
+

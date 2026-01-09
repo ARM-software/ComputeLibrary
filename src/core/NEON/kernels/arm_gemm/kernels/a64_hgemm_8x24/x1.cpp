@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,11 +23,11 @@
  */
 
 // Build on AArch64 where either ENABLE_FP16_KERNELS is set or FP16 is explicitly supported.
-#if defined(__aarch64__) && (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
+#if (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && defined(__aarch64__)
 
 #include <arm_neon.h>
 
-#include "../../asmlib.hpp"
+#include "asmlib.hpp"
 
 // Kernel implementation.
 //
@@ -343,4 +343,5 @@ void a64_hgemm_asimd_8x24_x1(const __fp16 *Apanel, const __fp16 *Bpanel, __fp16 
 
 } // namespace arm_gemm
 
-#endif // __aarch64__ && (ENABLE_FP16_KERNELS || __ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
+#endif // (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && defined(__aarch64__)
+

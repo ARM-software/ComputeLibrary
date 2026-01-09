@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025 Arm Limited.
+ * Copyright (c) 2017-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,17 +26,17 @@
 #include <algorithm>
 #include <cassert>
 
-#include "arm_gemm.hpp"
-#include "bfloat.hpp"
+#include "arm_gemm/arm_gemm.hpp"
+#include "arm_common/bfloat.hpp"
 #include "convolver.hpp"
 #include "kernel_traits.hpp"
 #include "kernel_weight_format.hpp"
 #include "performance_parameters.hpp"
-#include "quantized.hpp"
-#include "utils.hpp"
+#include "arm_common/internal/quantized.hpp"
+#include "arm_common/internal/utils.hpp"
 
 #ifdef CYCLE_PROFILING
-#include "profiler.hpp"
+#include "arm_common/profiler.hpp"
 #endif
 
 // Some macros used to decide how much working space to allocate.
@@ -253,7 +253,7 @@ void kernel_and_merge<true, false, Requantize32>::run(
     }
 }
 
-// Run a kernel with integrated merge, dequantizing to FP32
+// Run a kernel with integrated merge, quantizing to FP32
 template<>
 template<typename strategy, typename Tlo, typename Tro, typename Tr, typename Tri, typename Tab>
 void kernel_and_merge<false, false, DequantizeFloat>::run(
@@ -300,7 +300,7 @@ void kernel_and_merge<true, false, DequantizeFloat>::run(
         strategy &strat, const Tlo *a_ptr, const Tro *b_panel, size_t, Tri *c_panel,
         Tr *c_ptr, int ldc, int kern_k, unsigned int m_0,
         unsigned int m_max, unsigned int n_0, unsigned int n_max, const Tr *bias,
-        const Activation &act, bool accumulate, const DequantizeFloat &qp, const int32_t *,
+        const Activation &act, bool not_first_pass, const DequantizeFloat &qp, const int32_t *,
         Tab *)
 {
     const int bblocks = iceildiv(n_max - n_0, strategy::out_width());
@@ -317,15 +317,14 @@ void kernel_and_merge<true, false, DequantizeFloat>::run(
 #ifdef CYCLE_PROFILING
         auto p=prof.ScopedProfiler(PROFILE_QUANTIZE, ((m_max-m_0) * bblocks * strategy::out_width() * sizeof(Tr)));
 #endif
-        auto out_area = strategy::out_width() * strategy::out_height();
         for (int i=0; i<bblocks; i++) {
-            const unsigned int n_start = n_0 + (strategy::out_width() * i);
-            const unsigned int n_end = std::min(n_start + strategy::out_width(), n_max);
+            unsigned int n_start = n_0 + (strategy::out_width() * i);
+            unsigned int n_end = std::min(n_start + strategy::out_width(), n_max);
 
             dequantize_block_32(qp, (n_end - n_start), (m_max - m_0),
-                            c_panel + (i * out_area), strategy::out_width(),
+                            c_panel + (i * strategy::out_width() * strategy::out_height()), strategy::out_width(),
                             c_ptr + m_0 * ldc + n_start, ldc,
-                            bias != nullptr ? bias + n_start : nullptr, accumulate, act);
+                            bias != nullptr ? bias + n_start : nullptr, not_first_pass, act);
 
         }
     }
@@ -691,6 +690,23 @@ class GemmInterleaved : public GemmCommon<Tlo, Tro, Tr> {
         // K blocking not supported if we are requantizing with the merging
         // kernels.
         if (std::is_same<OutputStage, Requantize32>::value && MergeStep) {
+            return get_ktotal(args);
+        }
+
+        // We can't K block non-fast FP16 cases without an accumulation buffer.
+#if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(ARM_COMPUTE_ENABLE_FP16))
+        if (std::is_same<Tlo, __fp16>::value && std::is_same<Tr, __fp16>::value && !args._fast_mode && MergeStep) {
+            return get_ktotal(args);
+        }
+
+        // And for int8-requantizing-fp16
+        if (std::is_same<Tro, int8_t>::value && std::is_same<Tr, __fp16>::value && MergeStep) {
+            return get_ktotal(args);
+        }
+#endif // defined(__aarch64__) && (defined(FP16_KERNELS) || defined(ARM_COMPUTE_ENABLE_FP16))
+
+        // Same for BF16BF16 cases.
+        if (std::is_same<Tlo, bfloat16>::value && std::is_same<Tr, bfloat16>::value && MergeStep) {
             return get_ktotal(args);
         }
 
@@ -1363,7 +1379,6 @@ public:
     GemmConfig get_config() override {
         GemmConfig c;
 
-        c.method = GemmMethod::GEMM_INTERLEAVED;
         c.inner_block_size = _k_block;
         c.outer_block_size = _x_block;
         c.filter = get_type_name<strategy>();
@@ -1394,22 +1409,26 @@ public:
 };
 
 // Aliases for the variations
-template<typename strategy, typename To, typename Tr, typename OutputStage=Nothing>
-using GemmInterleavedNoMerge = GemmInterleaved<strategy, To, To, Tr, OutputStage, false>;
+template<typename strategy, typename Tlo, typename Tro, typename Tr, typename OutputStage=Nothing>
+using GemmInterleavedNoMerge = GemmInterleaved<strategy, Tlo, Tro, Tr, OutputStage, false>;
 
-template<typename strategy, typename To, typename Tr, typename OutputStage=Nothing>
-using GemmInterleavedFixedFormat = GemmInterleaved<strategy, To, To, Tr, OutputStage, true, true>;
+template<typename strategy, typename Tlo, typename Tro, typename Tr, typename OutputStage=Nothing>
+using GemmInterleavedNoMergeFloatAcc = GemmInterleaved<strategy, Tlo, Tro, Tr, OutputStage, false, false, false, true>;
 
-template<typename strategy, typename To, typename Tr>
-using GemmInterleavedPretransposedNoMergeQuantizedInline = GemmInterleaved<strategy, To, To, Tr, Requantize32, false>;
+template<typename strategy, typename Tlo, typename Tro, typename Tr, typename OutputStage=Nothing>
+using GemmInterleavedFixedFormat = GemmInterleaved<strategy, Tlo, Tro, Tr, OutputStage, true, true>;
+
+template<typename strategy, typename Tlo, typename Tro, typename Tr>
+using GemmInterleavedPretransposedNoMergeQuantizedInline = GemmInterleaved<strategy, Tlo, Tro, Tr, Requantize32, false>;
 
 template<typename strategy, typename Tlo, typename Tro, typename Tr>
 using GemmInterleavedQuantized = GemmInterleaved<strategy, Tlo, Tro, Tr, Requantize32>;
 
-template<typename strategy, typename To, typename Tr>
-using GemmInterleavedNoMergeDequantized = GemmInterleaved<strategy, To, To, Tr, DequantizeFloat, false>;
+template<typename strategy, typename Tlo, typename Tro, typename Tr>
+using GemmInterleavedNoMergeDequantized = GemmInterleaved<strategy, Tlo, Tro, Tr, DequantizeFloat, false>;
 
 template<typename strategy, typename Tlo, typename Tro, typename Tr>
 using GemmInterleavedDequantized = GemmInterleaved<strategy, Tlo, Tro, Tr, DequantizeFloat>;
 
 } // namespace arm_gemm
+

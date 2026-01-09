@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019, 2020, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,11 +25,11 @@
 
 #include <algorithm>
 
-#include "arm_gemm.hpp"
+#include "arm_gemm/arm_gemm.hpp"
 
 #include <cstdint>
-#include "../../asmlib.hpp"
-#include "../../utils.hpp"
+#include "asmlib.hpp"
+#include "arm_common/internal/utils.hpp"
 
 namespace arm_gemm {
 
@@ -4588,3 +4588,4 @@ void a64_smallK_hybrid_s8s32_dot_6x4(const int8_t *A, int lda, const int8_t *B, 
 } // namespace arm_gemm
 
 #endif // __aarch64__
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, 2025 Arm Limited.
+ * Copyright (c) 2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #include "Reorder.h"
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#include "src/cpu/kernels/assembly/arm_common/internal/utils.hpp"
 
 namespace arm_compute
 {
