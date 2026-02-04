@@ -43,15 +43,42 @@ namespace
 {
 
 static const std::vector<CpuTopKVKernel::TopKVKernel> available_kernels = {
+
+    {"sve_fp16_topkv",
+     [](const CpuTopKVKernelDataTypeISASelectorData &data)
+     { return (data.dt == DataType::F16) && data.isa.fp16 && data.isa.sve; },
+     REGISTER_FP16_SVE(arm_compute::cpu::topkv_fp16_sve)},
+
+    {"sve_fp32_topkv",
+     [](const CpuTopKVKernelDataTypeISASelectorData &data) { return (data.dt == DataType::F32) && data.isa.sve; },
+     REGISTER_FP32_SVE(arm_compute::cpu::topkv_fp32_sve)},
+
+    {"sve_qasymm8_topkv",
+     [](const CpuTopKVKernelDataTypeISASelectorData &data) { return (data.dt == DataType::QASYMM8) && data.isa.sve; },
+     REGISTER_QASYMM8_SVE(arm_compute::cpu::topkv_qasymm8_sve)},
+
+    {"sve_qasymm8_signed_topkv",
+     [](const CpuTopKVKernelDataTypeISASelectorData &data)
+     { return (data.dt == DataType::QASYMM8_SIGNED) && data.isa.sve; },
+     REGISTER_QASYMM8_SIGNED_SVE(arm_compute::cpu::topkv_qasymm8_signed_sve)},
+
+    {"sve_s32_topkv",
+     [](const CpuTopKVKernelDataTypeISASelectorData &data) { return (data.dt == DataType::S32) && data.isa.sve; },
+     REGISTER_INTEGER_SVE(arm_compute::cpu::topkv_s32_sve)},
+
     {"neon_s32_topkv", [](const CpuTopKVKernelDataTypeISASelectorData &data) { return (data.dt == DataType::S32); },
      REGISTER_INTEGER_NEON(arm_compute::cpu::topkv_s32_neon)},
+
     {"neon_fp32_topkv", [](const CpuTopKVKernelDataTypeISASelectorData &data) { return (data.dt == DataType::F32); },
      REGISTER_FP32_NEON(arm_compute::cpu::topkv_fp32_neon)},
+
     {"neon_fp16_topkv",
      [](const CpuTopKVKernelDataTypeISASelectorData &data) { return (data.dt == DataType::F16) && data.isa.fp16; },
      REGISTER_FP16_NEON(arm_compute::cpu::topkv_fp16_neon)},
+
     {"neon_qu8_topkv", [](const CpuTopKVKernelDataTypeISASelectorData &data) { return (data.dt == DataType::QASYMM8); },
      REGISTER_QASYMM8_NEON(arm_compute::cpu::topkv_qasymm8_neon)},
+
     {"neon_qs8_topkv",
      [](const CpuTopKVKernelDataTypeISASelectorData &data) { return (data.dt == DataType::QASYMM8_SIGNED); },
      REGISTER_QASYMM8_SIGNED_NEON(arm_compute::cpu::topkv_qasymm8_signed_neon)}};
