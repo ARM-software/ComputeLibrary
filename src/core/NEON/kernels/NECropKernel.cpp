@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2022, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -323,7 +323,10 @@ void NECropKernel::run(const Window &window, const ThreadInfo &info)
 
     const auto *uk = get_implementation(CropSelectorData{_input->info()->data_type()});
 
-    uint32_t    batch_index = *(reinterpret_cast<int32_t *>(_box_ind->ptr_to_element(Coordinates(_crop_box_ind))));
+    uint32_t batch_index = *(reinterpret_cast<int32_t *>(_box_ind->ptr_to_element(Coordinates(_crop_box_ind))));
+    ARM_COMPUTE_ERROR_ON(batch_index >=
+                         _input->info()->tensor_shape()[3]); // Check if batch_index is outside the number of batches
+
     Coordinates input_offset(
         0, _end[0] < _start[0] ? _start[0] - _cols_out_of_bounds[0] : _start[0] + _cols_out_of_bounds[0],
         _end[1] < _start[1] ? _start[1] - _rows_out_of_bounds[0] : _start[1] + _rows_out_of_bounds[0], batch_index);
