@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H
-#define ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H
+#ifndef ACL_SRC_CORE_NEON_KERNELS_NEFFTDIGITREVERSEKERNEL_H
+#define ACL_SRC_CORE_NEON_KERNELS_NEFFTDIGITREVERSEKERNEL_H
 
 #include "arm_compute/core/KernelDescriptors.h"
 
@@ -92,6 +92,7 @@ private:
     const ITensor                     *_input;
     ITensor                           *_output;
     const ITensor                     *_idx;
+    size_t                             _axis;
 };
 } // namespace arm_compute
-#endif /*ARM_COMPUTE_NEFFTDIGITREVERSEKERNEL_H */
+#endif // ACL_SRC_CORE_NEON_KERNELS_NEFFTDIGITREVERSEKERNEL_H

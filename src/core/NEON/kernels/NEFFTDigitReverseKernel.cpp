@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2025 Arm Limited.
+ * Copyright (c) 2019-2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,7 +83,14 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo             
 }
 } // namespace
 
-NEFFTDigitReverseKernel::NEFFTDigitReverseKernel() : _func(nullptr), _input(nullptr), _output(nullptr), _idx(nullptr)
+NEFFTDigitReverseKernel::NEFFTDigitReverseKernel()
+    : _func(nullptr),
+      _input(nullptr),
+      _output(nullptr),
+      _idx(nullptr),
+      _axis(
+          std::numeric_limits<size_t>::
+              max()) // Axis is set to an unsupported value so configure() fails with just this initialisation like with nullptr for the tensors
 {
 }
 
@@ -98,17 +105,17 @@ void NEFFTDigitReverseKernel::configure(const ITensor                   *input,
     _input  = input;
     _output = output;
     _idx    = idx;
+    _axis   = config.axis;
 
-    const size_t axis             = config.axis;
-    const bool   is_conj          = config.conjugate;
-    const bool   is_input_complex = (input->info()->num_channels() == 2);
+    const bool is_conj          = config.conjugate;
+    const bool is_input_complex = (input->info()->num_channels() == 2);
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info(), idx->info(), config);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     INEKernel::configure(win_config.second);
 
-    if (axis == 0)
+    if (_axis == 0)
     {
         if (is_input_complex)
         {
@@ -126,7 +133,7 @@ void NEFFTDigitReverseKernel::configure(const ITensor                   *input,
             _func = &NEFFTDigitReverseKernel::digit_reverse_kernel_axis_0<false, false>;
         }
     }
-    else if (axis == 1)
+    else if (_axis == 1)
     {
         if (is_input_complex)
         {
@@ -155,6 +162,7 @@ Status NEFFTDigitReverseKernel::validate(const ITensorInfo               *input,
                                          const ITensorInfo               *idx,
                                          const FFTDigitReverseKernelInfo &config)
 {
+    ARM_COMPUTE_ERROR_ON(config.axis != 0 && config.axis != 1);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, idx, config));
     ARM_COMPUTE_RETURN_ON_ERROR(
         validate_and_configure_window(input->clone().get(), output->clone().get(), idx->clone().get(), config).first);
@@ -280,6 +288,17 @@ void NEFFTDigitReverseKernel::run(const Window &window, const ThreadInfo &info)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
     ARM_COMPUTE_UNUSED(info);
+
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
+    // Ensure that no values in the idx tensor refer to out-of-bounds indices in the input
+    const uint32_t input_tensor_size_at_axis = static_cast<uint32_t>(_input->info()->tensor_shape()[_axis]);
+    for (size_t i = 0; i < _idx->info()->tensor_shape()[0]; ++i)
+    {
+        ARM_COMPUTE_ERROR_ON(*(reinterpret_cast<uint32_t *>(_idx->ptr_to_element(Coordinates(i)))) >=
+                             input_tensor_size_at_axis);
+    }
+#endif /* ARM_COMPUTE_ASSERTS_ENABLED */
+
     (this->*_func)(window);
 }
 
