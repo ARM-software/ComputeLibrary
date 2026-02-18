@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Arm Limited.
+ * Copyright (c) 2021-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -185,8 +185,10 @@ CpuGemmConv2d::SkipInfo CpuGemmConv2d::skip_im_col_info(const ITensorInfo       
     unsigned int       conv_h        = 0;
     std::tie(conv_w, conv_h) = scaled_dimensions(src->dimension(idx_width), src->dimension(idx_height), kernel_width,
                                                  kernel_height, conv_info, dilation);
-    const bool skip_im2col   = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 &&
-                              conv_info.stride().first == 1 && conv_info.stride().second == 1);
+
+    const bool skip_im2col = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 &&
+                              conv_info.stride().first == 1 && conv_info.stride().second == 1) &&
+                             !conv_info.has_padding();
 
     if (skip_im2col)
     {
