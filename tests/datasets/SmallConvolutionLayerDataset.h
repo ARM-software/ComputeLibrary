@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2025 Arm Limited.
+ * Copyright (c) 2017-2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -181,6 +181,8 @@ public:
         // 1x1 Kernel with Stride (1, 1) and NHWC data layout in order to test skipping Im2Col
         add_config(TensorShape(1U, 5U, 2U), TensorShape(1U, 1U, 2U, 3U), TensorShape(3U), TensorShape(1U, 5U, 3U),
                    PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(1U, 5U, 2U), TensorShape(1U, 1U, 2U, 3U), TensorShape(3U), TensorShape(3U, 7U, 3U),
+                   PadStrideInfo(1, 1, 1, 1));
 
         // Batch size 1
         add_config(TensorShape(23U, 27U, 5U), TensorShape(3U, 3U, 5U, 2U), TensorShape(2U), TensorShape(11U, 25U, 2U),
