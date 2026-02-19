@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, 2024 Arm Limited.
+ * Copyright (c) 2019-2022, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,6 +96,8 @@ const InstanceNormKernel *get_implementation(const InstanceNormSelectorData &dat
 
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, float gamma, float beta, float epsilon)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_UNUSED(gamma);
     ARM_COMPUTE_UNUSED(beta);
@@ -107,11 +109,17 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, f
 
     if (output != nullptr && output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_channels() != output->num_channels(),
                                         "Input and output have different number of channels");
+    }
+    else
+    {
+        // No configured output. Since `output` is expected to match `input`,
+        // there's nothing extra to check in this case.
     }
     return Status{};
 }

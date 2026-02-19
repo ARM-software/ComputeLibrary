@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
 #include "support/StringSupport.h"
@@ -46,6 +47,7 @@ constexpr unsigned int vector_size_byte_opencl = 16;
 
 Status validate_arguments(const ITensorInfo &src, const ITensorInfo &dst, const ElementWiseUnary op)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&src);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&src);
     if (op == ElementWiseUnary::LOGICAL_NOT)
     {
@@ -68,9 +70,15 @@ Status validate_arguments(const ITensorInfo &src, const ITensorInfo &dst, const 
     // Validate in case of configured dst
     if (dst.total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst);
         ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&src, &dst);
+    }
+    else
+    {
+        // No configured output. Since `dst` is expected to match `src`,
+        // there's nothing extra to check in this case.
     }
 
     return Status{};

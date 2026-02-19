@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -47,9 +48,12 @@ Status validate_arguments(const ITensorInfo              *boxes,
                           const BoundingBoxTransformInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(boxes, pred_boxes, deltas);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(boxes, deltas);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(boxes);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(boxes, DataType::QASYMM16, DataType::F32, DataType::F16);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(deltas, DataType::QASYMM8, DataType::F32, DataType::F16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(boxes, ITensorInfo::one_channel, DataType::QASYMM16,
+                                                         DataType::F32, DataType::F16);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(deltas, ITensorInfo::one_channel, DataType::QASYMM8,
+                                                         DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON(deltas->tensor_shape()[1] != boxes->tensor_shape()[1]);
     ARM_COMPUTE_RETURN_ERROR_ON(deltas->tensor_shape()[0] % 4 != 0);
     ARM_COMPUTE_RETURN_ERROR_ON(boxes->tensor_shape()[0] != 4);
@@ -62,7 +66,7 @@ Status validate_arguments(const ITensorInfo              *boxes,
         const UniformQuantizationInfo boxes_qinfo = boxes->quantization_info().uniform();
         ARM_COMPUTE_RETURN_ERROR_ON(boxes_qinfo.scale != 0.125f);
         ARM_COMPUTE_RETURN_ERROR_ON(boxes_qinfo.offset != 0);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(deltas, DataType::QASYMM8);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(deltas, ITensorInfo::one_channel, DataType::QASYMM8);
     }
     else
     {
@@ -71,6 +75,7 @@ Status validate_arguments(const ITensorInfo              *boxes,
 
     if (pred_boxes->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(pred_boxes);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(pred_boxes->tensor_shape(), deltas->tensor_shape());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(pred_boxes, boxes);
         ARM_COMPUTE_RETURN_ERROR_ON(pred_boxes->num_dimensions() > 2);
@@ -80,6 +85,11 @@ Status validate_arguments(const ITensorInfo              *boxes,
             ARM_COMPUTE_RETURN_ERROR_ON(pred_boxes_qinfo.scale != 0.125f);
             ARM_COMPUTE_RETURN_ERROR_ON(pred_boxes_qinfo.offset != 0);
         }
+    }
+    else
+    {
+        const auto pred_boxes_info = TensorInfo(deltas->tensor_shape(), ITensorInfo::one_channel, boxes->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&pred_boxes_info);
     }
     ARM_COMPUTE_RETURN_ERROR_ON(info.scale() <= 0);
 

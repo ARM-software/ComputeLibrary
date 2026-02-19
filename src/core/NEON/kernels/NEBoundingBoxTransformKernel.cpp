@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, 2024 Arm Limited.
+ * Copyright (c) 2019-2022, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -99,6 +99,7 @@ Status validate_arguments(const ITensorInfo              *boxes,
                           const BoundingBoxTransformInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(boxes, pred_boxes, deltas);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(boxes, deltas);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(boxes);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(boxes, DataType::QASYMM16, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(deltas, DataType::QASYMM8, DataType::F32, DataType::F16);
@@ -123,6 +124,7 @@ Status validate_arguments(const ITensorInfo              *boxes,
 
     if (pred_boxes->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(pred_boxes);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(pred_boxes->tensor_shape(), deltas->tensor_shape());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(pred_boxes, deltas);
         ARM_COMPUTE_RETURN_ERROR_ON(pred_boxes->num_dimensions() > 2);
@@ -132,6 +134,11 @@ Status validate_arguments(const ITensorInfo              *boxes,
             ARM_COMPUTE_RETURN_ERROR_ON(pred_qinfo.scale != 0.125f);
             ARM_COMPUTE_RETURN_ERROR_ON(pred_qinfo.offset != 0);
         }
+    }
+    else
+    {
+        // No configured output. Since `pred_boxes` is expected to match `deltas`,
+        // there's nothing extra to check in this case.
     }
 
     return Status{};

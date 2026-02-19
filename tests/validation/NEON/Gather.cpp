@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, 2025 Arm Limited.
+ * Copyright (c) 2019-2022, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,7 +80,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F16),
         }),
         make("Axis", {
-                                            0,
                                             1,
                                             -2,
                                             0,

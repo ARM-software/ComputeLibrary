@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited.
+ * Copyright (c) 2017-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,10 +26,13 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -37,6 +40,7 @@
 
 namespace arm_compute
 {
+using namespace misc::shape_calculator;
 namespace opencl
 {
 namespace kernels
@@ -46,15 +50,24 @@ namespace
 Status validate_arguments_matrix_a_reduction(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                         DataType::QSYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, ITensorInfo::one_channel, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED, DataType::QSYMM8);
+
+    // Output vector matches the number of rows of the input matrix.
+    const TensorShape output_shape     = compute_reductionB_shape(*src);
+    const auto        output_data_type = DataType::S32;
 
     if (dst->total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-            dst->dimension(0) != src->dimension(1),
-            "Output vector must have length equal to the number of rows of the input matrix");
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, ITensorInfo::one_channel, output_data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
+    }
+    else
+    {
+        const TensorInfo dst_info(output_shape, ITensorInfo::one_channel, output_data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
     return Status{};
 }
@@ -62,15 +75,25 @@ Status validate_arguments_matrix_a_reduction(const ITensorInfo *src, const ITens
 Status validate_arguments_matrix_b_reduction(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                         DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, ITensorInfo::one_channel, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED, DataType::QSYMM8,
+                                                         DataType::QSYMM8_PER_CHANNEL);
+
+    // Output vector matches the number of columns of the input matrix.
+    const TensorShape output_shape     = compute_reductionA_shape(*src);
+    const auto        output_data_type = DataType::S32;
 
     if (dst->total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-            dst->dimension(0) != src->dimension(0),
-            "Output vector must have length equal to the number of columns of the input matrix");
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, ITensorInfo::one_channel, output_data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
+    }
+    else
+    {
+        const TensorInfo dst_info(output_shape, ITensorInfo::one_channel, output_data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
     return Status{};
 }

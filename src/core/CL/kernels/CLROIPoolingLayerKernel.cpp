@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -54,10 +55,9 @@ Status CLROIPoolingLayerKernel::validate(const ITensorInfo         *input,
                                          const ITensorInfo         *output,
                                          const ROIPoolingLayerInfo &pool_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, rois, output);
-
     //Validate arguments
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, rois, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, rois);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(rois, 1, DataType::U16);
     ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(0) != 5);
     ARM_COMPUTE_RETURN_ERROR_ON(rois->num_dimensions() > 2);
@@ -65,13 +65,19 @@ Status CLROIPoolingLayerKernel::validate(const ITensorInfo         *input,
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
 
+    const TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), input->dimension(2),
+                                   rois->dimension(1));
+
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON((output->dimension(0) != pool_info.pooled_width()) ||
-                                    (output->dimension(1) != pool_info.pooled_height()));
-        ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != output->dimension(2));
-        ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(1) != output->dimension(3));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+    }
+    else
+    {
+        const TensorInfo output_info(output_shape, input->num_channels(), input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

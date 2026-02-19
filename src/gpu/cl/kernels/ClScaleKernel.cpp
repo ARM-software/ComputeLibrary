@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023 Arm Limited.
+ * Copyright (c) 2016-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/ScaleUtils.h"
 #include "support/Cast.h"
@@ -65,6 +66,7 @@ calculate_scale_factors(const ITensorInfo *src, const ITensorInfo *dst, DataLayo
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const ScaleKernelInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::U8, DataType::S16, DataType::F16, DataType::F32);

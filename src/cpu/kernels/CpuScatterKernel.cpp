@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Arm Limited.
+ * Copyright (c) 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -121,6 +121,8 @@ Status CpuScatterKernel::validate(const ITensorInfo *updates,
 {
     ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuScatterKernel::validate");
     ARM_COMPUTE_UNUSED(scatter_info);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(updates, indices, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(updates, indices, dst);
 
     const TensorShape &ind_shape = indices->tensor_shape();
     const TensorShape &upt_shape = updates->tensor_shape();

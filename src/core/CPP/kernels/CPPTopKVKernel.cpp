@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/misc/Traits.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -53,9 +54,12 @@ Status validate_arguments(const ITensorInfo *predictions,
                           const unsigned int k)
 {
     ARM_COMPUTE_UNUSED(k);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(predictions, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                         DataType::S32, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(targets, 1, DataType::U32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(predictions, targets, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(predictions, targets);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(predictions, ITensorInfo::one_channel, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED, DataType::S32, DataType::F16,
+                                                         DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(targets, ITensorInfo::one_channel, DataType::U32);
 
     ARM_COMPUTE_RETURN_ERROR_ON(predictions->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON(targets->num_dimensions() > 1);
@@ -63,8 +67,14 @@ Status validate_arguments(const ITensorInfo *predictions,
     // Validate configured output
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), targets->tensor_shape());
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, ITensorInfo::one_channel, DataType::U8);
+    }
+    else
+    {
+        const auto output_info = TensorInfo(targets->tensor_shape(), ITensorInfo::one_channel, DataType::U8);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

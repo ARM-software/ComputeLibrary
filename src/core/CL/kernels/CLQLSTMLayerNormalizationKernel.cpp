@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023 Arm Limited.
+ * Copyright (c) 2020-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/utils/StringUtils.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -66,6 +67,7 @@ Status validate_arguments(const ITensorInfo *input,
                           const ITensorInfo *bias)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weight, bias, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, weight, bias);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 2, "Input tensor cannot have more than 2 dimensions");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weight->num_dimensions() > 1, "Weight tensor cannot have more than 1 dimensions");
@@ -81,8 +83,14 @@ Status validate_arguments(const ITensorInfo *input,
     // Checks performed when output is configured
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
+    else
+    {
+        // No configured output. Since `output` is expected to match `input`,
+        // there's nothing extra to check in this case.
     }
     return Status{};
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -43,6 +44,7 @@ Status validate_arguments(const ITensorInfo *bboxes,
                           const float        iou_threshold)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(bboxes, scores, output_indices);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(bboxes, scores, output_indices);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bboxes, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_indices, 1, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(bboxes->num_dimensions() > 2,

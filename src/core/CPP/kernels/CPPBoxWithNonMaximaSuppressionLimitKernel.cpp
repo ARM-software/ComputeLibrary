@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2022 Arm Limited.
+ * Copyright (c) 2018-2020, 2022, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Helpers.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/WindowHelpers.h"
 
 #include <algorithm>
@@ -381,6 +382,8 @@ void CPPBoxWithNonMaximaSuppressionLimitKernel::configure(const ITensor        *
                                                           const BoxNMSLimitInfo info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(scores_in, boxes_in, scores_out, boxes_out, classes);
+    ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(scores_in->info(), boxes_in->info(), scores_out->info(), boxes_out->info(),
+                                          classes->info());
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(scores_in, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(scores_in, boxes_in, scores_out);
     const unsigned int num_classes = scores_in->info()->dimension(0);
@@ -396,8 +399,10 @@ void CPPBoxWithNonMaximaSuppressionLimitKernel::configure(const ITensor        *
     ARM_COMPUTE_ERROR_ON(scores_out->info()->dimension(0) != classes->info()->dimension(0));
     if (keeps != nullptr)
     {
+        ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(keeps->info());
         ARM_COMPUTE_ERROR_ON_MSG(keeps_size == nullptr,
                                  "keeps_size cannot be nullptr if keeps has to be provided as output");
+        ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(keeps_size->info());
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(scores_in, keeps);
         ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(keeps_size, 1, DataType::U32);
         ARM_COMPUTE_ERROR_ON(scores_out->info()->dimension(0) != keeps->info()->dimension(0));
@@ -405,10 +410,12 @@ void CPPBoxWithNonMaximaSuppressionLimitKernel::configure(const ITensor        *
     }
     if (batch_splits_in != nullptr)
     {
+        ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(batch_splits_in->info());
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(scores_in, batch_splits_in);
     }
     if (batch_splits_out != nullptr)
     {
+        ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(batch_splits_out->info());
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(scores_in, batch_splits_out);
     }
 

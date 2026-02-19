@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,12 +24,14 @@
 #include "src/gpu/cl/kernels/ClTransposedConvolutionKernel.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -48,6 +50,8 @@ Status validate_arguments(const ITensorInfo   *input,
                           const ITensorInfo   *output,
                           const PadStrideInfo &deconv_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32,
                                                          DataType::QASYMM8_SIGNED, DataType::QASYMM8);
@@ -66,6 +70,7 @@ Status validate_arguments(const ITensorInfo   *input,
 
     if (biases != nullptr)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(biases);
         if (is_data_type_quantized_asymmetric(input->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
@@ -81,22 +86,28 @@ Status validate_arguments(const ITensorInfo   *input,
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC);
     }
 
+    const size_t input_width    = input->dimension(width_idx);
+    const size_t input_height   = input->dimension(height_idx);
+    const size_t weights_width  = weights->dimension(width_idx);
+    const size_t weights_height = weights->dimension(height_idx);
+
+    const auto out_dims =
+        deconvolution_output_dimensions(input_width, input_height, weights_width, weights_height, deconv_info);
+    const TensorShape output_shape =
+        misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input, *weights);
+
     // Checks performed when output is configured
     if (output->total_size() != 0)
     {
-        const size_t input_width    = input->dimension(width_idx);
-        const size_t input_height   = input->dimension(height_idx);
-        const size_t weights_width  = weights->dimension(width_idx);
-        const size_t weights_height = weights->dimension(height_idx);
-
-        auto out_dims =
-            deconvolution_output_dimensions(input_width, input_height, weights_width, weights_height, deconv_info);
-        TensorShape output_shape =
-            misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input, *weights);
-
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(output, DataLayout::NHWC);
+    }
+    else
+    {
+        const TensorInfo output_info(output_shape, input->num_channels(), input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

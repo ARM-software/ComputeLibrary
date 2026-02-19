@@ -229,6 +229,8 @@ Status NECropKernel::validate(const ITensorInfo *input,
                               float              extrapolation_value)
 {
     ARM_COMPUTE_UNUSED(extrapolation_value);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, crop_boxes, box_ind, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, crop_boxes, box_ind);
     const auto *uk = get_implementation(CropSelectorData{input->data_type()});
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
@@ -243,10 +245,16 @@ Status NECropKernel::validate(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ERROR_ON(box_ind->tensor_shape()[0] <= crop_box_ind);
     if (output->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(output, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_dimensions() != 3);
         ARM_COMPUTE_RETURN_ERROR_ON(output->has_padding());
+    }
+    else
+    {
+        // Complicated, but since it's crop, `output` should be no larger than
+        // `input` anyway, so there's nothing extra to check in this case.
     }
     return Status{};
 }

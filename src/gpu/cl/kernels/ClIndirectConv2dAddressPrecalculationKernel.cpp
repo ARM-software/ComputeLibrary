@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,10 +27,12 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/KernelDescriptors.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -50,8 +52,10 @@ Status validate_arguments(const ITensorInfo                 *src,
                           const PadStrideInfo               &conv_info,
                           const DirectConvComputeKernelInfo &desc)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, ITensorInfo::one_channel, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(src, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(0) != src->dimension(0),
@@ -60,14 +64,21 @@ Status validate_arguments(const ITensorInfo                 *src,
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(desc.m0 <= 0 || desc.m0 > 8,
                                     "M0 can only be greater than 0 and less than or equal to 8");
 
+    const TensorShape output_shape = misc::shape_calculator::compute_indirect_buffer_shape(
+        src->tensor_shape(), src->data_layout(), weights->tensor_shape(), conv_info, desc);
+    const auto output_data_type = DataType::S32;
+
     // Checks performed when dst is configured
     if (dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
-            dst->tensor_shape(),
-            misc::shape_calculator::compute_indirect_buffer_shape(src->tensor_shape(), src->data_layout(),
-                                                                  weights->tensor_shape(), conv_info, desc));
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, ITensorInfo::one_channel, output_data_type);
+    }
+    else
+    {
+        const TensorInfo dst_info(output_shape, ITensorInfo::one_channel, output_data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

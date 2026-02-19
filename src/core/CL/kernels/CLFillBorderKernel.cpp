@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023 Arm Limited.
+ * Copyright (c) 2016-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
 #include "support/StringSupport.h"
@@ -80,7 +81,8 @@ void CLFillBorderKernel::configure(const CLCompileContext &compile_context,
                                    BorderMode              border_mode,
                                    const PixelValue       &constant_border_value)
 {
-    ARM_COMPUTE_ERROR_ON(tensor == nullptr);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
+    ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(tensor);
     ARM_COMPUTE_ERROR_ON(tensor->num_channels() != 1);
     auto padding_info = get_padding_info({tensor});
 

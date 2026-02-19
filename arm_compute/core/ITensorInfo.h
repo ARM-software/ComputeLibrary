@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2025 Arm Limited.
+ * Copyright (c) 2016-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,10 @@ public:
     using Id = int32_t;
     /** An invalid tensor id within a domain */
     static constexpr Id invalid_tensor_id = 0;
+    /** Named constant for commonly used value */
+    static constexpr size_t one_channel = 1u;
+    /** Named constant for commonly used value */
+    static constexpr size_t two_channels = 2u;
     /** Get the value representing dynamic dimension state
      *
      * @return Value representing dynamic dimension state

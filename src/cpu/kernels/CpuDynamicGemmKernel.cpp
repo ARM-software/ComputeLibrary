@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Arm Limited.
+ * Copyright (c) 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/function_info/GEMMInfo.h"
 
 #include "src/common/utils/profile/acl_profile.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/MemoryHelpers.h"
 #include "src/cpu/kernels/dynamic_gemm/heuristics/CpuDynamicGemmKernelHeuristics.h"
 #include "src/cpu/utils/CpuAuxTensorHandler.h"
@@ -137,6 +138,8 @@ void CpuDynamicGemmKernel::run_op(ITensorPack &tensors, const Window &window, co
     const ITensor *c      = tensors.get_const_tensor(ACL_SRC_2);
     ITensor       *d      = tensors.get_tensor(ACL_DST);
     ITensor       *pack_b = tensors.get_tensor(offset_int_vec(_base_aux_slot + PackedRHS));
+
+    ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(a->info(), b->info(), c->info(), d->info(), pack_b->info());
 
     ARM_COMPUTE_EXIT_ON_MSG(
         a->info()->dimension(0) != b->info()->dimension(1),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 
 #include "src/common/utils/Log.h"
 #include "src/core/CL/CLUtils.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
@@ -120,6 +121,7 @@ Status ClMatMulNativeKernel::validate(const ITensorInfo         *lhs,
 {
     ARM_COMPUTE_UNUSED(act_info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lhs, rhs, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(lhs, rhs);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, rhs);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_matmul_kernel_info(matmul_kernel_info));
@@ -132,13 +134,20 @@ Status ClMatMulNativeKernel::validate(const ITensorInfo         *lhs,
 
     if (dst->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         const TensorInfo tensor_info_dst = dst->clone()->set_tensor_shape(expected_output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &tensor_info_dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, dst);
     }
+    else
+    {
+        const TensorInfo dst_info(expected_output_shape, lhs->num_channels(), lhs->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
+    }
 
     if (bias != nullptr)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(bias);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(bias, lhs);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG((bias->num_dimensions() > 1), "Multi dimensional bias is unsupported.");
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(bias->dimension(0) != expected_output_shape[0],
