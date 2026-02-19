@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -44,24 +45,31 @@ namespace
 Status validate_arguments(const ITensorInfo *anchors, const ITensorInfo *all_anchors, const ComputeAnchorsInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(anchors, all_anchors);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(anchors);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(anchors);
     ARM_COMPUTE_RETURN_ERROR_ON(anchors->dimension(0) != info.values_per_roi());
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(anchors, DataType::QSYMM16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(anchors->num_dimensions() > 2);
+    const size_t      feature_height = info.feat_height();
+    const size_t      feature_width  = info.feat_width();
+    const size_t      num_anchors    = anchors->dimension(1);
+    const TensorShape output_shape(info.values_per_roi(), feature_width * feature_height * num_anchors);
+    const auto        all_anchors_info =
+        TensorInfo(output_shape, ITensorInfo::one_channel, anchors->data_type(), anchors->quantization_info());
     if (all_anchors->total_size() > 0)
     {
-        size_t feature_height = info.feat_height();
-        size_t feature_width  = info.feat_width();
-        size_t num_anchors    = anchors->dimension(1);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(all_anchors);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(all_anchors, anchors);
-        ARM_COMPUTE_RETURN_ERROR_ON(all_anchors->num_dimensions() > 2);
-        ARM_COMPUTE_RETURN_ERROR_ON(all_anchors->dimension(0) != info.values_per_roi());
-        ARM_COMPUTE_RETURN_ERROR_ON(all_anchors->dimension(1) != feature_height * feature_width * num_anchors);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(all_anchors, &all_anchors_info);
 
         if (is_data_type_quantized(anchors->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(anchors, all_anchors);
         }
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&all_anchors_info);
     }
     return Status{};
 }

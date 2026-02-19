@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
 #include "support/StringSupport.h"
@@ -63,6 +64,7 @@ ClSoftmaxKernel::ClSoftmaxKernel()
 Status ClSoftmaxKernel::validate(const ITensorInfo &src, const ITensorInfo &dst, const SoftmaxKernelInfo &info)
 {
     ARM_COMPUTE_UNUSED(src, dst, info);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&src, &dst);
 
     ARM_COMPUTE_RETURN_ERROR_ON(src.num_dimensions() > 4);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Helpers.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/WindowHelpers.h"
 
 #include <cstddef>
@@ -44,6 +45,7 @@ bool CPPUpsampleKernel::is_parallelisable() const
 void CPPUpsampleKernel::configure(const ITensor *input, ITensor *output, const PadStrideInfo &info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(input->info(), output->info());
 
     _input  = input;
     _output = output;

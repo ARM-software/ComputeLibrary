@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -92,8 +93,8 @@ void ClFillKernel::configure(const CLCompileContext &compile_context,
 
 Status ClFillKernel::validate(const ITensorInfo *tensor, const PixelValue &constant_value, Window *window)
 {
-    ARM_COMPUTE_UNUSED(tensor);
     ARM_COMPUTE_UNUSED(constant_value);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(tensor);
     if (window != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(window->x().step() != 1);

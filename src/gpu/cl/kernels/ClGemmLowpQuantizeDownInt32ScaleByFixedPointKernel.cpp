@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Arm Limited.
+ * Copyright (c) 2020-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -52,11 +53,14 @@ Status validate_arguments(const ITensorInfo             *src,
                           const GEMMLowpOutputStageInfo *info)
 {
     ARM_COMPUTE_UNUSED(info);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, ITensorInfo::one_channel, DataType::S32);
 
     // Check biases if exist
     if (bias != nullptr)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(bias);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, bias);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
         ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(0) != bias->dimension(0));
@@ -64,8 +68,14 @@ Status validate_arguments(const ITensorInfo             *src,
 
     if (dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->data_type() != info->output_data_type, "Mismatching dst data type");
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, ITensorInfo::one_channel, info->output_data_type);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
+    }
+    else
+    {
+        const TensorInfo dst_info(src->tensor_shape(), ITensorInfo::one_channel, info->output_data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

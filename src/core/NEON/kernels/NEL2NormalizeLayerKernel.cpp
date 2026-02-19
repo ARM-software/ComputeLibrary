@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2022, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 
 #include "src/common/cpuinfo/CpuIsaInfo.h"
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/NEMath.h"
@@ -114,6 +115,7 @@ validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, const ITens
 
     const uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, sum, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, sum);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(actual_axis > 2, "Actual axis greater than 2 is not supported");
@@ -127,10 +129,16 @@ validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, const ITens
 
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(input->tensor_shape(), output->tensor_shape());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
+    }
+    else
+    {
+        // No configured output. Since `output` is expected to match `input`,
+        // there's nothing extra to check in this case.
     }
 
     return Status{};

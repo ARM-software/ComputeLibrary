@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -41,17 +42,25 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Multiples &multiples)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(multiples.size() > 4);
     ARM_COMPUTE_RETURN_ERROR_ON(multiples.empty());
     ARM_COMPUTE_RETURN_ERROR_ON(std::any_of(multiples.begin(), multiples.end(), [](uint32_t e) { return e == 0; }));
 
+    const TensorShape output_shape = misc::shape_calculator::compute_tiled_shape(input->tensor_shape(), multiples);
+
     // Validate output if initialized
     if (output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
-            misc::shape_calculator::compute_tiled_shape(input->tensor_shape(), multiples), output->tensor_shape());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output_shape, output->tensor_shape());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
+    else
+    {
+        const TensorInfo output_info(output_shape, input->num_channels(), input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023, 2025 Arm Limited.
+ * Copyright (c) 2022-2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/core/CL/CLUtils.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/helpers/float_ops.h"
@@ -69,6 +70,7 @@ Status validate_arguments(const ITensorInfo       *src0,
 {
     ARM_COMPUTE_UNUSED(alpha);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src0, src1);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!arm_matrix_multiply_supported(CLKernelLibrary::get().get_device()),
                                     "The extension cl_arm_matrix_multiply is not supported on the target platform");
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, 1, DataType::F16, DataType::F32);
@@ -147,6 +149,7 @@ Status validate_arguments(const ITensorInfo       *src0,
         const unsigned int src2_dim0 = src2->dimension(0);
         const unsigned int src2_dim1 = src2->dimension(1);
 
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src2);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src2, src1);
         if (gemm_info.broadcast_bias)
         {
@@ -169,12 +172,18 @@ Status validate_arguments(const ITensorInfo       *src0,
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src1, &tensor_info_reshaped1);
 
+    const TensorShape output_shape = misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info);
+
     if (dst->total_size() != 0)
     {
-        const TensorInfo tensor_info_dst =
-            dst->clone()->set_tensor_shape(misc::shape_calculator::compute_mm_shape(*src0, *src1, gemm_info));
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &tensor_info_dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, dst);
+    }
+    else
+    {
+        const TensorInfo dst_info(output_shape, src0->num_channels(), src0->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

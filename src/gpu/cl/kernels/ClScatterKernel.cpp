@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
 
@@ -58,6 +59,8 @@ Status ClScatterKernel::validate(const ITensorInfo *updates,
                                  const ScatterInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(updates, indices, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(updates, indices, dst);
 
     const TensorShape &ind_shape = indices->tensor_shape();
     const TensorShape &upt_shape = updates->tensor_shape();

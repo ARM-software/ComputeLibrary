@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,7 @@ Status validate_arguments(const ITensorInfo         *input,
                           const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, rois);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, rois);
 
     //Validate arguments
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(rois, DataType::U16);
@@ -52,13 +53,19 @@ Status validate_arguments(const ITensorInfo         *input,
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(input, DataType::F32, DataType::QASYMM8);
     ARM_COMPUTE_RETURN_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
 
+    const TensorShape output_shape(pool_info.pooled_width(), pool_info.pooled_height(), input->dimension(2),
+                                   rois->dimension(1));
+
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON((output->dimension(0) != pool_info.pooled_width()) ||
-                                    (output->dimension(1) != pool_info.pooled_height()));
-        ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != output->dimension(2));
-        ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(1) != output->dimension(3));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+    }
+    else
+    {
+        const TensorInfo output_info(output_shape, input->num_channels(), input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/core/Utils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -96,6 +97,7 @@ Status ClConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src,
                                                       DataLayout         data_layout)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(src->num_dimensions() != 2);
@@ -105,8 +107,14 @@ Status ClConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src,
     // Checks performed when dst is configured
     if (dst->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
+    }
+    else
+    {
+        // No configured output. Since `dst` is expected to match `src`,
+        // there's nothing extra to check in this case.
     }
 
     return Status{};

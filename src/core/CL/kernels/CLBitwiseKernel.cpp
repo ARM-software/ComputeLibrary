@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023 Arm Limited.
+ * Copyright (c) 2020-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -49,17 +50,20 @@ void CLBitwiseKernel::configure(const CLCompileContext &compile_context,
                                 BitwiseOperation        op)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(input1->info());
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, ITensorInfo::one_channel, DataType::U8);
     if (op != BitwiseOperation::NOT)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(input2);
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8);
+        ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(input2->info());
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, ITensorInfo::one_channel, DataType::U8);
     }
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, ITensorInfo::one_channel, DataType::U8);
 
-    // Output auto inizialitation if not yet initialized
+    // Output auto initialization if not yet initialized
     auto_init_if_empty(*(output->info()), *(input1->info()));
+    ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(output->info());
     auto padding_info = get_padding_info({input1, input2, output});
 
     // Configure kernel window

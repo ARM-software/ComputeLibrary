@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -49,6 +50,7 @@ Status validate_arguments(const ITensorInfo         *input,
                           const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, rois, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, rois);
     ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(0) != 5);
     ARM_COMPUTE_RETURN_ERROR_ON(rois->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
@@ -57,12 +59,19 @@ Status validate_arguments(const ITensorInfo         *input,
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC, DataLayout::NCHW);
     ARM_COMPUTE_RETURN_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
 
+    const TensorShape output_shape = compute_roi_align_shape(*input, *rois, pool_info);
+
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(compute_roi_align_shape(*input, *rois, pool_info),
-                                                           output->tensor_shape());
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output_shape, output->tensor_shape());
+    }
+    else
+    {
+        const auto output_info = TensorInfo(output_shape, input->num_channels(), input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     if (is_data_type_quantized_asymmetric(input->data_type()))

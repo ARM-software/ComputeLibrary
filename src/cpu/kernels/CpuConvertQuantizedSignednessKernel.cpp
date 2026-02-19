@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2025 Arm Limited.
+ * Copyright (c) 2019-2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/Window.h"
 
 #include "src/common/utils/profile/acl_profile.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -46,13 +47,21 @@ namespace
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
 
     // Validate output if initialized
     if (dst->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(src->tensor_shape(), dst->tensor_shape());
+    }
+    else
+    {
+        // No configured output. Since `dst` is expected to match `src` (except
+        // for data type, which changes nothing in terms of size), there's nothing
+        // extra to check in this case.
     }
 
     return Status{};

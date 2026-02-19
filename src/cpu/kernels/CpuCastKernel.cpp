@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2025 Arm Limited.
+ * Copyright (c) 2016-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,8 @@ static const std::vector<CpuCastKernel::CastKernel> available_kernels = {
 
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, ConvertPolicy policy)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(dst);
     ARM_COMPUTE_UNUSED(policy);
@@ -154,7 +156,14 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Conver
     // Validate in case of configured dst
     if (dst->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
+    }
+    else
+    {
+        // The data type must be given, but the shape is expected to match src.
+        const TensorInfo dst_info(src->tensor_shape(), src->num_channels(), dst->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

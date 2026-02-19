@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/core/AccessWindowStatic.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -64,15 +65,26 @@ Status validate_arguments(const ITensorInfo    *src0,
                           const ITensorInfo    *output_shifts)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+    if (vector_sum_col != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(vector_sum_col);
+    }
+    if (vector_sum_row != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(vector_sum_row);
+    }
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src0, src1);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, ITensorInfo::one_channel, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED);
     if (src0->data_type() == DataType::QASYMM8)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, src1);
     }
     else
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1, 1, DataType::QASYMM8, DataType::QSYMM8,
-                                                             DataType::QASYMM8_SIGNED, DataType::QSYMM8_PER_CHANNEL);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1, ITensorInfo::one_channel, DataType::QASYMM8,
+                                                             DataType::QSYMM8, DataType::QASYMM8_SIGNED,
+                                                             DataType::QSYMM8_PER_CHANNEL);
     }
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src0->num_dimensions() > 4,
                                     "The number of dimensions for the LHS matrix must be <= 4");
@@ -114,23 +126,25 @@ Status validate_arguments(const ITensorInfo    *src0,
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src1, &tensor_info_reshaped1);
 
     const TensorShape expected_dst_shape = compute_mm_shape(*src0, *src1, gemm_info);
+    const DataType    expected_data_type =
+        (output_stage.type == GEMMLowpOutputStageType::NONE) ? DataType::S32 : src0->data_type();
     if (dst->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         const TensorInfo tensor_info_dst = dst->clone()->set_tensor_shape(expected_dst_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &tensor_info_dst);
-        if (output_stage.type == GEMMLowpOutputStageType::NONE)
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
-        }
-        else
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, dst);
-        }
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, ITensorInfo::one_channel, expected_data_type);
+    }
+    else
+    {
+        const TensorInfo dst_info(expected_dst_shape, ITensorInfo::one_channel, expected_data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     if (bias != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(bias);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, ITensorInfo::one_channel, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() > 1);
         ARM_COMPUTE_RETURN_ERROR_ON(expected_dst_shape[0] != bias->dimension(0));
     }
@@ -145,14 +159,16 @@ Status validate_arguments(const ITensorInfo    *src0,
         // If a_offset == 0, vector_sum_col can be a nullptr
         if (gemm_info.a_offset != 0)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_col, 1, DataType::S32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_col, ITensorInfo::one_channel,
+                                                                 DataType::S32);
             ARM_COMPUTE_RETURN_ERROR_ON(vector_sum_col->dimension(0) != expected_dst_shape[0]);
         }
 
         // If b_offset == 0, vector_sum_row can be a nullptr
         if (gemm_info.b_offset != 0)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_row, 1, DataType::S32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(vector_sum_row, ITensorInfo::one_channel,
+                                                                 DataType::S32);
 
             // Check if mm result is a 3D reinterpretation
             const bool reinterpret_as_3d =
@@ -196,9 +212,12 @@ Status validate_arguments(const ITensorInfo    *src0,
 
         if (output_multipliers != nullptr && output_shifts != nullptr)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_multipliers, 1, DataType::S32);
+            ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output_multipliers, output_shifts);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_multipliers, ITensorInfo::one_channel,
+                                                                 DataType::S32);
             ARM_COMPUTE_RETURN_ERROR_ON(output_multipliers->num_dimensions() > 1);
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_shifts, 1, DataType::S32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_shifts, ITensorInfo::one_channel,
+                                                                 DataType::S32);
             ARM_COMPUTE_RETURN_ERROR_ON(output_shifts->num_dimensions() > 1);
             if (output_stage.is_quantized_per_channel)
             {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 
 #include "src/core/AccessWindowStatic.h"
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
@@ -50,6 +51,8 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const GEMMRHSMatrixInfo &rhs_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.n0 == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.k0 == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(rhs_info.h0 == 0);
@@ -71,12 +74,19 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
         ARM_COMPUTE_RETURN_ON_ERROR(gemm::validate_image2d_support_on_rhs(tensor_reshaped_info, rhs_info));
     }
 
+    const TensorShape output_shape = misc::shape_calculator::compute_rhs_reshaped_shape(*src, rhs_info);
+
     if (dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
-            dst->tensor_shape(), misc::shape_calculator::compute_rhs_reshaped_shape(*src, rhs_info));
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
+    }
+    else
+    {
+        const TensorInfo dst_info(output_shape, src->num_channels(), src->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -43,6 +44,8 @@ constexpr unsigned int vector_size_byte_opencl = 16;
 Status validate_arguments(const ITensorInfo *output, const float start, const float end, const float step)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON(output->total_size() == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
                                                          DataType::U16, DataType::S16, DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);

@@ -86,14 +86,16 @@ static const std::vector<CpuTopKVKernel::TopKVKernel> available_kernels = {
 Status
 validate_arguments(const ITensorInfo &predictions, const ITensorInfo &targets, const ITensorInfo &dst, uint32_t k)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&predictions, &targets);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&predictions);
 
     // predictions (logical shape [C, N], where N defaults to 1 if dimension 1 is absent)
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&predictions, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                         DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&predictions, ITensorInfo::one_channel, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED, DataType::S32, DataType::F16,
+                                                         DataType::F32);
 
     // targets (class indices)
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&targets, 1, DataType::U32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&targets, ITensorInfo::one_channel, DataType::U32);
 
     const unsigned int C = predictions.tensor_shape()[0]; // classes
     const unsigned int N = predictions.tensor_shape()[1]; // batch (defaults to 1 if not present)
@@ -118,8 +120,14 @@ validate_arguments(const ITensorInfo &predictions, const ITensorInfo &targets, c
     // If dst is already configured, validate it
     if (dst.total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&dst, 1, DataType::U8);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&dst, ITensorInfo::one_channel, DataType::U8);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst.tensor_shape() != out_shape, "dst shape must be [N]");
+    }
+    else
+    {
+        const auto dst_info = TensorInfo(out_shape, ITensorInfo::one_channel, DataType::U8);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     const auto uk = CpuTopKVKernel::get_implementation<CpuTopKVKernelDataTypeISASelectorData>(

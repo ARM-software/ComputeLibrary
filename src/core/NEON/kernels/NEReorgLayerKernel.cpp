@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -43,6 +44,8 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, int32_t stride)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input);
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
@@ -56,13 +59,20 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->tensor_shape()[idx_height] % stride) != 0,
                                     "The height of the input tensor must be a multiple of stride");
 
+    const TensorShape output_shape = misc::shape_calculator::compute_reorg_output_shape(*input, stride);
+
     // Validate output if initialized
     if (output->total_size() != 0)
     {
-        const TensorInfo tensor_info_output =
-            output->clone()->set_tensor_shape(misc::shape_calculator::compute_reorg_output_shape(*input, stride));
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
+        const TensorInfo tensor_info_output = output->clone()->set_tensor_shape(output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
+    else
+    {
+        const auto output_info = TensorInfo(output_shape, input->num_channels(), input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};
