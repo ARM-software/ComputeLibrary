@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2025 Arm Limited.
+# Copyright (c) 2016-2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -448,16 +448,19 @@ env['CC'] = env['compiler_cache']+ " " + compiler_prefix + c_compiler
 env['CXX'] = env['compiler_cache']+ " " + compiler_prefix + cpp_compiler
 env['LD'] = toolchain_prefix + "ld"
 env['AS'] = toolchain_prefix + "as"
+env['AR'] = toolchain_prefix + "ar"
+env['RANLIB'] = toolchain_prefix + "ranlib"
 
 if env['os'] == 'windows':
     env['AR'] = "llvm-lib"
     env['RANLIB'] = "llvm-ranlib"
     env['AS'] = env['CC']
     env['ASFLAGS'] = []
-else:
-    env['AR'] = toolchain_prefix + "ar"
-
-env['RANLIB'] = toolchain_prefix + "ranlib"
+elif env['os'] == 'android':
+    # If --target is specified in the NDK, we need to relay it to the assembler
+    # See https://developer.android.com/ndk/guides/other_build_systems#overview
+    # for more information on different ways to build.
+    env.Append(ASFLAGS = env['extra_cc_flags'])
 
 print("Using compilers:")
 print("CC", env['CC'])
