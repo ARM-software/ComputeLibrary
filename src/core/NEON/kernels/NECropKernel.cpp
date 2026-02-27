@@ -38,6 +38,8 @@
 #include "src/core/utils/helpers/bit_ops.h"
 #include "src/cpu/kernels/crop/list.h"
 
+#include <algorithm>
+
 namespace arm_compute
 {
 namespace
@@ -323,9 +325,11 @@ void NECropKernel::run(const Window &window, const ThreadInfo &info)
 
     const auto *uk = get_implementation(CropSelectorData{_input->info()->data_type()});
 
-    uint32_t batch_index = *(reinterpret_cast<int32_t *>(_box_ind->ptr_to_element(Coordinates(_crop_box_ind))));
-    ARM_COMPUTE_ERROR_ON(batch_index >=
-                         _input->info()->tensor_shape()[3]); // Check if batch_index is outside the number of batches
+    uint32_t batch_index =
+        std::min(static_cast<uint32_t>(_input->info()->tensor_shape()[3]),
+                 *(reinterpret_cast<uint32_t *>(_box_ind->ptr_to_element(Coordinates(_crop_box_ind)))));
+
+    ARM_COMPUTE_ERROR_ON(batch_index >= _input->info()->tensor_shape()[3]);
 
     Coordinates input_offset(
         0, _end[0] < _start[0] ? _start[0] - _cols_out_of_bounds[0] : _start[0] + _cols_out_of_bounds[0],
