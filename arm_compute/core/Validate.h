@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023-2025 Arm Limited.
+ * Copyright (c) 2016-2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,9 @@
 #include "arm_compute/core/Window.h"
 
 #include <algorithm>
+#include <array>
+#include <type_traits>
+#include <utility>
 
 namespace arm_compute
 {
@@ -778,7 +781,7 @@ void error_on_format_not_in(
 
     ARM_COMPUTE_ERROR_ON_LOC(object_format == Format::UNKNOWN, function, file, line);
 
-    const std::array<F, sizeof...(Fs)> formats_array{{std::forward<Fs>(formats)...}};
+    const std::array<std::decay_t<F>, sizeof...(Fs)> formats_array{{std::forward<Fs>(formats)...}};
     ARM_COMPUTE_UNUSED(formats_array);
 
     ARM_COMPUTE_ERROR_ON_LOC_MSG(
@@ -810,7 +813,7 @@ inline arm_compute::Status error_on_data_type_not_in(
     const DataType &tensor_dt = tensor_info->data_type(); //NOLINT
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_dt == DataType::UNKNOWN, function, file, line);
 
-    const std::array<T, sizeof...(Ts)> dts_array{{std::forward<Ts>(dts)...}};
+    const std::array<std::decay_t<T>, sizeof...(Ts)> dts_array{{std::forward<Ts>(dts)...}};
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(
         tensor_dt != dt && std::none_of(dts_array.begin(), dts_array.end(), [&](const T &d) { return d == tensor_dt; }),
         function, file, line, "ITensor data type %s not supported by this kernel",
@@ -862,7 +865,7 @@ inline arm_compute::Status error_on_data_layout_not_in(
     const DataLayout &tensor_dl = tensor_info->data_layout(); //NOLINT
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_dl == DataLayout::UNKNOWN, function, file, line);
 
-    const std::array<T, sizeof...(Ts)> dls_array{{std::forward<Ts>(dls)...}};
+    const std::array<std::decay_t<T>, sizeof...(Ts)> dls_array{{std::forward<Ts>(dls)...}};
     ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG_VAR(
         tensor_dl != dl && std::none_of(dls_array.begin(), dls_array.end(), [&](const T &l) { return l == tensor_dl; }),
         function, file, line, "ITensor data layout %s not supported by this kernel",
@@ -1041,7 +1044,7 @@ error_on_channel_not_in(const char *function, const char *file, const int line, 
 {
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(cn == Channel::UNKNOWN, function, file, line);
 
-    const std::array<T, sizeof...(Ts)> channels_array{{std::forward<Ts>(channels)...}};
+    const std::array<std::decay_t<T>, sizeof...(Ts)> channels_array{{std::forward<Ts>(channels)...}};
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(channel != cn && std::none_of(channels_array.begin(), channels_array.end(),
                                                                   [&](const T &f) { return f == cn; }),
                                     function, file, line);
