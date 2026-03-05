@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025 Arm Limited.
+ * Copyright (c) 2017-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,6 +105,7 @@ struct TensorFillInfo
     int32_t hash{0};
 };
 
+#ifdef ARM_COMPUTE_CPU_ENABLED
 template <typename TensorType,
           typename AccessorType,
           typename FunctionType,
@@ -129,6 +130,9 @@ TensorType compute_gemmlowp_target_for_updated_sq_info_after_config(
     DataType                   data_type_output            = DataType::UNKNOWN,
     const ActivationLayerInfo &act_info                    = ActivationLayerInfo())
 {
+    // Runtime assert rather than static_assert because this template gets
+    // instantiated with FunctionType other than NEGEMMLowpMatrixMultiplyCore. The
+    // function call itself is prevented at runtime with conditions.
     ARM_COMPUTE_ASSERT((std::is_same<FunctionType, NEGEMMLowpMatrixMultiplyCore>::value == true));
     ARM_COMPUTE_ASSERT(is_data_type_quantized_asymmetric(data_type_a));
     ARM_COMPUTE_ASSERT(is_data_type_quantized_asymmetric(data_type_b));
@@ -222,6 +226,7 @@ TensorType compute_gemmlowp_target_for_updated_sq_info_after_config(
     gemmlowp.run();
     return output;
 }
+#endif // ARM_COMPUTE_CPU_ENABLED
 
 template <typename TensorType,
           typename AccessorType,
@@ -730,6 +735,12 @@ protected:
                               bool                           updated_sq_info_after_config = false,
                               const ActivationLayerInfo     &act_info                     = ActivationLayerInfo())
     {
+#ifndef ARM_COMPUTE_CPU_ENABLED
+        ARM_COMPUTE_UNUSED(updated_sq_info_after_config, act_info);
+        ARM_COMPUTE_ERROR_ON(updated_sq_info_after_config);
+#endif // ARM_COMPUTE_CPU_ENABLED
+
+#ifdef ARM_COMPUTE_CPU_ENABLED
         if (updated_sq_info_after_config)
         {
             return compute_gemmlowp_target_for_updated_sq_info_after_config<
@@ -739,6 +750,7 @@ protected:
                                  arm_compute::DataType::UNKNOWN, act_info);
         }
         else
+#endif // ARM_COMPUTE_CPU_ENABLED
         {
             return compute_gemmlowp_target<TensorType, AccessorType, FunctionType, reinterpret_input_as_3d,
                                            reinterpret_output_as_3d, qasymm8_t, true, run_twice>(
