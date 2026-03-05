@@ -198,6 +198,11 @@ public:
                bool                padded_weights               = false,
                bool                updated_sq_info_after_config = false)
     {
+#ifndef ARM_COMPUTE_CPU_ENABLED
+        ARM_COMPUTE_UNUSED(updated_sq_info_after_config);
+        ARM_COMPUTE_ERROR_ON(updated_sq_info_after_config);
+#endif // ARM_COMPUTE_CPU_ENABLED
+
         if (std::is_same<TensorType, Tensor>::value && // Cpu
             (data_type == DataType::F16 || weights_data_type == DataType::F16) && !CPUInfo::get().has_fp16())
         {
@@ -236,6 +241,7 @@ public:
             _use_dynamic_output_quant = true;
         }
 
+#ifdef ARM_COMPUTE_CPU_ENABLED
         if (updated_sq_info_after_config)
         {
             _target = compute_gemmlowp_target_for_updated_sq_info_after_config(
@@ -243,6 +249,7 @@ public:
                 pre_pad_layer, padded_weights);
         }
         else
+#endif // ARM_COMPUTE_CPU_ENABLED
         {
             _target = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights,
                                      dilation, act_info, pre_pad_layer, padded_weights);
@@ -484,6 +491,7 @@ protected:
         return dst;
     }
 
+#ifdef ARM_COMPUTE_CPU_ENABLED
     // Compute the target when updating static quantization information after configuration.
     TensorType compute_gemmlowp_target_for_updated_sq_info_after_config(TensorShape               input_shape,
                                                                         TensorShape               weights_shape,
@@ -496,6 +504,9 @@ protected:
                                                                         PaddingList pre_pad_layer  = PaddingList({}),
                                                                         bool        padded_weights = false)
     {
+        // Runtime assert rather than static_assert because this template gets
+        // instantiated with FunctionType other than NEGEMMConvolutionLayer. The
+        // function call itself is prevented at runtime with conditions.
         ARM_COMPUTE_ASSERT((std::is_same<FunctionType, NEGEMMConvolutionLayer>::value == true));
         ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
 
@@ -612,6 +623,7 @@ protected:
         }
         return dst;
     }
+#endif // ARM_COMPUTE_CPU_ENABLED
 
     SimpleTensor<TO> compute_reference(const TensorShape        &input_shape,
                                        const TensorShape        &weights_shape,
