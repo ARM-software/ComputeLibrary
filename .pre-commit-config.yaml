@@ -119,7 +119,7 @@ repos:
         args: ['--maxkb=100']
         stages: [pre-commit]
   - repo: https://github.com/fsfe/reuse-tool
-    rev: v4.0.3
+    rev: v6.2.0
     hooks:
       - id: reuse
         stages: [ pre-commit ]
