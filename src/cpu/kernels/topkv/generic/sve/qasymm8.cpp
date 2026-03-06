@@ -21,29 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_SRC_CPU_KERNELS_TOPKV_LIST_H
-#define ACL_SRC_CPU_KERNELS_TOPKV_LIST_H
+#if defined(__ARM_FEATURE_SVE)
+
+#include "src/cpu/kernels/topkv/generic/sve/impl.h"
+
+#include <arm_sve.h>
+#include <cstdint>
 
 namespace arm_compute
 {
 namespace cpu
 {
-#define DECLARE_TOPKV_KERNEL(func_name) \
-    void func_name(const ITensor *in1, const ITensor *in2, ITensor *out, uint32_t k, const Window &win)
+namespace detail
+{
 
-DECLARE_TOPKV_KERNEL(topkv_qasymm8_neon);
-DECLARE_TOPKV_KERNEL(topkv_qasymm8_signed_neon);
-DECLARE_TOPKV_KERNEL(topkv_fp16_neon);
-DECLARE_TOPKV_KERNEL(topkv_fp32_neon);
-DECLARE_TOPKV_KERNEL(topkv_s32_neon);
-DECLARE_TOPKV_KERNEL(topkv_fp32_sve);
-DECLARE_TOPKV_KERNEL(topkv_fp16_sve);
-DECLARE_TOPKV_KERNEL(topkv_qasymm8_sve);
-DECLARE_TOPKV_KERNEL(topkv_qasymm8_signed_sve);
-DECLARE_TOPKV_KERNEL(topkv_s32_sve);
+template <>
+inline uint32_t vector_length<uint8_t>()
+{
+    return static_cast<uint32_t>(svcntb());
+}
 
-#undef DECLARE_TOPKV_KERNEL
+template <>
+inline uint32_t count_gt_block<uint8_t>(const uint8_t *ptr, uint8_t thr, uint32_t block_elems)
+{
+    const svbool_t  pg = svwhilelt_b8(static_cast<uint64_t>(0), static_cast<uint64_t>(block_elems));
+    const svuint8_t v  = svld1_u8(pg, ptr);
+    const svbool_t  gt = svcmpgt_n_u8(pg, v, thr);
+    return static_cast<uint32_t>(svcntp_b8(svptrue_b8(), gt));
+}
+
+} // namespace detail
+
+void topkv_qasymm8_sve(const ITensor *predictions, const ITensor *targets, ITensor *out, uint32_t k, const Window &win)
+{
+    detail::topkv_sve_wrapper<uint8_t>(predictions, targets, out, k, win);
+}
+
+// Force instantiation into this TU
+template void detail::topkv_sve_wrapper<uint8_t>(const ITensor *, const ITensor *, ITensor *, uint32_t, const Window &);
+
 } // namespace cpu
 } // namespace arm_compute
 
-#endif // ACL_SRC_CPU_KERNELS_TOPKV_LIST_H
+#endif // __ARM_FEATURE_SVE

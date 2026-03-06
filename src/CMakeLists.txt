@@ -365,6 +365,11 @@ target_sources(
 	cpu/kernels/scale/sve/qasymm8_signed.cpp
 	cpu/kernels/softmax/generic/sve/impl.cpp
 	cpu/kernels/softmax/generic/sve/impl_bf16.cpp
+	cpu/kernels/topkv/generic/sve/fp16.cpp
+	cpu/kernels/topkv/generic/sve/fp32.cpp
+	cpu/kernels/topkv/generic/sve/integer.cpp
+	cpu/kernels/topkv/generic/sve/qasymm8.cpp
+	cpu/kernels/topkv/generic/sve/qasymm8_signed.cpp
 )
 
 target_sources(
