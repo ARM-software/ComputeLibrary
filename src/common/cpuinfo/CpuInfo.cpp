@@ -32,6 +32,7 @@
 
 #include <map>
 #include <sstream>
+#include <sys/types.h>
 
 #if !defined(BARE_METAL)
 #include <algorithm>
@@ -53,15 +54,15 @@
 #endif /* !defined(BARE_METAL) */
 
 #if !defined(_WIN64)
-#if !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) && \
-    (defined(__arm__) || defined(__aarch64__))
+#if !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__FreeBSD__) && \
+    !defined(__QNX__) && (defined(__arm__) || defined(__aarch64__))
 #include <asm/hwcap.h> /* Get HWCAP bits from asm/hwcap.h */
 #include <sys/auxv.h>
-#elif (defined(__OpenBSD__) || defined(__APPLE__)) && defined(__aarch64__)
+#elif (defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__APPLE__)) && defined(__aarch64__)
 #include <sys/sysctl.h>
 #include <sys/types.h>
 #endif /* defined(__APPLE__) && defined(__aarch64__)) */
-#endif /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) && (defined(__arm__) || defined(__aarch64__)) */
+#endif /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) !defined(__FreeBSD__) && !defined(__QNX__) && (defined(__arm__) || defined(__aarch64__)) */
 
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP_CPUID    (1 << 11)
 #define ARM_COMPUTE_GET_FEATURE_REG(var, freg) __asm __volatile("MRS %0, " #freg : "=r"(var))
@@ -71,8 +72,8 @@ namespace cpuinfo
 {
 namespace
 {
-#if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) && \
-    (defined(__arm__) || defined(__aarch64__))
+#if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
+    !defined(__FreeBSD__) && !defined(__QNX__) && (defined(__arm__) || defined(__aarch64__))
 /** Extract MIDR using CPUID information that are exposed to user-space
  *
  * @param[in] max_num_cpus Maximum number of possible CPUs
@@ -364,8 +365,8 @@ CpuInfo::CpuInfo(CpuIsaInfo isa, std::vector<CpuModel> cpus) : _isa(std::move(is
 
 CpuInfo CpuInfo::build()
 {
-#if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) && \
-    (defined(__arm__) || defined(__aarch64__))
+#if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && \
+    !defined(__FreeBSD__) && !defined(__QNX__) && (defined(__arm__) || defined(__aarch64__))
     const uint64_t hwcaps   = getauxval(AT_HWCAP);
     const uint64_t hwcaps2  = getauxval(AT_HWCAP2);
     const uint32_t max_cpus = get_max_cpus();
@@ -395,7 +396,7 @@ CpuInfo CpuInfo::build()
 
     CpuInfo info(isa, cpus_model);
     return info;
-#elif defined(__OpenBSD__)
+#elif defined(__OpenBSD__) || defined(__FreeBSD__)
     int    mib[2] = {0, 0};
     int    ncpu   = {1};
     size_t len    = sizeof(ncpu);
@@ -435,8 +436,8 @@ CpuInfo CpuInfo::build()
     std::vector<CpuModel> cpus_model(1, midr_to_model(midr));
     CpuInfo               info(isa, cpus_model);
     return info;
-#elif defined(__aarch64__) && \
-    (defined(__OpenBSD__) || defined(__APPLE__)) /* #elif(BARE_METAL) && defined(__aarch64__) */
+#elif defined(__aarch64__) && (defined(__OpenBSD__) || defined(__FreeBSD__) || \
+                               defined(__APPLE__)) /* #elif(BARE_METAL) && defined(__aarch64__) */
     int                   ncpus = get_hw_capability("hw.perflevel0.logicalcpu");
     CpuIsaInfo            isainfo;
     std::vector<CpuModel> cpus_model(ncpus);
@@ -453,7 +454,7 @@ CpuInfo CpuInfo::build()
     isainfo.sme2       = get_hw_capability("hw.optional.arm.FEAT_SME2");
     CpuInfo info(isainfo, cpus_model);
     return info;
-#elif defined(__aarch64__) && defined(_WIN64)    /* #elif defined(__aarch64__) && defined(__APPLE__) */
+#elif defined(__aarch64__) && defined(_WIN64)      /* #elif defined(__aarch64__) && defined(__APPLE__) */
     CpuIsaInfo isainfo;
 
     isainfo.neon = IsProcessorFeaturePresent(PF_ARM_NEON_INSTRUCTIONS_AVAILABLE);
@@ -485,7 +486,7 @@ CpuInfo CpuInfo::build()
     std::vector<CpuModel> cpus_model(ncpus);
     CpuInfo               info(isainfo, cpus_model);
     return info;
-#else                                            /* #elif defined(__aarch64__) && defined(_WIN64) */
+#else                                              /* #elif defined(__aarch64__) && defined(_WIN64) */
     CpuInfo info(CpuIsaInfo(), {CpuModel::GENERIC});
     return info;
 #endif /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) */
@@ -502,8 +503,8 @@ CpuModel CpuInfo::cpu_model(uint32_t cpuid) const
 
 CpuModel CpuInfo::cpu_model() const
 {
-#if defined(_WIN64) || defined(BARE_METAL) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__QNX__) || \
-    (!defined(__arm__) && !defined(__aarch64__))
+#if defined(_WIN64) || defined(BARE_METAL) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__FreeBSD__) || \
+    defined(__QNX__) || (!defined(__arm__) && !defined(__aarch64__))
     return cpu_model(0);
 #else /* defined(BARE_METAL) || defined(__APPLE__) || defined(__OpenBSD__) || defined(__QNX__) || (!defined(__arm__) && !defined(__aarch64__)) */
     return cpu_model(sched_getcpu());
