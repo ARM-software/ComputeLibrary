@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2024-2025 Arm Limited.
+ * Copyright (c) 2016-2021, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -110,10 +110,21 @@ protected:
     /** Interface to be implemented by the child class to unlock the memory allocation after the CPU is done accessing it. */
     virtual void unlock() = 0;
 
+    /** Returns whether allocator currently owns the TensorInfo metadata object. */
+    bool owns_info() const;
+    /** Returns whether the allocator has imported external backing memory. */
+    bool is_imported() const;
+    /** Track import state for derived allocators when ownership of backing memory changes. */
+    void set_imported(bool imported);
+    /** Update TensorInfo::is_resizable only if allocator owns the metadata. */
+    void set_resizable_if_info_owned(bool is_resizable);
+
 private:
     TensorInfo  _info_owned{};           /**< Tensor's metadata. */
     TensorInfo *_info_external{nullptr}; /**< External Tensor's metadata */
     size_t      _alignment{};            /**< Tensor's alignment in bytes */
+    bool        _owns_info{true};        /**< True when allocator owns metadata; false for soft_init(). */
+    bool        _is_imported{false};     /**< True when memory was imported instead of allocated by allocator. */
 };
 } // namespace arm_compute
 #endif // ACL_ARM_COMPUTE_RUNTIME_ITENSORALLOCATOR_H

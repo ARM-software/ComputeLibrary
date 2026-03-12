@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, 2024 Arm Limited.
+ * Copyright (c) 2016-2020, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,7 +71,7 @@ TensorAllocator::TensorAllocator(IMemoryManageable *owner) : _owner(owner), _ass
 
 TensorAllocator::~TensorAllocator()
 {
-    info().set_is_resizable(true);
+    set_resizable_if_info_owned(true);
 }
 
 TensorAllocator::TensorAllocator(TensorAllocator &&o) noexcept
@@ -142,13 +142,15 @@ void TensorAllocator::allocate()
     {
         _associated_memory_group->finalize_memory(_owner, _memory, info().total_size(), alignment_to_use);
     }
-    info().set_is_resizable(false);
+    set_imported(false);
+    set_resizable_if_info_owned(false);
 }
 
 void TensorAllocator::free()
 {
     _memory.set_region(nullptr);
-    info().set_is_resizable(true);
+    set_imported(false);
+    set_resizable_if_info_owned(true);
 }
 
 bool TensorAllocator::is_allocated() const
@@ -163,7 +165,8 @@ Status TensorAllocator::import_memory(void *memory)
     ARM_COMPUTE_RETURN_ERROR_ON(alignment() != 0 && !arm_compute::utility::check_aligned(memory, alignment()));
 
     _memory.set_owned_region(std::make_unique<MemoryRegion>(memory, info().total_size()));
-    info().set_is_resizable(false);
+    set_imported(true);
+    set_resizable_if_info_owned(false);
 
     return Status{};
 }

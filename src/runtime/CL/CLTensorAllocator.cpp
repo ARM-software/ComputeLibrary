@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2024 Arm Limited.
+ * Copyright (c) 2016-2021, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -157,7 +157,8 @@ void CLTensorAllocator::allocate()
     }
 
     // Lock allocator
-    info().set_is_resizable(false);
+    set_imported(false);
+    set_resizable_if_info_owned(false);
 }
 
 void CLTensorAllocator::free()
@@ -165,7 +166,8 @@ void CLTensorAllocator::free()
     _mapping = nullptr;
     _memory.set_region(nullptr);
     clear_quantization_arrays(_scale, _offset);
-    info().set_is_resizable(true);
+    set_imported(false);
+    set_resizable_if_info_owned(true);
 }
 
 bool CLTensorAllocator::is_allocated() const
@@ -182,7 +184,8 @@ Status CLTensorAllocator::import_memory(cl::Buffer buffer)
 
     _memory.set_owned_region(std::make_unique<CLBufferMemoryRegion>(buffer));
 
-    info().set_is_resizable(false);
+    set_imported(true);
+    set_resizable_if_info_owned(false);
     return Status{};
 }
 

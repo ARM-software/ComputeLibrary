@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,12 +35,16 @@ void ITensorAllocator::init(const TensorInfo &input, size_t alignment)
     _info_owned    = input;
     _info_external = nullptr;
     _alignment     = alignment;
+    _owns_info     = true;
+    _is_imported   = false;
 }
 
 void ITensorAllocator::soft_init(TensorInfo &input, size_t alignment)
 {
     _info_external = &input;
     _alignment     = alignment;
+    _owns_info     = false;
+    _is_imported   = false;
 }
 
 TensorInfo &ITensorAllocator::info()
@@ -56,4 +60,27 @@ const TensorInfo &ITensorAllocator::info() const
 size_t ITensorAllocator::alignment() const
 {
     return _alignment;
+}
+
+bool ITensorAllocator::owns_info() const
+{
+    return _owns_info;
+}
+
+bool ITensorAllocator::is_imported() const
+{
+    return _is_imported;
+}
+
+void ITensorAllocator::set_imported(bool imported)
+{
+    _is_imported = imported;
+}
+
+void ITensorAllocator::set_resizable_if_info_owned(bool is_resizable)
+{
+    if (_owns_info)
+    {
+        info().set_is_resizable(is_resizable);
+    }
 }
