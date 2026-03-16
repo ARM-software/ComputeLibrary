@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_WRAPPER_SHR_H
-#define ARM_COMPUTE_WRAPPER_SHR_H
+#ifndef ACL_SRC_CORE_NEON_WRAPPER_INTRINSICS_SHR_H
+#define ACL_SRC_CORE_NEON_WRAPPER_INTRINSICS_SHR_H
 
 #include <arm_neon.h>
 #include <type_traits>
@@ -103,6 +103,8 @@ VSHR_IMPL(int8x8_t, vshr_n, s8)
     {                                      \
         return prefix##_##postfix(a, b);   \
     }
+VSHRQ_IMPL(uint16x8_t, vshrq_n, u16)
+VSHRQ_IMPL(int16x8_t, vshrq_n, s16)
 VSHRQ_IMPL(uint32x4_t, vshrq_n, u32)
 VSHRQ_IMPL(int32x4_t, vshrq_n, s32)
 #undef VSHRQ_IMPL
@@ -145,4 +147,4 @@ VQRSHRN_EX_SCALAR_IMPL(int32_t, int64_t, vqrshrnd_n, vqrshrund_n, s64)
 
 } // namespace wrapper
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_WRAPPER_SHR_H */
+#endif // ACL_SRC_CORE_NEON_WRAPPER_INTRINSICS_SHR_H

@@ -48,11 +48,10 @@ static inline uint32_t reduce_u8_to_count(uint8x16_t m)
 }
 
 template <>
-uint32_t count_gt_block<uint8_t>(const uint8_t *ptr, uint8_t threshold)
+uint32_t count_gt_block<uint8_t>(const uint8_t *ptr, uint8x16_t thr_vec)
 {
-    const uint8x16_t v   = vld1q_u8(ptr);
-    const uint8x16_t thr = vdupq_n_u8(threshold);
-    const uint8x16_t m   = vcgtq_u8(v, thr); // 0xFF / 0x00 bytes
+    const uint8x16_t v = vld1q_u8(ptr);
+    const uint8x16_t m = vcgtq_u8(v, thr_vec); // 0xFF / 0x00 bytes
     return reduce_u8_to_count(m);
 }
 

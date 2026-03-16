@@ -50,24 +50,21 @@ SimpleTensor<uint8_t> topkv(SimpleTensor<T> &predictions, SimpleTensor<uint32_t>
 
     SimpleTensor<uint8_t> expected(TensorShape(N), DataType::U8);
 
-    const float eps = std::numeric_limits<float>::epsilon();
-
     for (int i = 0; i < N; ++i)
     {
         // targets[i] (U32)
         const uint32_t target_class = targets[i];
 
         // Read predictions[target_class, i] as T, then promote to float
-        const T     target_t   = *reinterpret_cast<const T *>(predictions(Coordinates{target_class, i}));
-        const float target_val = static_cast<float>(target_t);
+        const T target    = *reinterpret_cast<const T *>(predictions(Coordinates{target_class, i}));
+        const T threshold = target;
 
         unsigned int rank = 0;
         for (int c = 0; c < C; ++c)
         {
-            const T     vt = *reinterpret_cast<const T *>(predictions(Coordinates{c, i}));
-            const float v  = static_cast<float>(vt);
+            const T v = *reinterpret_cast<const T *>(predictions(Coordinates{c, i}));
 
-            if ((v - target_val) > eps)
+            if (v > threshold)
             {
                 ++rank;
             }

@@ -47,20 +47,11 @@ static inline uint32_t reduce_u32x4(uint32x4_t v)
 
 // Explicit specialization for float: may use float32x4_t
 template <>
-uint32_t count_gt_block<float>(const float *ptr, float threshold)
+uint32_t count_gt_block<float>(const float *ptr, float32x4_t thr_vec)
 {
-    using Tag = wrapper::traits::neon_bitvector_tag_t<float, wrapper::traits::BitWidth::W128>;
-
-    const auto v = wrapper::vloadq(ptr);
-
-    // epsilon-aware compare: treat a > b only when (a - b) > epsilon
-    const float eps_val      = std::numeric_limits<float>::epsilon();
-    const float thr_with_eps = threshold + eps_val;
-    const auto  thr_eps_vec  = wrapper::vdup_n(thr_with_eps, Tag{});
-    const auto  mask         = wrapper::vcgt(v, thr_eps_vec); // new: v > (threshold + eps)
-
-    const uint32x4_t m = mask;
-    const uint32x4_t b = vshrq_n_u32(m, 31);
+    const float32x4_t v    = wrapper::vloadq(ptr);
+    const uint32x4_t  mask = wrapper::vcgt(v, thr_vec); // new: v > (threshold)
+    const uint32x4_t  b    = wrapper::vshrq_n<31>(mask);
     return reduce_u32x4(b);
 }
 } // namespace detail
