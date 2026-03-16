@@ -23,6 +23,7 @@
  */
 #if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) && defined(ENABLE_FP16_KERNELS)
 
+#include "src/core/NEON/wrapper/wrapper.h"
 #include "src/cpu/kernels/topkv/generic/neon/impl.h"
 
 #include <arm_neon.h>
@@ -33,33 +34,24 @@ namespace cpu
 {
 namespace detail
 {
-static inline uint32_t reduce_u32x4(uint32x4_t v)
+static inline uint32_t reduce_u16x8(uint16x8_t v)
 {
 #if defined(__aarch64__)
-    return vaddvq_u32(v);
+    return vaddvq_u16(v);
 #else
-    uint32x2_t s = vadd_u32(vget_low_u32(v), vget_high_u32(v));
-    s            = vpadd_u32(s, s);
-    return vget_lane_u32(s, 0);
+    uint16x4_t s = vadd_u16(vget_low_u16(v), vget_high_u16(v));
+    s            = vpadd_u16(s, s);
+    return vget_lane_u16(s, 0);
 #endif
 }
 
-// Explicit specialization for float16_t
 template <>
-uint32_t count_gt_block<float16_t>(const float16_t *ptr, float16_t threshold)
+uint32_t count_gt_block<float16_t>(const float16_t *ptr, float16x8_t thr_vec)
 {
-    // Load 8 fp16
-    const float16x8_t v16 = vld1q_f16(reinterpret_cast<const __fp16 *>(ptr));
-
-    const float32x4_t thr = vdupq_n_f32(threshold);
-
-    const float32x4_t v0 = vcvt_f32_f16(vget_low_f16(v16));
-    const float32x4_t v1 = vcvt_f32_f16(vget_high_f16(v16));
-
-    const uint32x4_t b0 = vshrq_n_u32(vcgtq_f32(v0, thr), 31);
-    const uint32x4_t b1 = vshrq_n_u32(vcgtq_f32(v1, thr), 31);
-
-    return reduce_u32x4(b0) + reduce_u32x4(b1);
+    const float16x8_t v    = wrapper::vloadq(ptr);
+    const uint16x8_t  mask = wrapper::vcgt(v, thr_vec); // new: v > (threshold)
+    const uint16x8_t  b    = wrapper::vshrq_n<15>(mask);
+    return reduce_u16x8(b);
 }
 
 } // namespace detail

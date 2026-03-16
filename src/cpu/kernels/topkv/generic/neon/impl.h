@@ -27,6 +27,8 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/core/NEON/wrapper/wrapper.h"
+
 #include <limits>
 #include <type_traits>
 
@@ -36,13 +38,18 @@ namespace cpu
 {
 namespace detail
 {
-template <typename ScalarType>
-uint32_t count_gt_block(const ScalarType *ptr, ScalarType threshold);
+template <typename ScalarType, typename VectorType>
+uint32_t count_gt_block(const ScalarType *ptr, VectorType threshold);
 
 template <typename ScalarType>
 void topkv_neon_wrapper(
     const ITensor *predictions, const ITensor *targets, ITensor *out, uint32_t k, const Window &window)
 {
+    constexpr auto bit_width = wrapper::traits::BitWidth::W128;
+
+    using TagType    = typename wrapper::traits::neon_bitvector_tag_t<ScalarType, bit_width>;
+    using VectorType = typename wrapper::traits::neon_bitvector_t<ScalarType, bit_width>;
+
     const auto        &pred_info = *predictions->info();
     const unsigned int C         = pred_info.tensor_shape()[0];
 
@@ -66,7 +73,8 @@ void topkv_neon_wrapper(
             const ScalarType *base =
                 reinterpret_cast<const ScalarType *>(predictions->ptr_to_element(Coordinates{0, n}));
 
-            const ScalarType thr = base[t];
+            const ScalarType thr     = base[t];
+            const VectorType thr_vec = wrapper::vdup_n(thr, TagType{});
 
             uint32_t     rank = 0;
             unsigned int c    = 0;
@@ -75,7 +83,7 @@ void topkv_neon_wrapper(
             // Vector loop with early-exit
             for (; c + vec_elems <= C; c += vec_elems)
             {
-                rank += count_gt_block<ScalarType>(base + c, thr);
+                rank += count_gt_block<ScalarType>(base + c, thr_vec);
                 if (rank >= k)
                 {
                     // For large C and small K (e.g. QASYMM8, C=32000, K=3), the probability that the

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,14 +34,7 @@ namespace arm_compute
 {
 namespace
 {
-template <typename T, typename std::enable_if<utils::traits::is_floating_point<T>::value, int>::type = 0>
-inline bool greater_than(T a, T b)
-{
-    const T epsilon = std::numeric_limits<T>::epsilon();
-    return (a - b > epsilon);
-}
-
-template <typename T, typename std::enable_if<!utils::traits::is_floating_point<T>::value, int>::type = 0>
+template <typename T>
 inline bool greater_than(T a, T b)
 {
     return (a > b);

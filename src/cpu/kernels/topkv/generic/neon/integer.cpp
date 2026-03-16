@@ -43,12 +43,11 @@ static inline uint32_t reduce_u32x4(uint32x4_t v)
 }
 
 template <>
-uint32_t count_gt_block<int32_t>(const int32_t *ptr, int32_t threshold)
+uint32_t count_gt_block<int32_t>(const int32_t *ptr, int32x4_t thr_vec)
 {
-    const int32x4_t  v   = vld1q_s32(ptr);
-    const int32x4_t  thr = vdupq_n_s32(threshold);
-    const uint32x4_t m   = vcgtq_s32(v, thr);  // 0xFFFFFFFF / 0 per lane
-    const uint32x4_t b   = vshrq_n_u32(m, 31); // 0/1 per lane
+    const int32x4_t  v = vld1q_s32(ptr);
+    const uint32x4_t m = vcgtq_s32(v, thr_vec); // 0xFFFFFFFF / 0 per lane
+    const uint32x4_t b = vshrq_n_u32(m, 31);    // 0/1 per lane
     return reduce_u32x4(b);
 }
 
