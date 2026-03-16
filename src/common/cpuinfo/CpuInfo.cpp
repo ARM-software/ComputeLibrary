@@ -57,11 +57,20 @@
     !defined(__QNX__) && (defined(__arm__) || defined(__aarch64__))
 #include <asm/hwcap.h> /* Get HWCAP bits from asm/hwcap.h */
 #include <sys/auxv.h>
-#elif (defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__APPLE__)) && defined(__aarch64__)
+#elif (defined(__APPLE__)) && \
+    defined(                  \
+        __aarch64__) /* #if !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__FreeBSD__) && \
+    !defined(__QNX__) && (defined(__arm__) || defined(__aarch64__)) */
 #include <sys/sysctl.h>
 #include <sys/types.h>
-#endif /* defined(__APPLE__) && defined(__aarch64__)) */
-#endif /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__FreeBSD__) && !defined(__QNX__) && (defined(__arm__) || defined(__aarch64__)) */
+#elif (defined(__OpenBSD__) || defined(__FreeBSD__)) && \
+    defined(__aarch64__) /* #elif (defined(__APPLE__)) && defined(__aarch64__) */
+#include <sys/auxv.h>
+#include <sys/sysctl.h>
+#include <sys/types.h>
+#include <unistd.h>
+#endif /* #elif (defined(OpenBSD) || defined(FreeBSD)) && defined(aarch64) */
+#endif /* !defined(_WIN64) */
 
 #define ARM_COMPUTE_CPU_FEATURE_HWCAP_CPUID    (1 << 11)
 #define ARM_COMPUTE_GET_FEATURE_REG(var, freg) __asm __volatile("MRS %0, " #freg : "=r"(var))
@@ -395,7 +404,11 @@ CpuInfo CpuInfo::build()
 
     CpuInfo info(isa, cpus_model);
     return info;
-#elif defined(__OpenBSD__) || defined(__FreeBSD__)
+#elif defined(__arm__) &&    \
+    (defined(__OpenBSD__) || \
+     defined(                \
+         __FreeBSD__)) /* if !defined(_WIN64) && !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) &&
+    !defined(__FreeBSD__) && !defined(__QNX__) && (defined(__arm__) || defined(__aarch64__)) */
     int    mib[2] = {0, 0};
     int    ncpu   = {1};
     size_t len    = sizeof(ncpu);
@@ -412,8 +425,7 @@ CpuInfo CpuInfo::build()
     CpuInfo info(isainfo, cpus_model);
     return info;
 #elif (BARE_METAL) && \
-    defined(          \
-        __aarch64__) /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && !defined(__QNX__) && (defined(__arm__) || defined(__aarch64__)) */
+    defined(__aarch64__) /* #elif defined(__arm__) && (defined(__OpenBSD__) || defined(__FreeBSD__)) */
 
     // Assume single CPU in bare metal mode.  Just read the ID register and feature bits directly.
     uint64_t isar0 = 0, isar1 = 0, pfr0 = 0, pfr1 = 0, svefr0 = 0, smefr0 = 0, midr = 0;
@@ -435,8 +447,33 @@ CpuInfo CpuInfo::build()
     std::vector<CpuModel> cpus_model(1, midr_to_model(midr));
     CpuInfo               info(isa, cpus_model);
     return info;
-#elif defined(__aarch64__) && (defined(__OpenBSD__) || defined(__FreeBSD__) || \
-                               defined(__APPLE__)) /* #elif(BARE_METAL) && defined(__aarch64__) */
+
+#elif defined(__aarch64__) && (defined(__OpenBSD__) || defined(__FreeBSD__))
+    int ncpus = sysconf(_SC_NPROCESSORS_ONLN);
+
+    unsigned long hwcap = 0, hwcap2 = 0;
+    elf_aux_info(AT_HWCAP, &hwcap, sizeof(hwcap));
+    elf_aux_info(AT_HWCAP2, &hwcap2, sizeof(hwcap2));
+
+    CpuIsaInfo            isainfo;
+    std::vector<CpuModel> cpus_model(ncpus);
+
+    isainfo.neon       = (hwcap & HWCAP_ASIMD) != 0;
+    isainfo.fp16       = (hwcap & HWCAP_FPHP) != 0;
+    isainfo.dot        = (hwcap & HWCAP_ASIMDDP) != 0;
+    isainfo.bf16       = (hwcap2 & HWCAP2_BF16) != 0;
+    isainfo.i8mm       = (hwcap2 & HWCAP2_I8MM) != 0;
+    isainfo.sme        = (hwcap2 & HWCAP2_SME) != 0;
+    isainfo.sme2       = (hwcap2 & HWCAP2_SME2) != 0;
+    isainfo.sme_f32f32 = (hwcap2 & HWCAP2_SME_F32F32) != 0;
+    isainfo.sme_i8i32  = (hwcap2 & HWCAP2_SME_I8I32) != 0;
+    isainfo.sme_f16f32 = (hwcap2 & HWCAP2_SME_F16F32) != 0;
+    isainfo.sme_b16f32 = (hwcap2 & HWCAP2_SME_B16F32) != 0;
+    CpuInfo info(isainfo, cpus_model);
+    return info;
+
+#elif defined(__aarch64__) && \
+    defined(__APPLE__) /* #elif defined(__aarch64__) && (defined(__OpenBSD__) || defined(__FreeBSD__)) */
     int                   ncpus = get_hw_capability("hw.perflevel0.logicalcpu");
     CpuIsaInfo            isainfo;
     std::vector<CpuModel> cpus_model(ncpus);
@@ -453,7 +490,7 @@ CpuInfo CpuInfo::build()
     isainfo.sme2       = get_hw_capability("hw.optional.arm.FEAT_SME2");
     CpuInfo info(isainfo, cpus_model);
     return info;
-#elif defined(__aarch64__) && defined(_WIN64)      /* #elif defined(__aarch64__) && defined(__APPLE__) */
+#elif defined(__aarch64__) && defined(_WIN64) /* #elif defined(__aarch64__) && defined(__APPLE__) */
     CpuIsaInfo isainfo;
 
     isainfo.neon = IsProcessorFeaturePresent(PF_ARM_NEON_INSTRUCTIONS_AVAILABLE);
@@ -485,7 +522,7 @@ CpuInfo CpuInfo::build()
     std::vector<CpuModel> cpus_model(ncpus);
     CpuInfo               info(isainfo, cpus_model);
     return info;
-#else                                              /* #elif defined(__aarch64__) && defined(_WIN64) */
+#else                                         /* #elif defined(__aarch64__) && defined(_WIN64) */
     CpuInfo info(CpuIsaInfo(), {CpuModel::GENERIC});
     return info;
 #endif /* !defined(BARE_METAL) && !defined(__APPLE__) && !defined(__OpenBSD__) && (defined(__arm__) || defined(__aarch64__)) */
