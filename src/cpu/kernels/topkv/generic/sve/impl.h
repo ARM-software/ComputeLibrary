@@ -85,7 +85,6 @@ topkv_sve_wrapper(const ITensor *predictions, const ITensor *targets, ITensor *o
 
     const ITensorInfo *pred_info = predictions->info();
     const uint32_t     N         = pred_info->dimension(0); // samples
-    const uint32_t     C         = pred_info->dimension(1); // classes
 
     const uint32_t vl = vector_length<Scalar>(); // cache once per kernel invocation
 
@@ -96,8 +95,8 @@ topkv_sve_wrapper(const ITensor *predictions, const ITensor *targets, ITensor *o
         window,
         [&](const Coordinates &id)
         {
-            const uint32_t c = static_cast<uint32_t>(id.x()); // class index
-            ARM_COMPUTE_ERROR_ON(c >= C);
+            const uint32_t c = static_cast<uint32_t>(id.x());   // class index
+            ARM_COMPUTE_ERROR_ON(c >= pred_info->dimension(1)); // classes
 
             uint32_t t = {*reinterpret_cast<uint32_t *>(tgt_it.ptr())};
             ARM_COMPUTE_ERROR_ON(t >= N);
