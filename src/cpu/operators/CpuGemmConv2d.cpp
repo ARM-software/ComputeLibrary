@@ -939,8 +939,10 @@ void CpuGemmConv2d::run(ITensorPack &tensors)
     // Handle the case where output has top/bottom padding
     const ITensor *out_to_use = out_has_padding ? gemm_output.get() : dst;
     Tensor         gemm3d;
-    _gemm_output_3d.extend_padding(out_to_use->info()->padding());
-    gemm3d.allocator()->soft_init(_gemm_output_3d);
+    TensorInfo     gemm3d_info(_gemm_output_3d);
+    gemm3d_info.set_is_resizable(true);
+    gemm3d_info.extend_padding(out_to_use->info()->padding());
+    gemm3d.allocator()->soft_init(gemm3d_info);
     gemm3d.allocator()->import_memory(out_to_use->buffer());
     auto gemm_output_to_use = gemm_output.get();
 
