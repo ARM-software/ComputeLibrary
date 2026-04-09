@@ -38,7 +38,7 @@ path = [
 	".clang-tidy",
 	"SECURITY.md"
 ]
-SPDX-FileCopyrightText = "2020 Arm Limited"
+SPDX-FileCopyrightText = "2020, 2026 Arm Limited"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
