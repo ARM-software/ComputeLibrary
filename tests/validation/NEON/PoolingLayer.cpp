@@ -105,6 +105,16 @@ const auto pool_outside_input_dataset = zip(
     make("ExcludePadding", {false, false, false, false}));
 } // namespace
 
+const auto PoolingDatasetQASYMM8PaddedMax = combine(make("Shape", {TensorShape(7U, 5U, 3U), TensorShape(8U, 7U, 5U)}),
+                                                    make("PoolingType", {PoolingType::MAX}),
+                                                    make("PoolingSize", {Size2D(3, 3)}),
+                                                    make("PadStride", {PadStrideInfo(2, 2, 1, 1)}),
+                                                    make("ExcludePadding", {false}),
+                                                    make("DataType", DataType::QASYMM8),
+                                                    make("DataLayout", {DataLayout::NHWC}),
+                                                    make("InputQuantInfo", {QuantizationInfo(0.25f, 11)}),
+                                                    make("OutputQuantInfo", {QuantizationInfo(0.25f, 11)}));
+
 TEST_SUITE(NEON)
 TEST_SUITE(PoolingLayer)
 
@@ -385,6 +395,15 @@ using NEPoolingLayerQuantizedMixedDataLayoutFixture =
     PoolingLayerValidationQuantizedFixture<Tensor, Accessor, NEPoolingLayer, T, true>;
 
 TEST_SUITE(QASYMM8)
+
+FIXTURE_DATA_TEST_CASE(QASYMM8PaddedMax,
+                       NEPoolingLayerQuantizedFixture<uint8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       PoolingDatasetQASYMM8PaddedMax)
+{
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+
 FIXTURE_DATA_TEST_CASE(RunSmallNCHW,
                        NEPoolingLayerQuantizedFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,

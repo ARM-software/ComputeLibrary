@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,11 +89,12 @@ TEST_SUITE(CpuPool2d)
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Invalid pad/size combination
                                             TensorInfo(TensorShape(15U, 13U, 5U), 1, DataType::F32),     // Non-rectangular Global Pooling
                                             TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32),     // Invalid output Global Pooling
-                                            TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::QASYMM8), // Invalid exclude_padding = false with quantized type, no actual padding and NHWC
+                                            TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::QASYMM8), // Quantized NHWC without padding remains valid
                                             TensorInfo(TensorShape(13U, 13U, 5U), 1, DataType::F32),
                                             TensorInfo(TensorShape(1U, 16U, 1U),  1, DataType::F32),
                                             TensorInfo(TensorShape(112, 112, 64,1), 1, DataType::F32, DataLayout::NHWC), // Mismatching number of channels
                                             TensorInfo(TensorShape(112, 112, 64,1), 1, DataType::F32, DataLayout::NHWC), // Mismatching width
+                                            TensorInfo(TensorShape(5U, 13U, 13U, 1U), 1, DataType::QASYMM8, DataLayout::NHWC), // Padded NHWC QASYMM8 MAX with matching qinfo
                                          }),
     make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16),
                                             TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32),
@@ -106,6 +107,7 @@ TEST_SUITE(CpuPool2d)
                                             TensorInfo(TensorShape(1U, 15U, 1U), 1, DataType::F32),
                                             TensorInfo(TensorShape(56, 56, 64,1), 1, DataType::F32, DataLayout::NHWC),
                                             TensorInfo(TensorShape(56, 51, 64,1), 1, DataType::F32, DataLayout::NHWC),
+                                            TensorInfo(TensorShape(5U, 7U, 7U, 1U), 1, DataType::QASYMM8, DataLayout::NHWC),
                                            }),
     make("PoolInfo",  { PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
                                             PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0)),
@@ -118,8 +120,9 @@ TEST_SUITE(CpuPool2d)
                                             PoolingLayerInfo(PoolingType::MAX, 2, DataLayout::NHWC, PadStrideInfo(1, 1, 0, 0), false),
                                             PoolingLayerInfo(PoolingType::MAX,3,DataLayout::NHWC,PadStrideInfo(2,2,1,1)),
                                             PoolingLayerInfo(PoolingType::MAX,3,DataLayout::NHWC,PadStrideInfo(2,2,1,1)),
+                                            PoolingLayerInfo(PoolingType::MAX, 3, DataLayout::NHWC, PadStrideInfo(2, 2, 1, 1), false),
                                            }),
-    make("Expected", { false, false, false, false, true, false, true, false, false, false, false})),
+    make("Expected", { false, false, false, false, true, false, true, false, false, false, false, true})),
     input_info, output_info, pool_info, expected)
 {
     bool is_valid = bool(arm_compute::experimental::op::CpuPool2d::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info));
