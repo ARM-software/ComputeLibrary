@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Arm Limited.
+ * Copyright (c) 2021-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -145,9 +145,10 @@ CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorIn
             if (src->data_type() == DataType::QASYMM8)
             {
                 const bool has_padding = info.pad_stride_info.has_padding();
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-                    !info.exclude_padding && has_padding,
-                    "Assembly kernels do not support padding for QASYMM8 with same src/dst quantization info");
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.pool_type != PoolingType::MAX && !info.exclude_padding &&
+                                                    has_padding,
+                                                "Assembly kernels only support padded MAX pooling for QASYMM8 with "
+                                                "same src/dst quantization info");
             }
         }
     }
@@ -159,9 +160,9 @@ CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorIn
         {
             // If dst is not configured, the quantization info are the same
             const bool has_padding = info.pad_stride_info.has_padding();
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-                !info.exclude_padding && has_padding,
-                "Assembly kernels do not support padding for QASYMM8 with same src/dst quantization info");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.pool_type != PoolingType::MAX && !info.exclude_padding && has_padding,
+                                            "Assembly kernels only support padded MAX pooling for QASYMM8 with "
+                                            "same src/dst quantization info");
         }
     }
     return Status{};
