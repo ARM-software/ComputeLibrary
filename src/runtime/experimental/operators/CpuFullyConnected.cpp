@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Arm Limited.
+ * Copyright (c) 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,10 @@ Status CpuFullyConnected::validate(const ITensorInfo      *src,
                    (biases == nullptr || biases->data_type() == DataType::F32) && dst->data_type() == DataType::F32;
     bool fp16_ok = src->data_type() == DataType::F16 && weights->data_type() == DataType::F16 &&
                    (biases == nullptr || biases->data_type() == DataType::F16) && dst->data_type() == DataType::F16;
-    if (!(fp32_ok || fp16_ok))
+    bool bf16_ok = src->data_type() == DataType::BFLOAT16 && weights->data_type() == DataType::BFLOAT16 &&
+                   (biases == nullptr || biases->data_type() == DataType::BFLOAT16) &&
+                   dst->data_type() == DataType::BFLOAT16;
+    if (!(fp32_ok || fp16_ok || bf16_ok))
     {
         return Status(ErrorCode::RUNTIME_ERROR, "datatype is not supported");
     }
