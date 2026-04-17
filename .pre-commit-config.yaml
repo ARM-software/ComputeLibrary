@@ -98,6 +98,11 @@ repos:
         always_run: true
         entry: bash -c "pip install -q commitizen && git log -1 --pretty=%s | cz check"
         stages: [pre-push]
+      - id: check-signoff
+        name: Check Signed-off-by
+        entry: bash -c 'grep -qi "Signed-off-by:.*@arm.com" "$0" || { echo "Missing Signed-off-by with @arm.com"; exit 1; }'
+        language: system
+        stages: [commit-msg]
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v14.0.6
     hooks:
