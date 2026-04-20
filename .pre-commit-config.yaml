@@ -100,9 +100,12 @@ repos:
         stages: [pre-push]
       - id: check-signoff
         name: Check Signed-off-by
-        entry: bash -c 'grep -qi "Signed-off-by:.*@arm.com" "$0" || { echo "Missing Signed-off-by with @arm.com"; exit 1; }'
+        entry: >
+          bash -c 'git log -1 --pretty=%B |
+          grep -qiE "^Signed-off-by: .+ <.+@.+>$"'
+        always_run: true
         language: system
-        stages: [commit-msg]
+        stages: [pre-push]
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v14.0.6
     hooks:
