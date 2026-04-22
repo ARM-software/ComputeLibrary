@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Arm Limited.
+ * Copyright (c) 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,9 +30,9 @@ namespace arm_gemm
 {
 
 // Implementations
-void sme_interleaved_nomerge_bf16fp32_mopa_4VLx1VL(const bfloat16 *const A, const bfloat16 *const B, float *const C, int ldc, const int M, const int N, const int K, const float *const bias, const Activation act, bool accumulate, float *const accumulator_buffer);
+void sme2_interleaved_nomerge_bf16fp32_mopa_4VLx1VL_lhs2VL(const bfloat16 *const A, const bfloat16 *const B, float *const C, int ldc, const int M, const int N, const int K, const float *const bias, const Activation act, bool accumulate, float *const accumulator_buffer);
 
-class cls_sme_interleaved_nomerge_bf16fp32_mopa_4VLx1VL
+class cls_sme2_interleaved_nomerge_bf16fp32_mopa_4VLx1VL_lhs2VL
 {
 public:
   typedef bfloat16 lhs_operand_type;
@@ -68,11 +68,11 @@ public:
   }
 
   // Default to the generic kernel
-  kern_type kernel = sme_interleaved_nomerge_bf16fp32_mopa_4VLx1VL;
+  kern_type kernel = sme2_interleaved_nomerge_bf16fp32_mopa_4VLx1VL_lhs2VL;
 
-  StdTransformsSME<lhs_operand_type, result_type, 4, 1, 2> transforms = {};
+  StdTransformsSME<lhs_operand_type, result_type, 2, 1, 2> transforms = {};
 
-  cls_sme_interleaved_nomerge_bf16fp32_mopa_4VLx1VL(const CPUInfo *)
+  cls_sme2_interleaved_nomerge_bf16fp32_mopa_4VLx1VL_lhs2VL(const CPUInfo *)
   {
   }
 };
