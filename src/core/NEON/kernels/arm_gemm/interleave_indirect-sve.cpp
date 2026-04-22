@@ -107,28 +107,18 @@ template void IndirectInterleave<1, 2, VLType::SME>(bfloat16 *, const bfloat16 *
 template void ConvolutionInterleave<1, 2, VLType::SME>(bfloat16 *, const bfloat16 *, size_t, const convolver<bfloat16> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<1, 2, VLType::SME>(bfloat16 *, const bfloat16 *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 
-template void IndirectInterleave<4, 2, VLType::SME>(bfloat16 *, const bfloat16 * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
-template void ConvolutionInterleave<4, 2, VLType::SME>(bfloat16 *, const bfloat16 *, size_t, const convolver<bfloat16> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
-template void Interleave<4, 2, VLType::SME>(bfloat16 *, const bfloat16 *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
-
 template void IndirectInterleave<2, 2, VLType::SME>(bfloat16 *, const bfloat16 * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void ConvolutionInterleave<2, 2, VLType::SME>(bfloat16 *, const bfloat16 *, size_t, const convolver<bfloat16> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<2, 2, VLType::SME>(bfloat16 *, const bfloat16 *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
-#endif // defined(ARM_COMPUTE_ENABLE_BF16) && defined(__aarch64__) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
 
-#if defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_SME2) && defined(__aarch64__)
 template void IndirectInterleave<1, 2, VLType::SME>(bfloat16 *, const float * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void ConvolutionInterleave<1, 2, VLType::SME>(bfloat16 *, const float *, size_t, const convolver<float> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<1, 2, VLType::SME>(bfloat16 *, const float *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 
-template void IndirectInterleave<4, 2, VLType::SME>(bfloat16 *, const float * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
-template void ConvolutionInterleave<4, 2, VLType::SME>(bfloat16 *, const float *, size_t, const convolver<float> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
-template void Interleave<4, 2, VLType::SME>(bfloat16 *, const float *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
-
 template void IndirectInterleave<2, 2, VLType::SME>(bfloat16 *, const float * const * const *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void ConvolutionInterleave<2, 2, VLType::SME>(bfloat16 *, const float *, size_t, const convolver<float> &, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
 template void Interleave<2, 2, VLType::SME>(bfloat16 *, const float *, size_t, unsigned int, unsigned int, unsigned int, unsigned int, bool, int32_t);
-#endif // defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_SME2) && defined(__aarch64__)
+#endif // defined(ARM_COMPUTE_ENABLE_BF16) && defined(__aarch64__) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
 
 } // namespace arm_gemm
 
