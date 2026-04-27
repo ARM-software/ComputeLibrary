@@ -134,21 +134,28 @@ CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorIn
 
         if (src_qinfo != dst_qinfo)
         {
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.pool_type != PoolingType::MAX,
+                                            "Assembly kernels only support differing src/dst quantization info for "
+                                            "MAX pooling");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_type() == DataType::QASYMM8_SIGNED &&
+                                                (src_qinfo.offset != 0 || dst_qinfo.offset != 0),
+                                            "Assembly kernels only support differing src/dst quantization info for "
+                                            "QASYMM8_SIGNED when both offsets are zero");
             const float multiplier = src_qinfo.scale / dst_qinfo.scale;
             int32_t     dst_multiplier{};
             int32_t     dst_shift{};
             ARM_COMPUTE_RETURN_ERROR_ON(
-                quantization::calculate_quantized_multiplier(multiplier, &dst_multiplier, &dst_shift));
+                !quantization::calculate_quantized_multiplier(multiplier, &dst_multiplier, &dst_shift));
         }
         else
         {
-            if (src->data_type() == DataType::QASYMM8)
+            if (src->data_type() == DataType::QASYMM8 || src->data_type() == DataType::QASYMM8_SIGNED)
             {
                 const bool has_padding = info.pad_stride_info.has_padding();
                 ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.pool_type != PoolingType::MAX && !info.exclude_padding &&
                                                     has_padding,
-                                                "Assembly kernels only support padded MAX pooling for QASYMM8 with "
-                                                "same src/dst quantization info");
+                                                "Assembly kernels only support padded MAX pooling for QASYMM8 and "
+                                                "QASYMM8_SIGNED with same src/dst quantization info");
             }
         }
     }
@@ -156,13 +163,13 @@ CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorIn
     {
         const TensorInfo out_info(dst_shape, 1, src->data_type()); // use src dtype as they're same.
         ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&out_info);
-        if (src->data_type() == DataType::QASYMM8)
+        if (src->data_type() == DataType::QASYMM8 || src->data_type() == DataType::QASYMM8_SIGNED)
         {
             // If dst is not configured, the quantization info are the same
             const bool has_padding = info.pad_stride_info.has_padding();
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.pool_type != PoolingType::MAX && !info.exclude_padding && has_padding,
-                                            "Assembly kernels only support padded MAX pooling for QASYMM8 with "
-                                            "same src/dst quantization info");
+                                            "Assembly kernels only support padded MAX pooling for QASYMM8 and "
+                                            "QASYMM8_SIGNED with same src/dst quantization info");
         }
     }
     return Status{};
@@ -303,9 +310,10 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInf
     int32_t     dst_shift{};
     quantization::calculate_quantized_multiplier(multiplier, &dst_multiplier, &dst_shift);
 
-    const arm_conv::pooling::Requantize32 requant_args(src_qinfo.offset, dst_qinfo.offset,
-                                                       dst_shift, // left shift
-                                                       0,         // right shift
+    const int32_t left_shift  = std::max(-dst_shift, static_cast<int32_t>(0));
+    const int32_t right_shift = std::min(-dst_shift, static_cast<int32_t>(0));
+
+    const arm_conv::pooling::Requantize32 requant_args(src_qinfo.offset, dst_qinfo.offset, left_shift, right_shift,
                                                        dst_multiplier);
 
     // Configure assembly pooling kernel with requantization
