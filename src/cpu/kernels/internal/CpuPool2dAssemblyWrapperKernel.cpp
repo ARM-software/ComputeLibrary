@@ -137,10 +137,6 @@ CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorIn
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.pool_type != PoolingType::MAX,
                                             "Assembly kernels only support differing src/dst quantization info for "
                                             "MAX pooling");
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->data_type() == DataType::QASYMM8_SIGNED &&
-                                                (src_qinfo.offset != 0 || dst_qinfo.offset != 0),
-                                            "Assembly kernels only support differing src/dst quantization info for "
-                                            "QASYMM8_SIGNED when both offsets are zero");
             const float multiplier = src_qinfo.scale / dst_qinfo.scale;
             int32_t     dst_multiplier{};
             int32_t     dst_shift{};
