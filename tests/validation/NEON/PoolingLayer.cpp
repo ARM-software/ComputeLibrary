@@ -136,6 +136,17 @@ const auto PoolingDatasetQASYMM8SignedPaddedMaxDifferentQInfoZeroOffset =
             make("InputQuantInfo", {QuantizationInfo(0.25f, 0)}),
             make("OutputQuantInfo", {QuantizationInfo(0.5f, 0)}));
 
+const auto PoolingDatasetQASYMM8SignedPaddedMaxDifferentQInfo =
+    combine(make("Shape", {TensorShape(7U, 5U, 3U)}),
+            make("PoolingType", {PoolingType::MAX}),
+            make("PoolingSize", {Size2D(3, 3)}),
+            make("PadStride", {PadStrideInfo(2, 2, 1, 1)}),
+            make("ExcludePadding", {false}),
+            make("DataType", DataType::QASYMM8_SIGNED),
+            make("DataLayout", {DataLayout::NHWC}),
+            make("InputQuantInfo", {QuantizationInfo(0.25f, -11)}),
+            make("OutputQuantInfo", {QuantizationInfo(0.5f, -7)}));
+
 const auto PoolingDatasetQASYMM8SignedPaddedMaxSameQInfo =
     combine(make("Shape", {TensorShape(7U, 5U, 3U), TensorShape(8U, 7U, 5U)}),
             make("PoolingType", {PoolingType::MAX}),
@@ -227,6 +238,38 @@ TEST_CASE(ValidatePaddedAvgDifferentQuantizationInfo, framework::DatasetMode::AL
 
     input_info.set_quantization_info(QuantizationInfo(0.25f, 11));
     output_info.set_quantization_info(QuantizationInfo(0.5f, 7));
+    input_info.set_is_resizable(false);
+    output_info.set_is_resizable(false);
+
+    const bool is_valid = bool(NEPoolingLayer::validate(&input_info, &output_info, pool_info));
+
+    ARM_COMPUTE_EXPECT(!is_valid, framework::LogLevel::ERRORS);
+}
+
+TEST_CASE(ValidatePaddedSignedMaxDifferentQuantizationInfo, framework::DatasetMode::ALL)
+{
+    TensorInfo input_info(TensorShape(3U, 15U, 11U, 1U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC);
+    TensorInfo output_info(TensorShape(3U, 8U, 6U, 1U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC);
+    const auto pool_info = PoolingLayerInfo(PoolingType::MAX, 3, DataLayout::NHWC, PadStrideInfo(2, 2, 1, 1), false);
+
+    input_info.set_quantization_info(QuantizationInfo(0.25f, -11));
+    output_info.set_quantization_info(QuantizationInfo(0.5f, -7));
+    input_info.set_is_resizable(false);
+    output_info.set_is_resizable(false);
+
+    const bool is_valid = bool(NEPoolingLayer::validate(&input_info, &output_info, pool_info));
+
+    ARM_COMPUTE_EXPECT(is_valid, framework::LogLevel::ERRORS);
+}
+
+TEST_CASE(ValidatePaddedSignedAvgDifferentQuantizationInfo, framework::DatasetMode::ALL)
+{
+    TensorInfo input_info(TensorShape(3U, 15U, 11U, 1U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC);
+    TensorInfo output_info(TensorShape(3U, 8U, 6U, 1U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC);
+    const auto pool_info = PoolingLayerInfo(PoolingType::AVG, 3, DataLayout::NHWC, PadStrideInfo(2, 2, 1, 1), false);
+
+    input_info.set_quantization_info(QuantizationInfo(0.25f, -11));
+    output_info.set_quantization_info(QuantizationInfo(0.5f, -7));
     input_info.set_is_resizable(false);
     output_info.set_is_resizable(false);
 
@@ -534,6 +577,14 @@ FIXTURE_DATA_TEST_CASE(PaddedMaxDifferentQInfoZeroOffset,
                        NEPoolingLayerQuantizedFixture<int8_t>,
                        framework::DatasetMode::PRECOMMIT,
                        PoolingDatasetQASYMM8SignedPaddedMaxDifferentQInfoZeroOffset)
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_qasymm8_s);
+}
+FIXTURE_DATA_TEST_CASE(PaddedMaxDifferentQInfo,
+                       NEPoolingLayerQuantizedFixture<int8_t>,
+                       framework::DatasetMode::PRECOMMIT,
+                       PoolingDatasetQASYMM8SignedPaddedMaxDifferentQInfo)
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8_s);
