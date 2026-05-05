@@ -93,6 +93,7 @@ cpu::AsmGemmInfo init_assembly_metadata(const Conv2dInfo &info, bool is_indirect
     asm_info.fast_mode               = info.enable_fast_math;
     asm_info.fixed_format            = info.weights_info.weight_format() != WeightFormat::UNSPECIFIED;
     asm_info.weight_format           = info.weights_info.weight_format();
+    asm_info.use_fp32_acc            = !info.enable_fast_math;
     return asm_info;
 }
 } // namespace
