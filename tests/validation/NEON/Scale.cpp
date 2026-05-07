@@ -210,6 +210,16 @@ TEST_CASE(MissmatchingDataType, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(bool(result) == false, framework::LogLevel::ERRORS);
 }
 
+TEST_CASE(DefaultScaleKernelInfoUsesNoPadding, framework::DatasetMode::ALL)
+{
+    const auto input  = TensorInfo{input_shape, 1, default_data_type, default_data_layout};
+    const auto output = TensorInfo{output_shape, 1, default_data_type, default_data_layout};
+    Status     result{};
+
+    result = NEScale::validate(&input, &output, ScaleKernelInfo{default_interpolation_policy, default_border_mode});
+    ARM_COMPUTE_EXPECT(bool(result) == true, framework::LogLevel::ERRORS);
+}
+
 TEST_CASE(UsePadding, framework::DatasetMode::ALL)
 {
     const auto input  = TensorInfo{input_shape, 1, default_data_type, default_data_layout};
