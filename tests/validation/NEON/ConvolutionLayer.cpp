@@ -64,11 +64,10 @@ void configure_conv_function<NEGEMMConv2d, Tensor>(NEGEMMConv2d              &fu
                                                    const WeightsInfo         &weights_info,
                                                    const Size2D              &dilation,
                                                    const ActivationLayerInfo &act_info,
-                                                   unsigned int               num_groups)
+                                                   unsigned int               num_groups,
+                                                   bool                       use_fp32_acc)
 {
-    ARM_COMPUTE_UNUSED(weights_info);
-
-    Conv2dInfo conv_info(info, dilation, act_info, false, num_groups);
+    Conv2dInfo conv_info(info, dilation, act_info, false, num_groups, weights_info, use_fp32_acc);
     func.configure(src, weights, bias, dst, conv_info);
 }
 } // namespace detail
@@ -87,10 +86,14 @@ constexpr float               tolerance_num_f16 = 0.15f;
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 const RelativeTolerance<half_float::half>
-    rel_tolerance_f16(half_float::half(0.2f));          /**< Relative tolerance value for FP16 types */
-const AbsoluteTolerance<float> abs_tolerance_f16(0.2f); /**< Absolute tolerance for FP16 types */
-constexpr float                tolerance_num = 0.07f;   /**< Tolerance number for the FP16 implementation */
-#endif                                                  /* ARM_COMPUTE_ENABLE_FP16 */
+    rel_tolerance_f16(half_float::half(0.2f));                     /**< Relative tolerance value for FP16 types */
+const AbsoluteTolerance<float>            abs_tolerance_f16(0.2f); /**< Absolute tolerance for FP16 types */
+constexpr float                           tolerance_num = 0.07f;   /**< Tolerance number for the FP16 implementation */
+const RelativeTolerance<half_float::half> rel_tolerance_f16_fp32_acc(
+    half_float::half(0.001f)); /**< Relative tolerance value for FP16 types with FP32 accumulation */
+const AbsoluteTolerance<float>
+    abs_tolerance_f16_fp32_acc(0.01f); /**< Absolute tolerance value for FP16 types with FP32 accumulation */
+#endif                                 /* ARM_COMPUTE_ENABLE_FP16 */
 
 #if __aarch64__
 constexpr float tolerance_num_dequantize_f32 = 1e-5; /**< Tolerance number for the FP32 dequantization */
@@ -1854,6 +1857,10 @@ TEST_SUITE(DirectGEMMConv2d)
 template <typename T>
 using NEDirectGEMMConv2dLayerFixture = ConvolutionValidationFixture<Tensor, Accessor, NEGEMMConv2d, T>;
 
+template <typename T>
+using NEDirectGEMMConv2dLayerFP16Fixture =
+    NEDirectGEMMConv2dLayerFP16WithAccModeFixture<Tensor, Accessor, NEGEMMConv2d, T>;
+
 /** Test case for memory injection in @ref cpu::CpuGemmDirectConv2d.
  *
  * Configure the operator once and inject memory at run-time in multiple executions.
@@ -1967,6 +1974,39 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
     validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
 TEST_SUITE_END() // FP32
+
+#ifdef ARM_COMPUTE_ENABLE_FP16
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEDirectGEMMConv2dLayerFP16Fixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NHWC}),
+                               NoActivation,
+                               make("UseFP32Acc", {false, true})))
+{
+    if (CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        if (_use_fp32_acc)
+        {
+            validate(Accessor(_target), _reference, rel_tolerance_f16_fp32_acc, 0.f, abs_tolerance_f16_fp32_acc);
+        }
+        else
+        {
+            validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
+        }
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
+    }
+}
+TEST_SUITE_END() // FP16
+#endif           /* ARM_COMPUTE_ENABLE_FP16 */
 TEST_SUITE_END() // Float
 
 #ifdef __aarch64__
