@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2025 Arm Limited.
+ * Copyright (c) 2017-2020, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -175,6 +175,15 @@ template SimpleTensor<half> convolution_layer<half, half, half, half>(const Simp
                                                                       const Size2D             &dilation,
                                                                       unsigned int              num_groups,
                                                                       QuantizationInfo          out_quant_info);
+
+template SimpleTensor<float> convolution_layer<half, half, half, float>(const SimpleTensor<half> &src,
+                                                                        const SimpleTensor<half> &weights,
+                                                                        const SimpleTensor<half> &bias,
+                                                                        const TensorShape        &output_shape,
+                                                                        const PadStrideInfo      &info,
+                                                                        const Size2D             &dilation,
+                                                                        unsigned int              num_groups,
+                                                                        QuantizationInfo          out_quant_info);
 
 template SimpleTensor<uint8_t>
 convolution_layer<uint8_t, uint8_t, int32_t, uint8_t>(const SimpleTensor<uint8_t> &src,

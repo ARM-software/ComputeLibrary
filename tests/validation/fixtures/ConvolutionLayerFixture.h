@@ -75,8 +75,10 @@ configure_conv_function(ConvolutionFunction       &func,
                         const WeightsInfo         &weights_info,
                         const Size2D              &dilation,
                         const ActivationLayerInfo &act_info,
-                        unsigned int               num_groups)
+                        unsigned int               num_groups,
+                        bool                       use_fp32_acc = false)
 {
+    ARM_COMPUTE_UNUSED(use_fp32_acc);
     func.configure(src, weights, bias, dst, info, weights_info, dilation, act_info, false /* enable_fast_math */,
                    num_groups);
 }
@@ -93,8 +95,10 @@ configure_conv_function(ConvolutionFunction       &func,
                         const WeightsInfo         &weights_info,
                         const Size2D              &dilation,
                         const ActivationLayerInfo &act_info,
-                        unsigned int               num_groups)
+                        unsigned int               num_groups,
+                        bool                       use_fp32_acc = false)
 {
+    ARM_COMPUTE_UNUSED(use_fp32_acc);
     func.configure(src, weights, bias, dst, info, weights_info, dilation, act_info, num_groups);
 }
 #endif // ARM_COMPUTE_OPENCL_ENABLED
@@ -196,7 +200,8 @@ public:
                bool                mixed_layout                 = false,
                PaddingList         pre_pad_layer                = PaddingList({}),
                bool                padded_weights               = false,
-               bool                updated_sq_info_after_config = false)
+               bool                updated_sq_info_after_config = false,
+               bool                use_fp32_acc                 = false)
     {
 #ifndef ARM_COMPUTE_CPU_ENABLED
         ARM_COMPUTE_UNUSED(updated_sq_info_after_config);
@@ -252,7 +257,7 @@ public:
 #endif // ARM_COMPUTE_CPU_ENABLED
         {
             _target = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights,
-                                     dilation, act_info, pre_pad_layer, padded_weights);
+                                     dilation, act_info, pre_pad_layer, padded_weights, use_fp32_acc);
         }
 
         _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, dilation, act_info,
@@ -385,7 +390,8 @@ protected:
                               const Size2D             &dilation,
                               const ActivationLayerInfo act_info,
                               PaddingList               pre_pad_layer  = PaddingList({}),
-                              bool                      padded_weights = false)
+                              bool                      padded_weights = false,
+                              bool                      use_fp32_acc   = false)
     {
         ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
 
@@ -442,12 +448,12 @@ protected:
                                               info.pad_right() + pad_w.second, info.pad_top() + pad_h.first,
                                               info.pad_bottom() + pad_h.second, info.round());
             detail::configure_conv_function(conv, &src, &weights, &bias, &dst, new_conv_info, weights_info, dilation,
-                                            act_info, num_groups);
+                                            act_info, num_groups, use_fp32_acc);
         }
         else
         {
             detail::configure_conv_function(conv, &src, &weights, &bias, &dst, info, weights_info, dilation, act_info,
-                                            num_groups);
+                                            num_groups, use_fp32_acc);
         }
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
@@ -709,6 +715,84 @@ public:
             input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, data_type,
             data_layout, QuantizationInfo(), QuantizationInfo(), act_info, mixed_layout);
     }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
+class NEDirectGEMMConv2dLayerFP16WithAccModeFixture
+    : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>
+{
+    static_assert(std::is_same<typename std::decay<T>::type, half>::value,
+                  "NEDirectGEMMConv2dLayerFP16WithAccModeFixture only supports half");
+
+public:
+    void setup(TensorShape         input_shape,
+               TensorShape         weights_shape,
+               TensorShape         bias_shape,
+               TensorShape         output_shape,
+               PadStrideInfo       info,
+               Size2D              dilation,
+               bool                reshape_weights,
+               DataType            data_type,
+               DataLayout          data_layout,
+               ActivationLayerInfo act_info,
+               bool                use_fp32_acc)
+    {
+        ARM_COMPUTE_ERROR_ON(data_type != DataType::F16);
+        _use_fp32_acc = use_fp32_acc;
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T, T>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, data_type,
+            data_layout, QuantizationInfo(), QuantizationInfo(), act_info, mixed_layout, PaddingList({}), false, false,
+            use_fp32_acc);
+
+        if (std::is_same<TensorType, Tensor>::value && !CPUInfo::get().has_fp16())
+        {
+            return;
+        }
+
+        this->_reference =
+            compute_reference_fp32_acc(input_shape, weights_shape, bias_shape, output_shape, info, dilation, act_info);
+    }
+
+protected:
+    SimpleTensor<half> compute_reference_fp32_acc(const TensorShape        &input_shape,
+                                                  const TensorShape        &weights_shape,
+                                                  const TensorShape        &bias_shape,
+                                                  const TensorShape        &output_shape,
+                                                  const PadStrideInfo      &info,
+                                                  const Size2D             &dilation,
+                                                  const ActivationLayerInfo act_info)
+    {
+        ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
+
+        const unsigned int num_groups = input_shape[2] / weights_shape[2];
+
+        SimpleTensor<half> src{input_shape, DataType::F16};
+        SimpleTensor<half> weights{weights_shape, DataType::F16};
+        SimpleTensor<half> bias{bias_shape, DataType::F16};
+
+        this->fill(src, 0 + this->_hash);
+        this->fill(weights, 1 + this->_hash);
+        this->fill(bias, 2 + this->_hash);
+
+        auto conv_fp32 = reference::convolution_layer<half, half, half, float>(src, weights, bias, output_shape, info,
+                                                                               dilation, num_groups);
+
+        SimpleTensor<half> conv{output_shape, DataType::F16};
+        for (int i = 0; i < conv.num_elements(); ++i)
+        {
+            conv[i] = half(conv_fp32[i]);
+        }
+
+        if (act_info.enabled())
+        {
+            return reference::activation_layer<half>(conv, act_info);
+        }
+
+        return conv;
+    }
+
+public:
+    bool _use_fp32_acc{false};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
