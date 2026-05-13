@@ -53,7 +53,7 @@ SPDX-License-Identifier = "MIT"
 
 [[annotations]]
 path = ["README.md"]
-SPDX-FileCopyrightText = "2018-2025 Arm Limited"
+SPDX-FileCopyrightText = "2018-2026 Arm Limited"
 SPDX-License-Identifier = "MIT"
 
 [[annotations]]
