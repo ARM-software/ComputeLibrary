@@ -28,8 +28,6 @@
 #include "arm_compute/core/SparseTensor.h"
 #include "arm_compute/runtime/SparseTensorAllocator.h"
 
-#include <vector>
-
 namespace arm_compute
 {
 class COOTensor final : public SparseTensor, public IMemoryManageable
@@ -76,7 +74,10 @@ private:
      */
     COOTensor(const ITensor *tensor);
 
-    std::vector<Coordinates> _indices;
+    /** Size in bytes of each stored index coordinate component */
+    static constexpr size_t index_size = sizeof(int32_t);
+
+    size_t                        _indices_bytes{ 0 }; /**< Total bytes occupied by the indices section in the allocator buffer */
     mutable SparseTensorAllocator _allocator; /**< Instance of the basic CPU allocator.*/
 
 friend class Tensor;

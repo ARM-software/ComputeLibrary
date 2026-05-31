@@ -30,6 +30,10 @@
 
 #include "src/core/helpers/Utils.h"
 
+#include <cstring>
+#include <numeric>
+#include <vector>
+
 
 namespace arm_compute
 {
@@ -41,7 +45,8 @@ TensorInfo coo_tensor_info(const ITensorInfo *src_info)
 }
 } // namespace
 
-COOTensor::COOTensor(const ITensor *tensor, size_t sparse_dim) : SparseTensor(tensor->info()->num_dimensions(), sparse_dim), _indices(), _allocator(this)
+COOTensor::COOTensor(const ITensor *tensor, size_t sparse_dim)
+    : SparseTensor(tensor->info()->num_dimensions(), sparse_dim), _indices_bytes(0), _allocator(this)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
     const ITensorInfo *info = tensor->info();
@@ -67,28 +72,35 @@ COOTensor::COOTensor(const ITensor *tensor, size_t sparse_dim) : SparseTensor(te
         dense_shape[i] = info->dimension(sparse_dim + i);
     }
 
-    std::vector<uint8_t> temp_values;
-
     const size_t         step = std::accumulate(dense_shape.begin(), dense_shape.end(), size_t(1), std::multiplies<size_t>());
     const size_t     max_iter = std::accumulate(sparse_shape.begin(), sparse_shape.end(), size_t(1), std::multiplies<size_t>());
     const size_t element_size = info->element_size();
     const size_t   slice_size = step * element_size;
 
-    size_t value_byte_size = 0;
+    // count non-zero blocks to determine allocation sizes.
+    size_t nnz_count = 0;
     for(size_t i = 0; i < max_iter; i++)
     {
-        const size_t offset = i * slice_size;
-        if(has_non_zero_elements(const_cast<uint8_t *>(data + offset), slice_size, element_size, is_nonzero))
+        if(has_non_zero_elements(const_cast<uint8_t *>(data + i * slice_size), slice_size, element_size, is_nonzero))
         {
-            value_byte_size += slice_size;
+            nnz_count++;
         }
     }
 
-    // Indices are stored in _indices (host vector); no index data is written into
-    // the allocator buffer yet, so pass 0 for indices_bytes.
-    _allocator.init(coo_tensor_info(info), value_byte_size, 0);
+    // Buffer layout: [ indices section | values section ]
+    //   indices: nnz * sparse_dim * index_size bytes
+    //   values:  nnz * slice_size bytes
+    _indices_bytes = nnz_count * sparse_dim * index_size;
+    const size_t value_byte_size = nnz_count * slice_size;
+
+    _allocator.init(coo_tensor_info(info), value_byte_size, _indices_bytes);
     _allocator.allocate();
 
+    uint8_t *indices_ptr = _allocator.data();
+    uint8_t  *values_ptr = _allocator.data() + _indices_bytes;
+    size_t         entry = 0;
+
+    // Second pass: write indices and values directly into the buffer.
     for(size_t i = 0; i < max_iter; i++)
     {
         const size_t offset = i * slice_size;
@@ -97,28 +109,18 @@ COOTensor::COOTensor(const ITensor *tensor, size_t sparse_dim) : SparseTensor(te
             continue;
         }
 
-        // -----------------
-        // TODO: I built this function in a similar way to numpy's unravel_index.
-        // Do you think it's worth creating a util function somewhere else?
-        // Also, it stores the coordinates in a reverse way, with the fastest
-        // changing dimension last. Probably it would be better to store them
-        // in a more natural order.
-        std::vector<int32_t> multi_index(dim(), std::int32_t{0});
+        // Compute per-dimension sparse coordinates (equivalent to numpy unravel_index).
+        std::vector<int32_t> multi_index(sparse_dim, int32_t{ 0 });
         size_t remainder = i;
         for(size_t sd = sparse_dim; sd-- > 0;)
         {
             multi_index[sd] = remainder % sparse_shape[sd];
             remainder /= sparse_shape[sd];
         }
-        // -----------------
 
-        _indices.push_back(Coordinates(multi_index));
-        temp_values.insert(temp_values.end(), data + offset, data + offset + slice_size);
-    }
-
-    if(!temp_values.empty())
-    {
-        std::memcpy(_allocator.data(), temp_values.data(), temp_values.size());
+        std::memcpy(indices_ptr + entry * sparse_dim * index_size, multi_index.data(), sparse_dim * index_size);
+        std::memcpy(values_ptr  + entry * slice_size,               data + offset,      slice_size);
+        entry++;
     }
 }
 
@@ -128,7 +130,7 @@ COOTensor::COOTensor(const ITensor *tensor) : COOTensor(tensor, tensor->info()->
 
 size_t COOTensor::nnz() const
 {
-    return _indices.size();
+    return (sparse_dim() > 0) ? (_indices_bytes / (sparse_dim() * index_size)) : 0;
 }
 
 ITensorInfo *COOTensor::info() const
@@ -166,24 +168,28 @@ std::unique_ptr<ITensor> COOTensor::to_dense()
         return tensor;
     }
 
-    for(size_t i = 0; i < _indices.size(); ++i)
+    const size_t       sdim = sparse_dim();
+    const uint8_t *idx_base = _allocator.data();
+    const uint8_t *val_base = _allocator.data() + _indices_bytes;
+
+    for(size_t i = 0; i < nnz(); i++)
     {
-        const Coordinates     &c = _indices[i];
-        const uint8_t *block_ptr = buffer() + i * dense_vol * element_size;
+        const int32_t    *stored = reinterpret_cast<const int32_t *>(idx_base + i * sdim * index_size);
+        const uint8_t *block_ptr = val_base + i * dense_vol * element_size;
 
         size_t final_offset = 0;
-        for(size_t d = 0; d < sparse_dim(); ++d)
+        for(size_t d = 0; d < sdim; d++)
         {
-            final_offset += c[d] * dense_volume(d+1);
+            final_offset += stored[d] * dense_volume(d + 1);
         }
         final_offset *= element_size;
 
-        for(size_t j = 0; j < dense_vol; ++j)
+        for(size_t j = 0; j < dense_vol; j++)
         {
-            const void *value_ptr = block_ptr + j * element_size;
-            uint8_t     *base_ptr = tensor->buffer() + first_elem_offset + final_offset + j * element_size;
-
-            std::memcpy(base_ptr, value_ptr, element_size);
+            std::memcpy(
+                tensor->buffer() + first_elem_offset + final_offset + j * element_size,
+                block_ptr + j * element_size,
+                element_size);
         }
     }
 
@@ -194,7 +200,11 @@ Coordinates COOTensor::get_coordinates(size_t nth) const
 {
     ARM_COMPUTE_ERROR_ON_MSG(nth >= nnz(), "Invalid index");
 
-    return _indices[nth];
+    const size_t        sdim = sparse_dim();
+    const int32_t *index_ptr = reinterpret_cast<const int32_t *>(_allocator.data() + nth * sdim * index_size);
+    std::vector<int32_t>  coords_data(index_ptr, index_ptr + sdim);
+
+    return Coordinates(coords_data);
 }
 
 const uint8_t *COOTensor::get_value(Coordinates coords) const
@@ -205,17 +215,21 @@ const uint8_t *COOTensor::get_value(Coordinates coords) const
         ARM_COMPUTE_ERROR_ON_MSG(static_cast<size_t>(coords[i]) >= info()->tensor_shape()[i], "Invalid coordinates shape");
     }
 
-    const uint8_t    *data = static_cast<const uint8_t *>(buffer());
-    const size_t dense_vol = dense_volume(sparse_dim());
+    const size_t          n = nnz();
+    const size_t       sdim = sparse_dim();
+    const size_t  dense_vol = dense_volume(sdim);
+    const size_t  elem_size = info()->element_size();
+    const uint8_t *idx_base = _allocator.data();
+    const uint8_t *val_base = _allocator.data() + _indices_bytes;
 
-    for(size_t i = 0; i < _indices.size(); ++i)
+    for(size_t i = 0; i < n; i++)
     {
-        const Coordinates &c = _indices[i];
-        bool           match = true;
+        const int32_t *stored = reinterpret_cast<const int32_t *>(idx_base + i * sdim * index_size);
+        bool            match = true;
 
-        for(size_t d = 0; d < coords.num_dimensions(); ++d)
+        for(size_t d = 0; d < sdim; d++)
         {
-            if(c[d] != coords[d])
+            if(stored[d] != coords[d])
             {
                 match = false;
                 break;
@@ -223,7 +237,7 @@ const uint8_t *COOTensor::get_value(Coordinates coords) const
         }
         if(match)
         {
-            return data + i * dense_vol * info()->element_size();
+            return val_base + i * dense_vol * elem_size;
         }
     }
 
@@ -239,25 +253,27 @@ void COOTensor::associate_memory_group(IMemoryGroup *memory_group)
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
 void COOTensor::print(std::ostream &os) const
 {
-    const uint8_t *data = static_cast<const uint8_t *>(buffer());
-
-    if(_indices.empty())
+    if(nnz() == 0)
     {
         os << "index: [] values: []" << std::endl;
         return;
     }
 
-    for(size_t i = 0; i < _indices.size(); ++i)
+    const size_t       sdim = sparse_dim();
+    const uint8_t *idx_base = _allocator.data();
+    const uint8_t *val_base = _allocator.data() + _indices_bytes;
+
+    for(size_t i = 0; i < nnz(); i++)
     {
-        const Coordinates &coord = _indices[i];
+        const int32_t *stored = reinterpret_cast<const int32_t *>(idx_base + i * sdim * index_size);
         os << "index: [";
-        for (size_t j = 0; j < coord.num_dimensions(); ++j)
+        for(size_t d = 0; d < sdim; d++)
         {
-            os << coord[j];
-            if (j < coord.num_dimensions() - 1) os << ", ";
+            os << stored[d];
+            if(d < sdim - 1) os << ", ";
         }
         os << "]  values: ";
-        print_values(os, data, i, dense_volume(sparse_dim()));
+        print_values(os, val_base, i, dense_volume(sparse_dim()));
     }
 }
 #endif // ARM_COMPUTE_ASSERTS_ENABLED
