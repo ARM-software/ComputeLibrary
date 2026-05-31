@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_INDIRECT_CONV2D_ADDRESS_PRECALCULATION_FIXTURE
-#define ARM_COMPUTE_TEST_INDIRECT_CONV2D_ADDRESS_PRECALCULATION_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_INDIRECTCONV2DADDRESSPRECALCULATIONFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_INDIRECTCONV2DADDRESSPRECALCULATIONFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "tests/Globals.h"
+
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/IndirectConv2dAddressPrecalculation.h"
 
@@ -62,15 +63,12 @@ public:
         const PadStrideInfo conv_info(stride, stride, pad, pad);
 
         const TensorShape shape_conv_src(23, // The input channels are not used by the kernel
-                                         src_w,
-                                         src_h,
-                                         src_b);
+                                         src_w, src_h, src_b);
 
         const TensorShape shape_conv_wei(23, // The input channels are not used by the kernel
-                                         wei_w,
-                                         wei_h,
+                                         wei_w, wei_h,
                                          23 // The output channels are not used by the kernel
-                                        );
+        );
 
         // The result of the kernel does not change with the datatype. Hence, we can fix it to Fp16 for validation purposes
         const DataType data_type = DataType::F16;
@@ -80,7 +78,11 @@ public:
     }
 
 protected:
-    TensorType compute_target(TensorShape shape_conv_src, TensorShape shape_conv_wei, DataType data_type, const PadStrideInfo &conv_info, const DirectConvComputeKernelInfo &desc)
+    TensorType compute_target(TensorShape                        shape_conv_src,
+                              TensorShape                        shape_conv_wei,
+                              DataType                           data_type,
+                              const PadStrideInfo               &conv_info,
+                              const DirectConvComputeKernelInfo &desc)
     {
         TensorInfo src_conv_info(shape_conv_src, 1, data_type, DataLayout::NHWC);
         TensorInfo wei_conv_info(shape_conv_wei, 1, data_type, DataLayout::NHWC);
@@ -92,25 +94,32 @@ protected:
         OperatorType func;
         func.configure(&src_conv_info, &wei_conv_info, dst.info(), conv_info, desc);
 
-        add_padding_x({ &dst });
+        add_padding_x({&dst});
 
         // Allocate tensors
         dst.allocator()->allocate();
 
         // Compute GEMM LHS matrix reshape function
-        ITensorPack tensors = { { ACL_DST, &dst } };
+        ITensorPack tensors = {{ACL_DST, &dst}};
         func.run(tensors);
 
         return dst;
     }
 
-    SimpleTensor<int32_t> compute_reference(TensorShape shape_conv_src, TensorShape shape_conv_wei, DataType data_type, const PadStrideInfo &conv_info, const DirectConvComputeKernelInfo &desc)
+    SimpleTensor<int32_t> compute_reference(TensorShape                        shape_conv_src,
+                                            TensorShape                        shape_conv_wei,
+                                            DataType                           data_type,
+                                            const PadStrideInfo               &conv_info,
+                                            const DirectConvComputeKernelInfo &desc)
     {
         ARM_COMPUTE_UNUSED(data_type);
-        TensorShape shape_out         = compute_indirect_buffer_shape(shape_conv_src, DataLayout::NHWC, shape_conv_wei, conv_info, desc);
-        TensorShape output_conv_shape = compute_deep_convolution_shape(shape_conv_src, DataLayout::NHWC, shape_conv_wei, conv_info);
+        TensorShape shape_out =
+            compute_indirect_buffer_shape(shape_conv_src, DataLayout::NHWC, shape_conv_wei, conv_info, desc);
+        TensorShape output_conv_shape =
+            compute_deep_convolution_shape(shape_conv_src, DataLayout::NHWC, shape_conv_wei, conv_info);
 
-        return reference::indirect_conv2d_addr_precalculation(shape_conv_src, shape_conv_wei, output_conv_shape, shape_out, conv_info);
+        return reference::indirect_conv2d_addr_precalculation(shape_conv_src, shape_conv_wei, output_conv_shape,
+                                                              shape_out, conv_info);
     }
 
     TensorType            _target{};
@@ -119,4 +128,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_INDIRECT_CONV2D_ADDRESS_PRECALCULATION_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_INDIRECTCONV2DADDRESSPRECALCULATIONFIXTURE_H

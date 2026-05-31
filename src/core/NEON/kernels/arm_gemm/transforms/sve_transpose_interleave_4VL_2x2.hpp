@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(__aarch64__)
 
 namespace {
 
@@ -39,15 +39,16 @@ void sve_transpose_interleave_4VL_2x2(uint16_t *out, const uint16_t *in, size_t 
     size_t out_stride = 4 * roundup<size_t>(height, 2) * get_vector_length<uint16_t>();
 
     __asm__ __volatile__(
-      "cmp %x[height], #0x8\n"
+      "mov x13, %x[height]\n"
       "ptrue p2.b\n"
+      "cmp x13, #0x8\n"
       "blt 6f\n"
       "1:"  // Main row loop: Head
       "mov x12, %x[in]\n"
       "mov x11, %x[width]\n"
       "cnth x10, ALL, MUL #4\n"
       "mov x9, %x[out]\n"
-      "sub %x[height], %x[height], #0x8\n"
+      "sub x13, x13, #0x8\n"
       "add x28, x12, %x[in_stride]\n"
       "add x27, x28, %x[in_stride]\n"
       "add x26, x27, %x[in_stride]\n"
@@ -182,7 +183,7 @@ void sve_transpose_interleave_4VL_2x2(uint16_t *out, const uint16_t *in, size_t 
       "whilelt p1.h, XZR, x21\n"
       "dech x21\n"
       "whilelt p0.h, XZR, x21\n"
-      "cmp x11, #0x0\n"
+      "cmp x11, #0\n"
       "ld1h { z21.h }, p1/Z, [x12]\n"
       "ld1h { z20.h }, p1/Z, [x28]\n"
       "ld1h { z19.h }, p1/Z, [x27]\n"
@@ -242,20 +243,21 @@ void sve_transpose_interleave_4VL_2x2(uint16_t *out, const uint16_t *in, size_t 
       "st1h { z16.h }, p2, [x20, #-1, MUL VL]\n"
       "bgt 4b\n"
       "5:"  // Main row loop: Column loop skip
-      "cmp %x[height], #0x8\n"
+      "cmp x13, #0x8\n"
       "addvl %x[out], %x[out], #16\n"
       "bge 1b\n"
-      "cbz %x[height], 12f\n"
+      "cbz x13, 12f\n"
       "6:"  // Main loop skip
       "7:"  // Tail row loop: Head
       "mov x12, %x[in]\n"
       "mov x21, %x[width]\n"
       "cnth x20, ALL, MUL #4\n"
-      "cmp %x[height], #0x1\n"
+      "cmp x13, #0x1\n"
       "mov x9, %x[out]\n"
-      "sub %x[height], %x[height], #0x2\n"
+      "sub x13, x13, #0x2\n"
       "add x28, x12, %x[in_stride]\n"
       "add %x[in], x28, %x[in_stride]\n"
+      "csel %x[in], %x[in], x28, GT\n"
       "csel x28, x28, %x[pad_row], GT\n"
       "cmp x21, x20\n"
       "blt 9f\n"
@@ -299,7 +301,7 @@ void sve_transpose_interleave_4VL_2x2(uint16_t *out, const uint16_t *in, size_t 
       "whilelt p1.h, XZR, x20\n"
       "dech x20\n"
       "whilelt p0.h, XZR, x20\n"
-      "cmp x21, #0x0\n"
+      "cmp x21, #0\n"
       "ld1h { z18.h }, p1/Z, [x12]\n"
       "ld1h { z17.h }, p1/Z, [x28]\n"
       "ld1h { z20.h }, p0/Z, [x12, #1, MUL VL]\n"
@@ -317,13 +319,13 @@ void sve_transpose_interleave_4VL_2x2(uint16_t *out, const uint16_t *in, size_t 
       "add x9, x9, %x[out_stride]\n"
       "bgt 10b\n"
       "11:"  // Tail row loop: Column loop skip
-      "cmp %x[height], #0x1\n"
+      "cmp x13, #0x1\n"
       "addvl %x[out], %x[out], #4\n"
       "bge 7b\n"
       "12:"  // Done
-      : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
-      : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
-      : "cc", "memory", "p0", "p1", "p2", "x9", "x10", "x11", "x12", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
+      : [in] "+&r" (in), [out] "+&r" (out)
+      : [height] "r" (height), [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
+      : "cc", "memory", "p0", "p1", "p2", "x9", "x10", "x11", "x12", "x13", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
     );
 }
 
@@ -342,5 +344,5 @@ void Transform<4, 2, true, VLType::SVE>(
     );
 }
 
+#endif // defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(__aarch64__)
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

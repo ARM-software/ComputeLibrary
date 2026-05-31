@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, 2023 Arm Limited.
+ * Copyright (c) 2019, 2020, 2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,9 @@
 
 #ifdef __aarch64__
 
-#include "arm_gemm.hpp"
-#include "quantized.hpp"
-#include "utils.hpp"
+#include "arm_gemm/arm_gemm.hpp"
+#include "arm_common/internal/quantized.hpp"
+#include "arm_common/internal/utils.hpp"
 
 #include <cassert>
 
@@ -1158,3 +1158,4 @@ void row_sums_indirect(
 } // namespace arm_gemm
 
 #endif // __aarch64__
+

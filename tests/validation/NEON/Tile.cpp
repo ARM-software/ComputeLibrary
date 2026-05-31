@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,14 @@
 #include "arm_compute/runtime/NEON/functions/NETile.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/TileFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -39,32 +40,32 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
-const auto MultiplesDataset = framework::dataset::make("Multiples", { Multiples{ 3 },
-                                                                      Multiples{ 2, 2 },
-                                                                      Multiples{ 1, 1, 3, 4 },
-                                                                      Multiples{ 2, 1, 2, 2 },
-                                                                      Multiples{ 2, 1, 3 },
-                                                                      Multiples{ 2, 2, 2 }
-                                                                    });
+const auto MultiplesDataset = make("Multiples",
+                                   {Multiples{3}, Multiples{2, 2}, Multiples{1, 1, 3, 4}, Multiples{2, 1, 2, 2},
+                                    Multiples{2, 1, 3}, Multiples{2, 2, 2}});
 } // namespace
 TEST_SUITE(NEON)
 TEST_SUITE(Tile)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(10, 10), 1, DataType::F32),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+        make("InputInfo", { TensorInfo(TensorShape(10, 10), 1, DataType::F32),
                                                 TensorInfo(TensorShape(10, 10), 1, DataType::F32),  // Mismatching shape
                                                 TensorInfo(TensorShape(10, 10), 1, DataType::F16), // Mismatching type
-                                                TensorInfo(TensorShape(10, 10), 1, DataType::F32)}), // Wrong multiples
-        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(10, 20), 1, DataType::F32),
+                                                TensorInfo(TensorShape(10, 10), 1, DataType::F32)}),
+        // Wrong multiples
+        make("OutputInfo",{ TensorInfo(TensorShape(10, 20), 1, DataType::F32),
                                                 TensorInfo(TensorShape(20, 20), 1, DataType::F32),
                                                 TensorInfo(TensorShape(20, 20), 1, DataType::F32),
-                                                TensorInfo(TensorShape(10, 20), 1, DataType::F32)})),
-        framework::dataset::make("Multiples",{ Multiples{1, 2}, Multiples{1, 2}, Multiples{0, 1} })),
-        framework::dataset::make("Expected", {true, false, false, false })),
+                                                TensorInfo(TensorShape(10, 20), 1, DataType::F32)}),
+        make("Multiples",{ Multiples{1, 2}, Multiples{1, 2}, Multiples{0, 1} }),
+        make("Expected", {true, false, false, false })
+        ),
         input_info, output_info, multiples, expected)
 {
     const Status status = NETile::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), multiples);
@@ -78,13 +79,18 @@ using NETileFixture = TileValidationFixture<Tensor, Accessor, NETile, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NETileFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)),
-                                                                                                 MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NETileFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F16), MultiplesDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NETileFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NETileFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F16), MultiplesDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -92,14 +98,18 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NETileFixture<half>, framework::DatasetMode::NI
 TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NETileFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)),
-                                                                                                  MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NETileFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F32), MultiplesDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NETileFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)),
-                                                                                                MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NETileFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F32), MultiplesDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -109,10 +119,10 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NETileFixture<int8_t>, framework::DatasetMode::ALL,
-                       combine(
-                           combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::S8 })),
-                           MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NETileFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), make("DataType", {DataType::S8}), MultiplesDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -122,10 +132,10 @@ TEST_SUITE_END() // Integer
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NETileFixture<uint8_t>, framework::DatasetMode::ALL,
-                       combine(
-                           combine(datasets::SmallShapes(), framework::dataset::make("DataType", { DataType::QASYMM8 })),
-                           MultiplesDataset))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NETileFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), make("DataType", {DataType::QASYMM8}), MultiplesDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference);

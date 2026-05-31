@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,12 +22,13 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+
 #include "src/cpu/kernels/CpuCol2ImKernel.h"
-#include "tests/NEON/Helper.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Helper.h"
 #include "tests/validation/Validation.h"
 
 namespace arm_compute
@@ -36,6 +37,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(Col2Im)
 
@@ -43,20 +46,21 @@ using CpuCol2Im = NESynthetizeFunction<cpu::kernels::CpuCol2ImKernel>;
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::S64),    // Unsupported data type
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+               make("InputInfo", { TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::S64),    // Unsupported data type
                                                        TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32),    // Mismatching data type
                                                        TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32),    // Invalid output shape
                                                        TensorInfo(TensorShape(10U, 12U, 1U, 2U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
+               make("OutputInfo",{ TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(3U, 3U, 10U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("ConvolvedWidth", { 3, 3, 3, 3, 3 })),
-               framework::dataset::make("ConvolvedHeight", { 4, 4, 4, 4, 4 })),
-               framework::dataset::make("Expected", { false, false, false, true })),
+                                                     }),
+               make("ConvolvedWidth", { 3, 3, 3, 3, 3 }),
+               make("ConvolvedHeight", { 4, 4, 4, 4, 4 }),
+               make("Expected", { false, false, false, true })
+               ),
                input_info, output_info, convolved_width, convolved_height, expected)
 {
     bool status = bool(CpuCol2Im::validate(&input_info, &output_info, Size2D(convolved_width, convolved_height)));

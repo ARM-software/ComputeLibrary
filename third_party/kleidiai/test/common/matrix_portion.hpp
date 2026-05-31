@@ -25,7 +25,9 @@ public:
     /// @param[in] start_col Starting column as the ratio to the width of the matrix.
     /// @param[in] height Portion height as the ratio to the height of the matrix.
     /// @param[in] width Portion width as the ratio to the width of the matrix.
-    MatrixPortion(float start_row, float start_col, float height, float width);
+    constexpr MatrixPortion(float start_row, float start_col, float height, float width) :
+        _start_row(start_row), _start_col(start_col), _height(height), _width(width) {
+    }
 
     /// Gets the starting row as the ratio to the height of the matrix.
     [[nodiscard]] float start_row() const;

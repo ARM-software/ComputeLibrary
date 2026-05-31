@@ -1,0 +1,87 @@
+///
+/// Copyright (c) 2025 Arm Limited.
+///
+/// SPDX-License-Identifier: MIT
+///
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to
+/// deal in the Software without restriction, including without limitation the
+/// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+/// sell copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+///
+/// The above copyright notice and this permission notice shall be included in all
+/// copies or substantial portions of the Software.
+///
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+/// SOFTWARE.
+///
+namespace arm_compute
+{
+/**
+@page profiling Profiling
+
+@tableofcontents
+
+@section profiling_overview Overview
+The Arm Compute Library includes a built-in profiling system based on the [Perfetto](https://perfetto.dev/) tracing framework. It allows developers to collect detailed performance data for CPU and GPU workloads executed via the library.
+The profiler can capture timing information for individual functions, kernels, and operations, providing insights into execution time, resource usage, and potential bottlenecks. The collected data can be visualized using the Perfetto UI, enabling developers to analyze performance characteristics and optimize their applications effectively.
+
+
+@section profiling_build How to Build
+
+Profiling is controlled at build time via the SCons-based build system. The parameters below are consumed by the build system and mapped to preprocessor definitions.
+
+@subsection profiling_build_flags Build Flags
+
+- `profile=1`: Enable the profiler (defines `ACL_PROFILE_ENABLE`).
+- `profile_level={0|1}`: Select profiling level (defines `ACL_PROFILE_LEVEL`).
+  - 0: Basic CPU tracing (low overhead).
+  - 1: Experimental GPU tracing (reconstructs GPU spans; higher overhead).
+- `profile_backend=perfetto`: Currently it's the only and the default profiler backend.
+- `profile_mode={kInProcessBackend|kSystemBackend}`: Perfetto mode (defines `ACL_PROFILE_MODE`).
+- `profile_size={16384|32768|65536|131072}`: Trace buffer size in KB (defines `ACL_ACL_PROFILE_SIZE_KB`).
+
+@subsection profiling_build_cmd Examples
+
+@code{.bash}
+# Linux In-Process profiling with GPU OpenCL(TM) shaders info.
+scons profile=1 profile_level=1 profile_mode=kInProcessBackend \
+      profile_size=16384 opencl=1 neon=1 os=linux arch=arm64-v8a -j$(nproc)
+
+# Android(TM) System profiling for CPU platforms.
+scons profile=1 profile_level=0 profile_mode=kSystemBackend\
+      profile_size=32768 opencl=0 neon=1 os=android arch=arm64-v8a -j$(nproc)
+@endcode
+
+@section profiling_modes System vs In‑Process
+
+- `kInProcessBackend`:
+  - Tracing engine lives inside the process; no setup or external dependency.
+  - Good for local runs; writes `acl.pftrace` at exit.
+- `kSystemBackend`:
+  - Connects to system Perfetto daemon; supports multi-process/system-wide traces.
+  - Requires traced and traced_probes binaries installed and running manually on linux platforms.
+  - Requires a running Perfetto service and appropriate permissions.
+
+@section OS Compatibility Table
+
+| Platform | In-Process | System |
+|----------|--------------------|----------------|
+| Linux    | OK (CPU+GPU)       | OK (CPU)       |
+| Android(TM)  | OK (CPU+GPU)       | OK (CPU)       |
+| macOS    | OK (CPU)           | Not supported  |
+
+@section profiling_limits Limitations
+
+- GPU timestamp reconstruction creates a synthetic GPU timeline and is currently incompatible with System mode (`profile_mode=kSystemBackend`).
+- GPU profiling at `profile_level=1` inserts OpenCL(TM) timing events; this can conflict with other GPU profiling tools. Do not enable simultaneously with external profilers (e.g. Arm NN GPU profiler).
+- At profile_level=1 GPU event timestamps are gathered only after the OpenCL(TM) scheduler (CLScheduler::sync()) waits for the queued work to finish, then projected onto the CPU timeline. This assumes the workload is GPU‑bound and the CPU thread is blocked waiting for the GPU. If the CPU does other work before calling sync, the reported GPU spans are shifted (delayed) by that extra CPU time, making them appear later than when they actually occurred.
+
+*/
+} // namespace arm_compute

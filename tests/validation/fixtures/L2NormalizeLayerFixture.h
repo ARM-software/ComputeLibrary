@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,12 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/L2NormalizeLayer.h"
 
 namespace arm_compute
@@ -50,7 +51,7 @@ class L2NormalizeLayerValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType data_type, DataLayout data_layout, int axis, float epsilon)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -64,16 +65,19 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
-        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value,
+                      "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value,
+                                                           arm_compute::utils::uniform_real_distribution_16bit<T>,
+                                                           std::uniform_real_distribution<T>>::type;
 
-        DistributionType distribution{ T(1.0f), T(2.0f) };
+        DistributionType distribution{T(1.0f), T(2.0f)};
         library->fill(tensor, distribution, 0);
     }
 
     TensorType compute_target(TensorShape shape, DataType data_type, DataLayout data_layout, int axis, float epsilon)
     {
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(shape, PermutationVector(2U, 0U, 1U));
         }
@@ -105,12 +109,13 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type, DataLayout data_layout, int axis, float epsilon)
+    SimpleTensor<T>
+    compute_reference(const TensorShape &shape, DataType data_type, DataLayout data_layout, int axis, float epsilon)
     {
         uint32_t actual_axis = wrap_around(axis, max_input_tensor_dim);
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
-            switch(actual_axis)
+            switch (actual_axis)
             {
                 case 0:
                     actual_axis = 2;
@@ -126,7 +131,7 @@ protected:
             }
         }
         // Create reference
-        SimpleTensor<T> src{ shape, data_type };
+        SimpleTensor<T> src{shape, data_type};
 
         // Fill reference
         fill(src);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, 2025 Arm Limited.
+ * Copyright (c) 2017-2022, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,7 @@ static const std::vector<CpuFloorKernel::FloorKernel> available_kernels = {
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
 
     const auto *uk =
         CpuFloorKernel::get_implementation(DataTypeISASelectorData{src->data_type(), CPUInfo::get().get_isa()});
@@ -60,8 +61,14 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst)
     // Validate in case of configured output
     if (dst->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
+    }
+    else
+    {
+        // No configured output. Since `dst` is expected to match `src`,
+        // there's nothing extra to check in this case.
     }
 
     return Status{};

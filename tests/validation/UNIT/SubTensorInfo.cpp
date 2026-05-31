@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/SubTensorInfo.h"
+
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/validation/Validation.h"
@@ -52,15 +54,20 @@ TEST_CASE(SubTensorCreation, framework::DatasetMode::ALL)
     TensorInfo info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
 
     // Negative testing on X
-    ARM_COMPUTE_EXPECT_THROW(SubTensorInfo(&info, TensorShape(13U, 17U, 3U), Coordinates(24, 0, 0)), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT_THROW(SubTensorInfo(&info, TensorShape(13U, 17U, 3U), Coordinates(15, 0, 0)), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_THROW(SubTensorInfo(&info, TensorShape(13U, 17U, 3U), Coordinates(24, 0, 0)),
+                             framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_THROW(SubTensorInfo(&info, TensorShape(13U, 17U, 3U), Coordinates(15, 0, 0)),
+                             framework::LogLevel::ERRORS);
 
     // Negative testing on Y
-    ARM_COMPUTE_EXPECT_THROW(SubTensorInfo(&info, TensorShape(23U, 8U, 3U), Coordinates(0, 18, 0)), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT_THROW(SubTensorInfo(&info, TensorShape(23U, 8U, 3U), Coordinates(0, 13, 0)), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_THROW(SubTensorInfo(&info, TensorShape(23U, 8U, 3U), Coordinates(0, 18, 0)),
+                             framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_THROW(SubTensorInfo(&info, TensorShape(23U, 8U, 3U), Coordinates(0, 13, 0)),
+                             framework::LogLevel::ERRORS);
 
     // Positive testing on XY indexing
-    ARM_COMPUTE_EXPECT_NO_THROW(SubTensorInfo(&info, TensorShape(4U, 3U, 2U), Coordinates(5, 2, 1)), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT_NO_THROW(SubTensorInfo(&info, TensorShape(4U, 3U, 2U), Coordinates(5, 2, 1)),
+                                framework::LogLevel::ERRORS);
 }
 
 /** Validate when extending padding on sub-tensor
@@ -115,7 +122,7 @@ TEST_CASE(DynamicShapesNotSupported, framework::DatasetMode::ALL)
 
     // Make dynamic shape explicitly (will throw)
     ARM_COMPUTE_EXPECT_THROW(sub_tensor_info.set_tensor_dims_state(construct_dynamic_dims_state()),
-        framework::LogLevel::ERRORS);
+                             framework::LogLevel::ERRORS);
     ARM_COMPUTE_ASSERT(!sub_tensor_info.is_dynamic());
 
     // Make static shape explicitly
@@ -124,9 +131,10 @@ TEST_CASE(DynamicShapesNotSupported, framework::DatasetMode::ALL)
 
     // Make only some dimensions dynamic (will throw)
     constexpr int32_t dynamic_dim = ITensorInfo::get_dynamic_state_value();
-    constexpr int32_t static_dim = ITensorInfo::get_static_state_value();
+    constexpr int32_t static_dim  = ITensorInfo::get_static_state_value();
 
-    constexpr ITensorInfo::TensorDimsState state {static_dim, dynamic_dim, dynamic_dim, static_dim, static_dim, static_dim};
+    constexpr ITensorInfo::TensorDimsState state{static_dim, dynamic_dim, dynamic_dim,
+                                                 static_dim, static_dim,  static_dim};
     ARM_COMPUTE_UNUSED(state);
     ARM_COMPUTE_EXPECT_THROW(sub_tensor_info.set_tensor_dims_state(state), framework::LogLevel::ERRORS);
 
@@ -139,24 +147,24 @@ TEST_CASE(DynamicShapesNotSupported, framework::DatasetMode::ALL)
 
 TEST_CASE(ParentWithDynamicShapesNotSupported, framework::DatasetMode::ALL)
 {
-    TensorInfo    tensor_info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
+    TensorInfo tensor_info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
     tensor_info.set_tensor_dims_state(construct_dynamic_dims_state());
 
     ARM_COMPUTE_EXPECT_THROW(SubTensorInfo(&tensor_info, TensorShape(4U, 3U, 3U), Coordinates(5, 2, 0)),
-        framework::LogLevel::ERRORS);
+                             framework::LogLevel::ERRORS);
 }
 
 TEST_CASE(DynamicShapeNotSupportedDueToNullParent, framework::DatasetMode::ALL)
 {
     SubTensorInfo sub_tensor_info = SubTensorInfo();
     ARM_COMPUTE_EXPECT_THROW(sub_tensor_info.set_tensor_dims_state(construct_dynamic_dims_state()),
-        framework::LogLevel::ERRORS);
+                             framework::LogLevel::ERRORS);
 }
 
 TEST_CASE(ExplicitNullParentNotSupported, framework::DatasetMode::ALL)
 {
     ARM_COMPUTE_EXPECT_THROW(SubTensorInfo(nullptr, TensorShape(4U, 3U, 3U), Coordinates(5, 2, 0)),
-        framework::LogLevel::ERRORS);
+                             framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE_END() // SubTensorInfo

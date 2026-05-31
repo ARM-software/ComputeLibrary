@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,9 +25,11 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -43,6 +45,7 @@ Status validate_arguments(const ITensorInfo *input,
                           PaddingMode        mode)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input);
     ARM_COMPUTE_UNUSED(constant_value);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON((padding.size() < 1) || (padding.size() > input->num_dimensions()));
@@ -58,12 +61,18 @@ Status validate_arguments(const ITensorInfo *input,
         }
     }
 
+    const TensorShape padded_shape = misc::shape_calculator::compute_padded_shape(input->tensor_shape(), padding);
+
     if (output->total_size() > 0)
     {
-        TensorShape padded_shape = misc::shape_calculator::compute_padded_shape(input->tensor_shape(), padding);
-
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(output, input);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), padded_shape);
+    }
+    else
+    {
+        const auto output_info = TensorInfo(padded_shape, input->num_channels(), input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

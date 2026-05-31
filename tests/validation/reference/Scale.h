@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022 Arm Limited.
+ * Copyright (c) 2017-2020, 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SCALE_H
-#define ARM_COMPUTE_TEST_SCALE_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_SCALE_H
+#define ACL_TESTS_VALIDATION_REFERENCE_SCALE_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -36,10 +36,18 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> scale(const SimpleTensor<T> &src, float scale_x, float scale_y, InterpolationPolicy policy, BorderMode border_mode, T constant_border_value = 0,
-                      SamplingPolicy sampling_policy = SamplingPolicy::CENTER, bool ceil_policy_scale = false, bool align_corners = false, QuantizationInfo output_quantization_info = QuantizationInfo());
+SimpleTensor<T> scale(const SimpleTensor<T> &src,
+                      float                  scale_x,
+                      float                  scale_y,
+                      InterpolationPolicy    policy,
+                      BorderMode             border_mode,
+                      T                      constant_border_value    = 0,
+                      SamplingPolicy         sampling_policy          = SamplingPolicy::CENTER,
+                      bool                   ceil_policy_scale        = false,
+                      bool                   align_corners            = false,
+                      QuantizationInfo       output_quantization_info = QuantizationInfo());
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SCALE_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_SCALE_H

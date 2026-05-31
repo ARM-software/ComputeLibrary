@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,11 +32,14 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> convert_fully_connected_weights(const SimpleTensor<T> &src, const TensorShape &original_input_shape, const DataLayout training_data_layout)
+SimpleTensor<T> convert_fully_connected_weights(const SimpleTensor<T> &src,
+                                                const TensorShape     &original_input_shape,
+                                                const DataLayout       training_data_layout)
 {
     SimpleTensor<T> dst(src.shape(), src.data_type());
 
-    const DataLayout original_input_data_layout = (training_data_layout == DataLayout::NCHW) ? DataLayout::NHWC : DataLayout::NCHW;
+    const DataLayout original_input_data_layout =
+        (training_data_layout == DataLayout::NCHW) ? DataLayout::NHWC : DataLayout::NCHW;
 
     const int width_idx   = get_data_layout_dimension_index(original_input_data_layout, DataLayoutDimension::WIDTH);
     const int height_idx  = get_data_layout_dimension_index(original_input_data_layout, DataLayoutDimension::HEIGHT);
@@ -50,9 +53,9 @@ SimpleTensor<T> convert_fully_connected_weights(const SimpleTensor<T> &src, cons
 
     const uint32_t num_elements = src.num_elements();
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(uint32_t i = 0; i < num_elements; ++i)
+    for (uint32_t i = 0; i < num_elements; ++i)
     {
         const Coordinates coords_in = index2coords(src.shape(), i);
         const Coordinates coords_out(coords_in.x(), coords_in.y() % factor_1 * factor_2 + coords_in.y() / factor_1);
@@ -63,12 +66,15 @@ SimpleTensor<T> convert_fully_connected_weights(const SimpleTensor<T> &src, cons
     return dst;
 }
 
-template SimpleTensor<uint8_t> convert_fully_connected_weights(const SimpleTensor<uint8_t> &src, const TensorShape &original_input_shape,
-                                                               const DataLayout training_data_layout);
-template SimpleTensor<half> convert_fully_connected_weights(const SimpleTensor<half> &src, const TensorShape &original_input_shape,
-                                                            const DataLayout training_data_layout);
-template SimpleTensor<float> convert_fully_connected_weights(const SimpleTensor<float> &src, const TensorShape &original_input_shape,
-                                                             const DataLayout training_data_layout);
+template SimpleTensor<uint8_t> convert_fully_connected_weights(const SimpleTensor<uint8_t> &src,
+                                                               const TensorShape           &original_input_shape,
+                                                               const DataLayout             training_data_layout);
+template SimpleTensor<half>    convert_fully_connected_weights(const SimpleTensor<half> &src,
+                                                               const TensorShape        &original_input_shape,
+                                                               const DataLayout          training_data_layout);
+template SimpleTensor<float>   convert_fully_connected_weights(const SimpleTensor<float> &src,
+                                                               const TensorShape         &original_input_shape,
+                                                               const DataLayout           training_data_layout);
 } // namespace reference
 } // namespace validation
 } // namespace test

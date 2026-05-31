@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,11 +23,13 @@
  */
 
 #include "QLSTMLayerNormalization.h"
+
+#include "arm_compute/core/utils/misc/Utility.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
+
 #include "ArithmeticOperations.h"
 #include "MeanStdDevNormalizationLayer.h"
 #include "PixelWiseMultiplication.h"
-#include "arm_compute/core/utils/misc/Utility.h"
-#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 namespace arm_compute
 {
@@ -37,10 +39,12 @@ namespace validation
 {
 namespace reference
 {
-SimpleTensor<int16_t> qlstm_layer_normalization(const SimpleTensor<int16_t> &src, const SimpleTensor<int16_t> &weight, const SimpleTensor<int32_t> &bias)
+SimpleTensor<int16_t> qlstm_layer_normalization(const SimpleTensor<int16_t> &src,
+                                                const SimpleTensor<int16_t> &weight,
+                                                const SimpleTensor<int32_t> &bias)
 {
     ARM_COMPUTE_ERROR_ON(src.shape().num_dimensions() > 2);
-    SimpleTensor<int16_t> output{ src.shape(), DataType::QSYMM16 };
+    SimpleTensor<int16_t> output{src.shape(), DataType::QSYMM16};
 
     const auto wq_info = weight.quantization_info().uniform();
     int        output_multiplier{};
@@ -48,7 +52,7 @@ SimpleTensor<int16_t> qlstm_layer_normalization(const SimpleTensor<int16_t> &src
     const auto s = quantization::calculate_quantized_multiplier(wq_info.scale, &output_multiplier, &output_shift);
     output_shift *= -1;
 
-    if(!bool(s))
+    if (!bool(s))
     {
         output_multiplier = 0;
         output_shift      = 0;
@@ -57,12 +61,12 @@ SimpleTensor<int16_t> qlstm_layer_normalization(const SimpleTensor<int16_t> &src
     const uint32_t num_batch = src.shape()[1];
     const uint32_t num_input = src.shape()[0];
 
-    for(uint32_t batch_idx = 0; batch_idx < num_batch; ++batch_idx)
+    for (uint32_t batch_idx = 0; batch_idx < num_batch; ++batch_idx)
     {
         int64_t sum{};
         int64_t sum_sq{};
 
-        for(uint32_t input_idx = 0; input_idx < num_input; ++input_idx)
+        for (uint32_t input_idx = 0; input_idx < num_input; ++input_idx)
         {
             const auto index = batch_idx * num_input + input_idx;
             const auto val   = static_cast<int32_t>(src[index]);
@@ -78,17 +82,20 @@ SimpleTensor<int16_t> qlstm_layer_normalization(const SimpleTensor<int16_t> &src
         int32_t stddev_invsqrt_shift{};
         quantization::get_invsqrt_quantized_multiplier_exp(variance, -1, stddev_invsqrt_mul, stddev_invsqrt_shift);
 
-        for(uint32_t input_idx = 0; input_idx < num_input; ++input_idx)
+        for (uint32_t input_idx = 0; input_idx < num_input; ++input_idx)
         {
-            const auto    index           = batch_idx * num_input + input_idx;
-            const auto    val             = static_cast<int32_t>(src[index]);
-            const auto    shifted         = (val << 10) - mean;
-            const auto    rescaled        = quantization::multiply_by_quantized_multiplier(shifted, stddev_invsqrt_mul, stddev_invsqrt_shift);
+            const auto index   = batch_idx * num_input + input_idx;
+            const auto val     = static_cast<int32_t>(src[index]);
+            const auto shifted = (val << 10) - mean;
+            const auto rescaled =
+                quantization::multiply_by_quantized_multiplier(shifted, stddev_invsqrt_mul, stddev_invsqrt_shift);
             const int64_t weighted        = rescaled * weight[input_idx] + bias[input_idx];
             const auto    reverse_shifted = static_cast<int32_t>((weighted + 512) >> 10);
-            auto          out_val         = quantization::multiply_by_quantized_multiplier(reverse_shifted, output_multiplier, output_shift + 12);
-            out_val                       = arm_compute::utility::clamp<decltype(out_val), int16_t>(out_val, std::numeric_limits<int16_t>::min());
-            output[index]                 = static_cast<int16_t>(out_val);
+            auto          out_val =
+                quantization::multiply_by_quantized_multiplier(reverse_shifted, output_multiplier, output_shift + 12);
+            out_val =
+                arm_compute::utility::clamp<decltype(out_val), int16_t>(out_val, std::numeric_limits<int16_t>::min());
+            output[index] = static_cast<int16_t>(out_val);
         }
     }
     return output;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,14 +23,15 @@
  */
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/Globals.h"
 #include "tests/datasets/ROIDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/Globals.h"
 #include "tests/validation/fixtures/ROIPoolingLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -38,6 +39,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::combine;
+using framework::dataset::make;
 namespace
 {
 RelativeTolerance<float> relative_tolerance_f32(0.01f);
@@ -51,8 +54,7 @@ TEST_SUITE(RoiPooling)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32), // Successful test
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo", { TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32), // Successful test
                                                        TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::QASYMM8), // Successful test (quantized)
                                                        TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32), // Incorrect rois type
                                                        TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32), // Mismatching data type input/output
@@ -62,7 +64,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(250U, 128U, 3U), 1, DataType::F32), // Mismatching height and width input/output
 
                                                      }),
-               framework::dataset::make("RoisInfo", { TensorInfo(TensorShape(5, 4U), 1, DataType::U16),
+               make("RoisInfo", { TensorInfo(TensorShape(5, 4U), 1, DataType::U16),
                                                       TensorInfo(TensorShape(5, 4U), 1, DataType::U16),
                                                       TensorInfo(TensorShape(5, 4U), 1, DataType::F16),
                                                       TensorInfo(TensorShape(5, 4U), 1, DataType::U16),
@@ -70,8 +72,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                       TensorInfo(TensorShape(5, 10U), 1, DataType::U16),
                                                       TensorInfo(TensorShape(4, 4U), 1, DataType::U16),
                                                       TensorInfo(TensorShape(5, 4U), 1, DataType::U16),
-                                                    })),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
+                                                    }),
+               make("OutputInfo",{ TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F16),
@@ -79,8 +81,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(7U, 7U, 3U, 4U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(5U, 5U, 3U, 4U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("PoolInfo", { ROIPoolingLayerInfo(7U, 7U, 1./8),
+                                                     }),
+               make("PoolInfo", { ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
@@ -88,8 +90,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
                                                       ROIPoolingLayerInfo(7U, 7U, 1./8),
-                                                      })),
-               framework::dataset::make("Expected", { true, true, false, false, false, false, false })),
+                                                      }),
+               make("Expected", { true, true, false, false, false, false, false })),
                input_info, rois_info, output_info, pool_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLROIPoolingLayer::validate(&input_info.clone()->set_is_resizable(true), &rois_info.clone()->set_is_resizable(true), &output_info.clone()->set_is_resizable(true), pool_info)) == expected, framework::LogLevel::ERRORS);
@@ -99,9 +101,9 @@ using CLROIPoolingLayerFloatFixture = ROIPoolingLayerFixture<CLTensor, CLAccesso
 
 TEST_SUITE(Float)
 FIXTURE_DATA_TEST_CASE(Small, CLROIPoolingLayerFloatFixture, framework::DatasetMode::ALL,
-                       framework::dataset::combine(framework::dataset::combine(datasets::SmallROIDataset(),
-                                                    framework::dataset::make("DataType", { DataType::F32 })),
-                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                       combine(combine(datasets::SmallROIDataset(),
+                                                    make("DataType", { DataType::F32 })),
+                                                    make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, relative_tolerance_f32, .02f, absolute_tolerance_f32);
@@ -116,11 +118,11 @@ using CLROIPoolingLayerQuantizedFixture = ROIPoolingLayerQuantizedFixture<CLTens
 TEST_SUITE(QASYMM8)
 
 FIXTURE_DATA_TEST_CASE(Small, CLROIPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL,
-                       combine(combine(combine(combine(datasets::SmallROIDataset(),
-                                                       framework::dataset::make("DataType", { DataType::QASYMM8 })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                       framework::dataset::make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) })),
-                               framework::dataset::make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
+                       combine(datasets::SmallROIDataset(),
+                                                       make("DataType", { DataType::QASYMM8 }),
+                                               make("DataLayout", { DataLayout::NCHW }),
+                                       make("InputQuantizationInfo", { QuantizationInfo(1.f / 255.f, 127) }),
+                               make("OutputQuantizationInfo", { QuantizationInfo(2.f / 255.f, 120) })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);

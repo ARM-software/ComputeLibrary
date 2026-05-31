@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2021, 2023-2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,8 @@
 
 #if defined(__aarch64__)
 
-#include "arm_gemm.hpp"
-#include "utils.hpp"
+#include "arm_gemm/arm_gemm.hpp"
+#include "arm_common/internal/utils.hpp"
 #include "depthwise.hpp"
 #include <cstdint>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(__aarch64__)
+#if defined(ARM_COMPUTE_ENABLE_BF16) && defined(__aarch64__)
 
 namespace {
 
@@ -39,13 +39,14 @@ void a64_transpose_interleave_16_2x4_fp32bf16(bfloat16 *out, const float *in, si
     size_t out_stride = 16 * roundup<size_t>(height, 4) * sizeof(bfloat16);
 
     __asm__ __volatile__(
-      "cmp %x[height], #0x8\n"
+      "mov x10, %x[height]\n"
+      "cmp x10, #0x8\n"
       "blt 9f\n"
       "1:"  // Main row loop: Head
       "mov x9, %x[in]\n"
       "mov x28, %x[width]\n"
       "mov x27, %x[out]\n"
-      "sub %x[height], %x[height], #0x8\n"
+      "sub x10, x10, #0x8\n"
       "add x26, x9, %x[in_stride]\n"
       "add x25, x26, %x[in_stride]\n"
       "add x24, x25, %x[in_stride]\n"
@@ -131,7 +132,7 @@ void a64_transpose_interleave_16_2x4_fp32bf16(bfloat16 *out, const float *in, si
       "zip2 v27.4s, v9.4s, v27.4s\n"
       "zip1 v9.4s, v20.4s, v10.4s\n"
       "zip2 v20.4s, v20.4s, v10.4s\n"
-      "str q11, [x27, #0x0]\n"
+      "str q11, [x27, #0]\n"
       "zip1 v10.4s, v4.4s, v6.4s\n"
       "zip1 v11.4s, v8.4s, v30.4s\n"
       ".inst 0x0ea169ce  // bfcvtn v14.4h, v14.4s\n"
@@ -208,8 +209,8 @@ void a64_transpose_interleave_16_2x4_fp32bf16(bfloat16 *out, const float *in, si
       "3:"  // Main row loop: Column loop skip
       "cbz x28, 8f\n"
       "cmp x28, #0x4\n"
-      "movi v16.16b, #0x0\n"
-      "str q16, [x27, #0x0]\n"
+      "movi v16.16b, #0\n"
+      "str q16, [x27, #0]\n"
       "str q16, [x27, #0x10]\n"
       "str q16, [x27, #0x20]\n"
       "str q16, [x27, #0x30]\n"
@@ -261,7 +262,7 @@ void a64_transpose_interleave_16_2x4_fp32bf16(bfloat16 *out, const float *in, si
       ".inst 0x4ea16ad4  // bfcvtn2 v20.8h, v22.4s\n"
       ".inst 0x4ea16a53  // bfcvtn2 v19.8h, v18.4s\n"
       ".inst 0x4ea16a11  // bfcvtn2 v17.8h, v16.4s\n"
-      "str q21, [x27, #0x0]\n"
+      "str q21, [x27, #0]\n"
       "str q20, [x27, #0x10]\n"
       "str q19, [x27, #0x80]\n"
       "str q17, [x27, #0x90]\n"
@@ -289,30 +290,33 @@ void a64_transpose_interleave_16_2x4_fp32bf16(bfloat16 *out, const float *in, si
       "zip1 v16.4s, v18.4s, v16.4s\n"
       ".inst 0x0ea16a31  // bfcvtn v17.4h, v17.4s\n"
       ".inst 0x0ea16a10  // bfcvtn v16.4h, v16.4s\n"
-      "str d17, [x27, #0x0]\n"
+      "str d17, [x27, #0]\n"
       "str d16, [x27, #0x80]\n"
       "add x27, x27, #0x8\n"
       "bge 6b\n"
       "7:"  // Main row loop: width 1 loop: skip
       "8:"  // Main row loop: odd col skip
-      "cmp %x[height], #0x8\n"
+      "cmp x10, #0x8\n"
       "add %x[out], %x[out], #0x100\n"
       "bge 1b\n"
-      "cbz %x[height], 18f\n"
+      "cbz x10, 18f\n"
       "9:"  // Main loop skip
       "10:"  // Tail row loop: Head
       "mov x9, %x[in]\n"
+      "cmp x10, #0x3\n"
       "mov x20, %x[width]\n"
-      "cmp %x[height], #0x3\n"
       "mov x27, %x[out]\n"
       "add x26, x9, %x[in_stride]\n"
       "add x25, x26, %x[in_stride]\n"
       "add x24, x25, %x[in_stride]\n"
-      "csel x25, x25, %x[pad_row], GE\n"
       "add %x[in], x24, %x[in_stride]\n"
+      "csel %x[in], %x[in], x24, GT\n"
       "csel x24, x24, %x[pad_row], GT\n"
-      "cmp %x[height], #0x1\n"
-      "sub %x[height], %x[height], #0x4\n"
+      "csel %x[in], %x[in], x25, GE\n"
+      "csel x25, x25, %x[pad_row], GE\n"
+      "cmp x10, #0x1\n"
+      "sub x10, x10, #0x4\n"
+      "csel %x[in], %x[in], x26, GT\n"
       "csel x26, x26, %x[pad_row], GT\n"
       "cmp x20, #0x10\n"
       "blt 12f\n"
@@ -383,7 +387,7 @@ void a64_transpose_interleave_16_2x4_fp32bf16(bfloat16 *out, const float *in, si
       ".inst 0x4ea16a95  // bfcvtn2 v21.8h, v20.4s\n"
       ".inst 0x4ea16a53  // bfcvtn2 v19.8h, v18.4s\n"
       ".inst 0x4ea16a11  // bfcvtn2 v17.8h, v16.4s\n"
-      "str q31, [x27, #0x0]\n"
+      "str q31, [x27, #0]\n"
       "str q29, [x27, #0x10]\n"
       "str q27, [x27, #0x20]\n"
       "str q25, [x27, #0x30]\n"
@@ -396,8 +400,8 @@ void a64_transpose_interleave_16_2x4_fp32bf16(bfloat16 *out, const float *in, si
       "12:"  // Tail row loop: Column loop skip
       "cbz x20, 17f\n"
       "cmp x20, #0x4\n"
-      "movi v16.16b, #0x0\n"
-      "str q16, [x27, #0x0]\n"
+      "movi v16.16b, #0\n"
+      "str q16, [x27, #0]\n"
       "str q16, [x27, #0x10]\n"
       "str q16, [x27, #0x20]\n"
       "str q16, [x27, #0x30]\n"
@@ -425,7 +429,7 @@ void a64_transpose_interleave_16_2x4_fp32bf16(bfloat16 *out, const float *in, si
       ".inst 0x0ea16a10  // bfcvtn v16.4h, v16.4s\n"
       ".inst 0x4ea16a72  // bfcvtn2 v18.8h, v19.4s\n"
       ".inst 0x4ea16a30  // bfcvtn2 v16.8h, v17.4s\n"
-      "str q18, [x27, #0x0]\n"
+      "str q18, [x27, #0]\n"
       "str q16, [x27, #0x10]\n"
       "add x27, x27, #0x20\n"
       "bge 13b\n"
@@ -443,22 +447,23 @@ void a64_transpose_interleave_16_2x4_fp32bf16(bfloat16 *out, const float *in, si
       "zip1 v16.4s, v18.4s, v16.4s\n"
       "zip1 v16.4s, v17.4s, v16.4s\n"
       ".inst 0x0ea16a10  // bfcvtn v16.4h, v16.4s\n"
-      "str d16, [x27, #0x0]\n"
+      "str d16, [x27, #0]\n"
       "add x27, x27, #0x8\n"
       "bge 15b\n"
       "16:"  // Tail row loop: width 1 loop: skip
       "17:"  // Tail row loop: odd col skip
-      "cmp %x[height], #0x1\n"
+      "cmp x10, #0x1\n"
       "add %x[out], %x[out], #0x80\n"
       "bge 10b\n"
       "18:"  // Done
-      : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
-      : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
-      : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x9", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28"
+      : [in] "+&r" (in), [out] "+&r" (out)
+      : [height] "r" (height), [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
+      : "cc", "memory", "v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x9", "x10", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28"
     );
 }
 
 } // anonymous namespace
+
 template<>
 void Transform<16, 4, true, VLType::None>(
     bfloat16 *out, const float *in, int stride, int x0, int xmax, int k0, int kmax)
@@ -472,5 +477,5 @@ void Transform<16, 4, true, VLType::None>(
     );
 }
 
+#endif // defined(ARM_COMPUTE_ENABLE_BF16) && defined(__aarch64__)
 
-#endif  // defined(__aarch64__)

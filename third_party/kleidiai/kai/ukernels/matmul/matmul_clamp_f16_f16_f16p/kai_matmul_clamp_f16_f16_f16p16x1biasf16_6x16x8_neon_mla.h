@@ -6,11 +6,6 @@
 
 #pragma once
 
-#if !defined(__aarch64__) || !defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC) || \
-    !defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
-#error This file must be compiled for AArch64, FEAT_FP16.
-#else  // Architectural features check.
-
 #include <stddef.h>
 
 #ifdef __cplusplus
@@ -109,18 +104,21 @@ size_t kai_get_dst_size_matmul_clamp_f16_f16_f16p16x1biasf16_6x16x8_neon_mla(siz
 /// @param[in]  rhs_packed Packed RHS buffer.
 /// @param[out] dst Output matrix buffer.
 /// @param[in]  dst_stride_row Stride in bytes between two rows of the DST matrix.
-/// @param[in]  dst_stride_col Stride in bytes between two columns of the DST matrix. For now, it must be sizeof(__fp16)
+/// @param[in]  dst_stride_col Stride in bytes between two columns of the DST matrix. For now, it must be
+/// sizeof(uint16_t)
 /// @param[in]  clamp_min Minimum value to clamp the final result.
 /// @param[in]  clamp_max Maximum value to clamp the final result.
+///
+/// @note Clamp minimum and maximum values are cast internally to the destination type before clamping the computed
+/// values.
+///
 void kai_run_matmul_clamp_f16_f16_f16p16x1biasf16_6x16x8_neon_mla(
     size_t m, size_t n, size_t k,                             //
     const void* lhs, size_t lhs_stride,                       //
     const void* rhs_packed,                                   //
     void* dst, size_t dst_stride_row, size_t dst_stride_col,  //
-    __fp16 clamp_min, __fp16 clamp_max);
+    float clamp_min, float clamp_max);
 
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
-
-#endif  // Architectural features check.

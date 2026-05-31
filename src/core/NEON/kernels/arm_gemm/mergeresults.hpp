@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,3 +29,4 @@ template<unsigned int twidth, unsigned int height, bool sve=false, typename Tin,
 void MergeResults(Tout * out, const Tin * in, int ldc, int y0, int ymax, int x0, int xmax, const Tout *bias, Activation act, bool append);
 
 } // namespace arm_gemm
+

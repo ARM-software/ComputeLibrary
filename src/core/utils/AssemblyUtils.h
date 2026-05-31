@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef UTILS_CORE_ASSEMBLY_UTILS_H
-#define UTILS_CORE_ASSEMBLY_UTILS_H
+#ifndef ACL_SRC_CORE_UTILS_ASSEMBLYUTILS_H
+#define ACL_SRC_CORE_UTILS_ASSEMBLYUTILS_H
 
 #include "arm_compute/core/Types.h"
 
 #include "src/core/NEON/kernels/assembly/common.hpp"
-#include "src/cpu/kernels/assembly/arm_gemm.hpp"
+#include "src/cpu/kernels/assembly/arm_gemm/arm_gemm.hpp"
 
 namespace arm_compute
 {
@@ -68,4 +68,4 @@ arm_gemm::WeightFormat map_to_arm_gemm_weight_format(const arm_compute::WeightFo
 arm_compute::WeightFormat map_to_arm_compute_weight_format(const arm_gemm::WeightFormat &weight_format);
 } // namespace assembly_utils
 } // namespace arm_compute
-#endif /* UTILS_CORE_ASSEMBLY_UTILS_H */
+#endif // ACL_SRC_CORE_UTILS_ASSEMBLYUTILS_H

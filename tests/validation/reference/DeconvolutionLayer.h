@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DECONVOLUTION_LAYER_H
-#define ARM_COMPUTE_TEST_DECONVOLUTION_LAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_DECONVOLUTIONLAYER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_DECONVOLUTIONLAYER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -48,10 +48,14 @@ namespace reference
  *
  */
 template <typename T, typename TW, typename TB>
-SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<TW> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info,
-                                    QuantizationInfo out_qinfo = QuantizationInfo());
+SimpleTensor<T> deconvolution_layer(const SimpleTensor<T>  &src,
+                                    const SimpleTensor<TW> &weights,
+                                    const SimpleTensor<TB> &bias,
+                                    const TensorShape      &output_shape,
+                                    const PadStrideInfo    &info,
+                                    QuantizationInfo        out_qinfo = QuantizationInfo());
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DECONVOLUTION_LAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_DECONVOLUTIONLAYER_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,10 +35,13 @@ namespace validation
 {
 namespace reference
 {
-SimpleTensor<int32_t> indirect_conv2d_addr_precalculation(const TensorShape &shape_conv_src, const TensorShape &shape_conv_wei, const TensorShape &shape_conv_dst, const TensorShape &shape_dst,
+SimpleTensor<int32_t> indirect_conv2d_addr_precalculation(const TensorShape   &shape_conv_src,
+                                                          const TensorShape   &shape_conv_wei,
+                                                          const TensorShape   &shape_conv_dst,
+                                                          const TensorShape   &shape_dst,
                                                           const PadStrideInfo &conv_info)
 {
-    SimpleTensor<int32_t> out{ shape_dst, DataType::S32 };
+    SimpleTensor<int32_t> out{shape_dst, DataType::S32};
 
     constexpr unsigned int width_idx = 1;
     constexpr unsigned int heigh_idx = 2;
@@ -59,16 +62,16 @@ SimpleTensor<int32_t> indirect_conv2d_addr_precalculation(const TensorShape &sha
 
     const int m0 = dst_width / ks;
 
-    for(int z = 0; z < dst_batch; ++z)
+    for (int z = 0; z < dst_batch; ++z)
     {
-        for(int y = 0; y < dst_height; ++y)
+        for (int y = 0; y < dst_height; ++y)
         {
             const int mout = y * m0;
-            for(int ki = 0; ki < ks; ++ki)
+            for (int ki = 0; ki < ks; ++ki)
             {
                 const int xk = ki % wei_conv_width;
                 const int yk = ki / wei_conv_width;
-                for(int mi = 0; mi < m0; ++mi)
+                for (int mi = 0; mi < m0; ++mi)
                 {
                     int xi = ((mout + mi) % dst_conv_width) * stride_x;
                     int yi = ((mout + mi) / dst_conv_width) * stride_y;

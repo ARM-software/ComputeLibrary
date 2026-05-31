@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_STRIDED_SLICE_DATASET
-#define ARM_COMPUTE_TEST_STRIDED_SLICE_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SLICEOPERATIONSDATASET_H
+#define ACL_TESTS_DATASETS_SLICEOPERATIONSDATASET_H
 
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -44,9 +44,9 @@ public:
         iterator(std::vector<TensorShape>::const_iterator tensor_shapes_it,
                  std::vector<Coordinates>::const_iterator starts_values_it,
                  std::vector<Coordinates>::const_iterator ends_values_it)
-            : _tensor_shapes_it{ std::move(tensor_shapes_it) },
-              _starts_values_it{ std::move(starts_values_it) },
-              _ends_values_it{ std::move(ends_values_it) }
+            : _tensor_shapes_it{std::move(tensor_shapes_it)},
+              _starts_values_it{std::move(starts_values_it)},
+              _ends_values_it{std::move(ends_values_it)}
         {
         }
 
@@ -119,13 +119,13 @@ public:
                  std::vector<int32_t>::const_iterator     begin_mask_values_it,
                  std::vector<int32_t>::const_iterator     end_mask_values_it,
                  std::vector<int32_t>::const_iterator     shrink_mask_values_it)
-            : _tensor_shapes_it{ std::move(tensor_shapes_it) },
-              _starts_values_it{ std::move(starts_values_it) },
-              _ends_values_it{ std::move(ends_values_it) },
-              _strides_values_it{ std::move(strides_values_it) },
-              _begin_mask_values_it{ std::move(begin_mask_values_it) },
-              _end_mask_values_it{ std::move(end_mask_values_it) },
-              _shrink_mask_values_it{ std::move(shrink_mask_values_it) }
+            : _tensor_shapes_it{std::move(tensor_shapes_it)},
+              _starts_values_it{std::move(starts_values_it)},
+              _ends_values_it{std::move(ends_values_it)},
+              _strides_values_it{std::move(strides_values_it)},
+              _begin_mask_values_it{std::move(begin_mask_values_it)},
+              _end_mask_values_it{std::move(end_mask_values_it)},
+              _shrink_mask_values_it{std::move(shrink_mask_values_it)}
         {
         }
 
@@ -144,8 +144,7 @@ public:
 
         StridedSliceDataset::type operator*() const
         {
-            return std::make_tuple(*_tensor_shapes_it,
-                                   *_starts_values_it, *_ends_values_it, *_strides_values_it,
+            return std::make_tuple(*_tensor_shapes_it, *_starts_values_it, *_ends_values_it, *_strides_values_it,
                                    *_begin_mask_values_it, *_end_mask_values_it, *_shrink_mask_values_it);
         }
 
@@ -174,19 +173,23 @@ public:
 
     iterator begin() const
     {
-        return iterator(_tensor_shapes.begin(),
-                        _starts_values.begin(), _ends_values.begin(), _strides_values.begin(),
+        return iterator(_tensor_shapes.begin(), _starts_values.begin(), _ends_values.begin(), _strides_values.begin(),
                         _begin_mask_values.begin(), _end_mask_values.begin(), _shrink_mask_values.begin());
     }
 
     int size() const
     {
-        return std::min(_tensor_shapes.size(), std::min(_starts_values.size(), std::min(_ends_values.size(), _strides_values.size())));
+        return std::min(_tensor_shapes.size(),
+                        std::min(_starts_values.size(), std::min(_ends_values.size(), _strides_values.size())));
     }
 
     void add_config(TensorShape shape,
-                    Coordinates starts, Coordinates ends, BiStrides strides,
-                    int32_t begin_mask = 0, int32_t end_mask = 0, int32_t shrink_mask = 0)
+                    Coordinates starts,
+                    Coordinates ends,
+                    BiStrides   strides,
+                    int32_t     begin_mask  = 0,
+                    int32_t     end_mask    = 0,
+                    int32_t     shrink_mask = 0)
     {
         _tensor_shapes.emplace_back(std::move(shape));
         _starts_values.emplace_back(std::move(starts));
@@ -261,10 +264,12 @@ public:
         add_config(TensorShape(15U, 16U, 4U), Coordinates(0, 1, 2), Coordinates(5, -1, 4), BiStrides(2, 1, 2));
         add_config(TensorShape(15U, 16U, 4U), Coordinates(0, 1, 2), Coordinates(5, -1, 4), BiStrides(2, 1, 2), 0, 1);
         // 4D
-        add_config(TensorShape(15U, 16U, 4U, 12U), Coordinates(0, 1, 2, 2), Coordinates(5, -1, 4, 5), BiStrides(2, 1, 2, 3));
+        add_config(TensorShape(15U, 16U, 4U, 12U), Coordinates(0, 1, 2, 2), Coordinates(5, -1, 4, 5),
+                   BiStrides(2, 1, 2, 3));
 
         // Shrink axis
-        add_config(TensorShape(1U, 3U, 2U, 3U), Coordinates(0, 1, 0, 0), Coordinates(1, 1, 1, 1), BiStrides(1, 1, 1, 1), 0, 15, 6);
+        add_config(TensorShape(1U, 3U, 2U, 3U), Coordinates(0, 1, 0, 0), Coordinates(1, 1, 1, 1), BiStrides(1, 1, 1, 1),
+                   0, 15, 6);
         add_config(TensorShape(3U, 2U), Coordinates(0, 0), Coordinates(3U, 1U), BiStrides(1, 1), 0, 0, 2);
         add_config(TensorShape(4U, 7U, 7U), Coordinates(0, 0, 0), Coordinates(1U, 1U, 1U), BiStrides(1, 1, 1), 0, 6, 1);
         add_config(TensorShape(4U, 7U, 7U), Coordinates(0, 1, 0), Coordinates(1U, 1U, 1U), BiStrides(1, 1, 1), 0, 5, 3);
@@ -281,12 +286,14 @@ public:
         // 2D
         add_config(TensorShape(372U, 68U), Coordinates(128, 7), Coordinates(368, -30), BiStrides(10, 7));
         // 3D
-        add_config(TensorShape(372U, 68U, 12U), Coordinates(128, 7, -1), Coordinates(368, -30, -5), BiStrides(14, 7, -2));
+        add_config(TensorShape(372U, 68U, 12U), Coordinates(128, 7, -1), Coordinates(368, -30, -5),
+                   BiStrides(14, 7, -2));
         // 4D
-        add_config(TensorShape(372U, 68U, 7U, 4U), Coordinates(128, 7, 2), Coordinates(368, -30, 5), BiStrides(20, 7, 2), 1, 1);
+        add_config(TensorShape(372U, 68U, 7U, 4U), Coordinates(128, 7, 2), Coordinates(368, -30, 5),
+                   BiStrides(20, 7, 2), 1, 1);
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_STRIDED_SLICE_DATASET */
+#endif // ACL_TESTS_DATASETS_SLICEOPERATIONSDATASET_H

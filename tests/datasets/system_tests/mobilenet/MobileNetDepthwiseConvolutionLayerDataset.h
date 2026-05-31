@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_MOBILENET_DEPTHWISE_CONVOLUTION_DATASET
-#define ARM_COMPUTE_TEST_MOBILENET_DEPTHWISE_CONVOLUTION_DATASET
-
-#include "tests/datasets/DepthwiseConvolutionLayerDataset.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_MOBILENET_MOBILENETDEPTHWISECONVOLUTIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_MOBILENET_MOBILENETDEPTHWISECONVOLUTIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/datasets/DepthwiseConvolutionLayerDataset.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -43,17 +42,21 @@ public:
     MobileNetDepthwiseConvolutionLayerDataset()
     {
         add_config(TensorShape(7U, 7U, 1024U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(14U, 14U, 512U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(14U, 14U, 512U), Size2D(3U, 3U),
+                   PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
         add_config(TensorShape(14U, 14U, 512U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(28U, 28U, 256U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(28U, 28U, 256U), Size2D(3U, 3U),
+                   PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
         add_config(TensorShape(28U, 28U, 256U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(56U, 56U, 128U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(56U, 56U, 128U), Size2D(3U, 3U),
+                   PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
         add_config(TensorShape(56U, 56U, 128U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(112U, 112U, 64U), Size2D(3U, 3U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(112U, 112U, 64U), Size2D(3U, 3U),
+                   PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
         add_config(TensorShape(112U, 112U, 32U), Size2D(3U, 3U), PadStrideInfo(1, 1, 1, 1));
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_MOBILENET_DEPTHWISE_CONVOLUTION_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_MOBILENET_MOBILENETDEPTHWISECONVOLUTIONLAYERDATASET_H

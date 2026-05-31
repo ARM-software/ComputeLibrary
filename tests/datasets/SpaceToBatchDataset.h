@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_DATASET
-#define ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SPACETOBATCHDATASET_H
+#define ACL_TESTS_DATASETS_SPACETOBATCHDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -46,10 +46,10 @@ public:
                  std::vector<TensorShape>::const_iterator block_shape_it,
                  std::vector<TensorShape>::const_iterator paddings_shape_it,
                  std::vector<TensorShape>::const_iterator dst_it)
-            : _src_it{ std::move(src_it) },
-              _block_shape_it{ std::move(block_shape_it) },
-              _paddings_shape_it{ std::move(paddings_shape_it) },
-              _dst_it{ std::move(dst_it) }
+            : _src_it{std::move(src_it)},
+              _block_shape_it{std::move(block_shape_it)},
+              _paddings_shape_it{std::move(paddings_shape_it)},
+              _dst_it{std::move(dst_it)}
         {
         }
 
@@ -92,7 +92,8 @@ public:
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_block_shape_shapes.size(), std::min(_padding_shapes.size(), _dst_shapes.size())));
+        return std::min(_src_shapes.size(),
+                        std::min(_block_shape_shapes.size(), std::min(_padding_shapes.size(), _dst_shapes.size())));
     }
 
     void add_config(TensorShape src, TensorShape block_shape, TensorShape padding_shapes, TensorShape dst)
@@ -133,10 +134,11 @@ public:
     LargeSpaceToBatchLayerDataset()
     {
         add_config(TensorShape(128U, 64U, 2U, 1U), TensorShape(2U), TensorShape(2U, 2U), TensorShape(64U, 32U, 2U, 4U));
-        add_config(TensorShape(512U, 64U, 2U, 1U), TensorShape(2U), TensorShape(2U, 2U), TensorShape(128U, 16U, 2U, 16U));
+        add_config(TensorShape(512U, 64U, 2U, 1U), TensorShape(2U), TensorShape(2U, 2U),
+                   TensorShape(128U, 16U, 2U, 16U));
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SPACETOBATCHDATASET_H

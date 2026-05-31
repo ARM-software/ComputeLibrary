@@ -113,7 +113,9 @@ void neon_fp32_dynamic_gemm_run(
 
 size_t neon_fp32_dynamic_gemm_size_of_packed_rhs(size_t rows, size_t columns)
 {
-    // The 0.5.0 documentation is wrong. In a kxn matrix, k=rows and n=columns.
+    // The KleidiAI documentation for this function is wrong (as of v1.19.0).
+    // It's in third_party/kleidiai/kai/ukernels/matmul/pack/kai_rhs_pack_kxn_f32p8x1biasf32_f32_f32_neon.h
+    // In a kxn matrix, k should be rows and n should be columns.
     return kai_get_rhs_packed_size_rhs_pack_kxn_f32p8x1biasf32_f32_f32_neon(columns, rows);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,17 +33,31 @@ TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(Tensor)
 
-EMPTY_BODY_FIXTURE_TEST_CASE(CreateTensorWithInvalidContext, CreateTensorWithInvalidContextFixture, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(CreateTensorWithInvalidDescriptor, CreateTensorWithInvalidDescriptorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidTensor, DestroyInvalidTensorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(CreateTensorWithInvalidContext,
+                             CreateTensorWithInvalidContextFixture,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(CreateTensorWithInvalidDescriptor,
+                             CreateTensorWithInvalidDescriptorFixture<acl::Target::GpuOcl>,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(DestroyInvalidTensor,
+                             DestroyInvalidTensorFixture<acl::Target::GpuOcl>,
+                             framework::DatasetMode::ALL)
 EMPTY_BODY_FIXTURE_TEST_CASE(SimpleTensor, SimpleTensorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
 EMPTY_BODY_FIXTURE_TEST_CASE(TensorStress, TensorStressFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(MapInvalidTensor, MapInvalidTensorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(MapAllocatedTensor, MapAllocatedTensorFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(MapInvalidTensor,
+                             MapInvalidTensorFixture<acl::Target::GpuOcl>,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(MapAllocatedTensor,
+                             MapAllocatedTensorFixture<acl::Target::GpuOcl>,
+                             framework::DatasetMode::ALL)
 EMPTY_BODY_FIXTURE_TEST_CASE(GetSize, TensorSizeFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
 EMPTY_BODY_FIXTURE_TEST_CASE(GetInvalidSize, InvalidTensorSizeFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(GetDescriptor, DescriptorConversionFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
-EMPTY_BODY_FIXTURE_TEST_CASE(GetInvalidDescriptor, InvalidDescriptorConversionFixture<acl::Target::GpuOcl>, framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(GetDescriptor,
+                             DescriptorConversionFixture<acl::Target::GpuOcl>,
+                             framework::DatasetMode::ALL)
+EMPTY_BODY_FIXTURE_TEST_CASE(GetInvalidDescriptor,
+                             InvalidDescriptorConversionFixture<acl::Target::GpuOcl>,
+                             framework::DatasetMode::ALL)
 
 TEST_SUITE_END() // Tensor
 TEST_SUITE_END() // UNIT

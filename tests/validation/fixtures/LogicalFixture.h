@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023 Arm Limited.
+ * Copyright (c) 2020-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_LOGICAL_FIXTURE
-#define ARM_COMPUTE_TEST_LOGICAL_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_LOGICALFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_LOGICALFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/Logical.h"
 
 namespace arm_compute
@@ -51,14 +52,14 @@ protected:
         constexpr auto mixed             = static_cast<uint8_t>(0xAA);
         constexpr auto mixed_bitwise_not = static_cast<uint8_t>((~0xAA));
 
-        library->fill_static_values(tensor, i == 0 ?
-                                    std::vector<uint8_t> { zero, one, zero, one, mixed, zero, mixed } :
-                                    std::vector<uint8_t> { zero, zero, one, one, zero, mixed, mixed_bitwise_not });
+        library->fill_static_values(
+            tensor, i == 0 ? std::vector<uint8_t>{zero, one, zero, one, mixed, zero, mixed}
+                           : std::vector<uint8_t>{zero, zero, one, one, zero, mixed, mixed_bitwise_not});
     }
 
     void allocate_tensor(std::initializer_list<TensorType *> tensors)
     {
-        for(auto t : tensors)
+        for (auto t : tensors)
         {
             ARM_COMPUTE_ASSERT(t->info()->is_resizable());
             t->allocator()->allocate();
@@ -73,8 +74,13 @@ protected:
 template <typename T>
 using LogicalBinaryRefFunctionPtrType = SimpleTensor<T>(const SimpleTensor<T> &, const SimpleTensor<T> &);
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, LogicalBinaryRefFunctionPtrType<T> RefFunction>
-class LogicalBinaryOperationValidationFixture : public LogicalOperationValidationFixtureBase<TensorType, AccessorType, FunctionType, T>
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          LogicalBinaryRefFunctionPtrType<T> RefFunction>
+class LogicalBinaryOperationValidationFixture
+    : public LogicalOperationValidationFixtureBase<TensorType, AccessorType, FunctionType, T>
 {
     using Parent = LogicalOperationValidationFixtureBase<TensorType, AccessorType, FunctionType, T>;
 
@@ -96,7 +102,7 @@ private:
 
         logical_binary_op.configure(&src0, &src1, &dst);
 
-        Parent::allocate_tensor({ &src0, &src1, &dst });
+        Parent::allocate_tensor({&src0, &src1, &dst});
 
         Parent::fill(AccessorType(src0), 0);
         Parent::fill(AccessorType(src1), 1);
@@ -109,8 +115,8 @@ private:
     SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1)
     {
         // Create reference
-        SimpleTensor<T> src0{ shape0, _data_type };
-        SimpleTensor<T> src1{ shape1, _data_type };
+        SimpleTensor<T> src0{shape0, _data_type};
+        SimpleTensor<T> src1{shape1, _data_type};
 
         // Fill reference
         Parent::fill(src0, 0);
@@ -123,13 +129,16 @@ private:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-using LogicalOrValidationFixture = LogicalBinaryOperationValidationFixture<TensorType, AccessorType, FunctionType, T, &reference::logical_or<T>>;
+using LogicalOrValidationFixture =
+    LogicalBinaryOperationValidationFixture<TensorType, AccessorType, FunctionType, T, &reference::logical_or<T>>;
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-using LogicalAndValidationFixture = LogicalBinaryOperationValidationFixture<TensorType, AccessorType, FunctionType, T, &reference::logical_and<T>>;
+using LogicalAndValidationFixture =
+    LogicalBinaryOperationValidationFixture<TensorType, AccessorType, FunctionType, T, &reference::logical_and<T>>;
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class LogicalNotValidationFixture : public LogicalOperationValidationFixtureBase<TensorType, AccessorType, FunctionType, T>
+class LogicalNotValidationFixture
+    : public LogicalOperationValidationFixtureBase<TensorType, AccessorType, FunctionType, T>
 {
     using Parent = LogicalOperationValidationFixtureBase<TensorType, AccessorType, FunctionType, T>;
 
@@ -150,7 +159,7 @@ private:
 
         logical_not.configure(&src, &dst);
 
-        Parent::allocate_tensor({ &src, &dst });
+        Parent::allocate_tensor({&src, &dst});
 
         Parent::fill(AccessorType(src), 0);
 
@@ -162,7 +171,7 @@ private:
     SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type };
+        SimpleTensor<T> src{shape, data_type};
 
         // Fill reference
         Parent::fill(src, 0);
@@ -173,4 +182,4 @@ private:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_LOGICAL_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_LOGICALFIXTURE_H

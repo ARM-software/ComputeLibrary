@@ -1,5 +1,5 @@
 <!--
-    SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+    SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 
     SPDX-License-Identifier: Apache-2.0
 -->
@@ -27,5 +27,7 @@ $ cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/android-ndk/build/cmake/android.toolchai
 ## Usage
 
 ```
-$ ./matmul_clamp_f32_qsi8d32p_qsi4c32p
+$ ./matmul_clamp_f32_qsi8d32p_qsi4c32p --threads <thread count>
 ```
+
+Replace `<thread count>` with the number of worker threads to use for the matmul operation. Use `--help` to list every supported command-line argument.

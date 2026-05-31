@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_POOL3D_LAYER_H
-#define ARM_COMPUTE_TEST_POOL3D_LAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_POOLING3DLAYER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_POOLING3DLAYER_H
 
-#include "Utils.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
+
+#include "Utils.h"
 
 namespace arm_compute
 {
@@ -38,13 +40,17 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> pooling_3d_layer_internal(const SimpleTensor<T> &src, const Pooling3dLayerInfo &pool3d_info, SimpleTensor<uint32_t> *indices = nullptr);
+SimpleTensor<T> pooling_3d_layer_internal(const SimpleTensor<T>    &src,
+                                          const Pooling3dLayerInfo &pool3d_info,
+                                          SimpleTensor<uint32_t>   *indices = nullptr);
 
 template <typename T>
-SimpleTensor<T> pooling_3d_layer(const SimpleTensor<T> &src, const Pooling3dLayerInfo &pool3d_info, const QuantizationInfo &output_qinfo = QuantizationInfo(),
-                                 SimpleTensor<uint32_t> *indices = nullptr);
+SimpleTensor<T> pooling_3d_layer(const SimpleTensor<T>    &src,
+                                 const Pooling3dLayerInfo &pool3d_info,
+                                 const QuantizationInfo   &output_qinfo = QuantizationInfo(),
+                                 SimpleTensor<uint32_t>   *indices      = nullptr);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_POOL3D_LAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_POOLING3DLAYER_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited.
+ * Copyright (c) 2019-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,10 +23,11 @@
  */
 #include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/utils/math/SafeOps.h"
-#include "tests/Globals.h"
-#include "tests/Utils.h"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 
 namespace arm_compute
 {

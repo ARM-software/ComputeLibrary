@@ -28,6 +28,7 @@
 #include "arm_compute/core/TensorInfo.h"
 
 #include "src/common/utils/profile/acl_profile.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -46,17 +47,20 @@ Status validate_arguments_matrix_a_reduction(const ITensorInfo                 *
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_ERROR_ON_MSG(info.is_reshaped == true, "Not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
 
     if (dst->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(
             dst->dimension(0) != src->dimension(1),
             "Output vector must have length equal to the number of rows of the input matrix");
     }
+
     return Status{};
 }
 Status validate_arguments_matrix_b_reduction(const ITensorInfo                 *src,
@@ -65,12 +69,14 @@ Status validate_arguments_matrix_b_reduction(const ITensorInfo                 *
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_ERROR_ON_MSG(info.is_reshaped == true, "Not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL);
 
     if (dst->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(
             dst->dimension(0) != src->dimension(0),

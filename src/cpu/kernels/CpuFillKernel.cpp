@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2025 Arm Limited.
+ * Copyright (c) 2018-2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/core/Window.h"
 
 #include "src/common/utils/profile/acl_profile.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -43,6 +44,7 @@ void CpuFillKernel::configure(const ITensorInfo *tensor, const PixelValue &const
 {
     ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuFillKernel::configure");
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
+    ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(tensor);
     _constant_value = constant_value;
 
     // Configure kernel window

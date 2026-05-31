@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -38,7 +39,7 @@ template <typename T>
 void generate_range(SimpleTensor<T> &dst, float start, const size_t num_of_elements, float step)
 {
     float val = start;
-    for(size_t index = 0; index < num_of_elements; index++)
+    for (size_t index = 0; index < num_of_elements; index++)
     {
         dst[index] = static_cast<T>(val);
         val += step;
@@ -56,19 +57,20 @@ SimpleTensor<T> range(SimpleTensor<T> &dst, float start, const size_t num_of_ele
 template <>
 SimpleTensor<uint8_t> range(SimpleTensor<uint8_t> &dst, float start, const size_t num_of_elements, float step)
 {
-    if(dst.data_type() == DataType::QASYMM8)
+    if (dst.data_type() == DataType::QASYMM8)
     {
-        SimpleTensor<float> dst_tmp{ dst.shape(), DataType::F32, 1 };
+        SimpleTensor<float> dst_tmp{dst.shape(), DataType::F32, 1};
         generate_range(dst_tmp, start, num_of_elements, step);
         return convert_to_asymmetric<uint8_t>(dst_tmp, dst.quantization_info());
     }
     generate_range(dst, start, num_of_elements, step);
     return dst;
 }
-template SimpleTensor<float> range(SimpleTensor<float> &dst, float start, const size_t num_of_elements, float step);
-template SimpleTensor<half> range(SimpleTensor<half> &dst, float start, const size_t num_of_elements, float step);
+template SimpleTensor<float>  range(SimpleTensor<float> &dst, float start, const size_t num_of_elements, float step);
+template SimpleTensor<half>   range(SimpleTensor<half> &dst, float start, const size_t num_of_elements, float step);
 template SimpleTensor<int8_t> range(SimpleTensor<int8_t> &dst, float start, const size_t num_of_elements, float step);
-template SimpleTensor<uint16_t> range(SimpleTensor<uint16_t> &dst, float start, const size_t num_of_elements, float step);
+template SimpleTensor<uint16_t>
+range(SimpleTensor<uint16_t> &dst, float start, const size_t num_of_elements, float step);
 template SimpleTensor<int16_t> range(SimpleTensor<int16_t> &dst, float start, const size_t num_of_elements, float step);
 
 } // namespace reference

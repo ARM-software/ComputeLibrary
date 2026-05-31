@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,11 +50,11 @@ inline Coordinates expand_coordinates(Coordinates in_coord, size_t axis, size_t 
     Coordinates expanded_coord;
     expanded_coord.set_num_dimensions(num_dimensions);
     expanded_coord.set(axis, slice);
-    for(size_t k = 0; k < axis; ++k)
+    for (size_t k = 0; k < axis; ++k)
     {
         expanded_coord.set(k, in_coord[k]);
     }
-    for(size_t k = axis + 1; k < num_dimensions; ++k)
+    for (size_t k = axis + 1; k < num_dimensions; ++k)
     {
         expanded_coord.set(k, in_coord[k - 1]);
     }
@@ -69,27 +69,31 @@ SimpleTensor<T> get_slice(const SimpleTensor<T> &input_tensor, size_t axis, size
 
     const size_t unpacked_num_dimensions(input_tensor.shape().num_dimensions());
 
-    SimpleTensor<T> output{ out_shape, input_tensor.data_type() };
+    SimpleTensor<T> output{out_shape, input_tensor.data_type()};
 
     Window win;
     win.use_tensor_dimensions(out_shape);
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        const Coordinates input_coords     = expand_coordinates(id, axis, slice, unpacked_num_dimensions);
-        *reinterpret_cast<T *>(output(id)) = *reinterpret_cast<const T *>(input_tensor(input_coords));
-    });
+    execute_window_loop(win,
+                        [&](const Coordinates &id)
+                        {
+                            const Coordinates input_coords =
+                                expand_coordinates(id, axis, slice, unpacked_num_dimensions);
+                            *reinterpret_cast<T *>(output(id)) =
+                                *reinterpret_cast<const T *>(input_tensor(input_coords));
+                        });
 
     return output;
 }
 } // namespace
 
 template <typename T>
-std::vector<SimpleTensor<T>> unstack(const SimpleTensor<T> &input_tensor, std::vector<SimpleTensor<T>> &output_tensors, int axis)
+std::vector<SimpleTensor<T>>
+unstack(const SimpleTensor<T> &input_tensor, std::vector<SimpleTensor<T>> &output_tensors, int axis)
 {
     // Wrap around negative values
     const unsigned int axis_u = wrap_around(axis, static_cast<int>(input_tensor.shape().num_dimensions()));
     ARM_COMPUTE_ERROR_ON(axis_u >= input_tensor.shape().num_dimensions());
-    for(size_t k = 0; k < output_tensors.size(); ++k)
+    for (size_t k = 0; k < output_tensors.size(); ++k)
     {
         SimpleTensor<T>      &output    = output_tensors[k];
         const SimpleTensor<T> kth_slice = get_slice(input_tensor, axis_u, k);
@@ -98,9 +102,12 @@ std::vector<SimpleTensor<T>> unstack(const SimpleTensor<T> &input_tensor, std::v
     return output_tensors;
 }
 
-template std::vector<SimpleTensor<float>> unstack(const SimpleTensor<float> &input_tensor, std::vector<SimpleTensor<float>> &output_tensors, int axis);
-template std::vector<SimpleTensor<half>> unstack(const SimpleTensor<half> &input_tensor, std::vector<SimpleTensor<half>> &output_tensors, int axis);
-template std::vector<SimpleTensor<uint8_t>> unstack(const SimpleTensor<uint8_t> &input_tensor, std::vector<SimpleTensor<uint8_t>> &output_tensors, int axis);
+template std::vector<SimpleTensor<float>>
+unstack(const SimpleTensor<float> &input_tensor, std::vector<SimpleTensor<float>> &output_tensors, int axis);
+template std::vector<SimpleTensor<half>>
+unstack(const SimpleTensor<half> &input_tensor, std::vector<SimpleTensor<half>> &output_tensors, int axis);
+template std::vector<SimpleTensor<uint8_t>>
+unstack(const SimpleTensor<uint8_t> &input_tensor, std::vector<SimpleTensor<uint8_t>> &output_tensors, int axis);
 
 } // namespace reference
 } // namespace validation

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018,2023 Arm Limited.
+ * Copyright (c) 2017-2018,2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -314,3 +314,4 @@ void MergeResults<8, 6, false>(float *out, const float *in, const int ldout, con
 }
 
 #endif // __arm__
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/Allocator.h"
 #include "arm_compute/runtime/NEON/functions/NEFlattenLayer.h"
 #include "arm_compute/runtime/Tensor.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/FlattenLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -40,21 +41,24 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(FlattenLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::U8),  // Mismatching data_type
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+               make("InputInfo", { TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::U8),  // Mismatching data_type
                                                        TensorInfo(TensorShape(4U, 5U, 4U), 1, DataType::F32),  // Mismatching shapes
                                                        TensorInfo(TensorShape(4U, 4U, 4U), 1, DataType::F32),  // Valid
                                                      }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(64U), 1, DataType::F32),
+               make("OutputInfo",{ TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("Expected", { false, false, true})),
+                                                     }),
+               make("Expected", { false, false, true})
+               ),
                input_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NEFlattenLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);
@@ -67,14 +71,20 @@ using NEFlattenLayerFixture = FlattenLayerValidationFixture<Tensor, Accessor, NE
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFlattenLayerFixture<float>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                    framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEFlattenLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEFlattenLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
-                                                                                                        framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEFlattenLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -83,34 +93,40 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFlattenLayerFixture<half>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                   framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEFlattenLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
+                               make("DataType", DataType::F16)))
 {
     // Only validate if the cpu architecture supports FP16.
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEFlattenLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
-                                                                                                       framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEFlattenLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
+                               make("DataType", DataType::F16)))
 {
     // Validate output
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() // FP16

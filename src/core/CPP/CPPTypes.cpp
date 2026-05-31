@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, 2024-2025 Arm Limited.
+ * Copyright (c) 2018-2022, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,9 @@
 
 #include "src/common/cpuinfo/CpuInfo.h"
 #include "src/common/cpuinfo/CpuIsaInfo.h"
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
+#ifdef ARM_COMPUTE_CPU_ENABLED
+#include "src/cpu/kernels/assembly/arm_common/internal/utils.hpp"
+#endif // ARM_COMPUTE_CPU_ENABLED
 
 namespace arm_compute
 {
@@ -115,6 +117,26 @@ bool CPUInfo::has_sme() const
 bool CPUInfo::has_sme2() const
 {
     return _impl->info.has_sme2();
+}
+
+bool CPUInfo::has_sme_i8i32() const
+{
+    return _impl->info.has_sme_i8i32();
+}
+
+bool CPUInfo::has_sme_f16f32() const
+{
+    return _impl->info.has_sme_f16f32();
+}
+
+bool CPUInfo::has_sme_f32f32() const
+{
+    return _impl->info.has_sme_f32f32();
+}
+
+bool CPUInfo::has_sme_b16f32() const
+{
+    return _impl->info.has_sme_b16f32();
 }
 
 CPUModel CPUInfo::get_cpu_model() const

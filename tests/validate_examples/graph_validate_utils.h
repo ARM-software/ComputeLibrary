@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, 2023 Arm Limited.
+ * Copyright (c) 2019-2020, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,8 +27,9 @@
 
 #include "arm_compute/graph.h"
 
-#include "ValidateExample.h"
 #include "utils/command_line/CommandLineParser.h"
+
+#include "ValidateExample.h"
 
 namespace arm_compute
 {
@@ -51,13 +52,10 @@ enum class ConvolutionPaddingMode
  */
 inline ::std::istream &operator>>(::std::istream &stream, ConvolutionPaddingMode &Mode)
 {
-    static const std::map<std::string, ConvolutionPaddingMode> modes =
-    {
-        { "valid", ConvolutionPaddingMode::Valid },
-        { "same", ConvolutionPaddingMode::Same },
-        { "manual", ConvolutionPaddingMode::Manual }
-    };
-    std::string value;
+    static const std::map<std::string, ConvolutionPaddingMode> modes = {{"valid", ConvolutionPaddingMode::Valid},
+                                                                        {"same", ConvolutionPaddingMode::Same},
+                                                                        {"manual", ConvolutionPaddingMode::Manual}};
+    std::string                                                value;
     stream >> value;
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     try
@@ -66,7 +64,7 @@ inline ::std::istream &operator>>(::std::istream &stream, ConvolutionPaddingMode
         Mode = modes.at(arm_compute::utility::tolower(value));
 #ifndef ARM_COMPUTE_EXCEPTIONS_DISABLED
     }
-    catch(const std::out_of_range &)
+    catch (const std::out_of_range &)
     {
         throw std::invalid_argument(value);
     }
@@ -84,7 +82,7 @@ inline ::std::istream &operator>>(::std::istream &stream, ConvolutionPaddingMode
  */
 inline ::std::ostream &operator<<(::std::ostream &os, ConvolutionPaddingMode Mode)
 {
-    switch(Mode)
+    switch (Mode)
     {
         case ConvolutionPaddingMode::Valid:
             os << "Valid";
@@ -105,30 +103,30 @@ inline ::std::ostream &operator<<(::std::ostream &os, ConvolutionPaddingMode Mod
 /** Structure holding all the input tensor graph parameters */
 struct TensorParams
 {
-    int              width{ 1 };
-    int              height{ 1 };
-    int              fm{ 1 };
-    int              batch{ 1 };
-    QuantizationInfo quant_info{ 1.0f, 0 };
+    int              width{1};
+    int              height{1};
+    int              fm{1};
+    int              batch{1};
+    QuantizationInfo quant_info{1.0f, 0};
     std::string      npy{};
-    uint64_t         range_low{ 0 };
-    uint64_t         range_high{ 16 };
+    uint64_t         range_low{0};
+    uint64_t         range_high{16};
 };
 
 /** Structure holding all the verification graph parameters */
 struct VerificationParams
 {
-    float absolute_tolerance{ -1.f };
-    float relative_tolerance{ -1.f };
-    float tolerance_number{ -1.f };
+    float absolute_tolerance{-1.f};
+    float relative_tolerance{-1.f};
+    float tolerance_number{-1.f};
 };
 
 /** Structure holding all the common graph parameters */
 struct FrameworkParams
 {
-    bool                       help{ false };
-    int                        threads{ 0 };
-    arm_compute::graph::Target target{ arm_compute::graph::Target::NEON };
+    bool                       help{false};
+    int                        threads{0};
+    arm_compute::graph::Target target{arm_compute::graph::Target::NEON};
 };
 
 /** Structure holding all the graph Example parameters */
@@ -140,29 +138,29 @@ struct CommonParams
     TensorParams          bias{};
     TensorParams          output{};
     VerificationParams    verification{};
-    arm_compute::DataType data_type{ DataType::F32 };
+    arm_compute::DataType data_type{DataType::F32};
 };
 
 /** Structure holding all the Convolution layer graph parameters */
 struct ConvolutionParams
 {
-    int depth_multiplier{ 1 };
+    int depth_multiplier{1};
     /** Padding graph parameters */
-    int                    padding_top{ 0 };
-    int                    padding_bottom{ 0 };
-    int                    padding_left{ 0 };
-    int                    padding_right{ 0 };
-    int                    padding_stride_x{ 0 };
-    int                    padding_stride_y{ 0 };
-    ConvolutionPaddingMode padding_mode{ ConvolutionPaddingMode::Valid };
+    int                    padding_top{0};
+    int                    padding_bottom{0};
+    int                    padding_left{0};
+    int                    padding_right{0};
+    int                    padding_stride_x{0};
+    int                    padding_stride_y{0};
+    ConvolutionPaddingMode padding_mode{ConvolutionPaddingMode::Valid};
     struct
     {
         struct
         {
-            int X{ 0 };
-            int Y{ 0 };
+            int X{0};
+            int Y{0};
         } stride{};
-        ConvolutionPaddingMode mode{ ConvolutionPaddingMode::Valid };
+        ConvolutionPaddingMode mode{ConvolutionPaddingMode::Valid};
     } padding{};
 };
 
@@ -170,7 +168,7 @@ struct ConvolutionParams
 struct FullyConnectedParams
 {
     FullyConnectedLayerInfo info{};
-    int                     num_outputs{ 1 };
+    int                     num_outputs{1};
 };
 
 /** Structure holding all the graph Example parameters */
@@ -178,9 +176,10 @@ struct ExampleParams : public CommonParams
 {
     FullyConnectedParams                           fully_connected{};
     ConvolutionParams                              convolution{};
-    arm_compute::graph::DepthwiseConvolutionMethod depth_convolution_method{ arm_compute::graph::DepthwiseConvolutionMethod::Default };
-    arm_compute::graph::ConvolutionMethod          convolution_method{ arm_compute::graph::ConvolutionMethod::Default };
-    arm_compute::DataLayout                        data_layout{ DataLayout::NCHW };
+    arm_compute::graph::DepthwiseConvolutionMethod depth_convolution_method{
+        arm_compute::graph::DepthwiseConvolutionMethod::Default};
+    arm_compute::graph::ConvolutionMethod convolution_method{arm_compute::graph::ConvolutionMethod::Default};
+    arm_compute::DataLayout               data_layout{DataLayout::NCHW};
 };
 
 /** Calculate stride information.
@@ -193,12 +192,14 @@ struct ExampleParams : public CommonParams
  */
 inline PadStrideInfo calculate_convolution_padding(ExampleParams params)
 {
-    switch(params.convolution.padding_mode)
+    switch (params.convolution.padding_mode)
     {
         case ConvolutionPaddingMode::Manual:
         {
-            return PadStrideInfo(params.convolution.padding_stride_x, params.convolution.padding_stride_y, params.convolution.padding_left, params.convolution.padding_right, params.convolution.padding_top,
-                                 params.convolution.padding_bottom, DimensionRoundingType::FLOOR);
+            return PadStrideInfo(params.convolution.padding_stride_x, params.convolution.padding_stride_y,
+                                 params.convolution.padding_left, params.convolution.padding_right,
+                                 params.convolution.padding_top, params.convolution.padding_bottom,
+                                 DimensionRoundingType::FLOOR);
         }
         case ConvolutionPaddingMode::Valid:
         {
@@ -206,9 +207,10 @@ inline PadStrideInfo calculate_convolution_padding(ExampleParams params)
         }
         case ConvolutionPaddingMode::Same:
         {
-            return arm_compute::calculate_same_pad(TensorShape(params.input.width, params.input.height), TensorShape(params.weights.width, params.weights.height),
-                                                   PadStrideInfo(params.convolution.padding_stride_x,
-                                                                 params.convolution.padding_stride_y));
+            return arm_compute::calculate_same_pad(
+                TensorShape(params.input.width, params.input.height),
+                TensorShape(params.weights.width, params.weights.height),
+                PadStrideInfo(params.convolution.padding_stride_x, params.convolution.padding_stride_y));
         }
         default:
             ARM_COMPUTE_ERROR("NOT SUPPORTED!");
@@ -236,20 +238,19 @@ public:
           relative_tolerance(parser.add_option<SimpleOption<float>>("rel_tolerance", -1.0f)),
           tolerance_number(parser.add_option<SimpleOption<float>>("tolerance_num", -1.0f))
     {
-        const std::set<arm_compute::graph::Target> supported_targets
-        {
+        const std::set<arm_compute::graph::Target> supported_targets{
             arm_compute::graph::Target::NEON,
             arm_compute::graph::Target::CL,
         };
 
-        const std::set<arm_compute::DataType> supported_data_types
-        {
+        const std::set<arm_compute::DataType> supported_data_types{
             DataType::F16,
             DataType::F32,
             DataType::QASYMM8,
         };
 
-        target    = parser.add_option<EnumOption<arm_compute::graph::Target>>("target", supported_targets, arm_compute::graph::Target::NEON);
+        target    = parser.add_option<EnumOption<arm_compute::graph::Target>>("target", supported_targets,
+                                                                           arm_compute::graph::Target::NEON);
         data_type = parser.add_option<EnumOption<DataType>>("type", supported_data_types, DataType::F32);
 
         target->set_help("Target to execute on");
@@ -329,9 +330,12 @@ void consume_common_graph_parameters(CommonGraphValidateOptions &options, Common
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_accessor(const TensorParams &tensor, PixelValue lower, PixelValue upper, const std::random_device::result_type seed = 0)
+inline std::unique_ptr<graph::ITensorAccessor> get_accessor(const TensorParams                   &tensor,
+                                                            PixelValue                            lower,
+                                                            PixelValue                            upper,
+                                                            const std::random_device::result_type seed = 0)
 {
-    if(!tensor.npy.empty())
+    if (!tensor.npy.empty())
     {
         return std::make_unique<arm_compute::graph_utils::NumPyBinLoader>(tensor.npy);
     }
@@ -346,19 +350,19 @@ template <typename D>
 class VerifyAccessor : public graph::ITensorAccessor
 {
 public:
-    using TBias = typename std::conditional<std::is_same<typename std::decay<D>::type, uint8_t>::value, int32_t, D>::type;
+    using TBias =
+        typename std::conditional<std::is_same<typename std::decay<D>::type, uint8_t>::value, int32_t, D>::type;
     /** Constructor
      *
      * @param[in] params Convolution parameters
      */
-    explicit VerifyAccessor(ExampleParams &params)
-        : _params(std::move(params))
+    explicit VerifyAccessor(ExampleParams &params) : _params(std::move(params))
     {
     }
     // Inherited methods overriden:
     bool access_tensor(ITensor &tensor) override
     {
-        if(_params.output.npy.empty())
+        if (_params.output.npy.empty())
         {
             arm_compute::test::SimpleTensor<D>     src;
             arm_compute::test::SimpleTensor<D>     weights;
@@ -369,8 +373,10 @@ public:
 
             //Fill the tensors with random values
             fill_tensor(src, 0, static_cast<D>(_params.input.range_low), static_cast<D>(_params.input.range_high));
-            fill_tensor(weights, 1, static_cast<D>(_params.weights.range_low), static_cast<D>(_params.weights.range_high));
-            fill_tensor(bias, 2, static_cast<TBias>(_params.input.range_low), static_cast<TBias>(_params.input.range_high));
+            fill_tensor(weights, 1, static_cast<D>(_params.weights.range_low),
+                        static_cast<D>(_params.weights.range_high));
+            fill_tensor(bias, 2, static_cast<TBias>(_params.input.range_low),
+                        static_cast<TBias>(_params.input.range_high));
 
             arm_compute::test::SimpleTensor<D> output = reference(src, weights, bias, output_shape(tensor));
 
@@ -379,7 +385,9 @@ public:
         else
         {
             //The user provided a reference file use an npy accessor to validate
-            arm_compute::graph_utils::NumPyAccessor(_params.output.npy, tensor.info()->tensor_shape(), tensor.info()->data_type()).access_tensor(tensor);
+            arm_compute::graph_utils::NumPyAccessor(_params.output.npy, tensor.info()->tensor_shape(),
+                                                    tensor.info()->data_type())
+                .access_tensor(tensor);
         }
         return false;
     }
@@ -401,9 +409,14 @@ public:
     {
         ARM_COMPUTE_UNUSED(tensor);
         //Create Input tensors
-        src     = arm_compute::test::SimpleTensor<D> { TensorShape(_params.input.width, _params.input.height, _params.input.fm, _params.input.batch), _params.data_type, 1, _params.input.quant_info };
-        weights = arm_compute::test::SimpleTensor<D> { TensorShape(_params.weights.width, _params.weights.height, _params.weights.fm), _params.data_type, 1, _params.weights.quant_info };
-        bias    = arm_compute::test::SimpleTensor<TBias> { TensorShape(_params.input.height), _params.data_type, 1, _params.input.quant_info };
+        src = arm_compute::test::SimpleTensor<D>{
+            TensorShape(_params.input.width, _params.input.height, _params.input.fm, _params.input.batch),
+            _params.data_type, 1, _params.input.quant_info};
+        weights = arm_compute::test::SimpleTensor<D>{
+            TensorShape(_params.weights.width, _params.weights.height, _params.weights.fm), _params.data_type, 1,
+            _params.weights.quant_info};
+        bias = arm_compute::test::SimpleTensor<TBias>{TensorShape(_params.input.height), _params.data_type, 1,
+                                                      _params.input.quant_info};
     }
 
     /** Calculate reference output tensor shape.
@@ -414,7 +427,8 @@ public:
      */
     virtual TensorShape output_shape(ITensor &tensor)
     {
-        return arm_compute::graph_utils::permute_shape(tensor.info()->tensor_shape(), _params.data_layout, DataLayout::NCHW);
+        return arm_compute::graph_utils::permute_shape(tensor.info()->tensor_shape(), _params.data_layout,
+                                                       DataLayout::NCHW);
     }
 
     /** Calculate reference tensor.
@@ -442,7 +456,10 @@ public:
      * @param[in]  low    lower bound for random values
      * @param[in]  high   upper bound for random values
      */
-    void fill_tensor(arm_compute::test::SimpleTensor<uint8_t> &tensor, std::random_device::result_type seed, uint8_t low, uint8_t high)
+    void fill_tensor(arm_compute::test::SimpleTensor<uint8_t> &tensor,
+                     std::random_device::result_type           seed,
+                     uint8_t                                   low,
+                     uint8_t                                   high)
     {
         ARM_COMPUTE_ERROR_ON(tensor.data_type() != arm_compute::DataType::QASYMM8);
 
@@ -454,7 +471,7 @@ public:
         std::mt19937                           gen(seed);
         std::uniform_int_distribution<uint8_t> distribution(qasymm8_low, qasymm8_high);
 
-        for(int i = 0; i < tensor.num_elements(); ++i)
+        for (int i = 0; i < tensor.num_elements(); ++i)
         {
             tensor[i] = quantize_qasymm8(distribution(gen), qinfo);
         }
@@ -468,12 +485,15 @@ public:
      * @param[in]  low    lower bound for random values
      * @param[in]  high   upper bound for random values
      */
-    void fill_tensor(arm_compute::test::SimpleTensor<int32_t> &tensor, std::random_device::result_type seed, int32_t low, int32_t high)
+    void fill_tensor(arm_compute::test::SimpleTensor<int32_t> &tensor,
+                     std::random_device::result_type           seed,
+                     int32_t                                   low,
+                     int32_t                                   high)
     {
         std::mt19937                           gen(seed);
         std::uniform_int_distribution<int32_t> distribution(static_cast<int32_t>(low), static_cast<uint32_t>(high));
 
-        for(int i = 0; i < tensor.num_elements(); ++i)
+        for (int i = 0; i < tensor.num_elements(); ++i)
         {
             tensor[i] = distribution(gen);
         }
@@ -487,13 +507,16 @@ public:
      * @param[in]  low    lower bound for random values
      * @param[in]  high   upper bound for random values
      */
-    void fill_tensor(arm_compute::test::SimpleTensor<float> &tensor, std::random_device::result_type seed, float low, float high)
+    void fill_tensor(arm_compute::test::SimpleTensor<float> &tensor,
+                     std::random_device::result_type         seed,
+                     float                                   low,
+                     float                                   high)
     {
         ARM_COMPUTE_ERROR_ON(tensor.data_type() != arm_compute::DataType::F32);
         std::mt19937                          gen(seed);
         std::uniform_real_distribution<float> distribution(low, high);
 
-        for(int i = 0; i < tensor.num_elements(); ++i)
+        for (int i = 0; i < tensor.num_elements(); ++i)
         {
             tensor[i] = distribution(gen);
         }
@@ -507,13 +530,16 @@ public:
      * @param[in]  low    lower bound for random values
      * @param[in]  high   upper bound for random values
      */
-    void fill_tensor(arm_compute::test::SimpleTensor<half> &tensor, std::random_device::result_type seed, half low, half high)
+    void fill_tensor(arm_compute::test::SimpleTensor<half> &tensor,
+                     std::random_device::result_type        seed,
+                     half                                   low,
+                     half                                   high)
     {
         ARM_COMPUTE_ERROR_ON(tensor.data_type() != arm_compute::DataType::F16);
         std::mt19937                          gen(seed);
         std::uniform_real_distribution<float> distribution(static_cast<half>(low), static_cast<half>(high));
 
-        for(int i = 0; i < tensor.num_elements(); ++i)
+        for (int i = 0; i < tensor.num_elements(); ++i)
         {
             tensor[i] = static_cast<half>(distribution(gen));
         }
@@ -554,26 +580,29 @@ public:
         float user_absolute_tolerance = _params.verification.absolute_tolerance;
         float user_tolerance_num      = _params.verification.tolerance_number;
         /* If no user input was provided override with defaults. */
-        if(user_relative_tolerance == -1)
+        if (user_relative_tolerance == -1)
         {
             user_relative_tolerance = relative_tolerance();
         }
 
-        if(user_absolute_tolerance == -1)
+        if (user_absolute_tolerance == -1)
         {
             user_absolute_tolerance = absolute_tolerance();
         }
 
-        if(user_tolerance_num == -1)
+        if (user_tolerance_num == -1)
         {
             user_tolerance_num = tolerance_number();
         }
 
-        const arm_compute::test::validation::RelativeTolerance<float> rel_tolerance(user_relative_tolerance); /**< Relative tolerance */
-        const arm_compute::test::validation::AbsoluteTolerance<float> abs_tolerance(user_absolute_tolerance); /**< Absolute tolerance */
-        const float                                                   tolerance_num(user_tolerance_num);      /**< Tolerance number */
+        const arm_compute::test::validation::RelativeTolerance<float> rel_tolerance(
+            user_relative_tolerance); /**< Relative tolerance */
+        const arm_compute::test::validation::AbsoluteTolerance<float> abs_tolerance(
+            user_absolute_tolerance);                  /**< Absolute tolerance */
+        const float tolerance_num(user_tolerance_num); /**< Tolerance number */
 
-        arm_compute::test::validation::validate(arm_compute::test::Accessor(tensor), output, rel_tolerance, tolerance_num, abs_tolerance);
+        arm_compute::test::validation::validate(arm_compute::test::Accessor(tensor), output, rel_tolerance,
+                                                tolerance_num, abs_tolerance);
     }
 
     ExampleParams _params;
@@ -588,22 +617,19 @@ public:
 template <template <typename D> class VerifyAccessorT>
 inline std::unique_ptr<graph::ITensorAccessor> get_verify_accessor(ExampleParams params)
 {
-    switch(params.data_type)
+    switch (params.data_type)
     {
         case DataType::QASYMM8:
         {
-            return std::make_unique<VerifyAccessorT<uint8_t>>(
-                       params);
+            return std::make_unique<VerifyAccessorT<uint8_t>>(params);
         }
         case DataType::F16:
         {
-            return std::make_unique<VerifyAccessorT<half>>(
-                       params);
+            return std::make_unique<VerifyAccessorT<half>>(params);
         }
         case DataType::F32:
         {
-            return std::make_unique<VerifyAccessorT<float>>(
-                       params);
+            return std::make_unique<VerifyAccessorT<float>>(params);
         }
         default:
             ARM_COMPUTE_ERROR("NOT SUPPORTED!");
@@ -614,8 +640,7 @@ template <typename LayerT, typename OptionsT, template <typename D> class Verify
 class GraphValidateExample : public ValidateExample
 {
 public:
-    GraphValidateExample(std::string name)
-        : graph(0, name)
+    GraphValidateExample(std::string name) : graph(0, name)
     {
     }
 
@@ -634,7 +659,7 @@ public:
         Options.consume_common_parameters(params);
         Options.consume_parameters(params);
 
-        if(params.common_params.help)
+        if (params.common_params.help)
         {
             parser.print_help(argv[0]);
             return false;
@@ -642,16 +667,16 @@ public:
 
         Options.print_parameters(std::cout, params);
         // Create input descriptor
-        const TensorShape input_shape = arm_compute::graph_utils::permute_shape(TensorShape(params.input.width, params.input.height, params.input.fm, params.input.batch),
-                                                                                DataLayout::NCHW, params.data_layout);
-        arm_compute::graph::TensorDescriptor input_descriptor = arm_compute::graph::TensorDescriptor(input_shape, params.data_type, params.input.quant_info, params.data_layout);
+        const TensorShape input_shape = arm_compute::graph_utils::permute_shape(
+            TensorShape(params.input.width, params.input.height, params.input.fm, params.input.batch), DataLayout::NCHW,
+            params.data_layout);
+        arm_compute::graph::TensorDescriptor input_descriptor = arm_compute::graph::TensorDescriptor(
+            input_shape, params.data_type, params.input.quant_info, params.data_layout);
 
         const PixelValue lower = PixelValue(params.input.range_low, params.data_type, params.input.quant_info);
         const PixelValue upper = PixelValue(params.input.range_high, params.data_type, params.input.quant_info);
 
-        graph << params.common_params.target
-              << params.convolution_method
-              << params.depth_convolution_method
+        graph << params.common_params.target << params.convolution_method << params.depth_convolution_method
               << arm_compute::graph::frontend::InputLayer(input_descriptor, get_accessor(params.input, lower, upper, 0))
               << GraphFunctionLayer(params)
               << arm_compute::graph::frontend::OutputLayer(get_verify_accessor<VerifyAccessorT>(params));
@@ -676,6 +701,6 @@ public:
     arm_compute::graph::frontend::Stream graph;
 };
 
-} // graph_validate_utils
-} // arm_compute
+} // namespace utils
+} // namespace arm_compute
 #endif // ACL_TESTS_VALIDATE_EXAMPLES_GRAPH_VALIDATE_UTILS_H

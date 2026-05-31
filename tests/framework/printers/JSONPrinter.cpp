@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019,2021 Arm Limited.
+ * Copyright (c) 2017-2019,2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,6 @@
 
 #include "../Framework.h"
 #include "../instruments/Measurement.h"
-
 #include <algorithm>
 
 namespace arm_compute
@@ -36,7 +35,7 @@ namespace framework
 {
 void JSONPrinter::print_separator(bool &flag)
 {
-    if(flag)
+    if (flag)
     {
         flag = false;
     }
@@ -52,7 +51,7 @@ void JSONPrinter::print_strings(T &&first, T &&last)
     bool              first_entry = true;
     std::stringstream log;
 
-    while(first != last)
+    while (first != last)
     {
         print_separator(first_entry);
 
@@ -60,7 +59,7 @@ void JSONPrinter::print_strings(T &&first, T &&last)
 
         log.str(*first);
 
-        for(std::string line; !std::getline(log, line).fail();)
+        for (std::string line; !std::getline(log, line).fail();)
         {
             *_stream << line << "; ";
         }
@@ -117,13 +116,14 @@ void JSONPrinter::print_list_tests(const std::vector<TestInfo> &infos)
 {
     *_stream << R"(, "list_tests" : {)";
     bool first = true;
-    for(auto const &info : infos)
+    for (auto const &info : infos)
     {
-        if(!first)
+        if (!first)
         {
             *_stream << ",";
         }
-        *_stream << R"(")" << info.id << R"(" : { "name": ")" << info.name << R"(", "mode": ")" << info.mode << R"(", "status" : ")" << info.status << R"(" })";
+        *_stream << R"(")" << info.id << R"(" : { "name": ")" << info.name << R"(", "mode": ")" << info.mode
+                 << R"(", "status" : ")" << info.status << R"(" })";
         first = false;
     }
     *_stream << "}";
@@ -132,6 +132,7 @@ void JSONPrinter::print_errors_header()
 {
     _errors.clear();
     _expected_errors.clear();
+    _warnings.clear();
     _infos.clear();
 }
 
@@ -147,6 +148,10 @@ void JSONPrinter::print_errors_footer()
     print_strings(_expected_errors.begin(), _expected_errors.end());
     *_stream << "]";
 
+    *_stream << R"(, "warnings" : [)";
+    print_strings(_warnings.begin(), _warnings.end());
+    *_stream << "]";
+
     *_stream << R"(, "infos" : [)";
     print_strings(_infos.begin(), _infos.end());
     *_stream << "]";
@@ -154,7 +159,7 @@ void JSONPrinter::print_errors_footer()
 
 void JSONPrinter::print_error(const std::exception &error, bool expected)
 {
-    if(expected)
+    if (expected)
     {
         _expected_errors.emplace_back(error.what());
     }
@@ -164,6 +169,11 @@ void JSONPrinter::print_error(const std::exception &error, bool expected)
     }
 }
 
+void JSONPrinter::print_warning(const std::string &warning)
+{
+    _warnings.push_back(warning);
+}
+
 void JSONPrinter::print_info(const std::string &info)
 {
     _infos.push_back(info);
@@ -171,7 +181,7 @@ void JSONPrinter::print_info(const std::string &info)
 
 void JSONPrinter::print_profiler_header(const std::string &header_data)
 {
-    if(header_data.size() > 0)
+    if (header_data.size() > 0)
     {
         print_separator(_first_test_entry);
     }
@@ -183,13 +193,13 @@ void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measuremen
     print_separator(_first_test_entry);
     *_stream << R"("measurements" : {)";
 
-    for(auto i_it = measurements.cbegin(), i_end = measurements.cend(); i_it != i_end;)
+    for (auto i_it = measurements.cbegin(), i_end = measurements.cend(); i_it != i_end;)
     {
         *_stream << R"(")" << i_it->first << R"(" : {)";
 
-        auto measurement_to_string = [](const Measurement & measurement)
+        auto measurement_to_string = [](const Measurement &measurement)
         {
-            if(measurement.raw_data().size() == 1)
+            if (measurement.raw_data().size() == 1)
             {
                 return measurement.raw_data().front();
             }
@@ -202,11 +212,12 @@ void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measuremen
                 return str.str();
             }
         };
-        *_stream << R"("raw" : [)" << join(i_it->second.begin(), i_it->second.end(), ",", measurement_to_string) << "],";
+        *_stream << R"("raw" : [)" << join(i_it->second.begin(), i_it->second.end(), ",", measurement_to_string)
+                 << "],";
         *_stream << R"("unit" : ")" << i_it->second.begin()->unit() << R"(")";
         *_stream << "}";
 
-        if(++i_it != i_end)
+        if (++i_it != i_end)
         {
             *_stream << ",";
         }

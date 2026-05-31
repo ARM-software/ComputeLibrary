@@ -30,6 +30,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "support/StringSupport.h"
 #include "support/ToolchainSupport.h"
 
@@ -37,6 +38,9 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #endif /* ARM_COMPUTE_CL */
+
+#include "arm_compute/runtime/CPP/CPPScheduler.h"
+#include "arm_compute/runtime/RuntimeContext.h"
 
 #include <cmath>
 #include <cstddef>
@@ -47,9 +51,6 @@
 #include <string>
 #include <type_traits>
 #include <vector>
-
-#include "arm_compute/runtime/CPP/CPPScheduler.h"
-#include "arm_compute/runtime/RuntimeContext.h"
 
 namespace arm_compute
 {
@@ -84,10 +85,10 @@ inline T round_half_even(T value, T epsilon = std::numeric_limits<T>::epsilon())
     T ipart          = 0;
     std::modf(positive_value, &ipart);
     // If 'value' is exactly halfway between two integers
-    if(std::abs(positive_value - (ipart + 0.5f)) < epsilon)
+    if (std::abs(positive_value - (ipart + 0.5f)) < epsilon)
     {
         // If 'ipart' is even then return 'ipart'
-        if(std::fmod(ipart, 2.f) < epsilon)
+        if (std::fmod(ipart, 2.f) < epsilon)
         {
             return support::cpp11::copysign(ipart, value);
         }
@@ -143,7 +144,7 @@ using make_unsigned_conditional_t = typename std::conditional<std::is_integral<T
  */
 inline Format get_format_for_channel(Channel channel)
 {
-    switch(channel)
+    switch (channel)
     {
         case Channel::R:
         case Channel::G:
@@ -162,7 +163,7 @@ inline Format get_format_for_channel(Channel channel)
  */
 inline Format get_channel_format(Channel channel)
 {
-    switch(channel)
+    switch (channel)
     {
         case Channel::R:
         case Channel::G:
@@ -201,9 +202,10 @@ inline auto foldl(F &&func, T &&value1, U &&value2) -> decltype(func(value1, val
  * @param[in] values  Remaining arguments.
  */
 template <typename F, typename I, typename T, typename... Vs>
-inline I foldl(F &&func, I &&initial, T &&value, Vs &&... values)
+inline I foldl(F &&func, I &&initial, T &&value, Vs &&...values)
 {
-    return foldl(std::forward<F>(func), func(std::forward<I>(initial), std::forward<T>(value)), std::forward<Vs>(values)...);
+    return foldl(std::forward<F>(func), func(std::forward<I>(initial), std::forward<T>(value)),
+                 std::forward<Vs>(values)...);
 }
 
 /** Create a valid region based on tensor shape, border mode and border size
@@ -215,22 +217,25 @@ inline I foldl(F &&func, I &&initial, T &&value, Vs &&... values)
  * @return A valid region starting at (0, 0, ...) with size of @p shape if @p border_undefined is false; otherwise
  *  return A valid region starting at (@p border_size.left, @p border_size.top, ...) with reduced size of @p shape.
  */
-inline ValidRegion shape_to_valid_region(const TensorShape &a_shape, bool border_undefined = false, BorderSize border_size = BorderSize(0))
+inline ValidRegion
+shape_to_valid_region(const TensorShape &a_shape, bool border_undefined = false, BorderSize border_size = BorderSize(0))
 {
-    ValidRegion valid_region{ Coordinates(), a_shape };
+    ValidRegion valid_region{Coordinates(), a_shape};
 
     Coordinates &anchor = valid_region.anchor;
     TensorShape &shape  = valid_region.shape;
 
-    if(border_undefined)
+    if (border_undefined)
     {
         ARM_COMPUTE_ERROR_ON(shape.num_dimensions() < 2);
 
         anchor.set(0, border_size.left);
         anchor.set(1, border_size.top);
 
-        const int valid_shape_x = std::max(0, static_cast<int>(shape.x()) - static_cast<int>(border_size.left) - static_cast<int>(border_size.right));
-        const int valid_shape_y = std::max(0, static_cast<int>(shape.y()) - static_cast<int>(border_size.top) - static_cast<int>(border_size.bottom));
+        const int valid_shape_x = std::max(0, static_cast<int>(shape.x()) - static_cast<int>(border_size.left) -
+                                                  static_cast<int>(border_size.right));
+        const int valid_shape_y = std::max(0, static_cast<int>(shape.y()) - static_cast<int>(border_size.top) -
+                                                  static_cast<int>(border_size.bottom));
 
         shape.set(0, valid_shape_x);
         shape.set(1, valid_shape_y);
@@ -250,7 +255,7 @@ inline ValidRegion shape_to_valid_region(const TensorShape &a_shape, bool border
 template <typename T>
 void store_value_with_data_type(void *ptr, T value, DataType data_type)
 {
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::U8:
         case DataType::QASYMM8:
@@ -311,11 +316,11 @@ void store_value_with_data_type(void *ptr, T value, DataType data_type)
 template <typename U, typename T>
 T saturate_cast(T val)
 {
-    if(val > static_cast<T>(std::numeric_limits<U>::max()))
+    if (val > static_cast<T>(std::numeric_limits<U>::max()))
     {
         val = static_cast<T>(std::numeric_limits<U>::max());
     }
-    if(val < static_cast<T>(std::numeric_limits<U>::lowest()))
+    if (val < static_cast<T>(std::numeric_limits<U>::lowest()))
     {
         val = static_cast<T>(std::numeric_limits<U>::lowest());
     }
@@ -362,9 +367,9 @@ inline Coordinates index2coord(const TensorShape &shape, int index)
     ARM_COMPUTE_ERROR_ON_MSG(index < 0 || index >= num_elements, "Index has to be in [0, num_elements]");
     ARM_COMPUTE_ERROR_ON_MSG(num_elements == 0, "Cannot create coordinate from empty shape");
 
-    Coordinates coord{ 0 };
+    Coordinates coord{0};
 
-    for(int d = shape.num_dimensions() - 1; d >= 0; --d)
+    for (int d = shape.num_dimensions() - 1; d >= 0; --d)
     {
         num_elements /= shape[d];
         coord.set(d, index / num_elements);
@@ -392,7 +397,7 @@ inline int coord2index(const TensorShape &shape, const Coordinates &coord)
     int index    = 0;
     int dim_size = 1;
 
-    for(unsigned int i = 0; i < coord.num_dimensions(); ++i)
+    for (unsigned int i = 0; i < coord.num_dimensions(); ++i)
     {
         index += coord[i] * dim_size;
         dim_size *= shape[i];
@@ -404,9 +409,9 @@ inline int coord2index(const TensorShape &shape, const Coordinates &coord)
 /** Check if a coordinate is within a valid region */
 inline bool is_in_valid_region(const ValidRegion &valid_region, Coordinates coord)
 {
-    for(size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
+    for (size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
     {
-        if(coord[d] < valid_region.start(d) || coord[d] >= valid_region.end(d))
+        if (coord[d] < valid_region.start(d) || coord[d] >= valid_region.end(d))
         {
             return false;
         }
@@ -442,8 +447,12 @@ inline T create_tensor(const TensorInfo &info, IRuntimeContext *ctx = nullptr)
  * @return Initialized tensor of given type.
  */
 template <typename T>
-inline T create_tensor(const TensorShape &shape, DataType data_type, int num_channels = 1,
-                       QuantizationInfo quantization_info = QuantizationInfo(), DataLayout data_layout = DataLayout::NCHW, IRuntimeContext *ctx = nullptr)
+inline T create_tensor(const TensorShape &shape,
+                       DataType           data_type,
+                       int                num_channels      = 1,
+                       QuantizationInfo   quantization_info = QuantizationInfo(),
+                       DataLayout         data_layout       = DataLayout::NCHW,
+                       IRuntimeContext   *ctx               = nullptr)
 {
     T          tensor(ctx);
     TensorInfo info(shape, num_channels, data_type);
@@ -485,7 +494,7 @@ inline std::vector<T> generate_random_real(unsigned int num_values, T min, T max
     std::mt19937                      gen(seed);
     std::uniform_real_distribution<T> dist(min, max);
 
-    for(unsigned int i = 0; i < num_values; ++i)
+    for (unsigned int i = 0; i < num_values; ++i)
     {
         v.at(i) = dist(gen);
     }
@@ -512,7 +521,7 @@ inline std::string get_typestring(DataType data_type)
     const unsigned int i = 1;
     const char        *c = reinterpret_cast<const char *>(&i);
     std::string        endianness;
-    if(*c == 1)
+    if (*c == 1)
     {
         endianness = std::string("<");
     }
@@ -522,7 +531,7 @@ inline std::string get_typestring(DataType data_type)
     }
     const std::string no_endianness("|");
 
-    switch(data_type)
+    switch (data_type)
     {
         case DataType::U8:
             return no_endianness + "u" + support::cpp11::to_string(sizeof(uint8_t));
@@ -557,7 +566,7 @@ template <typename TensorType>
 inline void sync_if_necessary()
 {
 #ifdef ARM_COMPUTE_CL
-    if(opencl_is_available() && std::is_same<typename std::decay<TensorType>::type, arm_compute::CLTensor>::value)
+    if (opencl_is_available() && std::is_same<typename std::decay<TensorType>::type, arm_compute::CLTensor>::value)
     {
         CLScheduler::get().sync();
     }

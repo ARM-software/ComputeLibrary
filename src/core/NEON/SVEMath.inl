@@ -82,7 +82,6 @@ inline svfloat16_t svinv_f16_z(svbool_t pg, svfloat16_t x)
 {
     auto recip = svrecpe_f16(x);
     recip      = svmul_f16_z(pg, svrecps_f16(x, recip), recip);
-    recip      = svmul_f16_z(pg, svrecps_f16(x, recip), recip);
     return recip;
 }
 

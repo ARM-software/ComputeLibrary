@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UNIT_QUEUE_FIXTURE
-#define ARM_COMPUTE_TEST_UNIT_QUEUE_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_UNIT_QUEUEFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_UNIT_QUEUEFIXTURE_H
 
 #include "arm_compute/Acl.hpp"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/framework/Macros.h"
@@ -105,11 +106,12 @@ public:
         acl::Context ctx(Target);
 
         std::array<char, 256> empty_array{};
-        AclQueue queue = nullptr;
+        AclQueue              queue = nullptr;
 
         ARM_COMPUTE_ASSERT(AclDestroyQueue(queue) == AclStatus::AclInvalidArgument);
         ARM_COMPUTE_ASSERT(AclDestroyQueue(reinterpret_cast<AclQueue>(ctx.get())) == AclStatus::AclInvalidArgument);
-        ARM_COMPUTE_ASSERT(AclDestroyQueue(reinterpret_cast<AclQueue>(empty_array.data())) == AclStatus::AclInvalidArgument);
+        ARM_COMPUTE_ASSERT(AclDestroyQueue(reinterpret_cast<AclQueue>(empty_array.data())) ==
+                           AclStatus::AclInvalidArgument);
         ARM_COMPUTE_ASSERT(queue == nullptr);
     };
 };
@@ -141,4 +143,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UNIT_QUEUE_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_UNIT_QUEUEFIXTURE_H

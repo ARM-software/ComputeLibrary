@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FRAMEWORK_REGISTRARS
-#define ARM_COMPUTE_TEST_FRAMEWORK_REGISTRARS
+#ifndef ACL_TESTS_FRAMEWORK_REGISTRARS_H
+#define ACL_TESTS_FRAMEWORK_REGISTRARS_H
 
 #include "DatasetModes.h"
 #include "Framework.h"
-
 #include <string>
 #include <utility>
 
@@ -84,11 +83,14 @@ inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string test_name, DatasetMod
 
 template <typename T>
 template <typename D>
-inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string test_name, DatasetMode mode, TestCaseFactory::Status status, D &&dataset)
+inline TestCaseRegistrar<T>::TestCaseRegistrar(std::string             test_name,
+                                               DatasetMode             mode,
+                                               TestCaseFactory::Status status,
+                                               D                     &&dataset)
 {
     auto it = dataset.begin();
 
-    for(int i = 0; i < dataset.size(); ++i, ++it)
+    for (int i = 0; i < dataset.size(); ++i, ++it)
     {
         // WORKAROUND for GCC 4.9
         // The last argument should be *it to pass just the data and not the
@@ -110,4 +112,4 @@ inline TestSuiteRegistrar::TestSuiteRegistrar(std::string name)
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FRAMEWORK_REGISTRARS */
+#endif // ACL_TESTS_FRAMEWORK_REGISTRARS_H

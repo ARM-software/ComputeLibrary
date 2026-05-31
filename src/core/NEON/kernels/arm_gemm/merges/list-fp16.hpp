@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,4 +21,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "a64_merge_fp16_24x8.hpp"
+#include "a64_merge_fp16_fp16_8x24.hpp"
+#include "a64_merge_fp32_fp16_8x12.hpp"

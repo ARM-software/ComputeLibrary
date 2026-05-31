@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLLSTMLayerQuantized.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
-#include "tests/Utils.h"
 #include "tests/datasets/LSTMLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
+#include "tests/Utils.h"
 #include "tests/validation/Validation.h"
 
 #include <vector>
@@ -50,11 +51,8 @@ inline void fill_tensor(CLTensor &tensor, const std::vector<T> &v)
     Window      window;
     window.use_tensor_dimensions(t_shape);
     Iterator out(&tensor, window);
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        *reinterpret_cast<T *>(out.ptr()) = v[coord2index(t_shape, id)];
-    },
-    out);
+    execute_window_loop(
+        window, [&](const Coordinates &id) { *reinterpret_cast<T *>(out.ptr()) = v[coord2index(t_shape, id)]; }, out);
     tensor.unmap();
 }
 

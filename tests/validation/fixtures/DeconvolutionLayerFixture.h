@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,11 +28,12 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/DeconvolutionLayer.h"
 
@@ -50,14 +51,26 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class DeconvolutionLayerFixtureBase : public framework::Fixture
 {
 public:
-    using TBias = typename std::conditional < std::is_same<typename std::decay<T>::type, uint8_t>::value || std::is_same<typename std::decay<T>::type, int8_t>::value, int32_t, T >::type;
+    using TBias = typename std::conditional<std::is_same<typename std::decay<T>::type, uint8_t>::value ||
+                                                std::is_same<typename std::decay<T>::type, int8_t>::value,
+                                            int32_t,
+                                            T>::type;
 
 public:
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info,
-               DataType data_type, DataType weights_data_type, DataLayout data_layout,
-               QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, QuantizationInfo weights_quantization_info, bool add_bias)
+    void setup(TensorShape      input_shape,
+               TensorShape      weights_shape,
+               TensorShape      bias_shape,
+               TensorShape      output_shape,
+               PadStrideInfo    info,
+               DataType         data_type,
+               DataType         weights_data_type,
+               DataLayout       data_layout,
+               QuantizationInfo input_quantization_info,
+               QuantizationInfo output_quantization_info,
+               QuantizationInfo weights_quantization_info,
+               bool             add_bias)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             (data_type == DataType::F16 || weights_data_type == DataType::F16) && !CPUInfo::get().has_fp16())
         {
             return;
@@ -79,7 +92,7 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::QASYMM8:
             {
@@ -90,7 +103,8 @@ protected:
             }
             case DataType::QASYMM8_SIGNED:
             {
-                std::pair<int, int> bounds = get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                std::pair<int, int> bounds =
+                    get_quantized_qasymm8_signed_bounds(tensor.quantization_info(), -1.0f, 1.0f);
                 std::uniform_int_distribution<int32_t> distribution(bounds.first, bounds.second);
                 library->fill(tensor, distribution, i);
                 break;
@@ -99,14 +113,15 @@ protected:
             {
                 int min_bound = 128;
                 int max_bound = -127;
-                for(size_t i = 0; i < _input_quantization_info.scale().size(); i++)
+                for (size_t i = 0; i < _input_quantization_info.scale().size(); i++)
                 {
-                    std::pair<int, int> bounds = get_symm_quantized_per_channel_bounds(tensor.quantization_info(), -1.0f, 1.0f);
-                    if(bounds.first < min_bound)
+                    std::pair<int, int> bounds =
+                        get_symm_quantized_per_channel_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+                    if (bounds.first < min_bound)
                     {
                         min_bound = bounds.first;
                     }
-                    if(bounds.second > max_bound)
+                    if (bounds.second > max_bound)
                     {
                         max_bound = bounds.second;
                     }
@@ -123,7 +138,7 @@ protected:
             }
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -141,7 +156,7 @@ protected:
     template <typename U>
     void fill_zeros(U &&tensor)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::S32:
             {
@@ -159,10 +174,14 @@ protected:
         }
     }
 
-    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, const TensorShape bias_shape, TensorShape output_shape,
-                              const PadStrideInfo &info, bool add_bias)
+    TensorType compute_target(TensorShape          input_shape,
+                              TensorShape          weights_shape,
+                              const TensorShape    bias_shape,
+                              TensorShape          output_shape,
+                              const PadStrideInfo &info,
+                              bool                 add_bias)
     {
-        if(_data_layout == DataLayout::NHWC)
+        if (_data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
             permute(weights_shape, PermutationVector(2U, 0U, 1U));
@@ -170,10 +189,13 @@ protected:
         }
 
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _input_quantization_info, _data_layout);
-        TensorType weights = create_tensor<TensorType>(weights_shape, _weights_data_type, 1, _weights_quantization_info, _data_layout);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, _input_quantization_info, _data_layout);
-        TensorType dst     = create_tensor<TensorType>(output_shape, _data_type, 1, _output_quantization_info, _data_layout);
+        TensorType src = create_tensor<TensorType>(input_shape, _data_type, 1, _input_quantization_info, _data_layout);
+        TensorType weights =
+            create_tensor<TensorType>(weights_shape, _weights_data_type, 1, _weights_quantization_info, _data_layout);
+        TensorType bias =
+            create_tensor<TensorType>(bias_shape, _bias_data_type, 1, _input_quantization_info, _data_layout);
+        TensorType dst =
+            create_tensor<TensorType>(output_shape, _data_type, 1, _output_quantization_info, _data_layout);
 
         // Create and configure function
         FunctionType conv;
@@ -181,7 +203,7 @@ protected:
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(weights.info()->is_resizable());
-        if(add_bias)
+        if (add_bias)
         {
             ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
         }
@@ -190,7 +212,7 @@ protected:
         // Allocate tensors
         src.allocator()->allocate();
         weights.allocator()->allocate();
-        if(add_bias)
+        if (add_bias)
         {
             bias.allocator()->allocate();
         }
@@ -198,7 +220,7 @@ protected:
 
         ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(!weights.info()->is_resizable());
-        if(add_bias)
+        if (add_bias)
         {
             ARM_COMPUTE_ASSERT(!bias.info()->is_resizable());
         }
@@ -207,7 +229,7 @@ protected:
         // Fill tensors
         fill(AccessorType(src), 0);
         fill(AccessorType(weights), 1);
-        if(add_bias)
+        if (add_bias)
         {
             fill(AccessorType(bias), 2);
         }
@@ -217,19 +239,23 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape,
-                                      const PadStrideInfo &info, bool add_bias)
+    SimpleTensor<T> compute_reference(const TensorShape   &input_shape,
+                                      const TensorShape   &weights_shape,
+                                      const TensorShape   &bias_shape,
+                                      const TensorShape   &output_shape,
+                                      const PadStrideInfo &info,
+                                      bool                 add_bias)
     {
         // Create reference
-        SimpleTensor<T>     src{ input_shape, _data_type, 1, _input_quantization_info };
-        SimpleTensor<TW>    weights{ weights_shape, _weights_data_type, 1, _weights_quantization_info };
-        SimpleTensor<TBias> bias{ bias_shape, _bias_data_type, 1, _input_quantization_info };
+        SimpleTensor<T>     src{input_shape, _data_type, 1, _input_quantization_info};
+        SimpleTensor<TW>    weights{weights_shape, _weights_data_type, 1, _weights_quantization_info};
+        SimpleTensor<TBias> bias{bias_shape, _bias_data_type, 1, _input_quantization_info};
 
         // Fill reference
         fill(src, 0);
         fill(weights, 1);
 
-        if(add_bias)
+        if (add_bias)
         {
             fill(bias, 2);
         }
@@ -251,14 +277,27 @@ protected:
     QuantizationInfo _weights_quantization_info{};
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, unsigned int kernel_size_x, unsigned int kernel_size_y>
-class DeconvolutionValidationFixture : public DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          unsigned int kernel_size_x,
+          unsigned int kernel_size_y>
+class DeconvolutionValidationFixture
+    : public DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
-               unsigned int num_kernels, DataType data_type, DataLayout data_layout, bool add_bias)
+    void setup(TensorShape  input_shape,
+               unsigned int sx,
+               unsigned int sy,
+               unsigned int padx,
+               unsigned int pady,
+               unsigned int num_kernels,
+               DataType     data_type,
+               DataLayout   data_layout,
+               bool         add_bias)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -267,23 +306,40 @@ public:
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
-        auto                out_dim = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, info);
-        TensorInfo          input_info(input_shape, 1, data_type);
-        TensorInfo          weights_info(weights_shape, 1, data_type);
-        TensorShape         output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
-        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, data_type, data_type, data_layout, QuantizationInfo(),
-                                                                                           QuantizationInfo(), QuantizationInfo(), add_bias);
+        auto                out_dim =
+            deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, info);
+        TensorInfo  input_info(input_shape, 1, data_type);
+        TensorInfo  weights_info(weights_shape, 1, data_type);
+        TensorShape output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
+        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, data_type, data_type, data_layout,
+            QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), add_bias);
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, unsigned int kernel_size_x, unsigned int kernel_size_y>
-class DeconvolutionValidationAsymmFixture : public DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          unsigned int kernel_size_x,
+          unsigned int kernel_size_y>
+class DeconvolutionValidationAsymmFixture
+    : public DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int pad_left, unsigned int pad_right, unsigned int pad_top,
-               unsigned int pad_bottom, unsigned int num_kernels, DataType data_type, DataLayout data_layout, bool add_bias)
+    void setup(TensorShape  input_shape,
+               unsigned int sx,
+               unsigned int sy,
+               unsigned int pad_left,
+               unsigned int pad_right,
+               unsigned int pad_top,
+               unsigned int pad_bottom,
+               unsigned int num_kernels,
+               DataType     data_type,
+               DataLayout   data_layout,
+               bool         add_bias)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -292,23 +348,40 @@ public:
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, pad_left, pad_right, pad_top, pad_bottom, DimensionRoundingType::CEIL);
-        auto                out_dim = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, info);
-        TensorInfo          input_info(input_shape, 1, data_type);
-        TensorInfo          weights_info(weights_shape, 1, data_type);
-        TensorShape         output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
-        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, data_type, data_type, data_layout, QuantizationInfo(),
-                                                                                           QuantizationInfo(), QuantizationInfo(), add_bias);
+        auto                out_dim =
+            deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, info);
+        TensorInfo  input_info(input_shape, 1, data_type);
+        TensorInfo  weights_info(weights_shape, 1, data_type);
+        TensorShape output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
+        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, data_type, data_type, data_layout,
+            QuantizationInfo(), QuantizationInfo(), QuantizationInfo(), add_bias);
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, unsigned int kernel_size_x, unsigned int kernel_size_y>
-class DeconvolutionValidationQuantizedFixture : public DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          unsigned int kernel_size_x,
+          unsigned int kernel_size_y>
+class DeconvolutionValidationQuantizedFixture
+    : public DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>
 {
 public:
-    void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
-               unsigned int num_kernels, DataType data_type, DataLayout data_layout, QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, bool add_bias)
+    void setup(TensorShape      input_shape,
+               unsigned int     sx,
+               unsigned int     sy,
+               unsigned int     padx,
+               unsigned int     pady,
+               unsigned int     num_kernels,
+               DataType         data_type,
+               DataLayout       data_layout,
+               QuantizationInfo input_quantization_info,
+               QuantizationInfo output_quantization_info,
+               bool             add_bias)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -317,25 +390,42 @@ public:
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
-        auto                out_dim = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, info);
-        TensorInfo          input_info(input_shape, 1, data_type, input_quantization_info);
-        TensorInfo          weights_info(weights_shape, 1, data_type, input_quantization_info);
-        TensorShape         output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
-        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, data_type, data_type, data_layout,
-                                                                                           input_quantization_info,
-                                                                                           output_quantization_info, input_quantization_info, add_bias);
+        auto                out_dim =
+            deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, info);
+        TensorInfo  input_info(input_shape, 1, data_type, input_quantization_info);
+        TensorInfo  weights_info(weights_shape, 1, data_type, input_quantization_info);
+        TensorShape output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
+        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, T>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, data_type, data_type, data_layout,
+            input_quantization_info, output_quantization_info, input_quantization_info, add_bias);
     }
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T, typename TW, unsigned int kernel_size_x, unsigned int kernel_size_y>
-class DeconvolutionValidationQuantizedPerChannelFixture : public DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, TW>
+template <typename TensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          typename TW,
+          unsigned int kernel_size_x,
+          unsigned int kernel_size_y>
+class DeconvolutionValidationQuantizedPerChannelFixture
+    : public DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, TW>
 {
 public:
-    void setup(TensorShape input_shape, unsigned int sx, unsigned int sy, unsigned int padx, unsigned int pady,
-               unsigned int num_kernels, DataType data_type, DataLayout data_layout, QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, bool add_bias,
-               DataType weights_data_type)
+    void setup(TensorShape      input_shape,
+               unsigned int     sx,
+               unsigned int     sy,
+               unsigned int     padx,
+               unsigned int     pady,
+               unsigned int     num_kernels,
+               DataType         data_type,
+               DataLayout       data_layout,
+               QuantizationInfo input_quantization_info,
+               QuantizationInfo output_quantization_info,
+               bool             add_bias,
+               DataType         weights_data_type)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             (data_type == DataType::F16 || weights_data_type == DataType::F16) && !CPUInfo::get().has_fp16())
         {
             return;
@@ -344,21 +434,22 @@ public:
         const TensorShape   weights_shape(kernel_size_x, kernel_size_y, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(sx, sy, padx, pady, DimensionRoundingType::CEIL);
-        auto                out_dim = deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, info);
-        TensorInfo          input_info(input_shape, 1, data_type, input_quantization_info);
-        TensorInfo          weights_info(weights_shape, 1, weights_data_type, input_quantization_info);
-        TensorShape         output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
+        auto                out_dim =
+            deconvolution_output_dimensions(input_shape.x(), input_shape.y(), kernel_size_x, kernel_size_y, info);
+        TensorInfo  input_info(input_shape, 1, data_type, input_quantization_info);
+        TensorInfo  weights_info(weights_shape, 1, weights_data_type, input_quantization_info);
+        TensorShape output_shape = compute_deconvolution_output_shape(out_dim, input_info, weights_info);
 
         std::vector<float>                    weights_scales{};
         std::mt19937                          gen(library->seed());
         std::uniform_real_distribution<float> dis(0.01f, 1.f);
-        for(size_t i = 0; i < output_shape[2]; ++i)
+        for (size_t i = 0; i < output_shape[2]; ++i)
         {
             weights_scales.push_back(dis(gen));
         }
-        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, TW>::setup(input_shape, weights_shape, bias_shape, output_shape, info, data_type, weights_data_type, data_layout,
-                                                                                            input_quantization_info,
-                                                                                            output_quantization_info, QuantizationInfo(weights_scales), add_bias);
+        DeconvolutionLayerFixtureBase<TensorType, AccessorType, FunctionType, T, TW>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, data_type, weights_data_type, data_layout,
+            input_quantization_info, output_quantization_info, QuantizationInfo(weights_scales), add_bias);
     }
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,7 @@ public:
                QuantizationInfo    b_qinfo = QuantizationInfo(),
                QuantizationInfo    o_qinfo = QuantizationInfo())
     {
-        if(std::is_same<TensorType, Tensor>::value && // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -199,13 +199,13 @@ protected:
     }
 
     template <typename TT>
-    typename std::enable_if < !std::is_integral<TT>::value, SimpleTensor<TT >>::type
-                                                                            compute_reference_gemm(const SimpleTensor<TT> &a,
-                                                                                                   const SimpleTensor<TT> &b,
-                                                                                                   const SimpleTensor<TT> &c,
-                                                                                                   float                   alpha,
-                                                                                                   float                   beta,
-                                                                                                   const QuantizationInfo &o_qinfo)
+    typename std::enable_if<!std::is_integral<TT>::value, SimpleTensor<TT>>::type
+    compute_reference_gemm(const SimpleTensor<TT> &a,
+                           const SimpleTensor<TT> &b,
+                           const SimpleTensor<TT> &c,
+                           float                   alpha,
+                           float                   beta,
+                           const QuantizationInfo &o_qinfo)
     {
         ARM_COMPUTE_UNUSED(o_qinfo);
 
@@ -214,12 +214,12 @@ protected:
 
     template <typename TT>
     typename std::enable_if<std::is_integral<TT>::value, SimpleTensor<TT>>::type
-                                                                        compute_reference_gemm(const SimpleTensor<TT> &a,
-                                                                                               const SimpleTensor<TT> &b,
-                                                                                               const SimpleTensor<TT> &c,
-                                                                                               float                   alpha,
-                                                                                               float                   beta,
-                                                                                               const QuantizationInfo &o_qinfo)
+    compute_reference_gemm(const SimpleTensor<TT> &a,
+                           const SimpleTensor<TT> &b,
+                           const SimpleTensor<TT> &c,
+                           float                   alpha,
+                           float                   beta,
+                           const QuantizationInfo &o_qinfo)
     {
         ARM_COMPUTE_UNUSED(alpha, beta);
 
@@ -239,8 +239,8 @@ protected:
         const auto tmp = reference::gemmlowp_matrix_multiply_core<int32_t>(a, b, c.shape(), -aq.offset, -bq.offset);
 
         auto output = reference::gemmlowp_quantize_down_scale_by_fixedpoint<int32_t, TT>(
-                          tmp, output_multipliers, output_shifts, oq.offset, std::numeric_limits<int32_t>::lowest(),
-                          std::numeric_limits<int32_t>::max());
+            tmp, output_multipliers, output_shifts, oq.offset, std::numeric_limits<int32_t>::lowest(),
+            std::numeric_limits<int32_t>::max());
         output.quantization_info(o_qinfo);
 
         return output;

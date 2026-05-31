@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, 2025 Arm Limited.
+ * Copyright (c) 2020-2022, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,7 +76,7 @@ public:
      *
      * @param[in, out] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/QASYMM8_SIGNED/F16/F32.
      * @param[out]     output    Destination tensor. Data types supported: Same as @p input.
-     * @param[out]     indices   The indices of the maximal values. Data type supported: U32.
+     * @param[in]      indices   The indices of the maximal values. Data type supported: U32.
      * @param[in]      pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
     void configure(ITensor *input, ITensor *indices, ITensor *output, const PoolingLayerInfo &pool_info);

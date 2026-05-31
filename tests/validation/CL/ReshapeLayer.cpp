@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ReshapeLayerDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ReshapeLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -41,28 +42,28 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(ReshapeLayer)
 
 // *INDENT-OFF*
 // clang-format off
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-                                                              framework::dataset::make("InputInfo",
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo",
 {
     TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),
     TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
     TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32), // mismatching dimensions
     TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F16), // mismatching types
 }),
-framework::dataset::make("OutputInfo",
+make("OutputInfo",
 {
     TensorInfo(TensorShape(9U, 5U, 21U), 1, DataType::F32),
     TensorInfo(TensorShape(8U, 24U, 4U), 1, DataType::F32),
     TensorInfo(TensorShape(192U, 192U),  1, DataType::F32),
     TensorInfo(TensorShape(9U, 5U, 21U), 1, DataType::F32),
-})),
-framework::dataset::make("Expected", { true, true, false, false })),
+}),
+make("Expected", { true, true, false, false })),
 input_info, output_info, expected)
 {
     // Create Fully Connected layer info
@@ -79,7 +80,10 @@ using CLReshapeLayerFixture = ReshapeLayerValidationFixture<CLTensor, CLAccessor
 
 TEST_SUITE(Float)
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReshapeLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -87,8 +91,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<float>, framework::Datase
 TEST_SUITE_END()
 
 TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType",
-                                                                                                   DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReshapeLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -98,7 +104,11 @@ TEST_SUITE_END()
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", { DataType::U8, DataType::QASYMM8 })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReshapeLayerFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(),
+                               make("DataType", {DataType::U8, DataType::QASYMM8})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -106,7 +116,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<uint8_t>, framework::Data
 TEST_SUITE_END()
 
 TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::S8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReshapeLayerFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -114,7 +127,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<int8_t>, framework::Datas
 TEST_SUITE_END()
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLReshapeLayerFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::S16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLReshapeLayerFixture<int16_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

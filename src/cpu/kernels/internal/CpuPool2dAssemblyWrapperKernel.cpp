@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Arm Limited.
+ * Copyright (c) 2021-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -104,6 +104,7 @@ Status
 CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorInfo *dst, const PoolingLayerInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
 #ifndef __aarch64__
     ARM_COMPUTE_RETURN_ERROR_MSG("32-bit is not supported by assembly kernels");
 #endif /* __aarch64__ */
@@ -120,43 +121,51 @@ CpuPool2dAssemblyWrapperKernel::validate(const ITensorInfo *src, const ITensorIn
         is_pool_region_entirely_outside_input(info),
         "Pooling region that is entirely outside input tensor is unsupported by assembly kernels");
 
+    const TensorShape dst_shape = compute_pool_shape(*src, info);
     if (dst->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
 
-        const TensorInfo out_info(compute_pool_shape(*src, info), 1, dst->data_type());
+        const TensorInfo out_info(dst_shape, 1, dst->data_type());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &out_info);
         const auto src_qinfo = src->quantization_info().uniform();
         const auto dst_qinfo = dst->quantization_info().uniform();
 
         if (src_qinfo != dst_qinfo)
         {
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.pool_type != PoolingType::MAX,
+                                            "Assembly kernels only support differing src/dst quantization info for "
+                                            "MAX pooling");
             const float multiplier = src_qinfo.scale / dst_qinfo.scale;
             int32_t     dst_multiplier{};
             int32_t     dst_shift{};
             ARM_COMPUTE_RETURN_ERROR_ON(
-                quantization::calculate_quantized_multiplier(multiplier, &dst_multiplier, &dst_shift));
+                !quantization::calculate_quantized_multiplier(multiplier, &dst_multiplier, &dst_shift));
         }
         else
         {
-            if (src->data_type() == DataType::QASYMM8)
+            if (src->data_type() == DataType::QASYMM8 || src->data_type() == DataType::QASYMM8_SIGNED)
             {
                 const bool has_padding = info.pad_stride_info.has_padding();
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-                    !info.exclude_padding && has_padding,
-                    "Assembly kernels do not support padding for QASYMM8 with same src/dst quantization info");
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.pool_type != PoolingType::MAX && !info.exclude_padding &&
+                                                    has_padding,
+                                                "Assembly kernels only support padded MAX pooling for QASYMM8 and "
+                                                "QASYMM8_SIGNED with same src/dst quantization info");
             }
         }
     }
     else
     {
-        if (src->data_type() == DataType::QASYMM8)
+        const TensorInfo out_info(dst_shape, 1, src->data_type()); // use src dtype as they're same.
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&out_info);
+        if (src->data_type() == DataType::QASYMM8 || src->data_type() == DataType::QASYMM8_SIGNED)
         {
             // If dst is not configured, the quantization info are the same
             const bool has_padding = info.pad_stride_info.has_padding();
-            ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-                !info.exclude_padding && has_padding,
-                "Assembly kernels do not support padding for QASYMM8 with same src/dst quantization info");
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(info.pool_type != PoolingType::MAX && !info.exclude_padding && has_padding,
+                                            "Assembly kernels only support padded MAX pooling for QASYMM8 and "
+                                            "QASYMM8_SIGNED with same src/dst quantization info");
         }
     }
     return Status{};
@@ -297,9 +306,10 @@ void CpuPool2dAssemblyWrapperKernel::create_arm_pooling_requant(const ITensorInf
     int32_t     dst_shift{};
     quantization::calculate_quantized_multiplier(multiplier, &dst_multiplier, &dst_shift);
 
-    const arm_conv::pooling::Requantize32 requant_args(src_qinfo.offset, dst_qinfo.offset,
-                                                       dst_shift, // left shift
-                                                       0,         // right shift
+    const int32_t left_shift  = std::max(-dst_shift, static_cast<int32_t>(0));
+    const int32_t right_shift = std::min(-dst_shift, static_cast<int32_t>(0));
+
+    const arm_conv::pooling::Requantize32 requant_args(src_qinfo.offset, dst_qinfo.offset, left_shift, right_shift,
                                                        dst_multiplier);
 
     // Configure assembly pooling kernel with requantization

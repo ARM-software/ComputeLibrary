@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -56,6 +57,7 @@ TensorShape get_dst_shape(const ITensorInfo *src, const PermutationVector &perm)
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const PermutationVector &perm)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->num_dimensions() < 1 || src->num_dimensions() > 4,
                                     "Permutation up to 4-D src tensor is supported");
@@ -66,13 +68,20 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(p >= perm.num_dimensions(), "Permutation vector has invalid values");
     }
 
+    const TensorShape dst_shape = misc::shape_calculator::compute_permutation_output_shape(*src, perm);
+
     // Validate configured dst
     if (dst->total_size() != 0)
     {
-        const TensorShape dst_shape = misc::shape_calculator::compute_permutation_output_shape(*src, perm);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), dst_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+    }
+    else
+    {
+        const TensorInfo dst_info(dst_shape, src->num_channels(), src->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
     return Status{};
 }

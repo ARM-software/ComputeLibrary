@@ -1,5 +1,5 @@
 <!--
-    SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+    SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 
     SPDX-License-Identifier: Apache-2.0
 -->
@@ -34,5 +34,5 @@ When KleidiAI is integrated and used in a product, developer must follow the sec
 
 Build scripts within this project download third party sources. KleidiAI uses the following third party sources:
 
-- Google Test v1.14.0, for the testing suite.
-- Google Benchmark v1.8.4, for the benchmarking suite.
+- Google Test v1.17.0, for the testing suite.
+- Google Benchmark v1.9.4, for the benchmarking suite.

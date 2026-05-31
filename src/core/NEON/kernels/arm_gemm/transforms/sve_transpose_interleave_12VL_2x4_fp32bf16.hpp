@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(__aarch64__)
 
 namespace {
 
@@ -40,22 +40,27 @@ void sve_transpose_interleave_12VL_2x4_fp32bf16(bfloat16 *out, const float *in, 
 
     __asm__ __volatile__(
       "ptrue p2.b\n"
+      "mov x9, %x[height]\n"
+      "cbz %x[height], 6f\n"
       "1:"  // Main row loop: Head
       "mov x28, %x[in]\n"
+      "cmp x9, #0x3\n"
       "mov x27, %x[width]\n"
       "cnth x26, ALL, MUL #6\n"
-      "cmp %x[height], #0x3\n"
       "mov x25, %x[out]\n"
       "add x24, x28, %x[in_stride]\n"
       "add x23, x24, %x[in_stride]\n"
       "add x22, x23, %x[in_stride]\n"
       "add %x[in], x22, %x[in_stride]\n"
+      "csel %x[in], %x[in], x22, GT\n"
       "csel x22, x22, %x[pad_row], GT\n"
+      "csel %x[in], %x[in], x23, GE\n"
       "csel x23, x23, %x[pad_row], GE\n"
-      "cmp %x[height], #0x1\n"
+      "cmp x9, #0x1\n"
+      "sub x9, x9, #0x4\n"
+      "csel %x[in], %x[in], x24, GT\n"
       "csel x24, x24, %x[pad_row], GT\n"
       "cmp x27, x26\n"
-      "sub %x[height], %x[height], #0x4\n"
       "blt 3f\n"
       "2:"  // Main row loop: Unroll column loop
       "ld1w { z16.s }, p2/Z, [x28]\n"
@@ -292,7 +297,7 @@ void sve_transpose_interleave_12VL_2x4_fp32bf16(bfloat16 *out, const float *in, 
       "ld1w { z2.s }, p1/Z, [x22, #4, MUL VL]\n"
       "zip1 z1.s, z28.s, z27.s\n"
       ".inst 0x658aaae0  // bfcvt z0.h, p2/M, z23.s\n"
-      "cmp x27, #0x0\n"
+      "cmp x27, #0\n"
       "ld1w { z31.s }, p0/Z, [x28, #5, MUL VL]\n"
       "ld1w { z16.s }, p0/Z, [x23, #5, MUL VL]\n"
       "ld1w { z30.s }, p0/Z, [x24, #5, MUL VL]\n"
@@ -349,16 +354,18 @@ void sve_transpose_interleave_12VL_2x4_fp32bf16(bfloat16 *out, const float *in, 
       "st1h { z17.h }, p2, [x20, #-1, MUL VL]\n"
       "bgt 4b\n"
       "5:"  // Main row loop: Column loop skip
-      "cmp %x[height], #0x1\n"
+      "cmp x9, #0x1\n"
       "addvl %x[out], %x[out], #12\n"
       "bge 1b\n"
-      : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
-      : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
-      : "cc", "memory", "p0", "p1", "p2", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
+      "6:"  // Done
+      : [in] "+&r" (in), [out] "+&r" (out)
+      : [height] "r" (height), [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
+      : "cc", "memory", "p0", "p1", "p2", "x9", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
     );
 }
 
 } // anonymous namespace
+
 template<>
 void Transform<12, 4, true, VLType::SVE>(
     bfloat16 *out, const float *in, int stride, int x0, int xmax, int k0, int kmax)
@@ -372,5 +379,5 @@ void Transform<12, 4, true, VLType::SVE>(
     );
 }
 
+#endif // defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(__aarch64__)
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

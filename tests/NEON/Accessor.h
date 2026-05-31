@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ACCESSOR_H
-#define ARM_COMPUTE_TEST_ACCESSOR_H
+#ifndef ACL_TESTS_NEON_ACCESSOR_H
+#define ACL_TESTS_NEON_ACCESSOR_H
 
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/IAccessor.h"
 
 namespace arm_compute
@@ -69,15 +70,14 @@ public:
     int              num_elements() const override;
     PaddingSize      padding() const override;
     QuantizationInfo quantization_info() const override;
-    const void *operator()(const Coordinates &coord) const override;
-    void *operator()(const Coordinates &coord) override;
+    const void      *operator()(const Coordinates &coord) const override;
+    void            *operator()(const Coordinates &coord) override;
 
 private:
     ITensor &_tensor;
 };
 
-inline Accessor::Accessor(ITensor &tensor)
-    : _tensor{ tensor }
+inline Accessor::Accessor(ITensor &tensor) : _tensor{tensor}
 {
 }
 
@@ -152,4 +152,4 @@ inline void *Accessor::operator()(const Coordinates &coord)
 }
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ACCESSOR_H */
+#endif // ACL_TESTS_NEON_ACCESSOR_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_QLSTM_LAYER_NORMALIZATION_H
-#define ARM_COMPUTE_TEST_QLSTM_LAYER_NORMALIZATION_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_QLSTMLAYERNORMALIZATION_H
+#define ACL_TESTS_VALIDATION_REFERENCE_QLSTMLAYERNORMALIZATION_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -35,10 +35,12 @@ namespace validation
 {
 namespace reference
 {
-SimpleTensor<int16_t> qlstm_layer_normalization(const SimpleTensor<int16_t> &src, const SimpleTensor<int16_t> &weight, const SimpleTensor<int32_t> &bias);
+SimpleTensor<int16_t> qlstm_layer_normalization(const SimpleTensor<int16_t> &src,
+                                                const SimpleTensor<int16_t> &weight,
+                                                const SimpleTensor<int32_t> &bias);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_TEST_QLSTM_LAYER_NORMALIZATION_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_QLSTMLAYERNORMALIZATION_H

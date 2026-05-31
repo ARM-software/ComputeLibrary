@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -126,14 +126,27 @@ void kai_run_rhs_pack_nxk_qsi4c32pscalef16_qsu4c32s16s0(
             for (size_t s = 0; s < num_segments_per_block; ++s) {
                 for (size_t i = 0; i < nr; ++i) {
                     const size_t src_row_idx = KAI_MIN(y + i, n - 1);
-                    memcpy(
-                        dst_row + i * num_bytes_per_segment, src_row + src_row_idx * rhs_stride, num_bytes_per_segment);
 
-                    for (size_t b = 0; b < num_bytes_per_segment; ++b) {
-                        uint8_t qs = dst_row[i * num_bytes_per_segment + b];
+                    if (num_bytes_per_segment == sizeof(uint32_t)) {
+                        uint32_t tmp = 0;
+                        memcpy(&tmp, src_row + src_row_idx * rhs_stride, num_bytes_per_segment);
+                        tmp = tmp ^ 0x88888888;
+                        memcpy(dst_row + i * num_bytes_per_segment, &tmp, num_bytes_per_segment);
+                    } else if (num_bytes_per_segment == sizeof(uint64_t)) {
+                        uint64_t tmp = 0;
+                        memcpy(&tmp, src_row + src_row_idx * rhs_stride, num_bytes_per_segment);
+                        tmp = tmp ^ 0x8888888888888888ULL;
+                        memcpy(dst_row + i * num_bytes_per_segment, &tmp, num_bytes_per_segment);
+                    } else {
+                        memcpy(
+                            dst_row + i * num_bytes_per_segment, src_row + src_row_idx * rhs_stride,
+                            num_bytes_per_segment);
 
-                        // Add offset (0x88)
-                        dst_row[i * num_bytes_per_segment + b] = qs ^ 0x88;
+                        for (size_t b = 0; b < num_bytes_per_segment; ++b) {
+                            uint8_t qs = dst_row[i * num_bytes_per_segment + b];
+                            // Add offset (0x88)
+                            dst_row[i * num_bytes_per_segment + b] = qs ^ 0x88;
+                        }
                     }
                 }
 

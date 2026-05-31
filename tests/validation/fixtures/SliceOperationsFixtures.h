@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,10 +28,10 @@
 #include "arm_compute/core/Types.h"
 
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/SliceOperations.h"
 
@@ -47,7 +47,7 @@ class SliceFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, Coordinates starts, Coordinates ends, DataType data_type)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -64,7 +64,8 @@ protected:
         library->fill_tensor_uniform(tensor, i);
     }
 
-    TensorType compute_target(const TensorShape &shape, const Coordinates &starts, const Coordinates &ends, DataType data_type)
+    TensorType
+    compute_target(const TensorShape &shape, const Coordinates &starts, const Coordinates &ends, DataType data_type)
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, data_type);
@@ -94,10 +95,11 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, const Coordinates &starts, const Coordinates &ends, DataType data_type)
+    SimpleTensor<T>
+    compute_reference(const TensorShape &shape, const Coordinates &starts, const Coordinates &ends, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type };
+        SimpleTensor<T> src{shape, data_type};
 
         // Fill reference
         fill(src, 0);
@@ -114,11 +116,15 @@ class StridedSliceFixture : public framework::Fixture
 {
 public:
     void setup(TensorShape shape,
-               Coordinates starts, Coordinates ends, BiStrides strides,
-               int32_t begin_mask, int32_t end_mask, int32_t shrink_mask,
-               DataType data_type)
+               Coordinates starts,
+               Coordinates ends,
+               BiStrides   strides,
+               int32_t     begin_mask,
+               int32_t     end_mask,
+               int32_t     shrink_mask,
+               DataType    data_type)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -136,9 +142,13 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &shape,
-                              const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                              int32_t begin_mask, int32_t end_mask, int32_t shrink_mask,
-                              DataType data_type)
+                              const Coordinates &starts,
+                              const Coordinates &ends,
+                              const BiStrides   &strides,
+                              int32_t            begin_mask,
+                              int32_t            end_mask,
+                              int32_t            shrink_mask,
+                              DataType           data_type)
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, data_type);
@@ -169,12 +179,16 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &shape,
-                                      const Coordinates &starts, const Coordinates &ends, const BiStrides &strides,
-                                      int32_t begin_mask, int32_t end_mask, int32_t shrink_mask,
-                                      DataType data_type)
+                                      const Coordinates &starts,
+                                      const Coordinates &ends,
+                                      const BiStrides   &strides,
+                                      int32_t            begin_mask,
+                                      int32_t            end_mask,
+                                      int32_t            shrink_mask,
+                                      DataType           data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type };
+        SimpleTensor<T> src{shape, data_type};
 
         // Fill reference
         fill(src, 0);

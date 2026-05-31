@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2023 Arm Limited.
+ * Copyright (c) 2017-2018, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ReshapeLayerDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ReshapeLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -41,28 +42,31 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(ReshapeLayer)
 
 // *INDENT-OFF*
 // clang-format off
 
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-                                                              framework::dataset::make("InputInfo",
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+                                                              make("InputInfo",
 {
     TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F32),
     TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32),
     TensorInfo(TensorShape(8U, 4U, 6U, 4U), 1, DataType::F32), // mismatching dimensions
     TensorInfo(TensorShape(9U, 5U, 7U, 3U), 1, DataType::F16), // mismatching types
 }),
-framework::dataset::make("OutputInfo",
+                                                              make("OutputInfo",
 {
     TensorInfo(TensorShape(9U, 5U, 21U), 1, DataType::F32),
     TensorInfo(TensorShape(8U, 24U, 4U), 1, DataType::F32),
     TensorInfo(TensorShape(192U, 192U),  1, DataType::F32),
     TensorInfo(TensorShape(9U, 5U, 21U), 1, DataType::F32),
-})),
-framework::dataset::make("Expected", { true, true, false, false })),
+}),
+                                                              make("Expected", { true, true, false, false })
+),
 input_info, output_info, expected)
 {
     // Create Fully Connected layer info
@@ -82,7 +86,10 @@ using NEReshapeLayerPaddedFixture = ReshapeLayerPaddedValidationFixture<Tensor, 
 
 TEST_SUITE(Float)
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReshapeLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -92,7 +99,10 @@ TEST_SUITE_END() //Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::S8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReshapeLayerFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -100,7 +110,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<int8_t>, framework::Datas
 TEST_SUITE_END() //S8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::S16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReshapeLayerFixture<int16_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -111,7 +124,10 @@ TEST_SUITE_END() //Integer
 TEST_SUITE(Padded)
 TEST_SUITE(Float)
 TEST_SUITE(F32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerPaddedFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReshapeLayerPaddedFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -121,7 +137,10 @@ TEST_SUITE_END() //Float
 
 TEST_SUITE(Integer)
 TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerPaddedFixture<int8_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::S8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReshapeLayerPaddedFixture<int8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -129,7 +148,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerPaddedFixture<int8_t>, framework:
 TEST_SUITE_END() //S8
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReshapeLayerPaddedFixture<int16_t>, framework::DatasetMode::ALL, combine(datasets::SmallReshapeLayerDataset(), framework::dataset::make("DataType", DataType::S16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEReshapeLayerPaddedFixture<int16_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallReshapeLayerDataset(), make("DataType", DataType::S16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

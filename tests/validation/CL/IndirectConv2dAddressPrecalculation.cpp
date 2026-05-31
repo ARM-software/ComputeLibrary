@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,16 +25,17 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
+
 #include "src/gpu/cl/kernels/ClIndirectConv2dAddressPrecalculationKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/IndirectConv2dAddressPrecalculationFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -42,12 +43,14 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 using namespace arm_compute::misc::shape_calculator;
 using namespace arm_compute::opencl::kernels;
 
 using CLIndirectConv2dAddressPrecalculation = CLSynthetizeOperator<ClIndirectConv2dAddressPrecalculationKernel>;
 
-using CLIndirectConv2dAddressPrecalculationFixture = IndirectConv2dAddressPrecalculationValidationFixture<CLTensor, CLAccessor, CLIndirectConv2dAddressPrecalculation>;
+using CLIndirectConv2dAddressPrecalculationFixture =
+    IndirectConv2dAddressPrecalculationValidationFixture<CLTensor, CLAccessor, CLIndirectConv2dAddressPrecalculation>;
 
 // *INDENT-OFF*
 // clang-format off
@@ -55,27 +58,27 @@ using CLIndirectConv2dAddressPrecalculationFixture = IndirectConv2dAddressPrecal
 
 namespace
 {
-const auto src_w_values  = framework::dataset::make("src_w", {91});
-const auto src_h_values  = framework::dataset::make("src_h", {103});
-const auto src_b_values  = framework::dataset::make("src_b", {1, 2});
-const auto wei_w_values  = framework::dataset::make("wei_w", {3, 5});
-const auto wei_h_values  = framework::dataset::make("wei_h", {1, 6});
-const auto pad_values    = framework::dataset::make("pad", {1, 2, 3});
-const auto stride_values = framework::dataset::make("stride", {1, 2});
-const auto m0_values     = framework::dataset::make("M0", { 1, 2, 4, 5, 7 });
+const auto src_w_values  = make("src_w", {91});
+const auto src_h_values  = make("src_h", {103});
+const auto src_b_values  = make("src_b", {1, 2});
+const auto wei_w_values  = make("wei_w", {3, 5});
+const auto wei_h_values  = make("wei_h", {1, 6});
+const auto pad_values    = make("pad", {1, 2, 3});
+const auto stride_values = make("stride", {1, 2});
+const auto m0_values     = make("M0", { 1, 2, 4, 5, 7 });
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(IndirectConv2dAddressPrecalculation)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLIndirectConv2dAddressPrecalculationFixture, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(src_w_values,
-                                                                        src_h_values),
-                                                                        src_b_values),
-                                                                        wei_w_values),
-                                                                        wei_h_values),
-                                                                        pad_values),
-                                                                        stride_values),
+                combine(src_w_values,
+                                                                        src_h_values,
+                                                                        src_b_values,
+                                                                        wei_w_values,
+                                                                        wei_h_values,
+                                                                        pad_values,
+                                                                        stride_values,
                                                                         m0_values))
 {
     // Validate output

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2024 Arm Limited.
+ * Copyright (c) 2016-2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -50,6 +51,8 @@ namespace
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, ConvertPolicy policy)
 {
     ARM_COMPUTE_UNUSED(policy);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON(src == dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(
@@ -70,7 +73,14 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, Conver
     // Validate in case of configured dst
     if (dst->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
+    }
+    else
+    {
+        // The data type must be given and the shape is the same as src.
+        const TensorInfo dst_info(src->tensor_shape(), src->num_channels(), dst->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

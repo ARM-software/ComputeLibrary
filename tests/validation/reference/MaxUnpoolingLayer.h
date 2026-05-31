@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_MAXUNPOOLING_LAYER_H
-#define ARM_COMPUTE_TEST_MAXUNPOOLING_LAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_MAXUNPOOLINGLAYER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_MAXUNPOOLINGLAYER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -36,11 +36,15 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> max_unpooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info, const QuantizationInfo &output_qinfo, SimpleTensor<uint32_t> &indices,
-                                    TensorShape output_shape, DataLayout data_layout = DataLayout::NCHW);
+SimpleTensor<T> max_unpooling_layer(const SimpleTensor<T>  &src,
+                                    const PoolingLayerInfo &info,
+                                    const QuantizationInfo &output_qinfo,
+                                    SimpleTensor<uint32_t> &indices,
+                                    TensorShape             output_shape,
+                                    DataLayout              data_layout = DataLayout::NCHW);
 
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_MAXUNPOOLING_LAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_MAXUNPOOLINGLAYER_H

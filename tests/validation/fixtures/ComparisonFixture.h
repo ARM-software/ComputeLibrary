@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,12 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Comparisons.h"
 
@@ -44,9 +45,14 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ComparisonValidationGenericFixture : public framework::Fixture
 {
 public:
-    void setup(ComparisonOperation op, const TensorShape &shape0, const TensorShape &shape1, DataType data_type, QuantizationInfo qinfo0, QuantizationInfo qinfo1)
+    void setup(ComparisonOperation op,
+               const TensorShape  &shape0,
+               const TensorShape  &shape1,
+               DataType            data_type,
+               QuantizationInfo    qinfo0,
+               QuantizationInfo    qinfo1)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -64,8 +70,11 @@ protected:
     }
 
     TensorType compute_target(ComparisonOperation op,
-                              const TensorShape &shape0, const TensorShape &shape1, DataType data_type,
-                              QuantizationInfo qinfo0, QuantizationInfo qinfo1)
+                              const TensorShape  &shape0,
+                              const TensorShape  &shape1,
+                              DataType            data_type,
+                              QuantizationInfo    qinfo0,
+                              QuantizationInfo    qinfo1)
     {
         // Create tensors
         TensorType ref_src1 = create_tensor<TensorType>(shape0, data_type, 1, qinfo0);
@@ -100,12 +109,15 @@ protected:
     }
 
     SimpleTensor<uint8_t> compute_reference(ComparisonOperation op,
-                                            const TensorShape &shape0, const TensorShape &shape1, DataType data_type,
-                                            QuantizationInfo qinfo0, QuantizationInfo qinfo1)
+                                            const TensorShape  &shape0,
+                                            const TensorShape  &shape1,
+                                            DataType            data_type,
+                                            QuantizationInfo    qinfo0,
+                                            QuantizationInfo    qinfo1)
     {
         // Create reference
-        SimpleTensor<T> ref_src1{ shape0, data_type, 1, qinfo0 };
-        SimpleTensor<T> ref_src2{ shape1, data_type, 1, qinfo1 };
+        SimpleTensor<T> ref_src1{shape0, data_type, 1, qinfo0};
+        SimpleTensor<T> ref_src2{shape1, data_type, 1, qinfo1};
 
         // Fill reference
         fill(ref_src1, 0);
@@ -119,12 +131,14 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ComparisonBroadcastValidationFixture : public ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class ComparisonBroadcastValidationFixture
+    : public ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(ComparisonOperation op, const TensorShape &shape0, const TensorShape &shape1, DataType data_type)
     {
-        ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(op, shape0, shape1, data_type, QuantizationInfo(), QuantizationInfo());
+        ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            op, shape0, shape1, data_type, QuantizationInfo(), QuantizationInfo());
     }
 };
 
@@ -134,28 +148,42 @@ class ComparisonValidationFixture : public ComparisonValidationGenericFixture<Te
 public:
     void setup(ComparisonOperation op, const TensorShape &shape, DataType data_type)
     {
-        ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(op, shape, shape, data_type, QuantizationInfo(), QuantizationInfo());
+        ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            op, shape, shape, data_type, QuantizationInfo(), QuantizationInfo());
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ComparisonValidationQuantizedFixture : public ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class ComparisonValidationQuantizedFixture
+    : public ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(ComparisonOperation op, const TensorShape &shape, DataType data_type, QuantizationInfo qinfo0, QuantizationInfo qinfo1)
+    void setup(ComparisonOperation op,
+               const TensorShape  &shape,
+               DataType            data_type,
+               QuantizationInfo    qinfo0,
+               QuantizationInfo    qinfo1)
 
     {
-        ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(op, shape, shape, data_type, qinfo0, qinfo1);
+        ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(op, shape, shape,
+                                                                                             data_type, qinfo0, qinfo1);
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ComparisonQuantizedBroadcastValidationFixture : public ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class ComparisonQuantizedBroadcastValidationFixture
+    : public ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(ComparisonOperation op, const TensorShape &shape0, const TensorShape &shape1, DataType data_type, QuantizationInfo qinfo0, QuantizationInfo qinfo1)
+    void setup(ComparisonOperation op,
+               const TensorShape  &shape0,
+               const TensorShape  &shape1,
+               DataType            data_type,
+               QuantizationInfo    qinfo0,
+               QuantizationInfo    qinfo1)
     {
-        ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(op, shape0, shape1, data_type, qinfo0, qinfo1);
+        ComparisonValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(op, shape0, shape1,
+                                                                                             data_type, qinfo0, qinfo1);
     }
 };
 } // namespace validation

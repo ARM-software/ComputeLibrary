@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DATASET_RANGE
-#define ARM_COMPUTE_TEST_DATASET_RANGE
+#ifndef ACL_TESTS_FRAMEWORK_DATASETS_RANGEDATASET_H
+#define ACL_TESTS_FRAMEWORK_DATASETS_RANGEDATASET_H
 
-#include "Dataset.h"
 #include "support/StringSupport.h"
 
+#include "Dataset.h"
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -56,7 +56,7 @@ public:
      * @param[in] step  Step size.
      */
     RangeDataset(std::string name, T start, T end, T step = 1)
-        : NamedDataset{ std::move(name) }, _start{ start }, _end{ end }, _step{ step }
+        : NamedDataset{std::move(name)}, _start{start}, _end{end}, _step{step}
     {
     }
 
@@ -75,8 +75,7 @@ public:
          * @param[in] start Dataset start value.
          * @param[in] step  Dataset step size.
          */
-        iterator(std::string name, T start, T step)
-            : _name{ name }, _value{ start }, _step{ step }
+        iterator(std::string name, T start, T step) : _name{name}, _value{start}, _step{step}
         {
         }
 
@@ -157,4 +156,4 @@ RangeDataset<T> make(std::string name, T start, T end, T step = 1)
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DATASET_RANGE */
+#endif // ACL_TESTS_FRAMEWORK_DATASETS_RANGEDATASET_H

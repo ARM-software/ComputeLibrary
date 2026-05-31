@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2023 Arm Limited.
+ * Copyright (c) 2018-2020, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,14 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLGather.h"
+
 #include "tests/CL/CLAccessor.h"
 #include "tests/datasets/GatherDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/fixtures/GatherFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -39,13 +40,13 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(Gather)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 27U), 1, DataType::F16),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("InputInfo", { TensorInfo(TensorShape(27U, 27U), 1, DataType::F16),
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),                // Invalid Output shape
@@ -56,7 +57,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),                // Invalid positive axis value
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F16),                // Invalid negative axis value
         }),
-        framework::dataset::make("IndicesInfo", {
+        make("IndicesInfo", {
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
@@ -67,8 +68,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
                                                 TensorInfo(TensorShape(10U), 1, DataType::U32),
-        })),
-        framework::dataset::make("OutputInfo", {
+        }),
+        make("OutputInfo", {
                                                 TensorInfo(TensorShape(10U, 27U), 1, DataType::F16),
                                                 TensorInfo(TensorShape(27U, 10U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(10U, 27U), 1, DataType::F32),
@@ -79,8 +80,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                 TensorInfo(TensorShape(27U, 10U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(27U, 27U), 1, DataType::F16),
-        })),
-        framework::dataset::make("Axis", {
+        }),
+        make("Axis", {
                                             0,
                                             1,
                                             -2,
@@ -91,8 +92,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                             1,
                                             2,
                                             -3,
-        })),
-        framework::dataset::make("Expected", { true, true, true, false, false, false, false, false, false, false })),
+        }),
+        make("Expected", { true, true, true, false, false, false, false, false, false, false })),
         input_info, indices_info, output_info, axis, expected)
 {
     const Status status = CLGather::validate(&input_info.clone()->set_is_resizable(true), &indices_info.clone()->set_is_resizable(true), &output_info.clone()->set_is_resizable(true), axis);
@@ -109,7 +110,7 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLGatherFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallGatherDataset(), framework::dataset::make("DataType", DataType::F16)))
+                       combine(datasets::SmallGatherDataset(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -118,7 +119,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunSmallMultiDimIndices,
                        CLGatherFixture<half>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::CLSmallGatherMultiDimIndicesDataset(), framework::dataset::make("DataType", DataType::F16)))
+                       combine(datasets::CLSmallGatherMultiDimIndicesDataset(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -127,7 +128,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallMultiDimIndices,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLGatherFixture<half>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeGatherDataset(), framework::dataset::make("DataType", DataType::F16)))
+                       combine(datasets::LargeGatherDataset(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -138,7 +139,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLGatherFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallGatherDataset(), framework::dataset::make("DataType", DataType::F32)))
+                       combine(datasets::SmallGatherDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -147,7 +148,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunSmallMultiDimIndices,
                        CLGatherFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::CLSmallGatherMultiDimIndicesDataset(), framework::dataset::make("DataType", DataType::F32)))
+                       combine(datasets::CLSmallGatherMultiDimIndicesDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -156,7 +157,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallMultiDimIndices,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLGatherFixture<float>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeGatherDataset(), framework::dataset::make("DataType", DataType::F32)))
+                       combine(datasets::LargeGatherDataset(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -168,7 +169,7 @@ TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLGatherFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallGatherDataset(), framework::dataset::make("DataType", DataType::U8)))
+                       combine(datasets::SmallGatherDataset(), make("DataType", DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -177,7 +178,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunSmallMultiDimIndices,
                        CLGatherFixture<uint8_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::CLSmallGatherMultiDimIndicesDataset(), framework::dataset::make("DataType", DataType::U8)))
+                       combine(datasets::CLSmallGatherMultiDimIndicesDataset(), make("DataType", DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -186,7 +187,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallMultiDimIndices,
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLGatherFixture<uint8_t>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeGatherDataset(), framework::dataset::make("DataType", DataType::U8)))
+                       combine(datasets::LargeGatherDataset(), make("DataType", DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -197,7 +198,7 @@ TEST_SUITE(U16)
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        CLGatherFixture<uint16_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::SmallGatherDataset(), framework::dataset::make("DataType", DataType::U16)))
+                       combine(datasets::SmallGatherDataset(), make("DataType", DataType::U16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -206,17 +207,16 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
 FIXTURE_DATA_TEST_CASE(RunSmallMultiDimIndices,
                        CLGatherFixture<uint16_t>,
                        framework::DatasetMode::PRECOMMIT,
-                       combine(datasets::CLSmallGatherMultiDimIndicesDataset(), framework::dataset::make("DataType", DataType::U16)))
+                       combine(datasets::CLSmallGatherMultiDimIndicesDataset(), make("DataType", DataType::U16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
 
-
 FIXTURE_DATA_TEST_CASE(RunLarge,
                        CLGatherFixture<uint16_t>,
                        framework::DatasetMode::NIGHTLY,
-                       combine(datasets::LargeGatherDataset(), framework::dataset::make("DataType", DataType::U16)))
+                       combine(datasets::LargeGatherDataset(), make("DataType", DataType::U16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

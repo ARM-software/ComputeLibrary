@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,21 +53,23 @@ SimpleTensor<T> space_to_depth(const SimpleTensor<T> &src, const TensorShape &ds
     const auto block_height = block_shape;
 
     int out_pos = 0;
-    for(int ba = 0; ba < batch; ++ba)
+    for (int ba = 0; ba < batch; ++ba)
     {
-        for(int outC = 0; outC < channel_out; ++outC)
+        for (int outC = 0; outC < channel_out; ++outC)
         {
             unsigned int inC = outC % channel_in;
 
             int shift_w = (outC / channel_in) % block_width;
             int shift_h = (outC / channel_in) / block_width;
 
-            for(int outH = 0; outH < height_out; ++outH)
+            for (int outH = 0; outH < height_out; ++outH)
             {
-                for(int outW = 0; outW < width_out; ++outW)
+                for (int outW = 0; outW < width_out; ++outW)
                 {
-                    const auto in_pos = ((ba * channel_in + inC) * height_in + ((outH * block_height + shift_h))) * width_in + (outW * block_width + shift_w);
-                    result[out_pos]   = src[in_pos];
+                    const auto in_pos =
+                        ((ba * channel_in + inC) * height_in + ((outH * block_height + shift_h))) * width_in +
+                        (outW * block_width + shift_w);
+                    result[out_pos] = src[in_pos];
                     ++out_pos;
                 }
             }
@@ -76,8 +78,10 @@ SimpleTensor<T> space_to_depth(const SimpleTensor<T> &src, const TensorShape &ds
     return result;
 }
 
-template SimpleTensor<float> space_to_depth(const SimpleTensor<float> &src, const TensorShape &dst_shape, const int block_shape);
-template SimpleTensor<half> space_to_depth(const SimpleTensor<half> &src, const TensorShape &dst_shape, const int block_shape);
+template SimpleTensor<float>
+space_to_depth(const SimpleTensor<float> &src, const TensorShape &dst_shape, const int block_shape);
+template SimpleTensor<half>
+space_to_depth(const SimpleTensor<half> &src, const TensorShape &dst_shape, const int block_shape);
 } // namespace reference
 } // namespace validation
 } // namespace test

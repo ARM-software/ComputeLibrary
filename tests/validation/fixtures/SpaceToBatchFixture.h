@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_SPACETOBATCHFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_SPACETOBATCHFIXTURE_H
 
-#include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
 #include "tests/validation/reference/SpaceToBatch.h"
 
 namespace arm_compute
@@ -39,11 +39,18 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SpaceToBatchLayerValidationGenericFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape paddings_shape, TensorShape output_shape,
-               DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
+    void setup(TensorShape      input_shape,
+               TensorShape      block_shape_shape,
+               TensorShape      paddings_shape,
+               TensorShape      output_shape,
+               DataType         data_type,
+               DataLayout       data_layout,
+               QuantizationInfo quantization_info)
     {
-        _target    = compute_target(input_shape, block_shape_shape, paddings_shape, output_shape, data_type, data_layout, quantization_info);
-        _reference = compute_reference(input_shape, block_shape_shape, paddings_shape, output_shape, data_type, quantization_info);
+        _target = compute_target(input_shape, block_shape_shape, paddings_shape, output_shape, data_type, data_layout,
+                                 quantization_info);
+        _reference = compute_reference(input_shape, block_shape_shape, paddings_shape, output_shape, data_type,
+                                       quantization_info);
     }
 
 protected:
@@ -59,10 +66,15 @@ protected:
         library->fill_tensor_value(tensor, 0);
     }
 
-    TensorType compute_target(TensorShape input_shape, const TensorShape &block_shape_shape, const TensorShape &paddings_shape, TensorShape output_shape,
-                              DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
+    TensorType compute_target(TensorShape        input_shape,
+                              const TensorShape &block_shape_shape,
+                              const TensorShape &paddings_shape,
+                              TensorShape        output_shape,
+                              DataType           data_type,
+                              DataLayout         data_layout,
+                              QuantizationInfo   quantization_info)
     {
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
             permute(output_shape, PermutationVector(2U, 0U, 1U));
@@ -100,9 +112,10 @@ protected:
         {
             auto      block_shape_data = AccessorType(block_shape);
             const int idx_width        = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-            for(unsigned int i = 0; i < block_shape_shape.x(); ++i)
+            for (unsigned int i = 0; i < block_shape_shape.x(); ++i)
             {
-                static_cast<int32_t *>(block_shape_data.data())[i] = input_shape[i + idx_width] / output_shape[i + idx_width];
+                static_cast<int32_t *>(block_shape_data.data())[i] =
+                    input_shape[i + idx_width] / output_shape[i + idx_width];
             }
         }
         // Compute function
@@ -111,18 +124,22 @@ protected:
         return output;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &block_shape_shape, const TensorShape &paddings_shape,
-                                      const TensorShape &output_shape, DataType data_type, QuantizationInfo quantization_info)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape,
+                                      const TensorShape &block_shape_shape,
+                                      const TensorShape &paddings_shape,
+                                      const TensorShape &output_shape,
+                                      DataType           data_type,
+                                      QuantizationInfo   quantization_info)
     {
         // Create reference
-        SimpleTensor<T>       input{ input_shape, data_type, 1, quantization_info };
-        SimpleTensor<int32_t> block_shape{ block_shape_shape, DataType::S32 };
-        SimpleTensor<int32_t> paddings{ paddings_shape, DataType::S32 };
+        SimpleTensor<T>       input{input_shape, data_type, 1, quantization_info};
+        SimpleTensor<int32_t> block_shape{block_shape_shape, DataType::S32};
+        SimpleTensor<int32_t> paddings{paddings_shape, DataType::S32};
 
         // Fill reference
         fill(input, 0);
         fill_pad(paddings);
-        for(unsigned int i = 0; i < block_shape_shape.x(); ++i)
+        for (unsigned int i = 0; i < block_shape_shape.x(); ++i)
         {
             block_shape[i] = input_shape[i] / output_shape[i];
         }
@@ -136,27 +153,40 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class SpaceToBatchLayerValidationFixture : public SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class SpaceToBatchLayerValidationFixture
+    : public SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape paddings_shape, TensorShape output_shape,
-               DataType data_type, DataLayout data_layout)
+    void setup(TensorShape input_shape,
+               TensorShape block_shape_shape,
+               TensorShape paddings_shape,
+               TensorShape output_shape,
+               DataType    data_type,
+               DataLayout  data_layout)
     {
-        SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, block_shape_shape, paddings_shape, output_shape, data_type, data_layout, QuantizationInfo());
+        SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            input_shape, block_shape_shape, paddings_shape, output_shape, data_type, data_layout, QuantizationInfo());
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class SpaceToBatchLayerValidationQuantizedFixture : public SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class SpaceToBatchLayerValidationQuantizedFixture
+    : public SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape input_shape, TensorShape block_shape_shape, TensorShape paddings_shape, TensorShape output_shape,
-               DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info)
+    void setup(TensorShape      input_shape,
+               TensorShape      block_shape_shape,
+               TensorShape      paddings_shape,
+               TensorShape      output_shape,
+               DataType         data_type,
+               DataLayout       data_layout,
+               QuantizationInfo quantization_info)
     {
-        SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, block_shape_shape, paddings_shape, output_shape, data_type, data_layout, quantization_info);
+        SpaceToBatchLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            input_shape, block_shape_shape, paddings_shape, output_shape, data_type, data_layout, quantization_info);
     }
 };
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SPACE_TO_BATCH_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_SPACETOBATCHFIXTURE_H

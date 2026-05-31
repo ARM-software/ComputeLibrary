@@ -23,10 +23,10 @@
  */
 #include "Winograd.h"
 
+#include "arm_compute/core/Types.h"
+
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Utils.h"
-
-#include "arm_compute/core/Types.h"
 
 #include <algorithm>
 #include <cmath>
@@ -42,171 +42,161 @@ namespace reference
 namespace
 {
 template <typename T>
-void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile_size, const Size2D &kernel_size, WinogradTransformType winograd_transform_type)
+void initialize_matrix_transform(SimpleTensor<T>      &src,
+                                 const Size2D         &output_tile_size,
+                                 const Size2D         &kernel_size,
+                                 WinogradTransformType winograd_transform_type)
 {
     // Winograd input transform matrices
-    static const std::array<float, 16> imatrix2x2_3x3 =
-    {
-        1.0f, 0.0f, -1.0f, 0.0f,
-        0.0f, 1.0f, 1.0f, 0.0f,
-        0.0f, -1.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, 0.0f, -1.0f
-    };
+    static const std::array<float, 16> imatrix2x2_3x3 = {1.0f, 0.0f,  -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+                                                         0.0f, -1.0f, 1.0f,  0.0f, 0.0f, 1.0f, 0.0f, -1.0f};
 
-    static const std::array<float, 36> imatrix4x4_3x3 =
-    {
-        0.125f,   0.1875f, -0.25f,   -0.1875f,  0.125f,   0.0f,
-        0.0f,     0.125f,   0.0625f, -0.3125f,  0.125f,   0.0f,
-        0.0f,    -0.125f,  -0.3125f, -0.0625f,  0.125f,   0.0f,
-        0.0f,     0.25f,   -0.125f,  -0.25f,    0.125f,   0.0f,
-        0.0f,    -0.125f,  -0.25f,    0.125f,   0.25f,    0.0f,
-        0.0f,     0.125f,   0.1875f, -0.25f,   -0.1875f,  0.125f
-    };
+    static const std::array<float, 36> imatrix4x4_3x3 = {
+        0.125f, 0.1875f, -0.25f,   -0.1875f, 0.125f, 0.0f, 0.0f, 0.125f, 0.0625f, -0.3125f, 0.125f,   0.0f,
+        0.0f,   -0.125f, -0.3125f, -0.0625f, 0.125f, 0.0f, 0.0f, 0.25f,  -0.125f, -0.25f,   0.125f,   0.0f,
+        0.0f,   -0.125f, -0.25f,   0.125f,   0.25f,  0.0f, 0.0f, 0.125f, 0.1875f, -0.25f,   -0.1875f, 0.125f};
 
-    static const std::array<float, 64> imatrix4x4_5x5 =
-    {
-        1.f, 0.f, -21.f / 4.f, 0.f, 21.f / 4.f, 0.f, -1.f, 0.f,
-        0.f, 1.f, 1.f, -17.f / 4.f, -17.f / 4.f, 1.f, 1.f, 0.f,
-        0.f, -1.f, 1.f, 17.f / 4.f, -17.f / 4.f, -1.f, 1.f, 0.f,
-        0.f, 1.f / 2.f, 1.f / 4.f, -5.f / 2.f, -5.f / 4.f, 2.f, 1.f, 0.f,
-        0.f, -1.f / 2.f, 1.f / 4.f, 5.f / 2.f, -5.f / 4.f, -2.f, 1.f, 0.f,
-        0.f, 2.f, 4.f, -5.f / 2.f, -5.f, 1.f / 2.f, 1.f, 0.f,
-        0.f, -2.f, 4.f, 5.f / 2.f, -5.f, -1.f / 2.f, 1.f, 0.f,
-        0.f, -1.f, 0.f, 21.f / 4.f, 0.f, -21.f / 4.f, 0.f, 1.f
-    };
+    static const std::array<float, 64> imatrix4x4_5x5 = {
+        1.f, 0.f,        -21.f / 4.f, 0.f,         21.f / 4.f,  0.f,         -1.f, 0.f,
+        0.f, 1.f,        1.f,         -17.f / 4.f, -17.f / 4.f, 1.f,         1.f,  0.f,
+        0.f, -1.f,       1.f,         17.f / 4.f,  -17.f / 4.f, -1.f,        1.f,  0.f,
+        0.f, 1.f / 2.f,  1.f / 4.f,   -5.f / 2.f,  -5.f / 4.f,  2.f,         1.f,  0.f,
+        0.f, -1.f / 2.f, 1.f / 4.f,   5.f / 2.f,   -5.f / 4.f,  -2.f,        1.f,  0.f,
+        0.f, 2.f,        4.f,         -5.f / 2.f,  -5.f,        1.f / 2.f,   1.f,  0.f,
+        0.f, -2.f,       4.f,         5.f / 2.f,   -5.f,        -1.f / 2.f,  1.f,  0.f,
+        0.f, -1.f,       0.f,         21.f / 4.f,  0.f,         -21.f / 4.f, 0.f,  1.f};
 
-    static const std::array<float, 64> imatrix2x1_7x7 =
-    {
-        -36.0f, 0.0f, 49.0f, 0.0f, -14.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, -36.0f, 36.0f, 13.0f, -13.0f, -1.0f, 1.0f, 0.0f,
-        0.0f, 36.0f, 36.0f, -13.0f, -13.0f, 1.0f, 1.0f, 0.0f,
-        0.0f, -18.0f, 9.0f, 20.0f, -10.0f, -2.0f, 1.0f, 0.0f,
-        0.0f, 18.0f, 9.0f, -20.0f, -10.0f, 2.0f, 1.0f, 0.0f,
-        0.0f, -12.0f, 4.0f, 15.0f, -5.0f, -3.0f, 1.0f, 0.0f,
-        0.0f, 12.0f, 4.0f, -15.0f, -5.0f, 3.0f, 1.0f, 0.0f,
-        0.0f, -36.0f, 0.0f, 49.0f, 0.0f, -14.0f, 0.0f, 1.0f
-    };
+    static const std::array<float, 64> imatrix2x1_7x7 = {
+        -36.0f, 0.0f,  49.0f, 0.0f,   -14.0f, 0.0f, 1.0f, 0.0f, 0.0f, -36.0f, 36.0f, 13.0f, -13.0f, -1.0f,  1.0f, 0.0f,
+        0.0f,   36.0f, 36.0f, -13.0f, -13.0f, 1.0f, 1.0f, 0.0f, 0.0f, -18.0f, 9.0f,  20.0f, -10.0f, -2.0f,  1.0f, 0.0f,
+        0.0f,   18.0f, 9.0f,  -20.0f, -10.0f, 2.0f, 1.0f, 0.0f, 0.0f, -12.0f, 4.0f,  15.0f, -5.0f,  -3.0f,  1.0f, 0.0f,
+        0.0f,   12.0f, 4.0f,  -15.0f, -5.0f,  3.0f, 1.0f, 0.0f, 0.0f, -36.0f, 0.0f,  49.0f, 0.0f,   -14.0f, 0.0f, 1.0f};
 
     // ------------------------------------------
 
     // Winograd filter transform matrices
-    static const std::array<float, 12> fmatrix2x2_3x3 =
-    {
-        1.0f, 0.0f, 0.0f,
-        0.5f, 0.5f, 0.5f,
-        0.5f, -0.5f, 0.5f,
-        0.0f, 0.0f, 1.0f
-    };
+    static const std::array<float, 12> fmatrix2x2_3x3 = {1.0f, 0.0f,  0.0f, 0.5f, 0.5f, 0.5f,
+                                                         0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f};
 
-    static const std::array<float, 18> fmatrix4x4_3x3 =
-    {
-        1.0f,        0.0f,        0.0f,
-        1.0f/3.0f,  -1.0f/3.0f,   1.0f/3.0f,
-        -1.0f/3.0f,  -1.0f/3.0f,  -1.0f/3.0f,
-        -8.0f/15.0f,  4.0f/15.0f, -2.0f/15.0f,
-        2.0f/15.0f,  4.0f/15.0f,  8.0f/15.0f,
-        0.0f,        0.0f,        1.0f
-    };
+    static const std::array<float, 18> fmatrix4x4_3x3 = {
+        1.0f,         0.0f,         0.0f,         1.0f / 3.0f,   -1.0f / 3.0f, 1.0f / 3.0f,
+        -1.0f / 3.0f, -1.0f / 3.0f, -1.0f / 3.0f, -8.0f / 15.0f, 4.0f / 15.0f, -2.0f / 15.0f,
+        2.0f / 15.0f, 4.0f / 15.0f, 8.0f / 15.0f, 0.0f,          0.0f,         1.0f};
 
-    static const std::array<float, 40> fmatrix4x4_5x5 =
-    {
-        1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        -2.0f / 9.0f, -2.0f / 9.0f, -2.0f / 9.0f, -2.0f / 9.0f, -2.0f / 9.0f,
-        -2.0f / 9.0f, 2.0f / 9.0f, -2.0f / 9.0f, 2.0f / 9.0f, -2.0f / 9.0f,
-        1.0f / 90.0f, 1.0f / 45.0f, 2.0f / 45.0f, 4.0f / 45.0f, 8.0f / 45.0f,
-        1.0f / 90.0f, -1.0f / 45.0f, 2.0f / 45.0f, -4.0f / 45.0f, 8.0f / 45.0f,
-        4.0f / 45.0f, 2.0f / 45.0f, 1.0f / 45.0f, 1.0f / 90.0f, 1.0f / 180.0f,
-        4.0f / 45.0f, -2.0f / 45.0f, 1.0f / 45.0f, -1.0f / 90.0f, 1.0f / 180.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+    static const std::array<float, 40> fmatrix4x4_5x5 = {
+        1.0f,          0.0f,          0.0f,          0.0f,          0.0f,         -2.0f / 9.0f,  -2.0f / 9.0f,
+        -2.0f / 9.0f,  -2.0f / 9.0f,  -2.0f / 9.0f,  -2.0f / 9.0f,  2.0f / 9.0f,  -2.0f / 9.0f,  2.0f / 9.0f,
+        -2.0f / 9.0f,  1.0f / 90.0f,  1.0f / 45.0f,  2.0f / 45.0f,  4.0f / 45.0f, 8.0f / 45.0f,  1.0f / 90.0f,
+        -1.0f / 45.0f, 2.0f / 45.0f,  -4.0f / 45.0f, 8.0f / 45.0f,  4.0f / 45.0f, 2.0f / 45.0f,  1.0f / 45.0f,
+        1.0f / 90.0f,  1.0f / 180.0f, 4.0f / 45.0f,  -2.0f / 45.0f, 1.0f / 45.0f, -1.0f / 90.0f, 1.0f / 180.0f,
+        0.0f,          0.0f,          0.0f,          0.0f,          1.0f
 
     };
 
-    static const std::array<float, 56> fmatrix2x1_7x7 =
-    {
-        -1.0f / 36.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-        1.0f / 48.0f, -1.0f / 48.0f, 1.0f / 48.0f, -1.0f / 48.0f, 1.0f / 48.0f, -1.0f / 48.0f, 1.0f / 48.0f,
-        1.0f / 48.0f, 1.0f / 48.0f, 1.0f / 48.0f, 1.0f / 48.0f, 1.0f / 48.0f, 1.0f / 48.0f, 1.0f / 48.0f,
-        -1.0f / 120.0f, 1.0f / 60.0f, -1.0f / 30.0f, 1.0f / 15.0f, -2.0f / 15.0f, 4.0f / 15.0f, -8.0f / 15.0f,
-        -1.0f / 120.0f, -1.0f / 60.0f, -1.0f / 30.0f, -1.0f / 15.0f, -2.0f / 15.0f, -4.0f / 15.0f, -8.0f / 15.0f,
-        1.0f / 720.0f, -1.0f / 240.0f, 1.0f / 80.0f, -3.0f / 80.0f, 9.0f / 80.0f, -27.0f / 80.0f, 81.0f / 80.0f,
-        1.0f / 720.0f, 1.0f / 240.0f, 1.0f / 80.0f, 3.0f / 80.0f, 9.0f / 80.0f, 27.0f / 80.0f, 81.0f / 80.0f,
-        0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
-    };
+    static const std::array<float, 56> fmatrix2x1_7x7 = {
+        -1.0f / 36.0f,  0.0f,           0.0f,          0.0f,          0.0f,          0.0f,           0.0f,
+        1.0f / 48.0f,   -1.0f / 48.0f,  1.0f / 48.0f,  -1.0f / 48.0f, 1.0f / 48.0f,  -1.0f / 48.0f,  1.0f / 48.0f,
+        1.0f / 48.0f,   1.0f / 48.0f,   1.0f / 48.0f,  1.0f / 48.0f,  1.0f / 48.0f,  1.0f / 48.0f,   1.0f / 48.0f,
+        -1.0f / 120.0f, 1.0f / 60.0f,   -1.0f / 30.0f, 1.0f / 15.0f,  -2.0f / 15.0f, 4.0f / 15.0f,   -8.0f / 15.0f,
+        -1.0f / 120.0f, -1.0f / 60.0f,  -1.0f / 30.0f, -1.0f / 15.0f, -2.0f / 15.0f, -4.0f / 15.0f,  -8.0f / 15.0f,
+        1.0f / 720.0f,  -1.0f / 240.0f, 1.0f / 80.0f,  -3.0f / 80.0f, 9.0f / 80.0f,  -27.0f / 80.0f, 81.0f / 80.0f,
+        1.0f / 720.0f,  1.0f / 240.0f,  1.0f / 80.0f,  3.0f / 80.0f,  9.0f / 80.0f,  27.0f / 80.0f,  81.0f / 80.0f,
+        0.0f,           0.0f,           0.0f,          0.0f,          0.0f,          0.0f,           1.0f};
 
     // ------------------------------------------
 
     // Winograd output transform matrices
-    static const std::array<float, 8> omatrix2x2_3x3 =
-    {
-        1.0f, 1.0f, 1.0f, 0.0f,
-        0.0f, 1.0f, -1.0f, -1.0f
-    };
+    static const std::array<float, 8> omatrix2x2_3x3 = {1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f};
 
-    static const std::array<float, 24> omatrix4x4_3x3 =
-    {
-        0.5f,     0.5f,     0.5f,     1.0f,     0.125f,   0.0f,
-        0.0f,    -0.5f,     0.5f,    -0.5f,     0.25f,    0.0f,
-        0.0f,     0.5f,     0.5f,     0.25f,    0.5f,     0.0f,
-        0.0f,    -0.5f,     0.5f,    -0.125f,   1.0f,     0.5f
-    };
+    static const std::array<float, 24> omatrix4x4_3x3 = {0.5f, 0.5f,  0.5f,  1.0f,  0.125f, 0.0f,    0.0f, -0.5f,
+                                                         0.5f, -0.5f, 0.25f, 0.0f,  0.0f,   0.5f,    0.5f, 0.25f,
+                                                         0.5f, 0.0f,  0.0f,  -0.5f, 0.5f,   -0.125f, 1.0f, 0.5f};
 
-    static const std::array<float, 36> omatrix4x4_5x5 =
-    {
-        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 8.0f, 8.0f, 0.0f,
-        0.0f, 1.0f, -1.0f, 2.0f, -2.0f, 4.0f, -4.0f, 0.0f,
-        0.0f, 1.0f, 1.0f, 4.0f, 4.0f, 2.0f, 2.0f, 0.0f,
-        0.0f, 1.0f, -1.0f, 8.0f, -8.0f, 1.0f, -1.0f, 1.0f
-    };
+    static const std::array<float, 36> omatrix4x4_5x5 = {
+        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 8.0f, 8.0f, 0.0f, 0.0f, 1.0f, -1.0f, 2.0f, -2.0f, 4.0f, -4.0f, 0.0f,
+        0.0f, 1.0f, 1.0f, 4.0f, 4.0f, 2.0f, 2.0f, 0.0f, 0.0f, 1.0f, -1.0f, 8.0f, -8.0f, 1.0f, -1.0f, 1.0f};
 
-    static const std::array<float, 16> omatrix2x1_7x7 =
-    {
-        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
-        0.0f, -1.0f, 1.0f, -2.0f, 2.0f, -3.0f, 3.0f, 1.0f
-    };
+    static const std::array<float, 16> omatrix2x1_7x7 = {1.0f, 1.0f,  1.0f, 1.0f,  1.0f, 1.0f,  1.0f, 0.0f,
+                                                         0.0f, -1.0f, 1.0f, -2.0f, 2.0f, -3.0f, 3.0f, 1.0f};
 
     // ------------------------------------------
 
     using WinogradKey = std::tuple<std::pair<int, int>, std::pair<int, int>, WinogradTransformType>;
 
     // Key = (Output tile size, Kernel size, Winograd transform type)
-    static std::map<WinogradKey, const float *> matrix_map =
-    {
-        { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::INPUT), imatrix2x2_3x3.data() },
-        { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::INPUT), imatrix4x4_3x3.data() },
-        { WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(3, 1), WinogradTransformType::INPUT), imatrix2x2_3x3.data() },
-        { WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1), WinogradTransformType::INPUT), imatrix4x4_3x3.data() },
-        { WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 3), WinogradTransformType::INPUT), imatrix2x2_3x3.data() },
-        { WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3), WinogradTransformType::INPUT), imatrix4x4_3x3.data() },
-        { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5), WinogradTransformType::INPUT), imatrix4x4_5x5.data() },
-        { WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1), WinogradTransformType::INPUT), imatrix4x4_5x5.data() },
-        { WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(7, 1), WinogradTransformType::INPUT), imatrix2x1_7x7.data() },
-        { WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 7), WinogradTransformType::INPUT), imatrix2x1_7x7.data() },
-        { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(7, 7), WinogradTransformType::INPUT), imatrix2x1_7x7.data() },
-        { WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5), WinogradTransformType::INPUT), imatrix4x4_5x5.data() },
-        { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::FILTER), fmatrix2x2_3x3.data() },
-        { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::FILTER), fmatrix4x4_3x3.data() },
-        { WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(3, 1), WinogradTransformType::FILTER), fmatrix2x2_3x3.data() },
-        { WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1), WinogradTransformType::FILTER), fmatrix4x4_3x3.data() },
-        { WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 3), WinogradTransformType::FILTER), fmatrix2x2_3x3.data() },
-        { WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3), WinogradTransformType::FILTER), fmatrix4x4_3x3.data() },
-        { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5), WinogradTransformType::FILTER), fmatrix4x4_5x5.data() },
-        { WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1), WinogradTransformType::FILTER), fmatrix4x4_5x5.data() },
-        { WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(7, 1), WinogradTransformType::FILTER), fmatrix2x1_7x7.data() },
-        { WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 7), WinogradTransformType::FILTER), fmatrix2x1_7x7.data() },
-        { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(7, 7), WinogradTransformType::FILTER), fmatrix2x1_7x7.data() },
-        { WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5), WinogradTransformType::FILTER), fmatrix4x4_5x5.data() },
-        { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::OUTPUT), omatrix2x2_3x3.data() },
-        { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::OUTPUT), omatrix4x4_3x3.data() },
-        { WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(3, 1), WinogradTransformType::OUTPUT), omatrix2x2_3x3.data() },
-        { WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1), WinogradTransformType::OUTPUT), omatrix4x4_3x3.data() },
-        { WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 3), WinogradTransformType::OUTPUT), omatrix2x2_3x3.data() },
-        { WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3), WinogradTransformType::OUTPUT), omatrix4x4_3x3.data() },
-        { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5), WinogradTransformType::OUTPUT), omatrix4x4_5x5.data() },
-        { WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1), WinogradTransformType::OUTPUT), omatrix4x4_5x5.data() },
-        { WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(7, 1), WinogradTransformType::OUTPUT), omatrix2x1_7x7.data() },
-        { WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 7), WinogradTransformType::OUTPUT), omatrix2x1_7x7.data() },
-        { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(7, 7), WinogradTransformType::OUTPUT), omatrix2x1_7x7.data() },
-        { WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5), WinogradTransformType::OUTPUT), omatrix4x4_5x5.data() },
+    static std::map<WinogradKey, const float *> matrix_map = {
+        {WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::INPUT),
+         imatrix2x2_3x3.data()},
+        {WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::INPUT),
+         imatrix4x4_3x3.data()},
+        {WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(3, 1), WinogradTransformType::INPUT),
+         imatrix2x2_3x3.data()},
+        {WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1), WinogradTransformType::INPUT),
+         imatrix4x4_3x3.data()},
+        {WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 3), WinogradTransformType::INPUT),
+         imatrix2x2_3x3.data()},
+        {WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3), WinogradTransformType::INPUT),
+         imatrix4x4_3x3.data()},
+        {WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5), WinogradTransformType::INPUT),
+         imatrix4x4_5x5.data()},
+        {WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1), WinogradTransformType::INPUT),
+         imatrix4x4_5x5.data()},
+        {WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(7, 1), WinogradTransformType::INPUT),
+         imatrix2x1_7x7.data()},
+        {WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 7), WinogradTransformType::INPUT),
+         imatrix2x1_7x7.data()},
+        {WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(7, 7), WinogradTransformType::INPUT),
+         imatrix2x1_7x7.data()},
+        {WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5), WinogradTransformType::INPUT),
+         imatrix4x4_5x5.data()},
+        {WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::FILTER),
+         fmatrix2x2_3x3.data()},
+        {WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::FILTER),
+         fmatrix4x4_3x3.data()},
+        {WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(3, 1), WinogradTransformType::FILTER),
+         fmatrix2x2_3x3.data()},
+        {WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1), WinogradTransformType::FILTER),
+         fmatrix4x4_3x3.data()},
+        {WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 3), WinogradTransformType::FILTER),
+         fmatrix2x2_3x3.data()},
+        {WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3), WinogradTransformType::FILTER),
+         fmatrix4x4_3x3.data()},
+        {WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5), WinogradTransformType::FILTER),
+         fmatrix4x4_5x5.data()},
+        {WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1), WinogradTransformType::FILTER),
+         fmatrix4x4_5x5.data()},
+        {WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(7, 1), WinogradTransformType::FILTER),
+         fmatrix2x1_7x7.data()},
+        {WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 7), WinogradTransformType::FILTER),
+         fmatrix2x1_7x7.data()},
+        {WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(7, 7), WinogradTransformType::FILTER),
+         fmatrix2x1_7x7.data()},
+        {WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5), WinogradTransformType::FILTER),
+         fmatrix4x4_5x5.data()},
+        {WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::OUTPUT),
+         omatrix2x2_3x3.data()},
+        {WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::OUTPUT),
+         omatrix4x4_3x3.data()},
+        {WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(3, 1), WinogradTransformType::OUTPUT),
+         omatrix2x2_3x3.data()},
+        {WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1), WinogradTransformType::OUTPUT),
+         omatrix4x4_3x3.data()},
+        {WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 3), WinogradTransformType::OUTPUT),
+         omatrix2x2_3x3.data()},
+        {WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3), WinogradTransformType::OUTPUT),
+         omatrix4x4_3x3.data()},
+        {WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5), WinogradTransformType::OUTPUT),
+         omatrix4x4_5x5.data()},
+        {WinogradKey(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1), WinogradTransformType::OUTPUT),
+         omatrix4x4_5x5.data()},
+        {WinogradKey(std::pair<int, int>(2, 1), std::pair<int, int>(7, 1), WinogradTransformType::OUTPUT),
+         omatrix2x1_7x7.data()},
+        {WinogradKey(std::pair<int, int>(1, 2), std::pair<int, int>(1, 7), WinogradTransformType::OUTPUT),
+         omatrix2x1_7x7.data()},
+        {WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(7, 7), WinogradTransformType::OUTPUT),
+         omatrix2x1_7x7.data()},
+        {WinogradKey(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5), WinogradTransformType::OUTPUT),
+         omatrix4x4_5x5.data()},
     };
 
     // Find transformation matrix
@@ -217,7 +207,7 @@ void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile
                                      winograd_transform_type));
 
     float const *matrix_values = nullptr;
-    if(it != matrix_map.end())
+    if (it != matrix_map.end())
     {
         // Get matrix pointer
         matrix_values = it->second;
@@ -233,7 +223,8 @@ void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile
 } // namespace
 
 template <typename T>
-SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info)
+SimpleTensor<T>
+winograd_input_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_ERROR_ON(in.data_layout() != DataLayout::NCHW);
 
@@ -241,7 +232,7 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
 
-    SimpleTensor<T> out{ output_shape, in.data_type() };
+    SimpleTensor<T> out{output_shape, in.data_type()};
 
     // Calculate dimensions for the tile
     const unsigned int tile_w = output_tile_size.width + kernel_size.width - 1;
@@ -253,19 +244,19 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
     TensorShape tile_dims(tile_max_dim, tile_max_dim);
 
     // Simple tensor for the input tile
-    SimpleTensor<T> src_tile{ tile_dims, in.data_type() };
+    SimpleTensor<T> src_tile{tile_dims, in.data_type()};
 
     // Simple tensor for the temporary tile
-    SimpleTensor<T> tmp_tile{ tile_dims, in.data_type() };
+    SimpleTensor<T> tmp_tile{tile_dims, in.data_type()};
 
     // Simple tensor for the output tile
-    SimpleTensor<T> dst_tile{ tile_dims, in.data_type() };
+    SimpleTensor<T> dst_tile{tile_dims, in.data_type()};
 
     // Simple tensor for the transformation matrix
-    SimpleTensor<T> matrix{ tile_dims, in.data_type() };
+    SimpleTensor<T> matrix{tile_dims, in.data_type()};
 
     // Simple tensor for the transformation matrix transposed
-    SimpleTensor<T> matrix_transposed{ tile_dims, in.data_type() };
+    SimpleTensor<T> matrix_transposed{tile_dims, in.data_type()};
 
     // Initialize matrix for the input transform
     initialize_matrix_transform(matrix, output_tile_size, kernel_size, WinogradTransformType::INPUT);
@@ -282,10 +273,8 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
     const int step_y      = output_tile_size.height;
 
     // Compute the number of output tiles along the x and y direction of size "output_tile_size"
-    const Size2D num_tiles = compute_winograd_convolution_tiles(Size2D(in_w, in_h),
-                                                                kernel_size,
-                                                                output_tile_size,
-                                                                conv_info);
+    const Size2D num_tiles =
+        compute_winograd_convolution_tiles(Size2D(in_w, in_h), kernel_size, output_tile_size, conv_info);
 
     const int num_tiles_x = num_tiles.width;
     const int num_tiles_y = num_tiles.height;
@@ -296,14 +285,14 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
     int end_x_zero   = 0;
     int end_y_zero   = 0;
 
-    if(output_tile_size.width == 1)
+    if (output_tile_size.width == 1)
     {
         start_x_zero = 1;
         start_y_zero = 0;
         end_x_zero   = tile_max_dim - 1;
         end_y_zero   = tile_max_dim;
     }
-    else if(output_tile_size.height == 1)
+    else if (output_tile_size.height == 1)
     {
         start_x_zero = 0;
         start_y_zero = 1;
@@ -320,13 +309,13 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
 
     ARM_COMPUTE_ERROR_ON((num_tiles_x * num_tiles_y) != static_cast<int>(out.shape().y()));
 
-    for(int b = 0; b < num_batches; ++b)
+    for (int b = 0; b < num_batches; ++b)
     {
-        for(int z = 0; z < in_d; ++z)
+        for (int z = 0; z < in_d; ++z)
         {
-            for(int y = 0; y < num_tiles_y; ++y)
+            for (int y = 0; y < num_tiles_y; ++y)
             {
-                for(int x = 0; x < num_tiles_x; ++x)
+                for (int x = 0; x < num_tiles_x; ++x)
                 {
                     int xi = x * step_x - conv_info.pad_left();
                     int yi = y * step_y - conv_info.pad_top();
@@ -342,10 +331,10 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
                     matrix_multiply<T>(tmp_tile, matrix_transposed, dst_tile);
 
                     // Store the output tile across the channels
-                    for(int i = 0; i < out_d; ++i)
+                    for (int i = 0; i < out_d; ++i)
                     {
-                        int xo = z;
-                        int yo = x + y * num_tiles_x;
+                        int xo                                                    = z;
+                        int yo                                                    = x + y * num_tiles_x;
                         out[coords2index(out.shape(), Coordinates(xo, yo, i, b))] = dst_tile[i * step_y_transf_tile];
                     }
                 }
@@ -357,12 +346,13 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const Tensor
 }
 
 template <typename T>
-SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info)
+SimpleTensor<T>
+winograd_filter_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_ERROR_ON_MSG(in.data_layout() != DataLayout::NCHW, "Only supported NCHW data format");
 
     // Create reference
-    SimpleTensor<T> out{ output_shape, in.data_type(), 1 };
+    SimpleTensor<T> out{output_shape, in.data_type(), 1};
 
     const Size2D output_tile_size = winograd_info.output_tile_size;
     const Size2D kernel_size      = winograd_info.kernel_size;
@@ -379,19 +369,19 @@ SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const Tenso
     const unsigned int input_tile_max_dim = std::max(input_tile_w, input_tile_h);
 
     // Simple tensor for the input tile
-    SimpleTensor<T> input_tile{ TensorShape(kernel_max_dim, kernel_max_dim), in.data_type(), 1 };
+    SimpleTensor<T> input_tile{TensorShape(kernel_max_dim, kernel_max_dim), in.data_type(), 1};
 
     // Simple tensor for the transformation matrix
-    SimpleTensor<T> trans_matrix{ TensorShape(kernel_max_dim, input_tile_max_dim), in.data_type(), 1 };
+    SimpleTensor<T> trans_matrix{TensorShape(kernel_max_dim, input_tile_max_dim), in.data_type(), 1};
 
     // Simple tensor for the transformation matrix transpose
-    SimpleTensor<T> trans_matrix_transposed{ TensorShape(input_tile_max_dim, kernel_max_dim), in.data_type(), 1 };
+    SimpleTensor<T> trans_matrix_transposed{TensorShape(input_tile_max_dim, kernel_max_dim), in.data_type(), 1};
 
     // Simple tensor for the temporary tile
-    SimpleTensor<T> tmp_tile{ TensorShape(kernel_max_dim, input_tile_max_dim), in.data_type(), 1 };
+    SimpleTensor<T> tmp_tile{TensorShape(kernel_max_dim, input_tile_max_dim), in.data_type(), 1};
 
     // Simple tensor for the output tile
-    SimpleTensor<T> transf_tile{ TensorShape(input_tile_max_dim, input_tile_max_dim), in.data_type(), 1 };
+    SimpleTensor<T> transf_tile{TensorShape(input_tile_max_dim, input_tile_max_dim), in.data_type(), 1};
 
     // Initialize matrix for the filter transform
     initialize_matrix_transform(trans_matrix, output_tile_size, kernel_size, WinogradTransformType::FILTER);
@@ -406,11 +396,11 @@ SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const Tenso
     // If we have a vertical filter (i.e. 1x3, 1x5,..), we need to take the elements along the y direction (step_y_transf_tile = width of the output tile)
     const int step_y_transf_tile = kernel_size.width == 1 ? input_tile_max_dim : 1;
 
-    for(int n = 0; n < num_batches; ++n)
+    for (int n = 0; n < num_batches; ++n)
     {
-        for(int w = 0; w < num_filters; ++w)
+        for (int w = 0; w < num_filters; ++w)
         {
-            for(int z = 0; z < num_channels; ++z)
+            for (int z = 0; z < num_channels; ++z)
             {
                 // Load the tile from the input tensor
                 get_tile<T>(in, input_tile, Coordinates(0, 0, z, w, n));
@@ -425,7 +415,7 @@ SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const Tenso
                 const int output_offset = w + z * num_filters;
 
                 // Store the values across the channels
-                for(unsigned int i = 0; i < input_tile_area; ++i)
+                for (unsigned int i = 0; i < input_tile_area; ++i)
                 {
                     out[output_offset + i * num_filters * num_channels] = transf_tile[i * step_y_transf_tile];
                 }
@@ -437,7 +427,10 @@ SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const Tenso
 }
 
 template <typename T>
-SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const SimpleTensor<T> &b, const TensorShape &output_shape, const WinogradInfo &winograd_info)
+SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in,
+                                          const SimpleTensor<T> &b,
+                                          const TensorShape     &output_shape,
+                                          const WinogradInfo    &winograd_info)
 {
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
     const Size2D        input_dimensions = winograd_info.input_dimensions;
@@ -445,7 +438,7 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
     const Size2D        kernel_size      = winograd_info.kernel_size;
 
     // Create reference
-    SimpleTensor<T> out{ output_shape, in.data_type(), 1 };
+    SimpleTensor<T> out{output_shape, in.data_type(), 1};
 
     // Calculate dimensions for the tiles
     const unsigned int in_tile_w  = output_tile_size.width + kernel_size.width - 1;
@@ -454,7 +447,9 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
     const unsigned int out_tile_h = output_tile_size.height;
 
     ARM_COMPUTE_ERROR_ON(in.shape()[2] != (in_tile_w * in_tile_h));
-    ARM_COMPUTE_ERROR_ON(in.shape()[0] != out.shape()[get_data_layout_dimension_index(winograd_info.output_data_layout, DataLayoutDimension::CHANNEL)]);
+    ARM_COMPUTE_ERROR_ON(
+        in.shape()[0] !=
+        out.shape()[get_data_layout_dimension_index(winograd_info.output_data_layout, DataLayoutDimension::CHANNEL)]);
 
     // Get the maximum dimension from the tile size
     const unsigned int in_tile_max_dim  = std::max(in_tile_w, in_tile_h);
@@ -472,19 +467,19 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
 
     // Create tensors
     // Simple tensor for the input tile
-    SimpleTensor<T> input_tile{ in_tile_dims, in.data_type(), 1 };
+    SimpleTensor<T> input_tile{in_tile_dims, in.data_type(), 1};
 
     // Simple tensor for the transformation matrix
-    SimpleTensor<T> trans_matrix{ tr_tile_dims, in.data_type(), 1 };
+    SimpleTensor<T> trans_matrix{tr_tile_dims, in.data_type(), 1};
 
     // Simple tensor for the transformation matrix transpose
-    SimpleTensor<T> trans_matrix_transposed{ TensorShape(tr_tile_dims[1], tr_tile_dims[0]), in.data_type(), 1 };
+    SimpleTensor<T> trans_matrix_transposed{TensorShape(tr_tile_dims[1], tr_tile_dims[0]), in.data_type(), 1};
 
     // Simple tensor for the temporary tile
-    SimpleTensor<T> tmp_tile{ tr_tile_dims, in.data_type(), 1 };
+    SimpleTensor<T> tmp_tile{tr_tile_dims, in.data_type(), 1};
 
     // Simple tensor for the output tile
-    SimpleTensor<T> output_tile{ out_tile_dims, in.data_type(), 1 };
+    SimpleTensor<T> output_tile{out_tile_dims, in.data_type(), 1};
 
     // Initialize matrix for the output transform
     initialize_matrix_transform(trans_matrix, output_tile_size, kernel_size, WinogradTransformType::OUTPUT);
@@ -512,9 +507,7 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
 
     // Compute the number of output tiles along the x and y direction of size "output_tile_size"
     const Size2D num_tiles = compute_winograd_convolution_tiles(Size2D(input_dimensions.width, input_dimensions.height),
-                                                                kernel_size,
-                                                                output_tile_size,
-                                                                conv_info);
+                                                                kernel_size, output_tile_size, conv_info);
 
     const int num_tiles_x = num_tiles.width;
     const int num_tiles_y = num_tiles.height;
@@ -529,14 +522,14 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
     zeros<T>(input_tile, Coordinates(0, 0), input_tile.shape());
 
     const T scale_factor = (kernel_size.width == 3 || kernel_size.height == 3) ? T(16.f) : T(1.f);
-    for(int n = 0; n < num_batches; ++n)
+    for (int n = 0; n < num_batches; ++n)
     {
-        for(int y = 0; y < h_in; ++y)
+        for (int y = 0; y < h_in; ++y)
         {
-            for(int x = 0; x < w_in; ++x)
+            for (int x = 0; x < w_in; ++x)
             {
                 // Load the input tile tile across the channels of the input tensor
-                for(int z = 0; z < c_in; ++z)
+                for (int z = 0; z < c_in; ++z)
                 {
                     input_tile[z] = in[x + (y * stridey_in) + (z * stridez_in) + (n * stridew_in)];
                 }
@@ -554,14 +547,15 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
 
                 const int output_offset = xo + (yo * stridey_out) + (zo * stridez_out) + (n * stridew_out);
 
-                for(int yi = 0; yi < static_cast<int>(out_tile_h); ++yi)
+                for (int yi = 0; yi < static_cast<int>(out_tile_h); ++yi)
                 {
-                    for(int xi = 0; xi < static_cast<int>(out_tile_w); ++xi)
+                    for (int xi = 0; xi < static_cast<int>(out_tile_w); ++xi)
                     {
                         // Check out-of-bound writes
-                        if((xo + xi < w_out) && (yo + yi < h_out))
+                        if ((xo + xi < w_out) && (yo + yi < h_out))
                         {
-                            out[output_offset + yi * stridey_out + xi] = scale_factor * scale_factor * output_tile[xi + yi * step_y_transf_tile];
+                            out[output_offset + yi * stridey_out + xi] =
+                                scale_factor * scale_factor * output_tile[xi + yi * step_y_transf_tile];
 
                             // Add bias
                             out[output_offset + yi * stridey_out + xi] += b[zo];
@@ -575,12 +569,26 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
     return out;
 }
 
-template SimpleTensor<float> winograd_filter_transform(const SimpleTensor<float> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
-template SimpleTensor<float> winograd_input_transform(const SimpleTensor<float> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
-template SimpleTensor<float> winograd_output_transform(const SimpleTensor<float> &in, const SimpleTensor<float> &b, const TensorShape &output_shape, const WinogradInfo &winograd_info);
-template SimpleTensor<half> winograd_filter_transform(const SimpleTensor<half> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
-template SimpleTensor<half> winograd_input_transform(const SimpleTensor<half> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
-template SimpleTensor<half> winograd_output_transform(const SimpleTensor<half> &in, const SimpleTensor<half> &b, const TensorShape &output_shape, const WinogradInfo &winograd_info);
+template SimpleTensor<float> winograd_filter_transform(const SimpleTensor<float> &in,
+                                                       const TensorShape         &output_shape,
+                                                       const WinogradInfo        &winograd_info);
+template SimpleTensor<float> winograd_input_transform(const SimpleTensor<float> &in,
+                                                      const TensorShape         &output_shape,
+                                                      const WinogradInfo        &winograd_info);
+template SimpleTensor<float> winograd_output_transform(const SimpleTensor<float> &in,
+                                                       const SimpleTensor<float> &b,
+                                                       const TensorShape         &output_shape,
+                                                       const WinogradInfo        &winograd_info);
+template SimpleTensor<half>  winograd_filter_transform(const SimpleTensor<half> &in,
+                                                       const TensorShape        &output_shape,
+                                                       const WinogradInfo       &winograd_info);
+template SimpleTensor<half>  winograd_input_transform(const SimpleTensor<half> &in,
+                                                      const TensorShape        &output_shape,
+                                                      const WinogradInfo       &winograd_info);
+template SimpleTensor<half>  winograd_output_transform(const SimpleTensor<half> &in,
+                                                       const SimpleTensor<half> &b,
+                                                       const TensorShape        &output_shape,
+                                                       const WinogradInfo       &winograd_info);
 
 } // namespace reference
 } // namespace validation

@@ -27,11 +27,12 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Permute.h"
 
@@ -48,20 +49,23 @@ namespace validation
 {
 namespace
 {
-constexpr int NUM_THREADS =  3;
-}// namespace
+constexpr int NUM_THREADS = 3;
+} // namespace
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class CpuTransposeGenericFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape, DataType data_type, QuantizationInfo qinfo, TestType test_type = TestType::ConfigureOnceRunOnce)
+    void setup(TensorShape      shape,
+               DataType         data_type,
+               QuantizationInfo qinfo,
+               TestType         test_type = TestType::ConfigureOnceRunOnce)
     {
         if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
         }
-        _test_type  = test_type;
+        _test_type         = test_type;
         _num_parallel_runs = (_test_type == TestType::ConfigureOnceRunMultiThreaded ? NUM_THREADS : 1);
 
         compute_target(shape, data_type, qinfo);
@@ -72,17 +76,17 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(tensor.data_type() == DataType::F32)
+        if (tensor.data_type() == DataType::F32)
         {
             std::uniform_real_distribution<float> distribution(-10.0f, 10.0f);
             library->fill(tensor, distribution, 0);
         }
-        else if(tensor.data_type() == DataType::F16)
+        else if (tensor.data_type() == DataType::F16)
         {
-            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -10.0f, 10.0f };
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-10.0f, 10.0f};
             library->fill(tensor, distribution, 0);
         }
-        else if(!is_data_type_quantized(tensor.data_type()))
+        else if (!is_data_type_quantized(tensor.data_type()))
         {
             std::uniform_int_distribution<> distribution(0, 100);
             library->fill(tensor, distribution, 0);
@@ -93,9 +97,10 @@ protected:
         }
     }
 
-    void allocate_and_fill_tensors(TensorType *src, TensorType *dst){
-        for(int i = 0; i < _num_parallel_runs; ++i) {
-
+    void allocate_and_fill_tensors(TensorType *src, TensorType *dst)
+    {
+        for (int i = 0; i < _num_parallel_runs; ++i)
+        {
             ARM_COMPUTE_ASSERT(src[i].info()->is_resizable());
             ARM_COMPUTE_ASSERT(dst[i].info()->is_resizable());
 
@@ -114,17 +119,18 @@ protected:
     void compute_target(const TensorShape &shape, DataType data_type, QuantizationInfo qinfo)
     {
         // Create tensors
-        TensorType src[NUM_THREADS];
-        TensorType dst[NUM_THREADS];
+        TensorType  src[NUM_THREADS];
+        TensorType  dst[NUM_THREADS];
         TensorType *dst_ptrs[NUM_THREADS];
 
         // Retain the shape but make rows the columns of the original shape
         TensorShape output_shape = shape;
         std::swap(output_shape[0], output_shape[1]);
 
-        for(int i = 0; i < _num_parallel_runs; ++i){
-            src[i] = create_tensor<TensorType>(shape, data_type, 1, qinfo);
-            dst[i] = create_tensor<TensorType>(output_shape, data_type, 1, qinfo);
+        for (int i = 0; i < _num_parallel_runs; ++i)
+        {
+            src[i]      = create_tensor<TensorType>(shape, data_type, 1, qinfo);
+            dst[i]      = create_tensor<TensorType>(output_shape, data_type, 1, qinfo);
             dst_ptrs[i] = &dst[i];
         }
 
@@ -134,27 +140,28 @@ protected:
 
         allocate_and_fill_tensors(src, dst);
 
-        if(_test_type == TestType::ConfigureOnceRunMultiThreaded)
+        if (_test_type == TestType::ConfigureOnceRunMultiThreaded)
         {
 #ifndef BARE_METAL
 
-            ITensorPack run_pack[NUM_THREADS];
+            ITensorPack              run_pack[NUM_THREADS];
             std::vector<std::thread> threads;
 
             threads.reserve(_num_parallel_runs);
-            for(int i = 0; i < _num_parallel_runs; ++i)
+            for (int i = 0; i < _num_parallel_runs; ++i)
             {
                 // Compute function
-                run_pack[i] = { {arm_compute::TensorType::ACL_SRC, &src[i]},
-                                {arm_compute::TensorType::ACL_DST, dst_ptrs[i]}};
+                run_pack[i] = {{arm_compute::TensorType::ACL_SRC, &src[i]},
+                               {arm_compute::TensorType::ACL_DST, dst_ptrs[i]}};
 
-                threads.emplace_back([&,i]
-                {
-                    trans_func.run(run_pack[i]);
-                    _target[i] = std::move(*(dst_ptrs[i]));
-                });
+                threads.emplace_back(
+                    [&, i]
+                    {
+                        trans_func.run(run_pack[i]);
+                        _target[i] = std::move(*(dst_ptrs[i]));
+                    });
             }
-            for(int i = 0; i < _num_parallel_runs; ++i)
+            for (int i = 0; i < _num_parallel_runs; ++i)
             {
                 threads[i].join();
             }
@@ -163,8 +170,8 @@ protected:
         else
         {
             // Compute function
-            ITensorPack run_pack{{ arm_compute::TensorType::ACL_SRC, &src[0]},
-                {arm_compute::TensorType::ACL_DST, dst_ptrs[0]}};
+            ITensorPack run_pack{{arm_compute::TensorType::ACL_SRC, &src[0]},
+                                 {arm_compute::TensorType::ACL_DST, dst_ptrs[0]}};
             trans_func.run(run_pack);
             _target[0] = std::move(*(dst_ptrs[0]));
         }
@@ -175,7 +182,7 @@ protected:
         // Create reference
         SimpleTensor<T> src{shape, data_type, 1, qinfo};
 
-        for(int i = 0; i < _num_parallel_runs; ++i)
+        for (int i = 0; i < _num_parallel_runs; ++i)
         {
             // Fill reference
             fill(src);
@@ -190,13 +197,13 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class CpuTransposeValidationFixture
-    : public CpuTransposeGenericFixture<TensorType, AccessorType, FunctionType, T>
+class CpuTransposeValidationFixture : public CpuTransposeGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(const TensorShape &shape, DataType data_type)
     {
-        CpuTransposeGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, QuantizationInfo());
+        CpuTransposeGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type,
+                                                                                     QuantizationInfo());
     }
 };
 
@@ -207,8 +214,8 @@ class CpuTransposeThreadSafeValidationFixture
 public:
     void setup(const TensorShape &shape, DataType data_type)
     {
-        CpuTransposeGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, QuantizationInfo(),
-            TestType::ConfigureOnceRunMultiThreaded);
+        CpuTransposeGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, data_type, QuantizationInfo(), TestType::ConfigureOnceRunMultiThreaded);
     }
 };
 
@@ -219,8 +226,8 @@ class CpuTransposeQuantizedThreadSafeValidationFixture
 public:
     void setup(const TensorShape &shape, DataType data_type, QuantizationInfo qinfo)
     {
-        CpuTransposeGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, qinfo,
-            TestType::ConfigureOnceRunMultiThreaded);
+        CpuTransposeGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, data_type, qinfo, TestType::ConfigureOnceRunMultiThreaded);
     }
 };
 

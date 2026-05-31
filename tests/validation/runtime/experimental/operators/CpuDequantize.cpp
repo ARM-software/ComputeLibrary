@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,18 +22,19 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/experimental/operators/CpuDequantize.h"
+
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/DatatypeDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/CpuDequantizeFixture.h"
-
+#include "tests/validation/Validation.h"
 
 /*
  * Tests for arm_compute::experimental::op::CpuDequantize which is a shallow wrapper for arm_compute::cpu::CpuDequantize.
@@ -48,39 +49,36 @@ namespace validation
 {
 namespace
 {
-        using   framework::dataset::make;
+using framework::dataset::make;
 #ifdef ARM_COMPUTE_ENABLE_FP16
-const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", {DataType::F16, DataType::F32});
 #else  /* ARM_COMPUTE_ENABLE_FP16 */
-const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
+const auto data_types = framework::dataset::make("DataType", {DataType::F32});
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 
 const auto dataset_quant_f32 = combine(datasets::SmallShapes(),
-                                        datasets::QuantizedTypes(),
-                                             make("DataType", DataType::F32),
-                                     make("DataLayout", { DataLayout::NCHW })
-                                     );
+                                       datasets::QuantizedTypes(),
+                                       make("DataType", DataType::F32),
+                                       make("DataLayout", {DataLayout::NCHW}));
 
 const auto dataset_quant_asymm_signed_f32 = combine(datasets::SmallShapes(),
-                                                                  make("QuantizedTypes", { DataType::QASYMM8_SIGNED }),
-                                                          make("DataType", DataType::F32),
-                                                  make("DataLayout", { DataLayout::NCHW })
-                                                  );
+                                                    make("QuantizedTypes", {DataType::QASYMM8_SIGNED}),
+                                                    make("DataType", DataType::F32),
+                                                    make("DataLayout", {DataLayout::NCHW}));
 
-const auto dataset_quant_per_channel_f32 = combine(datasets::SmallShapes(), datasets::QuantizedPerChannelTypes(),
-                                                         make("DataType", DataType::F32),
-                                                 make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })
-);
+const auto dataset_quant_per_channel_f32 = combine(datasets::SmallShapes(),
+                                                   datasets::QuantizedPerChannelTypes(),
+                                                   make("DataType", DataType::F32),
+                                                   make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}));
 
-const auto dataset_precommit_f32 = concat(concat(dataset_quant_f32, dataset_quant_per_channel_f32), dataset_quant_asymm_signed_f32);
-
+const auto dataset_precommit_f32 =
+    concat(concat(dataset_quant_f32, dataset_quant_per_channel_f32), dataset_quant_asymm_signed_f32);
 
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(OPERATORS)
 TEST_SUITE(CpuDequantize)
-
 
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(

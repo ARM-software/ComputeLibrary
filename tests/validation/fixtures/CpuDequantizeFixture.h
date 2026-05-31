@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #ifndef ACL_TESTS_VALIDATION_FIXTURES_CPUDEQUANTIZEFIXTURE_H
 #define ACL_TESTS_VALIDATION_FIXTURES_CPUDEQUANTIZEFIXTURE_H
 
-
 #include "tests/validation/fixtures/DequantizationLayerFixture.h"
 
 namespace arm_compute
@@ -34,12 +33,14 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class CpuDequantizationValidationFixture : public DequantizationValidationFixture<TensorType,  AccessorType,  FunctionType, T>
+class CpuDequantizationValidationFixture
+    : public DequantizationValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(TensorShape shape, DataType src_data_type, DataType dst_datatype, DataLayout data_layout)
     {
-        if(!cpu_supports_dtypes({src_data_type, dst_datatype})){
+        if (!cpu_supports_dtypes({src_data_type, dst_datatype}))
+        {
             return;
         }
 
@@ -51,7 +52,7 @@ public:
 protected:
     TensorType compute_target(TensorShape shape, DataType src_data_type, DataType dst_datatype, DataLayout data_layout)
     {
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(shape, PermutationVector(2U, 0U, 1U));
         }
@@ -78,15 +79,13 @@ protected:
         this->fill(AccessorType(src));
 
         // Prepare tensor pack
-        ITensorPack run_pack = { { arm_compute::TensorType::ACL_SRC, &src },
-                                { arm_compute::TensorType::ACL_DST, &dst } };
+        ITensorPack run_pack = {{arm_compute::TensorType::ACL_SRC, &src}, {arm_compute::TensorType::ACL_DST, &dst}};
 
         // Compute function
         dequantization_layer.run(run_pack);
 
         return dst;
     }
-
 };
 } // namespace validation
 } // namespace test

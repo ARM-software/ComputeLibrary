@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
 
@@ -108,6 +109,7 @@ void NEFillBorderKernel::configure(ITensor          *tensor,
                                    const PixelValue &constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
+    ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(tensor->info());
     _tensor = tensor;
     configure(tensor->info(), border_size, border_mode, constant_border_value);
 }
@@ -118,6 +120,7 @@ void NEFillBorderKernel::configure(ITensorInfo      *tensor,
                                    const PixelValue &constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
+    ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(tensor);
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_ERROR_ON(tensor->data_type() == DataType::UNKNOWN);
 

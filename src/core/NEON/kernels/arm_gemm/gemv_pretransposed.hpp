@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, 2024-2025 Arm Limited.
+ * Copyright (c) 2017-2022, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,10 +25,10 @@
 
 #include <stdio.h>
 
-#include "arm_gemm.hpp"
+#include "arm_gemm/arm_gemm.hpp"
 
 #ifdef CYCLE_PROFILING
-#include "profiler.hpp"
+#include "arm_common/profiler.hpp"
 #endif
 
 namespace arm_gemm {
@@ -81,9 +81,9 @@ void run_gemv_kernel<Requantize32>::run(
 // This is implementation is for GEMV with pretransposition.
 //
 // batches are not supported as a batched GEMV makes no sense (can be converted to a GEMM).
-template<typename strategy, typename To, typename Tr, typename OutputStage=Nothing>
-class GemvPretransposed : public GemmCommon<To, To, Tr> {
-    typedef typename strategy::operand_type Toi;
+template<typename strategy, typename Tlo, typename Tro, typename Tr, typename OutputStage=Nothing>
+class GemvPretransposed : public GemmCommon<Tlo, Tro, Tr> {
+    typedef typename strategy::operand_type Troi;
     typedef typename strategy::result_type Tri;
 
     const GemmArgs     _args;
@@ -93,7 +93,7 @@ class GemvPretransposed : public GemmCommon<To, To, Tr> {
     unsigned int k_block=0;
     unsigned int n_block=0;
 
-    const Toi *_B_pretransposed = nullptr;
+    const Troi *_B_pretransposed = nullptr;
 
     OutputStage _os;
 
@@ -197,10 +197,10 @@ public:
     }
 
     size_t get_B_pretransposed_array_size() const override {
-        return _buffer_per_multi * _args._nmulti * sizeof(To) + get_col_sum_size();
+        return _buffer_per_multi * _args._nmulti * sizeof(Troi) + get_col_sum_size();
     }
 
-    void requantize_bias(void *in_buffer, const To *B, const int ldb, const int B_multi_stride) override {
+    void requantize_bias(void *in_buffer, const Tro *B, const int ldb, const int B_multi_stride) override {
         // Column sums go on the front of the pretransposed buffer in requantized cases.
         // We could optimize here in case we don't actually need to sum the columns, but this code is only run on setup.
         if (std::is_same<OutputStage, Requantize32>::value) {
@@ -223,14 +223,14 @@ public:
         }
     }
 
-    void pretranspose_B_array(void *buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed) override {
+    void pretranspose_B_array(void *buffer, const Tro *B, const int ldb, const int B_multi_stride, bool transposed) override {
         assert(!transposed);
 
         requantize_bias(buffer, B, ldb, B_multi_stride);
 
         // The actual transposed buffer goes after the column sums (if any)
         uintptr_t buffer_int = reinterpret_cast<uintptr_t>(buffer);
-        Toi *B_buffer = reinterpret_cast<Toi *>(buffer_int + get_col_sum_size());
+        Troi *B_buffer = reinterpret_cast<Troi *>(buffer_int + get_col_sum_size());
 
         strategy strat(_args._ci);
 
@@ -242,13 +242,12 @@ public:
     }
 
     void set_pretransposed_B_data(void *buffer) override {
-        _B_pretransposed = reinterpret_cast<Toi *>(buffer);
+        _B_pretransposed = reinterpret_cast<Troi *>(buffer);
     }
 
     GemmConfig get_config() override {
         GemmConfig c;
 
-        c.method = GemmMethod::GEMV_PRETRANSPOSED;
         c.inner_block_size = k_block;
         c.outer_block_size = n_block;
         c.filter = get_type_name<strategy>();
@@ -277,3 +276,4 @@ public:
 };
 
 } // namespace arm_gemm
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2019-2021,2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,16 +22,16 @@
  * SOFTWARE.
  */
 
-#ifdef __aarch64__
+#if defined(ARM_COMPUTE_ENABLE_BF16) && defined(__aarch64__)
 
 template<>
 void interleave_block<8, 4, VLType::None, false>(
   bfloat16 * &out_ptr, const float * const * in, size_t width, size_t height,
-  size_t row_offset, bool
+  size_t row_offset, bool, int32_t
 )
 {
   __asm__ __volatile__(
-      "ldr x28, [%x[in], #0x0]\n"
+      "ldr x28, [%x[in], #0]\n"
       "ldr x27, [%x[in], #0x8]\n"
       "cmp %x[height], #0x8\n"
       "ldr x26, [%x[in], #0x10]\n"
@@ -61,14 +61,14 @@ void interleave_block<8, 4, VLType::None, false>(
       "csel x22, x22, x28, GT\n"
       "1:"  // no_pointer_adj
       "cmp %x[width], #0x4\n"
-      "prfm pldl1keep, [x28, #0x0]\n"
-      "prfm pldl1keep, [x27, #0x0]\n"
-      "prfm pldl1keep, [x26, #0x0]\n"
-      "prfm pldl1keep, [x25, #0x0]\n"
-      "prfm pldl1keep, [x24, #0x0]\n"
-      "prfm pldl1keep, [x23, #0x0]\n"
-      "prfm pldl1keep, [x22, #0x0]\n"
-      "prfm pldl1keep, [x21, #0x0]\n"
+      "prfm pldl1keep, [x28, #0]\n"
+      "prfm pldl1keep, [x27, #0]\n"
+      "prfm pldl1keep, [x26, #0]\n"
+      "prfm pldl1keep, [x25, #0]\n"
+      "prfm pldl1keep, [x24, #0]\n"
+      "prfm pldl1keep, [x23, #0]\n"
+      "prfm pldl1keep, [x22, #0]\n"
+      "prfm pldl1keep, [x21, #0]\n"
       "prfm pldl1keep, [x28, #0x40]\n"
       "prfm pldl1keep, [x27, #0x40]\n"
       "prfm pldl1keep, [x26, #0x40]\n"
@@ -105,7 +105,7 @@ void interleave_block<8, 4, VLType::None, false>(
       "prfm pldl1keep, [x21, #0x70]\n"
       ".inst 0x4ea16ab1  // bfcvtn2 v17.8h, v21.4s\n"
       ".inst 0x4ea16a90  // bfcvtn2 v16.8h, v20.4s\n"
-      "str q19, [%x[out_ptr], #0x0]\n"
+      "str q19, [%x[out_ptr], #0]\n"
       "str q18, [%x[out_ptr], #0x10]\n"
       "str q17, [%x[out_ptr], #0x20]\n"
       "str q16, [%x[out_ptr], #0x30]\n"
@@ -134,15 +134,15 @@ void interleave_block<8, 4, VLType::None, false>(
       "ld1 { v20.s }[2], [x21]\n"
       "b 5f\n"
       "4:"  // odd_loads_1_0
-      "ldr s19, [x28, #0x0]\n"
-      "ldr s23, [x27, #0x0]\n"
+      "ldr s19, [x28, #0]\n"
+      "ldr s23, [x27, #0]\n"
       "mov x20, #0x1\n"
-      "ldr s18, [x26, #0x0]\n"
-      "ldr s22, [x25, #0x0]\n"
-      "ldr s17, [x24, #0x0]\n"
-      "ldr s21, [x23, #0x0]\n"
-      "ldr s16, [x22, #0x0]\n"
-      "ldr s20, [x21, #0x0]\n"
+      "ldr s18, [x26, #0]\n"
+      "ldr s22, [x25, #0]\n"
+      "ldr s17, [x24, #0]\n"
+      "ldr s21, [x23, #0]\n"
+      "ldr s16, [x22, #0]\n"
+      "ldr s20, [x21, #0]\n"
       "5:"  // Odd load end
       ".inst 0x0ea16a73  // bfcvtn v19.4h, v19.4s\n"
       ".inst 0x0ea16a52  // bfcvtn v18.4h, v18.4s\n"
@@ -152,7 +152,7 @@ void interleave_block<8, 4, VLType::None, false>(
       ".inst 0x4ea16ad2  // bfcvtn2 v18.8h, v22.4s\n"
       ".inst 0x4ea16ab1  // bfcvtn2 v17.8h, v21.4s\n"
       ".inst 0x4ea16a90  // bfcvtn2 v16.8h, v20.4s\n"
-      "str q19, [%x[out_ptr], #0x0]\n"
+      "str q19, [%x[out_ptr], #0]\n"
       "str q18, [%x[out_ptr], #0x10]\n"
       "str q17, [%x[out_ptr], #0x20]\n"
       "str q16, [%x[out_ptr], #0x30]\n"
@@ -165,4 +165,5 @@ void interleave_block<8, 4, VLType::None, false>(
 }
 
 
-#endif // __aarch64__
+#endif // defined(ARM_COMPUTE_ENABLE_BF16) && defined(__aarch64__)
+

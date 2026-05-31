@@ -34,7 +34,7 @@
 #define TEST_SUITE(SUITE_NAME)  \
     namespace SUITE_NAME##Suite \
     {                           \
-    static arm_compute::test::framework::detail::TestSuiteRegistrar SUITE_NAME##Suite_reg{ #SUITE_NAME };
+        static arm_compute::test::framework::detail::TestSuiteRegistrar SUITE_NAME##Suite_reg{#SUITE_NAME};
 
 #define TEST_SUITE_END()                                                       \
     static arm_compute::test::framework::detail::TestSuiteRegistrar Suite_end; \
@@ -50,7 +50,7 @@
 #define CONCAT(ARG0, ARG1) ARG0##ARG1
 
 #define VARIADIC_SIZE_IMPL(e0, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10, e11, e12, e13, e14, e15, size, ...) size
-#define VARIADIC_SIZE(...) VARIADIC_SIZE_IMPL(__VA_ARGS__, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+#define VARIADIC_SIZE(...)                                                                                  VARIADIC_SIZE_IMPL(__VA_ARGS__, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
 
 #define JOIN_PARAM1(OP, param) OP(0, param)
 #define JOIN_PARAM2(OP, param, ...) \
@@ -102,22 +102,21 @@
     CONCAT(JOIN_PARAM, NUM)      \
     (OP, __VA_ARGS__)
 
-#define MAKE_TYPE_PARAM(i, name) typename T##i
-#define MAKE_ARG_PARAM(i, name) const T##i &name
+#define MAKE_TYPE_PARAM(i, name)          typename T##i
+#define MAKE_ARG_PARAM(i, name)           const T##i &name
 #define MAKE_NON_CONST_ARG_PARAM(i, name) T##i &name
-#define MAKE_TYPE_PARAMS(...) JOIN_PARAM(MAKE_TYPE_PARAM, VARIADIC_SIZE(__VA_ARGS__), __VA_ARGS__)
-#define MAKE_ARG_PARAMS(...) JOIN_PARAM(MAKE_ARG_PARAM, VARIADIC_SIZE(__VA_ARGS__), __VA_ARGS__)
-#define MAKE_NON_CONST_ARG_PARAMS(...) JOIN_PARAM(MAKE_NON_CONST_ARG_PARAM, VARIADIC_SIZE(__VA_ARGS__), __VA_ARGS__)
+#define MAKE_TYPE_PARAMS(...)             JOIN_PARAM(MAKE_TYPE_PARAM, VARIADIC_SIZE(__VA_ARGS__), __VA_ARGS__)
+#define MAKE_ARG_PARAMS(...)              JOIN_PARAM(MAKE_ARG_PARAM, VARIADIC_SIZE(__VA_ARGS__), __VA_ARGS__)
+#define MAKE_NON_CONST_ARG_PARAMS(...)    JOIN_PARAM(MAKE_NON_CONST_ARG_PARAM, VARIADIC_SIZE(__VA_ARGS__), __VA_ARGS__)
 
 //
 // TEST CASE MACROS
 //
-#define TEST_CASE_CONSTRUCTOR(TEST_NAME) \
-    TEST_NAME() = default;
-#define DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                   \
-    template <typename D>                                                \
-    explicit TEST_NAME(D &&data) : DataTestCase{ std::forward<D>(data) } \
-    {                                                                    \
+#define TEST_CASE_CONSTRUCTOR(TEST_NAME) TEST_NAME() = default;
+#define DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                 \
+    template <typename D>                                              \
+    explicit TEST_NAME(D &&data) : DataTestCase{std::forward<D>(data)} \
+    {                                                                  \
     }
 #define FIXTURE_SETUP(FIXTURE)                                   \
     void do_setup() override                                     \
@@ -129,7 +128,7 @@
     void do_setup() override                                     \
     {                                                            \
         framework::Framework::get().set_new_fixture_call(false); \
-        apply(this, &FIXTURE::setup, _data);              \
+        apply(this, &FIXTURE::setup, _data);                     \
     }
 #define FIXTURE_DATA_SETUP_NEW(FIXTURE)                         \
     void do_setup() override                                    \
@@ -137,10 +136,10 @@
         framework::Framework::get().set_new_fixture_call(true); \
         apply(this, &FIXTURE::setup, _data);                    \
                                                                 \
-        if(!_skip_test)                                         \
+        if (!_skip_test)                                        \
         {                                                       \
             configure_target();                                 \
-            if(!framework::Framework::get().configure_only())   \
+            if (!framework::Framework::get().configure_only())  \
             {                                                   \
                 allocate_and_run_target();                      \
                 compute_reference();                            \
@@ -165,18 +164,18 @@
 #define TEST_REGISTRAR(TEST_NAME, MODE, STATUS)                                               \
     static arm_compute::test::framework::detail::TestCaseRegistrar<TEST_NAME> TEST_NAME##_reg \
     {                                                                                         \
-        #TEST_NAME, MODE, STATUS                                                              \
+#TEST_NAME, MODE, STATUS                                                              \
     }
 #define DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET)                                                          \
     static arm_compute::test::framework::detail::TestCaseRegistrar<TEST_NAME<decltype(DATASET)::type>> TEST_NAME##_reg \
     {                                                                                                                  \
-        #TEST_NAME, MODE, STATUS, DATASET                                                                              \
+#TEST_NAME, MODE, STATUS, DATASET                                                                              \
     }
 
 #define TEST_CASE_IMPL(TEST_NAME, MODE, STATUS)                     \
     class TEST_NAME : public arm_compute::test::framework::TestCase \
     {                                                               \
-    public:                                                     \
+    public:                                                         \
         TEST_CASE_CONSTRUCTOR(TEST_NAME)                            \
         void do_run() override;                                     \
     };                                                              \
@@ -196,7 +195,7 @@
     template <typename... As>                                                                                       \
     class TEST_NAME<std::tuple<As...>> : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type> \
     {                                                                                                               \
-    public:                                                                                                     \
+    public:                                                                                                         \
         DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                              \
         void do_run() override                                                                                      \
         {                                                                                                           \
@@ -210,58 +209,62 @@
     template <MAKE_TYPE_PARAMS(__VA_ARGS__)>                                                                        \
     void TEST_NAME<std::tuple<As...>>::run(MAKE_ARG_PARAMS(__VA_ARGS__))
 
-#define NON_CONST_DATA_TEST_CASE_IMPL(TEST_NAME, MODE, STATUS, DATASET, ...)                                                  \
+#define NON_CONST_DATA_TEST_CASE_IMPL(TEST_NAME, MODE, STATUS, DATASET, ...)                                        \
     template <typename T>                                                                                           \
     class TEST_NAME;                                                                                                \
     template <typename... As>                                                                                       \
     class TEST_NAME<std::tuple<As...>> : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type> \
     {                                                                                                               \
-    public:                                                                                                     \
+    public:                                                                                                         \
         DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                              \
         void do_run() override                                                                                      \
         {                                                                                                           \
             arm_compute::test::framework::apply(this, &TEST_NAME::run<As...>, _data);                               \
         }                                                                                                           \
         template <MAKE_TYPE_PARAMS(__VA_ARGS__)>                                                                    \
-        void run(MAKE_NON_CONST_ARG_PARAMS(__VA_ARGS__));                                                                     \
+        void run(MAKE_NON_CONST_ARG_PARAMS(__VA_ARGS__));                                                           \
     };                                                                                                              \
     DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET);                                                          \
     template <typename... As>                                                                                       \
     template <MAKE_TYPE_PARAMS(__VA_ARGS__)>                                                                        \
     void TEST_NAME<std::tuple<As...>>::run(MAKE_NON_CONST_ARG_PARAMS(__VA_ARGS__))
 
-#define NON_CONST_DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...) \
-    NON_CONST_DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET, __VA_ARGS__)
+#define NON_CONST_DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...)                                                   \
+    NON_CONST_DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, \
+                                  DATASET, __VA_ARGS__)
 
-#define DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...) \
-    DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET, __VA_ARGS__)
-#define EXPECTED_FAILURE_DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...) \
-    DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, DATASET, __VA_ARGS__)
-#define DISABLED_DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...) \
-    DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET, __VA_ARGS__)
+#define DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...)                                                            \
+    DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET, \
+                        __VA_ARGS__)
+#define EXPECTED_FAILURE_DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...)                                            \
+    DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, \
+                        DATASET, __VA_ARGS__)
+#define DISABLED_DATA_TEST_CASE(TEST_NAME, MODE, DATASET, ...)                                                     \
+    DATA_TEST_CASE_IMPL(TEST_NAME, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET, \
+                        __VA_ARGS__)
 
-#define VALIDATION_FIXTURE_RUN()    \
-    void do_run() override          \
-    {                               \
-        if (_iteration != 0)        \
-        {                           \
-            do_setup();             \
-        }                           \
-        do_validate();              \
-        ++_iteration;               \
+#define VALIDATION_FIXTURE_RUN() \
+    void do_run() override       \
+    {                            \
+        if (_iteration != 0)     \
+        {                        \
+            do_setup();          \
+        }                        \
+        do_validate();           \
+        ++_iteration;            \
     }
 
 #define FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, STATUS)                    \
     class TEST_NAME : public arm_compute::test::framework::TestCase, public FIXTURE \
     {                                                                               \
-    public:                                                                     \
+    public:                                                                         \
         TEST_CASE_CONSTRUCTOR(TEST_NAME)                                            \
         FIXTURE_SETUP(FIXTURE)                                                      \
         VALIDATION_FIXTURE_RUN()                                                    \
         void do_validate();                                                         \
         FIXTURE_TEARDOWN(FIXTURE)                                                   \
     private:                                                                        \
-        unsigned int _iteration {0};                                                \
+        unsigned int _iteration{0};                                                 \
     };                                                                              \
     TEST_REGISTRAR(TEST_NAME, MODE, STATUS);                                        \
     void TEST_NAME::do_validate()
@@ -269,7 +272,8 @@
 #define FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
     FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE)
 #define EXPECTED_FAILURE_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
-    FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE)
+    FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE,                 \
+                           arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE)
 #define DISABLED_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
     FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED)
 
@@ -278,62 +282,70 @@
     {                                                          \
     }
 
-#define FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, STATUS, DATASET)                                                      \
-    template <typename T>                                                                                                           \
-    class TEST_NAME;                                                                                                                \
-    template <typename... As>                                                                                                       \
-    class TEST_NAME<std::tuple<As...>> : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type>, public FIXTURE \
-    {                                                                                                                               \
-    public:                                                                                                                     \
-        DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                                              \
-        FIXTURE_DATA_SETUP(FIXTURE)                                                                                                 \
-        VALIDATION_FIXTURE_RUN() \
-        void do_validate();                                                                                                         \
-        FIXTURE_TEARDOWN(FIXTURE)                                                                                                   \
-    private:                                                                                                                        \
-        unsigned int _iteration {0};                                                                                                \
-    };                                                                                                                              \
-    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET);                                                                          \
-    template <typename... As>                                                                                                       \
+#define FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, STATUS, DATASET)                                       \
+    template <typename T>                                                                                            \
+    class TEST_NAME;                                                                                                 \
+    template <typename... As>                                                                                        \
+    class TEST_NAME<std::tuple<As...>> : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type>, \
+                                         public FIXTURE                                                              \
+    {                                                                                                                \
+    public:                                                                                                          \
+        DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                               \
+        FIXTURE_DATA_SETUP(FIXTURE)                                                                                  \
+        VALIDATION_FIXTURE_RUN()                                                                                     \
+        void do_validate();                                                                                          \
+        FIXTURE_TEARDOWN(FIXTURE)                                                                                    \
+    private:                                                                                                         \
+        unsigned int _iteration{0};                                                                                  \
+    };                                                                                                               \
+    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET);                                                           \
+    template <typename... As>                                                                                        \
     void TEST_NAME<std::tuple<As...>>::do_validate()
 
 #define FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
-    FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET)
+    FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE,         \
+                                arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET)
 #define EXPECTED_FAILURE_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
-    FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, DATASET)
+    FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE,                          \
+                                arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, DATASET)
 #define DISABLED_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
-    FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET)
+    FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE,                  \
+                                arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET)
 
-#define FIXTURE_DATA_TEST_CASE_NEW_IMPL(TEST_NAME, FIXTURE, MODE, STATUS, DATASET)                                                  \
-    template <typename T>                                                                                                           \
-    class TEST_NAME;                                                                                                                \
-    template <typename... As>                                                                                                       \
-    class TEST_NAME<std::tuple<As...>> : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type>, public FIXTURE \
-    {                                                                                                                               \
-    public:                                                                                                                     \
-        DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                                              \
-        FIXTURE_DATA_SETUP_NEW(FIXTURE)                                                                                             \
-        VALIDATION_FIXTURE_RUN()                                                                                                    \
-        void do_validate();                                                                                                         \
-        FIXTURE_TEARDOWN(FIXTURE)                                                                                                   \
-    private:                                                                                                                        \
-        unsigned int _iteration {0};                                                                                                \
-    };                                                                                                                              \
-    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET);                                                                          \
-    template <typename... As>                                                                                                       \
+#define FIXTURE_DATA_TEST_CASE_NEW_IMPL(TEST_NAME, FIXTURE, MODE, STATUS, DATASET)                                   \
+    template <typename T>                                                                                            \
+    class TEST_NAME;                                                                                                 \
+    template <typename... As>                                                                                        \
+    class TEST_NAME<std::tuple<As...>> : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type>, \
+                                         public FIXTURE                                                              \
+    {                                                                                                                \
+    public:                                                                                                          \
+        DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                               \
+        FIXTURE_DATA_SETUP_NEW(FIXTURE)                                                                              \
+        VALIDATION_FIXTURE_RUN()                                                                                     \
+        void do_validate();                                                                                          \
+        FIXTURE_TEARDOWN(FIXTURE)                                                                                    \
+    private:                                                                                                         \
+        unsigned int _iteration{0};                                                                                  \
+    };                                                                                                               \
+    DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET);                                                           \
+    template <typename... As>                                                                                        \
     void TEST_NAME<std::tuple<As...>>::do_validate()
 
 #define FIXTURE_DATA_TEST_CASE_NEW(TEST_NAME, FIXTURE, MODE, DATASET) \
-    FIXTURE_DATA_TEST_CASE_NEW_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET)
+    FIXTURE_DATA_TEST_CASE_NEW_IMPL(TEST_NAME, FIXTURE, MODE,         \
+                                    arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET)
 #define EXPECTED_FAILURE_FIXTURE_DATA_TEST_CASE_NEW(TEST_NAME, FIXTURE, MODE, DATASET) \
-    FIXTURE_DATA_TEST_CASE_NEW_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, DATASET)
+    FIXTURE_DATA_TEST_CASE_NEW_IMPL(TEST_NAME, FIXTURE, MODE,                          \
+                                    arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, DATASET)
 #define DISABLED_FIXTURE_DATA_TEST_CASE_NEW(TEST_NAME, FIXTURE, MODE, DATASET) \
-    FIXTURE_DATA_TEST_CASE_NEW_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET)
+    FIXTURE_DATA_TEST_CASE_NEW_IMPL(TEST_NAME, FIXTURE, MODE,                  \
+                                    arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET)
 
 #define REGISTER_FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, STATUS)           \
     class TEST_NAME : public arm_compute::test::framework::TestCase, public FIXTURE \
     {                                                                               \
-    public:                                                                     \
+    public:                                                                         \
         TEST_CASE_CONSTRUCTOR(TEST_NAME)                                            \
         FIXTURE_SETUP(FIXTURE)                                                      \
         FIXTURE_RUN(FIXTURE)                                                        \
@@ -342,34 +354,41 @@
     };                                                                              \
     TEST_REGISTRAR(TEST_NAME, MODE, STATUS)
 
-#define REGISTER_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
-    REGISTER_FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE)
+#define REGISTER_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE)  \
+    REGISTER_FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, \
+                                    arm_compute::test::framework::TestCaseFactory::Status::ACTIVE)
 #define EXPECTED_FAILURE_REGISTER_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
-    REGISTER_FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE)
+    REGISTER_FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE,                 \
+                                    arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE)
 #define DISABLED_REGISTER_FIXTURE_TEST_CASE(TEST_NAME, FIXTURE, MODE) \
-    REGISTER_FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED)
+    REGISTER_FIXTURE_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE,         \
+                                    arm_compute::test::framework::TestCaseFactory::Status::DISABLED)
 
-#define REGISTER_FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, STATUS, DATASET)                                             \
-    template <typename T>                                                                                                           \
-    class TEST_NAME;                                                                                                                \
-    template <typename... As>                                                                                                       \
-    class TEST_NAME<std::tuple<As...>> : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type>, public FIXTURE \
-    {                                                                                                                               \
-    public:                                                                                                                     \
-        DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                                              \
-        FIXTURE_DATA_SETUP(FIXTURE)                                                                                                 \
-        FIXTURE_RUN(FIXTURE)                                                                                                        \
-        FIXTURE_SYNC(FIXTURE)                                                                                                       \
-        FIXTURE_TEARDOWN(FIXTURE)                                                                                                   \
-    };                                                                                                                              \
+#define REGISTER_FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, STATUS, DATASET)                              \
+    template <typename T>                                                                                            \
+    class TEST_NAME;                                                                                                 \
+    template <typename... As>                                                                                        \
+    class TEST_NAME<std::tuple<As...>> : public arm_compute::test::framework::DataTestCase<decltype(DATASET)::type>, \
+                                         public FIXTURE                                                              \
+    {                                                                                                                \
+    public:                                                                                                          \
+        DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                               \
+        FIXTURE_DATA_SETUP(FIXTURE)                                                                                  \
+        FIXTURE_RUN(FIXTURE)                                                                                         \
+        FIXTURE_SYNC(FIXTURE)                                                                                        \
+        FIXTURE_TEARDOWN(FIXTURE)                                                                                    \
+    };                                                                                                               \
     DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET)
 
 #define REGISTER_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
-    REGISTER_FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET)
+    REGISTER_FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE,         \
+                                         arm_compute::test::framework::TestCaseFactory::Status::ACTIVE, DATASET)
 #define EXPECTED_FAILURE_REGISTER_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
-    REGISTER_FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, DATASET)
+    REGISTER_FIXTURE_DATA_TEST_CASE_IMPL(                                                   \
+        TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::EXPECTED_FAILURE, DATASET)
 #define DISABLED_REGISTER_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, DATASET) \
-    REGISTER_FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE, arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET)
+    REGISTER_FIXTURE_DATA_TEST_CASE_IMPL(TEST_NAME, FIXTURE, MODE,                  \
+                                         arm_compute::test::framework::TestCaseFactory::Status::DISABLED, DATASET)
 //
 // TEST CASE MACROS END
 //

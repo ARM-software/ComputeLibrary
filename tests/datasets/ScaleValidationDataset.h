@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited.
+ * Copyright (c) 2020-2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef TESTS_DATASETS_SCALEVALIDATIONDATASET
-#define TESTS_DATASETS_SCALEVALIDATIONDATASET
+#ifndef ACL_TESTS_DATASETS_SCALEVALIDATIONDATASET_H
+#define ACL_TESTS_DATASETS_SCALEVALIDATIONDATASET_H
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/datasets/BorderModeDataset.h"
 #include "tests/datasets/SamplingPolicyDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
@@ -54,14 +55,14 @@ public:
     // These tensor shapes are NCHW layout, fixture will convert to NHWC.
     ScaleShapesBaseDataSet()
         : ShapeDataset("Shape",
-    {
-        TensorShape{ small_size, boundary_minus_one, channel, batch },
-                     TensorShape{ small_size, boundary_plus_one, channel, batch },
-                     TensorShape{ boundary_minus_one, small_size, channel, batch },
-                     TensorShape{ boundary_plus_one, small_size, channel, batch },
-                     TensorShape{ boundary_minus_one, boundary_plus_one, channel, batch },
-                     TensorShape{ boundary_plus_one, boundary_minus_one, channel, batch },
-    })
+                       {
+                           TensorShape{small_size, boundary_minus_one, channel, batch},
+                           TensorShape{small_size, boundary_plus_one, channel, batch},
+                           TensorShape{boundary_minus_one, small_size, channel, batch},
+                           TensorShape{boundary_plus_one, small_size, channel, batch},
+                           TensorShape{boundary_minus_one, boundary_plus_one, channel, batch},
+                           TensorShape{boundary_plus_one, boundary_minus_one, channel, batch},
+                       })
     {
     }
 };
@@ -81,10 +82,10 @@ public:
     // These tensor shapes are NCHW layout, fixture will convert to NHWC.
     ScaleShapesBaseDataSet()
         : ShapeDataset("Shape",
-    {
-        TensorShape{ small_size, boundary_plus_one, channel, batch },
-                     TensorShape{ boundary_plus_one, small_size, channel, batch },
-    })
+                       {
+                           TensorShape{small_size, boundary_plus_one, channel, batch},
+                           TensorShape{boundary_plus_one, small_size, channel, batch},
+                       })
     {
     }
 };
@@ -103,38 +104,38 @@ public:
     // These tensor shapes are NCHW layout, fixture will convert to NHWC.
     ScaleShapesBaseDataSet()
         : ShapeDataset("Shape",
-    {
-        TensorShape{ small_size, zero_vector_boundary_value, channel, batch },
-                     TensorShape{ zero_vector_boundary_value, small_size, channel, batch },
-    })
+                       {
+                           TensorShape{small_size, zero_vector_boundary_value, channel, batch},
+                           TensorShape{zero_vector_boundary_value, small_size, channel, batch},
+                       })
     {
     }
 };
 
 /** Interpolation policy test set */
 const auto ScaleInterpolationPolicySet = framework::dataset::make("InterpolationPolicy",
-{
-    InterpolationPolicy::NEAREST_NEIGHBOR,
-    InterpolationPolicy::BILINEAR,
-});
+                                                                  {
+                                                                      InterpolationPolicy::NEAREST_NEIGHBOR,
+                                                                      InterpolationPolicy::BILINEAR,
+                                                                  });
 
 /** Scale data types */
 const auto ScaleDataLayouts = framework::dataset::make("DataLayout",
-{
-    DataLayout::NCHW,
-    DataLayout::NHWC,
-});
+                                                       {
+                                                           DataLayout::NCHW,
+                                                           DataLayout::NHWC,
+                                                       });
 
 /** Sampling policy data set */
-const auto ScaleSamplingPolicySet = combine(datasets::SamplingPolicies(),
-                                            framework::dataset::make("AlignCorners", { false }));
+const auto ScaleSamplingPolicySet =
+    combine(datasets::SamplingPolicies(), framework::dataset::make("AlignCorners", {false}));
 
 /** Sampling policy data set for Aligned Corners which only allows TOP_LEFT policy.*/
 const auto ScaleAlignCornersSamplingPolicySet = combine(framework::dataset::make("SamplingPolicy",
-{
-    SamplingPolicy::TOP_LEFT,
-}),
-framework::dataset::make("AlignCorners", { true }));
+                                                                                 {
+                                                                                     SamplingPolicy::TOP_LEFT,
+                                                                                 }),
+                                                        framework::dataset::make("AlignCorners", {true}));
 
 /** Generated shapes: used by precommit and nightly for CPU tests
  * - 2D shapes with 0, 1, 2 vector iterations
@@ -152,8 +153,9 @@ framework::dataset::make("AlignCorners", { true }));
  * - 3D shapes with 1 vector iterations
  * - 4D shapes with 1 vector iterations
  */
-#define SCALE_PRECOMMIT_SHAPE_DATASET(element_per_iteration) \
-    concat(ScaleShapesBaseDataSet<3, 1, (element_per_iteration), 1>(), ScaleShapesBaseDataSet<3, 3, (element_per_iteration), 1>())
+#define SCALE_PRECOMMIT_SHAPE_DATASET(element_per_iteration)           \
+    concat(ScaleShapesBaseDataSet<3, 1, (element_per_iteration), 1>(), \
+           ScaleShapesBaseDataSet<3, 3, (element_per_iteration), 1>())
 
 /** Generated shapes for nightly to achieve more small and variety shapes. Used by CL nightly
  * - 2D shapes with 0, 1, 2 vector iterations
@@ -167,56 +169,51 @@ framework::dataset::make("AlignCorners", { true }));
            ScaleShapesBaseDataSet<3, 3, (element_per_iteration), 0>())
 
 /** Generating dataset for non-quantized data types with the given shapes */
-#define ASSEMBLE_DATASET(shape, samping_policy_set)             \
-    combine(combine(combine(combine((shape), ScaleDataLayouts), \
-                            ScaleInterpolationPolicySet),       \
-                    datasets::BorderModes()),                   \
+#define ASSEMBLE_DATASET(shape, samping_policy_set)                                                                 \
+    combine(                                                                                                        \
+        combine(combine(combine((shape), ScaleDataLayouts), ScaleInterpolationPolicySet), datasets::BorderModes()), \
+        samping_policy_set)
+
+#define ASSEMBLE_DATASET_DYNAMIC_FUSION(shape, samping_policy_set)                                \
+    combine(combine(combine((shape), framework::dataset::make("DataLayout", {DataLayout::NHWC})), \
+                    ScaleInterpolationPolicySet),                                                 \
             samping_policy_set)
 
-#define ASSEMBLE_DATASET_DYNAMIC_FUSION(shape, samping_policy_set)                                  \
-    combine(combine(combine((shape), framework::dataset::make("DataLayout", { DataLayout::NHWC })), \
-                    ScaleInterpolationPolicySet),                                                   \
+#define ASSEMBLE_S8_DATASET(shape, samping_policy_set)                                                         \
+    combine(combine(combine(combine((shape), framework::dataset::make("DataLayout", DataLayout::NHWC)),        \
+                            framework::dataset::make("InterpolationPolicy", {InterpolationPolicy::BILINEAR})), \
+                    framework::dataset::make("BorderMode", {BorderMode::REPLICATE})),                          \
             samping_policy_set)
 
-#define ASSEMBLE_S8_DATASET(shape, samping_policy_set)                                                           \
-    combine(combine(combine(combine((shape), framework::dataset::make("DataLayout", DataLayout::NHWC)),          \
-                            framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::BILINEAR })), \
-                    framework::dataset::make("BorderMode", { BorderMode::REPLICATE })),                          \
-            samping_policy_set)
-
-#define ASSEMBLE_NHWC_DATASET(shape, samping_policy_set)                                                      \
-    combine(combine(combine(combine((shape), framework::dataset::make("DataLayout", DataLayout::NHWC)),       \
-                            ScaleInterpolationPolicySet),                                                     \
-                    framework::dataset::make("BorderMode", { BorderMode::CONSTANT, BorderMode::REPLICATE })), \
+#define ASSEMBLE_NHWC_DATASET(shape, samping_policy_set)                                                    \
+    combine(combine(combine(combine((shape), framework::dataset::make("DataLayout", DataLayout::NHWC)),     \
+                            ScaleInterpolationPolicySet),                                                   \
+                    framework::dataset::make("BorderMode", {BorderMode::CONSTANT, BorderMode::REPLICATE})), \
             samping_policy_set)
 
 /** Generating dataset for quantized data tyeps with the given shapes */
-#define ASSEMBLE_QUANTIZED_DATASET(shape, sampling_policy_set, quantization_info_set) \
-    combine(combine(combine(combine(combine(shape,                                    \
-                                            quantization_info_set),                   \
-                                    ScaleDataLayouts),                                \
-                            ScaleInterpolationPolicySet),                             \
-                    datasets::BorderModes()),                                         \
+#define ASSEMBLE_QUANTIZED_DATASET(shape, sampling_policy_set, quantization_info_set)         \
+    combine(combine(combine(combine(combine(shape, quantization_info_set), ScaleDataLayouts), \
+                            ScaleInterpolationPolicySet),                                     \
+                    datasets::BorderModes()),                                                 \
             sampling_policy_set)
 
 #define ASSEMBLE_QUANTIZED_DATASET_DYNAMIC_FUSION(shape, sampling_policy_set, quantization_info_set) \
-    combine(combine(combine(combine(shape,                                                           \
-                                    quantization_info_set),                                          \
-                            framework::dataset::make("DataLayout", { DataLayout::NHWC })),           \
+    combine(combine(combine(combine(shape, quantization_info_set),                                   \
+                            framework::dataset::make("DataLayout", {DataLayout::NHWC})),             \
                     ScaleInterpolationPolicySet),                                                    \
             sampling_policy_set)
 
 /** Generating dataset for quantized data tyeps with the given shapes */
-#define ASSEMBLE_DIFFERENTLY_QUANTIZED_DATASET(shape, sampling_policy_set, input_quant_info_set, output_quant_info_set) \
-    combine(combine(combine(combine(combine(combine(shape,                                                              \
-                                                    input_quant_info_set),                                              \
-                                            output_quant_info_set),                                                     \
-                                    framework::dataset::make("DataLayout", { DataLayout::NHWC })),                      \
-                            framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::BILINEAR })),        \
-                    framework::dataset::make("BorderMode", { BorderMode::REPLICATE })),                                 \
+#define ASSEMBLE_DIFFERENTLY_QUANTIZED_DATASET(shape, sampling_policy_set, input_quant_info_set,               \
+                                               output_quant_info_set)                                          \
+    combine(combine(combine(combine(combine(combine(shape, input_quant_info_set), output_quant_info_set),      \
+                                    framework::dataset::make("DataLayout", {DataLayout::NHWC})),               \
+                            framework::dataset::make("InterpolationPolicy", {InterpolationPolicy::BILINEAR})), \
+                    framework::dataset::make("BorderMode", {BorderMode::REPLICATE})),                          \
             sampling_policy_set)
 
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* TESTS_DATASETS_SCALEVALIDATIONDATASET */
+#endif // ACL_TESTS_DATASETS_SCALEVALIDATIONDATASET_H

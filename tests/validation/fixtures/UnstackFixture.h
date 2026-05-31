@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,12 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Unstack.h"
 
@@ -49,7 +50,7 @@ class UnstackValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape input_shape, int axis, int num, DataType data_type)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -74,7 +75,7 @@ protected:
         const unsigned int         num_slices   = std::min(num, axis_size);
         std::vector<TensorType>    output_slices(num_slices);
         std::vector<ITensorType *> output_ptrs(num_slices);
-        for(size_t k = 0; k < num_slices; ++k)
+        for (size_t k = 0; k < num_slices; ++k)
         {
             output_ptrs[k] = &output_slices[k];
         }
@@ -82,7 +83,7 @@ protected:
         FunctionType unstack;
         unstack.configure(&input_tensor, output_ptrs, axis);
         // Allocate tensors
-        for(auto &out : output_slices)
+        for (auto &out : output_slices)
         {
             out.allocator()->allocate();
             ARM_COMPUTE_ASSERT(!out.info()->is_resizable());
@@ -95,18 +96,20 @@ protected:
         return output_slices;
     }
 
-    std::vector<SimpleTensor<T>> compute_reference(TensorShape input_shape, int axis, unsigned int num, DataType data_type)
+    std::vector<SimpleTensor<T>>
+    compute_reference(TensorShape input_shape, int axis, unsigned int num, DataType data_type)
     {
         const unsigned int axis_u             = wrap_around(axis, static_cast<int>(input_shape.num_dimensions()));
         const unsigned int axis_size          = input_shape[axis_u];
         const unsigned int num_output_tensors = (num == 0) ? axis_size : std::min(axis_size, num);
         // create and fill input tensor
-        SimpleTensor<T> input_tensor{ input_shape, data_type };
+        SimpleTensor<T> input_tensor{input_shape, data_type};
         fill(input_tensor, 0);
         // create output tensors
-        const TensorShape            slice_shape = arm_compute::misc::shape_calculator::calculate_unstack_shape(input_shape, axis_u);
+        const TensorShape slice_shape =
+            arm_compute::misc::shape_calculator::calculate_unstack_shape(input_shape, axis_u);
         std::vector<SimpleTensor<T>> output_tensors(num_output_tensors);
-        for(size_t k = 0; k < num_output_tensors; ++k)
+        for (size_t k = 0; k < num_output_tensors; ++k)
         {
             output_tensors[k] = SimpleTensor<T>(slice_shape, data_type);
         }

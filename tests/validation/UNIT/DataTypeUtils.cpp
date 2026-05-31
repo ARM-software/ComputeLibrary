@@ -26,8 +26,8 @@
 
 #include "tests/datasets/DatatypeDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/CartesianProductDataset.h"
+#include "tests/framework/Macros.h"
 
 #include <string>
 
@@ -43,11 +43,9 @@ TEST_SUITE(DataTypeUtils)
 
 // Whenever a new data type is added, this test will ensure string conversion
 // explicitly deals with that data type
-DATA_TEST_CASE(CheckDataTypeIsPrinted, framework::DatasetMode::ALL,
-    datasets::AllDataTypes("DataType"), dtype)
+DATA_TEST_CASE(CheckDataTypeIsPrinted, framework::DatasetMode::ALL, datasets::AllDataTypes("DataType"), dtype)
 {
-    ARM_COMPUTE_EXPECT(string_from_data_type(dtype) != "",
-        framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(string_from_data_type(dtype) != "", framework::LogLevel::ERRORS);
 }
 
 TEST_SUITE_END() // DataTypeUtils

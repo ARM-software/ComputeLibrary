@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,10 @@
 #include "src/core/CL/kernels/CLGatherKernel.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -40,22 +42,32 @@ inline Status
 validate_arguments(const ITensorInfo *input, const ITensorInfo *indices, const ITensorInfo *output, int axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, indices, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, indices);
     const uint32_t actual_axis = wrap_around(axis, static_cast<int>(input->num_dimensions()));
     ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() + indices->num_dimensions() - 1) > 4);
 
     ARM_COMPUTE_RETURN_ERROR_ON(actual_axis >= input->num_dimensions());
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->num_channels() != ITensorInfo::one_channel);
+
+    const TensorShape output_shape = arm_compute::misc::shape_calculator::compute_gather_shape(
+        input->tensor_shape(), indices->tensor_shape(), actual_axis);
 
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
-        TensorShape output_shape = arm_compute::misc::shape_calculator::compute_gather_shape(
-            input->tensor_shape(), indices->tensor_shape(), actual_axis);
         ARM_COMPUTE_RETURN_ERROR_ON(output_shape.total_size() != output->tensor_shape().total_size());
     }
+    else
+    {
+        const auto output_info = TensorInfo(output_shape, ITensorInfo::one_channel, input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
+    }
 
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, 1, DataType::U32, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indices, ITensorInfo::one_channel, DataType::U32,
+                                                         DataType::S32);
 
     return Status{};
 }

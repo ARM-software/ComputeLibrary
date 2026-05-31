@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,13 +26,13 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 
-#include "tests/NEON/Accessor.h"
 #include "tests/datasets/CropResizeDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/CropResizeFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -40,6 +40,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(CropResize)
 
@@ -50,36 +52,37 @@ using NECropResizeFixture = CropResizeFixture<Tensor, Accessor, NECropResize, T>
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32),
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+               make("InputInfo", { TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32), // Invalid box_ind shape.
                                                        TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32), // Invalid output shape.
                                                        TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32), // Invalid output data type.
                                                        TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32), // Invalid output shape.
                                                        TensorInfo(TensorShape(15U, 30U, 40U, 10U), 1, DataType::S32), // Invalid boxes shape.
                                                      }),
-               framework::dataset::make("BoxesInfo",{  TensorInfo(TensorShape(4, 20), 1, DataType::F32),
+               make("BoxesInfo",{  TensorInfo(TensorShape(4, 20), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4, 20), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4, 20), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4, 20), 1, DataType::F32),
                                                        TensorInfo(TensorShape(4, 20), 1, DataType::F32),
                                                        TensorInfo(TensorShape(3, 20), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("BoxIndInfo",{ TensorInfo(TensorShape(20), 1, DataType::S32),
+                                                     }),
+               make("BoxIndInfo",{ TensorInfo(TensorShape(20), 1, DataType::S32),
                                                        TensorInfo(TensorShape(10), 1, DataType::S32),
                                                        TensorInfo(TensorShape(20), 1, DataType::S32),
                                                        TensorInfo(TensorShape(20), 1, DataType::S32),
                                                        TensorInfo(TensorShape(20), 1, DataType::S32),
                                                        TensorInfo(TensorShape(20), 1, DataType::S32),
-                                                     })),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::F32),
+                                                     }),
+               make("OutputInfo",{ TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(15U, 5, 5, 10U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::S32),
                                                        TensorInfo(TensorShape(5U, 5, 5, 20U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(15U, 5, 5, 20U), 1, DataType::F32),
-                                                     })),
-               framework::dataset::make("Expected", { true, false, false, false, false, false})),
+                                                     }),
+               make("Expected", { true, false, false, false, false, false})
+               ),
                input, boxes, box_ind, output, expected)
 {
     ARM_COMPUTE_EXPECT(bool(NECropResize::validate(&input.clone()->set_data_layout(DataLayout::NHWC).set_is_resizable(false),
@@ -98,18 +101,18 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<half>,
                        framework::DatasetMode::ALL,
                        combine(datasets::SmallCropResizeDataset(),
-                               combine(framework::dataset::make("IsOutOfBounds", { true, false }),
-                                       framework::dataset::make("DataType", DataType::F16))))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() // F16
@@ -120,8 +123,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<float>,
                        framework::DatasetMode::ALL,
                        combine(datasets::SmallCropResizeDataset(),
-                               combine(framework::dataset::make("IsOutOfBounds", { true, false }),
-                                       framework::dataset::make("DataType", DataType::F32))))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
@@ -134,8 +137,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<uint8_t>,
                        framework::DatasetMode::ALL,
                        combine(datasets::SmallCropResizeDataset(),
-                               combine(framework::dataset::make("IsOutOfBounds", { true, false }),
-                                       framework::dataset::make("DataType", DataType::U8))))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
@@ -147,8 +150,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<uint16_t>,
                        framework::DatasetMode::ALL,
                        combine(datasets::SmallCropResizeDataset(),
-                               combine(framework::dataset::make("IsOutOfBounds", { true, false }),
-                                       framework::dataset::make("DataType", DataType::U16))))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::U16)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
@@ -160,8 +163,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<int16_t>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallCropResizeDataset(),
-                               combine(framework::dataset::make("IsOutOfBounds", { true, false }),
-                                       framework::dataset::make("DataType", DataType::S16))))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::S16)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
@@ -173,8 +176,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<uint32_t>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallCropResizeDataset(),
-                               combine(framework::dataset::make("IsOutOfBounds", { true, false }),
-                                       framework::dataset::make("DataType", DataType::U32))))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::U32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);
@@ -186,8 +189,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                        NECropResizeFixture<int32_t>,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallCropResizeDataset(),
-                               combine(framework::dataset::make("IsOutOfBounds", { true, false }),
-                                       framework::dataset::make("DataType", DataType::S32))))
+                               make("IsOutOfBounds", {true, false}),
+                               make("DataType", DataType::S32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_fp32, 0.01);

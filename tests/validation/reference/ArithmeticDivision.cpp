@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "ArithmeticDivision.h"
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -40,8 +41,12 @@ template <size_t dim>
 struct BroadcastUnroll
 {
     template <typename T>
-    static void unroll(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst,
-                       Coordinates &id_src1, Coordinates &id_src2, Coordinates &id_dst)
+    static void unroll(const SimpleTensor<T> &src1,
+                       const SimpleTensor<T> &src2,
+                       SimpleTensor<T>       &dst,
+                       Coordinates           &id_src1,
+                       Coordinates           &id_src2,
+                       Coordinates           &id_dst)
     {
         const bool src1_is_broadcast = (src1.shape()[dim - 1] != dst.shape()[dim - 1]);
         const bool src2_is_broadcast = (src2.shape()[dim - 1] != dst.shape()[dim - 1]);
@@ -50,11 +55,11 @@ struct BroadcastUnroll
         id_src2.set(dim - 1, 0);
         id_dst.set(dim - 1, 0);
 #if defined(_OPENMP)
-        #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-        for(size_t i = 0; i < dst.shape()[dim - 1]; ++i)
+        for (size_t i = 0; i < dst.shape()[dim - 1]; ++i)
         {
-            BroadcastUnroll < dim - 1 >::unroll(src1, src2, dst, id_src1, id_src2, id_dst);
+            BroadcastUnroll<dim - 1>::unroll(src1, src2, dst, id_src1, id_src2, id_dst);
 
             id_src1[dim - 1] += !src1_is_broadcast;
             id_src2[dim - 1] += !src2_is_broadcast;
@@ -67,10 +72,15 @@ template <>
 struct BroadcastUnroll<0>
 {
     template <typename T>
-    static void unroll(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst,
-                       Coordinates &id_src1, Coordinates &id_src2, Coordinates &id_dst)
+    static void unroll(const SimpleTensor<T> &src1,
+                       const SimpleTensor<T> &src2,
+                       SimpleTensor<T>       &dst,
+                       Coordinates           &id_src1,
+                       Coordinates           &id_src2,
+                       Coordinates           &id_dst)
     {
-        dst[coord2index(dst.shape(), id_dst)] = src1[coord2index(src1.shape(), id_src1)] / src2[coord2index(src2.shape(), id_src2)];
+        dst[coord2index(dst.shape(), id_dst)] =
+            src1[coord2index(src1.shape(), id_src1)] / src2[coord2index(src2.shape(), id_src2)];
     }
 };
 } // namespace
@@ -89,8 +99,10 @@ SimpleTensor<T> arithmetic_division(const SimpleTensor<T> &src1, const SimpleTen
     return dst;
 }
 
-template SimpleTensor<half> arithmetic_division(const SimpleTensor<half> &src1, const SimpleTensor<half> &src2, DataType data_type);
-template SimpleTensor<float> arithmetic_division(const SimpleTensor<float> &src1, const SimpleTensor<float> &src2, DataType data_type);
+template SimpleTensor<half>
+arithmetic_division(const SimpleTensor<half> &src1, const SimpleTensor<half> &src2, DataType data_type);
+template SimpleTensor<float>
+arithmetic_division(const SimpleTensor<float> &src1, const SimpleTensor<float> &src2, DataType data_type);
 } // namespace reference
 } // namespace validation
 } // namespace test

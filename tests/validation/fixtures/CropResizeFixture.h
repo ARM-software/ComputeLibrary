@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,10 +28,10 @@
 #include "arm_compute/core/Types.h"
 
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/CropResize.h"
 #include "tests/validation/reference/Permute.h"
@@ -46,17 +46,24 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class CropResizeFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape src_shape, TensorShape boxes_shape, Coordinates2D crop_size, InterpolationPolicy method,
-               float extrapolation_value, bool is_outside_bounds, DataType data_type)
+    void setup(TensorShape         src_shape,
+               TensorShape         boxes_shape,
+               Coordinates2D       crop_size,
+               InterpolationPolicy method,
+               float               extrapolation_value,
+               bool                is_outside_bounds,
+               DataType            data_type)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
         }
 
-        _target    = compute_target(src_shape, boxes_shape, crop_size, method, extrapolation_value, is_outside_bounds, data_type);
-        _reference = compute_reference(src_shape, boxes_shape, crop_size, method, extrapolation_value, is_outside_bounds, data_type);
+        _target    = compute_target(src_shape, boxes_shape, crop_size, method, extrapolation_value, is_outside_bounds,
+                                    data_type);
+        _reference = compute_reference(src_shape, boxes_shape, crop_size, method, extrapolation_value,
+                                       is_outside_bounds, data_type);
     }
 
 protected:
@@ -72,8 +79,13 @@ protected:
         library->fill_tensor_uniform(tensor, i, min, max);
     }
 
-    TensorType compute_target(const TensorShape &src_shape, const TensorShape &boxes_shape, const Coordinates2D &crop_size, InterpolationPolicy method,
-                              float extrapolation_value, bool is_outside_bounds, DataType data_type)
+    TensorType compute_target(const TensorShape   &src_shape,
+                              const TensorShape   &boxes_shape,
+                              const Coordinates2D &crop_size,
+                              InterpolationPolicy  method,
+                              float                extrapolation_value,
+                              bool                 is_outside_bounds,
+                              DataType             data_type)
     {
         TensorShape dst_shape(src_shape[0], crop_size.x, crop_size.y, boxes_shape[1]);
 
@@ -81,11 +93,12 @@ protected:
         TensorType src       = create_tensor<TensorType>(src_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC);
         TensorType boxes     = create_tensor<TensorType>(boxes_shape, DataType::F32);
         TensorType boxes_ind = create_tensor<TensorType>(TensorShape(boxes_shape[1]), DataType::S32);
-        TensorType dst       = create_tensor<TensorType>(dst_shape, DataType::F32, 1, QuantizationInfo(), DataLayout::NHWC);
+        TensorType dst = create_tensor<TensorType>(dst_shape, DataType::F32, 1, QuantizationInfo(), DataLayout::NHWC);
 
         boxes.allocator()->allocate();
         boxes_ind.allocator()->allocate();
-        fill(AccessorType(boxes), 1, is_outside_bounds ? 0.0f - out_of_bounds_reach : 0.0f, is_outside_bounds ? 1.0f + out_of_bounds_reach : 1.0f);
+        fill(AccessorType(boxes), 1, is_outside_bounds ? 0.0f - out_of_bounds_reach : 0.0f,
+             is_outside_bounds ? 1.0f + out_of_bounds_reach : 1.0f);
         fill(AccessorType(boxes_ind), 2, 0, static_cast<int32_t>(src_shape[3] - 1));
 
         // Create and configure function
@@ -110,20 +123,27 @@ protected:
         return dst;
     }
 
-    SimpleTensor<float> compute_reference(const TensorShape &src_shape, const TensorShape &boxes_shape, const Coordinates2D &crop_size, InterpolationPolicy method,
-                                          float extrapolation_value, bool is_outside_bounds, DataType data_type)
+    SimpleTensor<float> compute_reference(const TensorShape   &src_shape,
+                                          const TensorShape   &boxes_shape,
+                                          const Coordinates2D &crop_size,
+                                          InterpolationPolicy  method,
+                                          float                extrapolation_value,
+                                          bool                 is_outside_bounds,
+                                          DataType             data_type)
     {
         // Create reference
-        SimpleTensor<T>       src{ src_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC };
-        SimpleTensor<float>   boxes{ boxes_shape, DataType::F32 };
-        SimpleTensor<int32_t> boxes_ind{ TensorShape(boxes_shape[1]), DataType::S32 };
+        SimpleTensor<T>       src{src_shape, data_type, 1, QuantizationInfo(), DataLayout::NHWC};
+        SimpleTensor<float>   boxes{boxes_shape, DataType::F32};
+        SimpleTensor<int32_t> boxes_ind{TensorShape(boxes_shape[1]), DataType::S32};
 
         // Fill reference
         fill(src, 0);
-        fill(boxes, 1, is_outside_bounds ? 0.0f - out_of_bounds_reach : 0.0f, is_outside_bounds ? 1.0f + out_of_bounds_reach : 1.0f);
+        fill(boxes, 1, is_outside_bounds ? 0.0f - out_of_bounds_reach : 0.0f,
+             is_outside_bounds ? 1.0f + out_of_bounds_reach : 1.0f);
         fill(boxes_ind, 2, 0, static_cast<int32_t>(src.shape()[3] - 1));
 
-        SimpleTensor<float> output = reference::crop_and_resize(src, boxes, boxes_ind, crop_size, method, extrapolation_value);
+        SimpleTensor<float> output =
+            reference::crop_and_resize(src, boxes, boxes_ind, crop_size, method, extrapolation_value);
 
         SimpleTensor<float> permuted = reference::permute(output, PermutationVector(1, 2U, 0U));
         return permuted;

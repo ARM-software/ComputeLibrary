@@ -64,6 +64,11 @@ inline Status validate_arguments(const ITensorInfo     *lhs,
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(lhs);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(lhs, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, rhs, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(lhs, rhs);
+
+    TensorShape dst_shape{lhs->tensor_shape()};
+    dst_shape.set(0, is_interleaved ? reshape_info.n() : rhs->dimension(0));
+    dst_shape.set(1, is_interleaved ? reshape_info.m() : lhs->dimension(1));
 
     if (!is_interleaved)
     {
@@ -71,9 +76,15 @@ inline Status validate_arguments(const ITensorInfo     *lhs,
 
         if (dst->total_size() != 0)
         {
+            ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
             ARM_COMPUTE_RETURN_ERROR_ON(rhs->dimension(0) != dst->dimension(0));
             ARM_COMPUTE_RETURN_ERROR_ON(lhs->dimension(1) != dst->dimension(1));
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, dst);
+        }
+        else
+        {
+            const auto dst_info = TensorInfo(dst_shape, 1, lhs->data_type());
+            ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
         }
     }
     else
@@ -109,12 +120,18 @@ inline Status validate_arguments(const ITensorInfo     *lhs,
 
         if (dst->total_size() != 0)
         {
+            ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
             if (n != 0)
             {
                 ARM_COMPUTE_RETURN_ERROR_ON(dst->dimension(0) != static_cast<size_t>(n));
             }
             ARM_COMPUTE_RETURN_ERROR_ON(dst->dimension(1) != static_cast<size_t>(m));
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(lhs, dst);
+        }
+        else
+        {
+            const auto dst_info = TensorInfo(dst_shape, 1, lhs->data_type());
+            ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, 2024 Arm Limited.
+ * Copyright (c) 2019-2020, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define ACL_TESTS_DATASETS_DATATYPEDATASET_H
 
 #include "arm_compute/core/CoreTypes.h"
+
 #include "tests/framework/datasets/ContainerDataset.h"
 
 #include <vector>
@@ -39,29 +40,30 @@ class AllDataTypes final : public framework::dataset::ContainerDataset<std::vect
 {
 public:
     AllDataTypes(const std::string &name)
-        : ContainerDataset(name,
-    {
-        DataType::QSYMM8,
-        DataType::QASYMM8,
-        DataType::QASYMM8_SIGNED,
-        DataType::QSYMM16,
-        DataType::U8,                 /**< unsigned 8-bit number */
-        DataType::S8,                 /**< signed 8-bit number */
-        DataType::QSYMM8_PER_CHANNEL, /**< quantized, symmetric per channel fixed-point 8-bit number */
-        DataType::U16,                /**< unsigned 16-bit number */
-        DataType::S16,                /**< signed 16-bit number */
-        DataType::QSYMM16,            /**< quantized, symmetric fixed-point 16-bit number */
-        DataType::QASYMM16,           /**< quantized, asymmetric fixed-point 16-bit number */
-        DataType::U32,                /**< unsigned 32-bit number */
-        DataType::S32,                /**< signed 32-bit number */
-        DataType::U64,                /**< unsigned 64-bit number */
-        DataType::S64,                /**< signed 64-bit number */
-        DataType::BFLOAT16,           /**< 16-bit brain floating-point number */
-        DataType::F16,                /**< 16-bit floating-point number */
-        DataType::F32,                /**< 32-bit floating-point number */
-        DataType::F64,                /**< 64-bit floating-point number */
-        DataType::SIZET               /**< size_t */
-    })
+        : ContainerDataset(
+              name,
+              {
+                  DataType::QSYMM8,
+                  DataType::QASYMM8,
+                  DataType::QASYMM8_SIGNED,
+                  DataType::QSYMM16,
+                  DataType::U8,                 /**< unsigned 8-bit number */
+                  DataType::S8,                 /**< signed 8-bit number */
+                  DataType::QSYMM8_PER_CHANNEL, /**< quantized, symmetric per channel fixed-point 8-bit number */
+                  DataType::U16,                /**< unsigned 16-bit number */
+                  DataType::S16,                /**< signed 16-bit number */
+                  DataType::QSYMM16,            /**< quantized, symmetric fixed-point 16-bit number */
+                  DataType::QASYMM16,           /**< quantized, asymmetric fixed-point 16-bit number */
+                  DataType::U32,                /**< unsigned 32-bit number */
+                  DataType::S32,                /**< signed 32-bit number */
+                  DataType::U64,                /**< unsigned 64-bit number */
+                  DataType::S64,                /**< signed 64-bit number */
+                  DataType::BFLOAT16,           /**< 16-bit brain floating-point number */
+                  DataType::F16,                /**< 16-bit floating-point number */
+                  DataType::F32,                /**< 32-bit floating-point number */
+                  DataType::F64,                /**< 64-bit floating-point number */
+                  DataType::SIZET               /**< size_t */
+              })
     {
     }
 };
@@ -70,16 +72,16 @@ class CommonDataTypes final : public framework::dataset::ContainerDataset<std::v
 {
 public:
     CommonDataTypes(const std::string &name)
-        : ContainerDataset(name,
-    {
-        DataType::QASYMM8,
-        DataType::QASYMM8_SIGNED,
-        DataType::QSYMM8_PER_CHANNEL, /**< quantized, symmetric per channel fixed-point 8-bit number */
-        DataType::S32,                /**< signed 32-bit number */
-        DataType::BFLOAT16,           /**< 16-bit brain floating-point number */
-        DataType::F16,                /**< 16-bit floating-point number */
-        DataType::F32,                /**< 32-bit floating-point number */
-    })
+        : ContainerDataset(
+              name,
+              {
+                  DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                  DataType::QSYMM8_PER_CHANNEL, /**< quantized, symmetric per channel fixed-point 8-bit number */
+                  DataType::S32,                /**< signed 32-bit number */
+                  DataType::BFLOAT16,           /**< 16-bit brain floating-point number */
+                  DataType::F16,                /**< 16-bit floating-point number */
+                  DataType::F32,                /**< 32-bit floating-point number */
+              })
     {
     }
 };
@@ -88,23 +90,19 @@ class QuantizedTypes final : public framework::dataset::ContainerDataset<std::ve
 public:
     QuantizedTypes()
         : ContainerDataset("QuantizedTypes",
-    {
-        DataType::QSYMM8,
-                 DataType::QASYMM8,
-                 DataType::QASYMM8_SIGNED,
-                 DataType::QSYMM16,
-    })
+                           {
+                               DataType::QSYMM8,
+                               DataType::QASYMM8,
+                               DataType::QASYMM8_SIGNED,
+                               DataType::QSYMM16,
+                           })
     {
     }
 };
 class QuantizedPerChannelTypes final : public framework::dataset::ContainerDataset<std::vector<DataType>>
 {
 public:
-    QuantizedPerChannelTypes()
-        : ContainerDataset("QuantizedPerChannelTypes",
-    {
-        DataType::QSYMM8_PER_CHANNEL
-    })
+    QuantizedPerChannelTypes() : ContainerDataset("QuantizedPerChannelTypes", {DataType::QSYMM8_PER_CHANNEL})
     {
     }
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_INDIRECT_CONV2D_ADDRESS_PRECALCULATION_H
-#define ARM_COMPUTE_TEST_INDIRECT_CONV2D_ADDRESS_PRECALCULATION_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_INDIRECTCONV2DADDRESSPRECALCULATION_H
+#define ACL_TESTS_VALIDATION_REFERENCE_INDIRECTCONV2DADDRESSPRECALCULATION_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -35,10 +35,13 @@ namespace validation
 {
 namespace reference
 {
-SimpleTensor<int32_t> indirect_conv2d_addr_precalculation(const TensorShape &shape_conv_src, const TensorShape &shape_conv_wei, const TensorShape &shape_conv_out, const TensorShape &shape_out,
+SimpleTensor<int32_t> indirect_conv2d_addr_precalculation(const TensorShape   &shape_conv_src,
+                                                          const TensorShape   &shape_conv_wei,
+                                                          const TensorShape   &shape_conv_out,
+                                                          const TensorShape   &shape_out,
                                                           const PadStrideInfo &conv_info);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_INDIRECT_CONV2D_ADDRESS_PRECALCULATION_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_INDIRECTCONV2DADDRESSPRECALCULATION_H

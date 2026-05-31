@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,12 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ConcatenateLayer.h"
 
@@ -43,7 +44,12 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename ITensorType, typename AccessorType, typename FunctionType, typename T, bool CI = true>
+template <typename TensorType,
+          typename ITensorType,
+          typename AccessorType,
+          typename FunctionType,
+          typename T,
+          bool CI = true>
 class ConcatenateLayerValidationFixture : public framework::Fixture
 {
 private:
@@ -52,7 +58,7 @@ private:
 public:
     void setup(TensorShape shape, DataType data_type, unsigned int axis)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -71,7 +77,7 @@ public:
         //      the last element is the output quantization info
         //      all other elements are the quantization info for the input tensors
         std::vector<QuantizationInfo> qinfo(num_tensors + 1, QuantizationInfo());
-        for(auto &qi : qinfo)
+        for (auto &qi : qinfo)
         {
             qi = QuantizationInfo(1.f / 255.f, offset_dis(gen));
         }
@@ -79,10 +85,10 @@ public:
         std::uniform_real_distribution<float> change_dis(-0.25f, 0.f);
 
         // Generate more shapes based on the input
-        for(auto &s : shapes)
+        for (auto &s : shapes)
         {
             // Randomly change the dimension
-            if(mutate_dis(gen))
+            if (mutate_dis(gen))
             {
                 // Decrease the dimension by a small percentage. Don't increase
                 // as that could make tensor too large.
@@ -101,7 +107,10 @@ protected:
         library->fill_tensor_uniform(tensor, i);
     }
 
-    TensorType compute_target(const std::vector<TensorShape> &shapes, const std::vector<QuantizationInfo> &qinfo, DataType data_type, unsigned int axis)
+    TensorType compute_target(const std::vector<TensorShape>      &shapes,
+                              const std::vector<QuantizationInfo> &qinfo,
+                              DataType                             data_type,
+                              unsigned int                         axis)
     {
         std::vector<TensorType>       srcs;
         std::vector<SrcITensorType *> src_ptrs;
@@ -109,7 +118,7 @@ protected:
         // Create tensors
         srcs.reserve(shapes.size());
 
-        for(size_t j = 0; j < shapes.size(); ++j)
+        for (size_t j = 0; j < shapes.size(); ++j)
         {
             srcs.emplace_back(create_tensor<TensorType>(shapes[j], data_type, 1, qinfo[j]));
             src_ptrs.emplace_back(&srcs.back());
@@ -122,7 +131,7 @@ protected:
         FunctionType concat;
         concat.configure(src_ptrs, &dst, axis);
 
-        for(auto &src : srcs)
+        for (auto &src : srcs)
         {
             ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         }
@@ -130,7 +139,7 @@ protected:
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
         // Allocate tensors
-        for(auto &src : srcs)
+        for (auto &src : srcs)
         {
             src.allocator()->allocate();
             ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
@@ -141,7 +150,7 @@ protected:
 
         // Fill tensors
         int i = 0;
-        for(auto &src : srcs)
+        for (auto &src : srcs)
         {
             fill(AccessorType(src), i++);
         }
@@ -152,13 +161,16 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(std::vector<TensorShape> &shapes, const std::vector<QuantizationInfo> &qinfo, DataType data_type, unsigned int axis)
+    SimpleTensor<T> compute_reference(std::vector<TensorShape>            &shapes,
+                                      const std::vector<QuantizationInfo> &qinfo,
+                                      DataType                             data_type,
+                                      unsigned int                         axis)
     {
         std::vector<SimpleTensor<T>> srcs;
         std::vector<TensorShape *>   src_ptrs;
 
         // Create and fill tensors
-        for(size_t j = 0; j < shapes.size(); ++j)
+        for (size_t j = 0; j < shapes.size(); ++j)
         {
             srcs.emplace_back(shapes[j], data_type, 1, qinfo[j]);
             fill(srcs.back(), j);
@@ -166,7 +178,7 @@ protected:
         }
 
         const TensorShape dst_shape = misc::shape_calculator::calculate_concatenate_shape(src_ptrs, axis);
-        SimpleTensor<T>   dst{ dst_shape, data_type, 1, qinfo[shapes.size()] };
+        SimpleTensor<T>   dst{dst_shape, data_type, 1, qinfo[shapes.size()]};
         return reference::concatenate_layer<T>(srcs, dst, axis);
     }
 

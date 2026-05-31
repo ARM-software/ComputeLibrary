@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SCHARR_FIXTURE
-#define ARM_COMPUTE_TEST_SCHARR_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_SCHARRFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_SCHARRFIXTURE_H
 
+#include "tests/framework/Asserts.h"
+#include "tests/framework/Fixture.h"
 #include "tests/Globals.h"
 #include "tests/IAccessor.h"
 #include "tests/Types.h"
-#include "tests/framework/Asserts.h"
-#include "tests/framework/Fixture.h"
 #include "tests/validation/reference/Scharr.h"
 
 #include <memory>
@@ -75,7 +75,8 @@ public:
 
         _border_mode = border_mode;
         _target      = compute_target(shape, border_mode, format, constant_border_value, gradient_dimension);
-        _reference   = compute_reference(shape, info<FunctionType>::filter_size, border_mode, format, constant_border_value, gradient_dimension);
+        _reference   = compute_reference(shape, info<FunctionType>::filter_size, border_mode, format,
+                                         constant_border_value, gradient_dimension);
     }
 
 protected:
@@ -91,7 +92,11 @@ protected:
         library->fill_tensor_uniform(tensor, 0, static_cast<U>(0), static_cast<U>(0));
     }
 
-    std::pair<TensorType, TensorType> compute_target(const TensorShape &shape, BorderMode border_mode, Format format, uint8_t constant_border_value, GradientDimension gradient_dimension)
+    std::pair<TensorType, TensorType> compute_target(const TensorShape &shape,
+                                                     BorderMode         border_mode,
+                                                     Format             format,
+                                                     uint8_t            constant_border_value,
+                                                     GradientDimension  gradient_dimension)
     {
         // Create tensors
         TensorType src   = create_tensor<TensorType>(shape, data_type_from_format(format));
@@ -104,7 +109,7 @@ protected:
 
         FunctionType scharr;
 
-        switch(gradient_dimension)
+        switch (gradient_dimension)
         {
             case GradientDimension::GRAD_X:
                 scharr.configure(&src, &dst_x, nullptr, border_mode, constant_border_value);
@@ -143,11 +148,15 @@ protected:
         return std::make_pair(std::move(dst_x), std::move(dst_y));
     }
 
-    std::pair<SimpleTensor<U>, SimpleTensor<U>> compute_reference(const TensorShape &shape, int filter_size, BorderMode border_mode, Format format, uint8_t constant_border_value,
-                                                                  GradientDimension gradient_dimension)
+    std::pair<SimpleTensor<U>, SimpleTensor<U>> compute_reference(const TensorShape &shape,
+                                                                  int                filter_size,
+                                                                  BorderMode         border_mode,
+                                                                  Format             format,
+                                                                  uint8_t            constant_border_value,
+                                                                  GradientDimension  gradient_dimension)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, format };
+        SimpleTensor<T> src{shape, format};
 
         // Fill reference
         fill(src);
@@ -155,11 +164,11 @@ protected:
         return reference::scharr<U>(src, filter_size, border_mode, constant_border_value, gradient_dimension);
     }
 
-    BorderMode _border_mode{ BorderMode::UNDEFINED };
+    BorderMode                                  _border_mode{BorderMode::UNDEFINED};
     std::pair<TensorType, TensorType>           _target{};
     std::pair<SimpleTensor<U>, SimpleTensor<U>> _reference{};
 };
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SCHARR_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_SCHARRFIXTURE_H

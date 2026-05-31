@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/validation/Helpers.h"
 
 #include <algorithm>
@@ -40,18 +41,19 @@ namespace reference
 namespace
 {
 /** Average pooling over an aligned window */
-inline float roi_align_1x1(const float *input, TensorShape input_shape,
-                           float region_start_x,
-                           float bin_size_x,
-                           int   grid_size_x,
-                           float region_end_x,
-                           float region_start_y,
-                           float bin_size_y,
-                           int   grid_size_y,
-                           float region_end_y,
-                           int   pz)
+inline float roi_align_1x1(const float *input,
+                           TensorShape  input_shape,
+                           float        region_start_x,
+                           float        bin_size_x,
+                           int          grid_size_x,
+                           float        region_end_x,
+                           float        region_start_y,
+                           float        bin_size_y,
+                           int          grid_size_y,
+                           float        region_end_y,
+                           int          pz)
 {
-    if((region_end_x <= region_start_x) || (region_end_y <= region_start_y))
+    if ((region_end_x <= region_start_x) || (region_end_y <= region_start_y))
     {
         return 0;
     }
@@ -59,9 +61,9 @@ inline float roi_align_1x1(const float *input, TensorShape input_shape,
     {
         float avg = 0;
         // Iterate through the aligned pooling region
-        for(int iy = 0; iy < grid_size_y; ++iy)
+        for (int iy = 0; iy < grid_size_y; ++iy)
         {
-            for(int ix = 0; ix < grid_size_x; ++ix)
+            for (int ix = 0; ix < grid_size_x; ++ix)
             {
                 // Align the window in the middle of every bin
                 float y = region_start_y + (iy + 0.5) * bin_size_y / float(grid_size_y);
@@ -108,11 +110,11 @@ inline float roi_align_1x1(const float *input, TensorShape input_shape,
 template <typename TI, typename TO>
 SimpleTensor<TO> float_converter(const SimpleTensor<TI> &tensor, DataType dst_dt)
 {
-    SimpleTensor<TO> dst{ tensor.shape(), dst_dt, 1, QuantizationInfo(), tensor.data_layout() };
+    SimpleTensor<TO> dst{tensor.shape(), dst_dt, 1, QuantizationInfo(), tensor.data_layout()};
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < tensor.num_elements(); ++i)
+    for (int i = 0; i < tensor.num_elements(); ++i)
     {
         dst[i] = tensor[i];
     }
@@ -122,9 +124,9 @@ SimpleTensor<TO> float_converter(const SimpleTensor<TI> &tensor, DataType dst_dt
 SimpleTensor<float> convert_rois_from_asymmetric(SimpleTensor<uint16_t> rois)
 {
     const UniformQuantizationInfo &quantization_info = rois.quantization_info().uniform();
-    SimpleTensor<float>            dst{ rois.shape(), DataType::F32, 1, QuantizationInfo(), rois.data_layout() };
+    SimpleTensor<float>            dst{rois.shape(), DataType::F32, 1, QuantizationInfo(), rois.data_layout()};
 
-    for(int i = 0; i < rois.num_elements(); i += 5)
+    for (int i = 0; i < rois.num_elements(); i += 5)
     {
         dst[i]     = static_cast<float>(rois[i]); // batch idx
         dst[i + 1] = dequantize_qasymm16(rois[i + 1], quantization_info);
@@ -137,7 +139,10 @@ SimpleTensor<float> convert_rois_from_asymmetric(SimpleTensor<uint16_t> rois)
 } // namespace
 
 template <>
-SimpleTensor<float> roi_align_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)
+SimpleTensor<float> roi_align_layer(const SimpleTensor<float> &src,
+                                    const SimpleTensor<float> &rois,
+                                    const ROIPoolingLayerInfo &pool_info,
+                                    const QuantizationInfo    &output_qinfo)
 {
     ARM_COMPUTE_UNUSED(output_qinfo);
 
@@ -152,11 +157,11 @@ SimpleTensor<float> roi_align_layer(const SimpleTensor<float> &src, const Simple
     SimpleTensor<float> dst(output_shape, dst_data_type);
 
     // Iterate over every pixel of the input image
-    for(size_t px = 0; px < pool_info.pooled_width(); ++px)
+    for (size_t px = 0; px < pool_info.pooled_width(); ++px)
     {
-        for(size_t py = 0; py < pool_info.pooled_height(); ++py)
+        for (size_t py = 0; py < pool_info.pooled_height(); ++py)
         {
-            for(size_t pw = 0; pw < num_rois; ++pw)
+            for (size_t pw = 0; pw < num_rois; ++pw)
             {
                 const unsigned int roi_batch = rois_ptr[values_per_roi * pw];
                 const auto         x1        = float(rois_ptr[values_per_roi * pw + 1]);
@@ -181,8 +186,10 @@ SimpleTensor<float> roi_align_layer(const SimpleTensor<float> &src, const Simple
                 region_end_x   = utility::clamp(region_end_x, 0.0f, float(input_shape[0]));
                 region_end_y   = utility::clamp(region_end_y, 0.0f, float(input_shape[1]));
 
-                const int roi_bin_grid_x = (pool_info.sampling_ratio() > 0) ? pool_info.sampling_ratio() : int(ceil(bin_size_x));
-                const int roi_bin_grid_y = (pool_info.sampling_ratio() > 0) ? pool_info.sampling_ratio() : int(ceil(bin_size_y));
+                const int roi_bin_grid_x =
+                    (pool_info.sampling_ratio() > 0) ? pool_info.sampling_ratio() : int(ceil(bin_size_x));
+                const int roi_bin_grid_y =
+                    (pool_info.sampling_ratio() > 0) ? pool_info.sampling_ratio() : int(ceil(bin_size_y));
 
                 // Move input and output pointer across the fourth dimension
                 const size_t input_stride_w  = input_shape[0] * input_shape[1] * input_shape[2];
@@ -190,18 +197,12 @@ SimpleTensor<float> roi_align_layer(const SimpleTensor<float> &src, const Simple
                 const float *input_ptr       = src.data() + roi_batch * input_stride_w;
                 float       *output_ptr      = dst.data() + px + py * output_shape[0] + pw * output_stride_w;
 
-                for(int pz = 0; pz < int(input_shape[2]); ++pz)
+                for (int pz = 0; pz < int(input_shape[2]); ++pz)
                 {
                     // For every pixel pool over an aligned region
-                    *(output_ptr + pz * output_shape[0] * output_shape[1]) = roi_align_1x1(input_ptr, input_shape,
-                                                                                           region_start_x,
-                                                                                           bin_size_x,
-                                                                                           roi_bin_grid_x,
-                                                                                           region_end_x,
-                                                                                           region_start_y,
-                                                                                           bin_size_y,
-                                                                                           roi_bin_grid_y,
-                                                                                           region_end_y, pz);
+                    *(output_ptr + pz * output_shape[0] * output_shape[1]) =
+                        roi_align_1x1(input_ptr, input_shape, region_start_x, bin_size_x, roi_bin_grid_x, region_end_x,
+                                      region_start_y, bin_size_y, roi_bin_grid_y, region_end_y, pz);
                 }
             }
         }
@@ -210,7 +211,10 @@ SimpleTensor<float> roi_align_layer(const SimpleTensor<float> &src, const Simple
 }
 
 template <>
-SimpleTensor<half> roi_align_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)
+SimpleTensor<half> roi_align_layer(const SimpleTensor<half>  &src,
+                                   const SimpleTensor<half>  &rois,
+                                   const ROIPoolingLayerInfo &pool_info,
+                                   const QuantizationInfo    &output_qinfo)
 {
     SimpleTensor<float> src_tmp  = float_converter<half, float>(src, DataType::F32);
     SimpleTensor<float> rois_tmp = float_converter<half, float>(rois, DataType::F32);
@@ -220,7 +224,10 @@ SimpleTensor<half> roi_align_layer(const SimpleTensor<half> &src, const SimpleTe
 }
 
 template <>
-SimpleTensor<uint8_t> roi_align_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint16_t> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)
+SimpleTensor<uint8_t> roi_align_layer(const SimpleTensor<uint8_t>  &src,
+                                      const SimpleTensor<uint16_t> &rois,
+                                      const ROIPoolingLayerInfo    &pool_info,
+                                      const QuantizationInfo       &output_qinfo)
 {
     SimpleTensor<float>   src_tmp  = convert_from_asymmetric(src);
     SimpleTensor<float>   rois_tmp = convert_rois_from_asymmetric(rois);
@@ -229,7 +236,10 @@ SimpleTensor<uint8_t> roi_align_layer(const SimpleTensor<uint8_t> &src, const Si
     return dst;
 }
 template <>
-SimpleTensor<int8_t> roi_align_layer(const SimpleTensor<int8_t> &src, const SimpleTensor<uint16_t> &rois, const ROIPoolingLayerInfo &pool_info, const QuantizationInfo &output_qinfo)
+SimpleTensor<int8_t> roi_align_layer(const SimpleTensor<int8_t>   &src,
+                                     const SimpleTensor<uint16_t> &rois,
+                                     const ROIPoolingLayerInfo    &pool_info,
+                                     const QuantizationInfo       &output_qinfo)
 {
     SimpleTensor<float>  src_tmp  = convert_from_asymmetric(src);
     SimpleTensor<float>  rois_tmp = convert_rois_from_asymmetric(rois);

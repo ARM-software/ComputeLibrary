@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018,2021 Arm Limited.
+ * Copyright (c) 2017-2018,2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_MEASUREMENT
-#define ARM_COMPUTE_TEST_MEASUREMENT
+#ifndef ACL_TESTS_FRAMEWORK_INSTRUMENTS_MEASUREMENT_H
+#define ACL_TESTS_FRAMEWORK_INSTRUMENTS_MEASUREMENT_H
 
-#include "../Utils.h"
 #include "arm_compute/core/Error.h"
 
+#include "../Utils.h"
 #include <list>
 #include <ostream>
 #include <string>
@@ -47,8 +47,7 @@ struct Measurement
          *
          * @param[in] is_floating Will the value stored be floating point ?
          */
-        Value(bool is_floating)
-            : v{ 0 }, is_floating_point(is_floating)
+        Value(bool is_floating) : v{0}, is_floating_point(is_floating)
         {
         }
 
@@ -56,7 +55,7 @@ struct Measurement
          */
         friend std::ostream &operator<<(std::ostream &os, const Value &value)
         {
-            if(value.is_floating_point)
+            if (value.is_floating_point)
             {
                 os << arithmetic_to_string(value.v.floating_point, 4);
             }
@@ -82,7 +81,7 @@ struct Measurement
          */
         Value operator+(Value b) const
         {
-            if(is_floating_point)
+            if (is_floating_point)
             {
                 b.v.floating_point += v.floating_point;
             }
@@ -101,7 +100,7 @@ struct Measurement
          */
         Value operator-(Value b) const
         {
-            if(is_floating_point)
+            if (is_floating_point)
             {
                 b.v.floating_point -= v.floating_point;
             }
@@ -120,7 +119,7 @@ struct Measurement
          */
         Value operator*(Value b) const
         {
-            if(is_floating_point)
+            if (is_floating_point)
             {
                 b.v.floating_point *= v.floating_point;
             }
@@ -140,7 +139,7 @@ struct Measurement
         Value operator/(int b) const
         {
             Value res(is_floating_point);
-            if(is_floating_point)
+            if (is_floating_point)
             {
                 res.v.floating_point = v.floating_point / b;
             }
@@ -159,7 +158,7 @@ struct Measurement
          */
         Value &operator-=(const Value &b)
         {
-            if(is_floating_point)
+            if (is_floating_point)
             {
                 v.floating_point -= b.v.floating_point;
             }
@@ -178,7 +177,7 @@ struct Measurement
          */
         bool operator<(const Value &b) const
         {
-            if(is_floating_point)
+            if (is_floating_point)
             {
                 return v.floating_point < b.v.floating_point;
             }
@@ -197,7 +196,7 @@ struct Measurement
          */
         static double relative_standard_deviation(const Value &variance, const Value &mean)
         {
-            if(variance.is_floating_point)
+            if (variance.is_floating_point)
             {
                 return 100.0 * sqrt(variance.v.floating_point) / mean.v.floating_point;
             }
@@ -248,14 +247,14 @@ struct Measurement
      * @param[in] unit Unit of @p v
      * @param[in] raw  (Optional) The raw value(s) @p was generated from.
      */
-    template < typename Floating, typename std::enable_if < !std::is_integral<Floating>::value, int >::type = 0 >
+    template <typename Floating, typename std::enable_if<!std::is_integral<Floating>::value, int>::type = 0>
     Measurement(Floating v, std::string unit, std::list<std::string> raw = {})
         : _unit(unit), _raw_data(std::move(raw)), _value(true)
     {
         _value.v.floating_point = static_cast<double>(v);
-        if(_raw_data.empty())
+        if (_raw_data.empty())
         {
-            _raw_data = { _value.to_string() };
+            _raw_data = {_value.to_string()};
         }
     }
 
@@ -270,9 +269,9 @@ struct Measurement
         : _unit(unit), _raw_data(std::move(raw)), _value(false)
     {
         _value.v.integer = static_cast<long long int>(v);
-        if(_raw_data.empty())
+        if (_raw_data.empty())
         {
-            _raw_data = { _value.to_string() };
+            _raw_data = {_value.to_string()};
         }
     }
 
@@ -312,4 +311,4 @@ private:
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_MEASUREMENT */
+#endif // ACL_TESTS_FRAMEWORK_INSTRUMENTS_MEASUREMENT_H

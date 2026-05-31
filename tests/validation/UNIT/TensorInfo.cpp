@@ -22,10 +22,12 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/TensorInfo.h"
+
 #include "arm_compute/core/Types.h"
+
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
 #include "tests/validation/Validation.h"
 #include "utils/TypePrinter.h"
 
@@ -35,14 +37,16 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+using framework::dataset::zip;
 TEST_SUITE(UNIT)
 TEST_SUITE(TensorInfo)
 
 // *INDENT-OFF*
 // clang-format off
 /** Validates TensorInfo Autopadding */
-DATA_TEST_CASE(AutoPadding, framework::DatasetMode::ALL, zip(zip(zip(
-               framework::dataset::make("TensorShape", {
+DATA_TEST_CASE(AutoPadding, framework::DatasetMode::ALL, zip(
+               make("TensorShape", {
                TensorShape{},
                TensorShape{ 10U },
                TensorShape{ 10U, 10U },
@@ -50,23 +54,23 @@ DATA_TEST_CASE(AutoPadding, framework::DatasetMode::ALL, zip(zip(zip(
                TensorShape{ 10U, 10U, 10U, 10U },
                TensorShape{ 10U, 10U, 10U, 10U, 10U },
                TensorShape{ 10U, 10U, 10U, 10U, 10U, 10U }}),
-               framework::dataset::make("PaddingSize", {
+               make("PaddingSize", {
                PaddingSize{ 0, 0, 0, 0 },
                PaddingSize{ 0, 36, 0, 4 },
                PaddingSize{ 4, 36, 4, 4 },
                PaddingSize{ 4, 36, 4, 4 },
                PaddingSize{ 4, 36, 4, 4 },
                PaddingSize{ 4, 36, 4, 4 },
-               PaddingSize{ 4, 36, 4, 4 }})),
-               framework::dataset::make("Strides", {
+               PaddingSize{ 4, 36, 4, 4 }}),
+               make("Strides", {
                Strides{},
                Strides{ 1U, 50U },
                Strides{ 1U, 50U },
                Strides{ 1U, 50U, 900U },
                Strides{ 1U, 50U, 900U, 9000U },
                Strides{ 1U, 50U, 900U, 9000U, 90000U },
-               Strides{ 1U, 50U, 900U, 9000U, 90000U, 900000U }})),
-               framework::dataset::make("Offset", { 0U, 4U, 204U, 204U, 204U, 204U, 204U })),
+               Strides{ 1U, 50U, 900U, 9000U, 90000U, 900000U }}),
+               make("Offset", { 0U, 4U, 204U, 204U, 204U, 204U, 204U })),
                shape, auto_padding, strides, offset)
 {
     TensorInfo info{ shape, Format::U8 };
@@ -174,7 +178,7 @@ TEST_CASE(AsymmQuantizationInfo, framework::DatasetMode::ALL)
 TEST_CASE(SymmPerChannelQuantizationInfo, framework::DatasetMode::ALL)
 {
     // Create tensor info
-    const std::vector<float> scale = { 0.25f, 1.4f, 3.2f, 2.3f, 4.7f };
+    const std::vector<float> scale = {0.25f, 1.4f, 3.2f, 2.3f, 4.7f};
     const TensorInfo         info(TensorShape(32U, 16U), 1, DataType::QSYMM8_PER_CHANNEL, QuantizationInfo(scale));
 
     // Check quantization information
@@ -187,7 +191,7 @@ TEST_CASE(SymmPerChannelQuantizationInfo, framework::DatasetMode::ALL)
 /** Validates lock paddings flag*/
 TEST_CASE(SubTensorPaddingExpansion, framework::DatasetMode::ALL)
 {
-    TensorInfo    tensor_info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
+    TensorInfo tensor_info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
     tensor_info.set_lock_paddings(true);
 
     // Now lock padding is set to true, therefore the extend padding would fail
@@ -197,8 +201,8 @@ TEST_CASE(SubTensorPaddingExpansion, framework::DatasetMode::ALL)
 TEST_CASE(DynamicShapes, framework::DatasetMode::ALL)
 {
     // Static shape at init time
-    TensorInfo    tensor_info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
-    ARM_COMPUTE_ASSERT(!tensor_info.is_dynamic());  // Static initialized
+    TensorInfo tensor_info(TensorShape(23U, 17U, 3U), 1, DataType::F32);
+    ARM_COMPUTE_ASSERT(!tensor_info.is_dynamic()); // Static initialized
 
     // Make dynamic shape explicitly
     tensor_info.set_tensor_dims_state(construct_dynamic_dims_state());
@@ -210,9 +214,10 @@ TEST_CASE(DynamicShapes, framework::DatasetMode::ALL)
 
     // Make only some dimensions dynamic
     constexpr int32_t dynamic_dim = ITensorInfo::get_dynamic_state_value();
-    constexpr int32_t static_dim = ITensorInfo::get_static_state_value();
+    constexpr int32_t static_dim  = ITensorInfo::get_static_state_value();
 
-    constexpr ITensorInfo::TensorDimsState state {static_dim, dynamic_dim, dynamic_dim, static_dim, static_dim, static_dim};
+    constexpr ITensorInfo::TensorDimsState state{static_dim, dynamic_dim, dynamic_dim,
+                                                 static_dim, static_dim,  static_dim};
     tensor_info.set_tensor_dims_state(state);
     ARM_COMPUTE_ASSERT(tensor_info.is_dynamic());
 
@@ -229,10 +234,11 @@ TEST_CASE(InvalidStateForDynamicShapes, framework::DatasetMode::ALL)
 
     // Make only some dimensions dynamic
     constexpr int32_t dynamic_dim = ITensorInfo::get_dynamic_state_value();
-    constexpr int32_t static_dim = ITensorInfo::get_static_state_value();
+    constexpr int32_t static_dim  = ITensorInfo::get_static_state_value();
     constexpr int32_t invalid_dim = 10000;
 
-    constexpr ITensorInfo::TensorDimsState state {static_dim, invalid_dim, dynamic_dim, static_dim, static_dim, static_dim};
+    constexpr ITensorInfo::TensorDimsState state{static_dim, invalid_dim, dynamic_dim,
+                                                 static_dim, static_dim,  static_dim};
     ARM_COMPUTE_UNUSED(state);
     ARM_COMPUTE_EXPECT_THROW(tensor_info.set_tensor_dims_state(state), framework::LogLevel::ERRORS);
 }

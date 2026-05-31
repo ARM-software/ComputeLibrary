@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Arm Limited.
+ * Copyright (c) 2021-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@
 #include "src/core/NEON/kernels/convolution/common/tensor.hpp"
 #include "src/core/NEON/kernels/convolution/common/utils.hpp"
 #include "src/core/utils/AssemblyUtils.h"
-#include "src/cpu/kernels/assembly/arm_gemm.hpp"
+#include "src/cpu/kernels/assembly/arm_gemm/arm_gemm.hpp"
 #include "src/cpu/kernels/CpuWinogradConv2dKernel.h"
 #include "src/cpu/operators/CpuActivation.h"
 #include "src/cpu/operators/CpuPermute.h"

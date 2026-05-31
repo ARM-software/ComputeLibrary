@@ -23,6 +23,7 @@
  */
 #include "src/cpu/kernels/CpuDirectConv2dKernel.h"
 
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/Validate.h"
 
@@ -57,6 +58,7 @@ Status validate_arguments(const ITensorInfo   *src,
                           const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src, weights);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_layout() != DataLayout::NHWC);
 
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
@@ -77,14 +79,18 @@ Status validate_arguments(const ITensorInfo   *src,
     }
     ARM_COMPUTE_UNUSED(width_idx);
     // Checks performed when output is configured
+    const TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
     if (dst->total_size() != 0)
     {
-        TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
-
         DataType data_type = src->data_type();
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON(dst->data_type() != data_type);
+    }
+    else
+    {
+        const auto dst_info = TensorInfo(output_shape, 1, src->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

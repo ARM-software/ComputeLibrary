@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023, 2025 Arm Limited.
+ * Copyright (c) 2016-2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 
 #include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/ScaleHelpers.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/cpu/kernels/scale/neon/list.h"
@@ -341,11 +342,12 @@ Status validate_arguments(const ITensorInfo     *src,
                           ITensorInfo           *dst,
                           const ScaleKernelInfo &info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     const auto *uk = CpuScaleKernel::get_implementation(
         ScaleKernelDataTypeISASelectorData{src->data_type(), CPUInfo::get().get_isa(), info.interpolation_policy});
 
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(dst == src);
     ARM_COMPUTE_RETURN_ERROR_ON(src->num_channels() != 1);
@@ -367,6 +369,11 @@ Status validate_arguments(const ITensorInfo     *src,
                                  info.interpolation_policy != InterpolationPolicy::BILINEAR ||
                                  info.border_mode != BorderMode::REPLICATE));
 
+    if (offsets != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(offsets);
+    }
+
     if (info.interpolation_policy == InterpolationPolicy::NEAREST_NEIGHBOR && offsets != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
@@ -377,6 +384,7 @@ Status validate_arguments(const ITensorInfo     *src,
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
         if (dx != nullptr && dy != nullptr)
         {
+            ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dx, dy);
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dx, 1, DataType::F32);
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dy, 1, DataType::F32);
         }

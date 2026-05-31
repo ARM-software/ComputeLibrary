@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TESTFILTER
-#define ARM_COMPUTE_TEST_TESTFILTER
+#ifndef ACL_TESTS_FRAMEWORK_TESTFILTER_H
+#define ACL_TESTS_FRAMEWORK_TESTFILTER_H
 
 #include "DatasetModes.h"
-
 #include <regex>
 #include <utility>
 #include <vector>
@@ -74,11 +73,11 @@ private:
     using Ranges = std::vector<std::pair<int, int>>;
     Ranges parse_id_filter(const std::string &id_filter) const;
 
-    DatasetMode _dataset_mode{ DatasetMode::ALL };
-    std::regex  _name_filter{ ".*" };
+    DatasetMode _dataset_mode{DatasetMode::ALL};
+    std::regex  _name_filter{".*"};
     Ranges      _id_filter{};
 };
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TESTFILTER */
+#endif // ACL_TESTS_FRAMEWORK_TESTFILTER_H

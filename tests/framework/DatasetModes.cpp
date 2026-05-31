@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #include "DatasetModes.h"
 
 #include "Utils.h"
-
 #include <map>
 
 namespace arm_compute
@@ -35,19 +34,18 @@ namespace framework
 {
 DatasetMode dataset_mode_from_name(const std::string &name)
 {
-    static const std::map<std::string, DatasetMode> modes =
-    {
-        { "all", DatasetMode::ALL },
-        { "disabled", DatasetMode::DISABLED },
-        { "precommit", DatasetMode::PRECOMMIT },
-        { "nightly", DatasetMode::NIGHTLY },
+    static const std::map<std::string, DatasetMode> modes = {
+        {"all", DatasetMode::ALL},
+        {"disabled", DatasetMode::DISABLED},
+        {"precommit", DatasetMode::PRECOMMIT},
+        {"nightly", DatasetMode::NIGHTLY},
     };
 
     try
     {
         return modes.at(tolower(name));
     }
-    catch(const std::out_of_range &)
+    catch (const std::out_of_range &)
     {
         throw std::invalid_argument(name);
     }

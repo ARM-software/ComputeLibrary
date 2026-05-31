@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Arm Limited.
+ * Copyright (c) 2018-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/utils/helpers/tensor_info.h"
 #include "support/Cast.h"
@@ -52,6 +53,7 @@ Status validate_arguments(const ITensorInfo *src1,
                           const ITensorInfo *dst)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src1, src2, src3, src4, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src1, src2, src3, src4, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src1);
     ARM_COMPUTE_RETURN_ERROR_ON(src1->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src1, src2, src3, src4, dst);

@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -100,17 +100,20 @@ size_t kai_get_sr_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa
 size_t kai_get_lhs_packed_offset_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa(
     size_t m_idx, size_t k, size_t bl) {
     const size_t m_step = kai_get_m_step_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa();
+    const size_t mr = kai_get_mr_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa();
     KAI_ASSUME((m_idx % m_step) == 0);
 
-    return (m_idx / m_step) * kai_get_lhs_packed_stride(k, bl);
+    return (m_idx / mr) * kai_get_lhs_packed_stride(k, bl);
 }
 
 size_t kai_get_rhs_packed_offset_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa(
     size_t n_idx, size_t k, size_t bl) {
     const size_t n_step = kai_get_n_step_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa();
+    const size_t nr = kai_get_nr_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa();
+
     KAI_ASSUME((n_idx % n_step) == 0);
 
-    return (n_idx / n_step) * kai_get_rhs_packed_stride(k, bl);
+    return (n_idx / nr) * kai_get_rhs_packed_stride(k, bl);
 }
 
 size_t kai_get_dst_offset_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa(
@@ -148,17 +151,29 @@ void kai_run_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa(
         return;
     }
 
-    const size_t lhs_packed_stride = kai_get_lhs_packed_stride(k, bl);
-    const size_t rhs_packed_stride = kai_get_rhs_packed_stride(k, bl);
+    typedef struct {
+        size_t lhs_packed_stride;
+        size_t rhs_packed_stride;
+        size_t mr;
+    } KernelArgs;
+
+    KernelArgs ka;
+
     const size_t num_blocks = kai_get_num_blocks_per_row(k, bl);
 
     const size_t mr = kai_get_mr_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa();
     const size_t nr = kai_get_nr_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa();
 
-    const uint16_t* lhs_scales =
-        (uint16_t*)((const int8_t*)lhs_packed + lhs_packed_stride - (mr * num_blocks) * kai_num_bytes_multiplier_lhs);
-    const uint16_t* rhs_scales =
-        (uint16_t*)((const uint8_t*)rhs_packed + rhs_packed_stride - (nr * num_blocks) * kai_num_bytes_multiplier_rhs);
+    ka.mr = mr;
+    ka.lhs_packed_stride = kai_get_lhs_packed_stride(k, bl);
+    ka.rhs_packed_stride = kai_get_rhs_packed_stride(k, bl);
+
+    const uint16_t* lhs_scales = (const uint16_t*)((const int8_t*)lhs_packed + ka.lhs_packed_stride -
+                                                   (mr * num_blocks) * kai_num_bytes_multiplier_lhs);
+    const uint16_t* rhs_scales = (const uint16_t*)((const uint8_t*)rhs_packed + ka.rhs_packed_stride -
+                                                   (nr * num_blocks) * kai_num_bytes_multiplier_rhs);
+
+    kai_commit_za();
 
     __asm__ volatile(
         // Switch to streaming mode with ZA enabling
@@ -170,6 +185,11 @@ void kai_run_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa(
         // - ptrue
         " ptrue p0.b, all \n"
         " .inst 0x25a07810 // ptrue pn8.s \n"
+
+        // Predicate for loading fp16 scaling factors
+        " ldr x5, [%x[args_ptr], %[offset_mr]]\n"
+        " lsl x5, x5, #1 \n"
+        " whilelt p4.b, xzr, x5 \n"
 
         // Initialize ZT0 (Lookup table)
         " mov x6, %[lut]\n"
@@ -265,8 +285,8 @@ void kai_run_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa(
         // Copy destination pointer for store loop
         " mov x25, x24 \n"
 
-        // Load the fp16 scaling factors for the right matrix block
-        " ld1b {z16.b}, p0/z, [x23, x21] \n"
+        // Load the fp16 scaling factors for the left matrix block
+        " ld1b {z16.b}, p4/z, [x23, x21] \n"
         " inch x21, all \n"
 
         // Predicate for the selection of a scaling among the vector
@@ -334,11 +354,13 @@ void kai_run_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa(
 
         // === End of the K loop ===
 
+        " ldr x5, [%x[args_ptr], %[offset_stride_l]] \n"
+
         // Increment pointer to the quantized values of the right matrix
-        " add x22, x22, %[stride_l] \n"
+        " add x22, x22, x5\n"
 
         // Increment pointer to the scaling factors of the right matrix
-        " add x23, x23, %[stride_l] \n"
+        " add x23, x23, x5 \n"
 
         // Update destination pointer
         " mov x24, x25 \n"
@@ -354,8 +376,10 @@ void kai_run_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa(
         // Increment output pointer
         " incb %[dst], all, mul #4 \n"
 
-        " add x16, x16, %[stride_r] \n"
-        " add x17, x17, %[stride_r] \n"
+        " ldr x5, [%x[args_ptr], %[offset_stride_r]]\n"
+
+        " add x16, x16, x5 \n"
+        " add x17, x17, x5 \n"
 
         // Increment N loop index
         " incb x8, all \n"
@@ -372,11 +396,12 @@ void kai_run_matmul_clamp_f32_qsi8d32p1vlx4_qsi4c32p4vlx4_1vlx4vl_sme2_mopa(
         " .inst 0xd503467f // smstop \n"
         : [dst] "+r"(dst), [rhs_packed] "+r"(rhs_packed), [rhs_scales] "+r"(rhs_scales)
         : [M] "r"(m), [N] "r"(n), [K] "r"(k), [lhs_packed] "r"(lhs_packed), [lhs_scales] "r"(lhs_scales),
-          [stride] "r"(dst_stride_row), [lut] "r"(lut), [stride_l] "r"(lhs_packed_stride),
-          [stride_r] "r"(rhs_packed_stride)
-        : "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "z0",
-          "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17",
-          "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31", "x0", "x6",
+          [stride] "r"(dst_stride_row), [lut] "r"(lut), [args_ptr] "r"(&ka),
+          [offset_stride_l] "I"(offsetof(KernelArgs, lhs_packed_stride)),
+          [offset_stride_r] "I"(offsetof(KernelArgs, rhs_packed_stride)), [offset_mr] "I"(offsetof(KernelArgs, mr))
+        : "p0", "p1", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "z0", "z1",
+          "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18",
+          "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31", "x0", "x5", "x6",
           "x8", "x9", "x10", "x11", "x12", "x14", "x15", "x16", "x17", "x20", "x21", "x22", "x23", "x24", "x25",
           "memory", "cc");
 }

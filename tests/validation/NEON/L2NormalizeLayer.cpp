@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/NEON/functions/NEL2NormalizeLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/L2NormalizeLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -40,6 +41,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 /** Tolerance for float operations */
@@ -54,8 +57,8 @@ TEST_SUITE(L2NormalizeLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-    framework::dataset::make("InputInfo",  { TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching data type input/output
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+    make("InputInfo",  { TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching data type input/output
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching shape input/output
                                              TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), // Number of Input channels != 1
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), // DataType != F32
@@ -64,7 +67,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
                                            }),
-    framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(128U, 64U), 1, DataType::F16),
+    make("OutputInfo", { TensorInfo(TensorShape(128U, 64U), 1, DataType::F16),
                                              TensorInfo(TensorShape(256U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::S16),
@@ -72,8 +75,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
-                                           })),
-    framework::dataset::make("Axis",       {
+                                           }),
+    make("Axis",       {
                                             0,
                                             0,
                                             0,
@@ -81,8 +84,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             static_cast<int>(TensorShape::num_max_dimensions),
                                             3,
                                             -2,
-                                            0 })),
-    framework::dataset::make("Expected",   { false, false, false, false, true, true, true, true })),
+                                            0 }),
+    make("Expected",   { false, false, false, false, true, true, true, true })
+    ),
     input_info, output_info, axis, expected)
 {
     bool is_valid = bool(NEL2NormalizeLayer::validate(&input_info.clone()->set_is_resizable(false),
@@ -97,19 +101,27 @@ template <typename T>
 using NEL2NormalizeLayerFixture = L2NormalizeLayerValidationFixture<Tensor, Accessor, NEL2NormalizeLayer, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEL2NormalizeLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                       framework::dataset::make("Axis", { -1, 0, 1, 2 })),
-                               framework::dataset::make("Epsilon", { 1e-6 })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEL2NormalizeLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("Axis", {-1, 0, 1, 2}),
+                               make("Epsilon", {1e-6})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEL2NormalizeLayerFixture<float>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                       framework::dataset::make("Axis", { -1, 0, 2 })),
-                               framework::dataset::make("Epsilon", { 1e-6 })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEL2NormalizeLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("Axis", {-1, 0, 2}),
+                               make("Epsilon", {1e-6})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -118,37 +130,45 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEL2NormalizeLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                       framework::dataset::make("Axis", { -1, 0, 1, 2 })),
-                               framework::dataset::make("Epsilon", { 1e-6 })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEL2NormalizeLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("Axis", {-1, 0, 1, 2}),
+                               make("Epsilon", {1e-6})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_f16);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEL2NormalizeLayerFixture<half>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                                       framework::dataset::make("Axis", { -1, 0, 2 })),
-                               framework::dataset::make("Epsilon", { 1e-6 })))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEL2NormalizeLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("Axis", {-1, 0, 2}),
+                               make("Epsilon", {1e-6})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_f16);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() // FP16

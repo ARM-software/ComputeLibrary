@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2024-2025 Arm Limited.
+ * Copyright (c) 2017-2020, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 
 #include <arm_neon.h>
 
-#include "../../asmlib.hpp"
+#include "asmlib.hpp"
 
 namespace arm_gemm {
 
@@ -344,4 +344,5 @@ void a64_gemm_s8_8x12_x1(const int8_t *Apanel, const int8_t *Bpanel, int32_t *Cp
 
 } // namespace arm_gemm
 
-#endif
+#endif // __aarch64__
+

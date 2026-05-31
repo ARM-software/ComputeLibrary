@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,3 +51,4 @@ struct is_sme
 };
 
 }  // namespace arm_gemm
+

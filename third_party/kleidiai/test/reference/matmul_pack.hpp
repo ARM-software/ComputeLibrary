@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,8 +7,8 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
-#include <vector>
+
+#include "test/common/buffer.hpp"
 
 namespace kai::test {
 
@@ -37,7 +37,7 @@ namespace kai::test {
 ///
 /// @return The packed RHS.
 template <typename Data, typename Scale, typename ZeroPoint>
-std::vector<uint8_t> matmul_pack_rhs_nxk_static_quantized(
+Buffer matmul_pack_rhs_nxk_static_quantized(
     const void* data, const void* scales, Scale lhs_scale, Scale dst_scale, const void* biases,
     ZeroPoint lhs_zero_point, size_t n, size_t k, size_t block_height, size_t block_width);
 

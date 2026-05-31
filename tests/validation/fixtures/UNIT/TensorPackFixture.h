@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UNIT_TENSORPACK_FIXTURE
-#define ARM_COMPUTE_TEST_UNIT_TENSORPACK_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_UNIT_TENSORPACKFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_UNIT_TENSORPACKFIXTURE_H
 
 #include "arm_compute/Acl.hpp"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/framework/Macros.h"
@@ -78,11 +79,13 @@ public:
         acl::Context ctx(Target);
 
         std::array<char, 256> empty_array{};
-        AclTensorPack pack = nullptr;
+        AclTensorPack         pack = nullptr;
 
         ARM_COMPUTE_ASSERT(AclDestroyTensorPack(pack) == AclStatus::AclInvalidArgument);
-        ARM_COMPUTE_ASSERT(AclDestroyTensorPack(reinterpret_cast<AclTensorPack>(ctx.get())) == AclStatus::AclInvalidArgument);
-        ARM_COMPUTE_ASSERT(AclDestroyTensorPack(reinterpret_cast<AclTensorPack>(empty_array.data())) == AclStatus::AclInvalidArgument);
+        ARM_COMPUTE_ASSERT(AclDestroyTensorPack(reinterpret_cast<AclTensorPack>(ctx.get())) ==
+                           AclStatus::AclInvalidArgument);
+        ARM_COMPUTE_ASSERT(AclDestroyTensorPack(reinterpret_cast<AclTensorPack>(empty_array.data())) ==
+                           AclStatus::AclInvalidArgument);
         ARM_COMPUTE_ASSERT(pack == nullptr);
     };
 };
@@ -112,9 +115,7 @@ public:
         acl::TensorPack pack(ctx, &err);
         ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
 
-        auto status = AclPackTensor(pack.get(),
-                                    reinterpret_cast<AclTensor>(ctx.get()),
-                                    AclTensorSlot::AclSrc);
+        auto status = AclPackTensor(pack.get(), reinterpret_cast<AclTensor>(ctx.get()), AclTensorSlot::AclSrc);
         ARM_COMPUTE_ASSERT(status == AclInvalidArgument);
 
         status = AclPackTensor(pack.get(), nullptr, AclTensorSlot::AclSrc);
@@ -140,7 +141,7 @@ public:
     {
         acl::Context    ctx(Target);
         acl::TensorPack pack(ctx);
-        acl::Tensor     t(ctx, acl::TensorDescriptor({ 3, 3, 5, 7 }, acl::DataType::Float32));
+        acl::Tensor     t(ctx, acl::TensorDescriptor({3, 3, 5, 7}, acl::DataType::Float32));
 
         ARM_COMPUTE_ASSERT(pack.add(t, AclTensorSlot::AclSrc) == acl::StatusCode::Success);
     };
@@ -165,20 +166,21 @@ public:
         acl::Context    ctx(Target);
         acl::TensorPack pack(ctx);
 
-        const acl::TensorDescriptor desc(acl::TensorDescriptor({ 3, 3, 5, 7 }, acl::DataType::Float32));
+        const acl::TensorDescriptor desc(acl::TensorDescriptor({3, 3, 5, 7}, acl::DataType::Float32));
         const size_t                num_tensors = 256;
 
         std::vector<acl::Tensor> tensors;
-        for(unsigned int i = 0; i < num_tensors; ++i)
+        for (unsigned int i = 0; i < num_tensors; ++i)
         {
             auto err = acl::StatusCode::Success;
             tensors.emplace_back(acl::Tensor(ctx, desc, &err));
             ARM_COMPUTE_ASSERT(err == acl::StatusCode::Success);
-            ARM_COMPUTE_ASSERT(pack.add(tensors.back(), static_cast<int32_t>(AclTensorSlot::AclSrcVec) + i) == acl::StatusCode::Success);
+            ARM_COMPUTE_ASSERT(pack.add(tensors.back(), static_cast<int32_t>(AclTensorSlot::AclSrcVec) + i) ==
+                               acl::StatusCode::Success);
         }
     };
 };
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UNIT_TENSORPACK_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_UNIT_TENSORPACKFIXTURE_H

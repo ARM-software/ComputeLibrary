@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,11 @@
 #include "src/core/NEON/kernels/NELogicalKernel.h"
 
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Validate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -297,12 +299,16 @@ Status NELogicalKernel::validate(const ITensorInfo *input1,
                                  const ITensorInfo *output,
                                  LogicalOperation   op)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input1);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8);
     ARM_COMPUTE_RETURN_ERROR_ON(op == LogicalOperation::Unknown);
 
     TensorShape out_shape = input1->tensor_shape();
     if (op != LogicalOperation::Not)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input2);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input2);
         out_shape = TensorShape::broadcast_shape(input1->tensor_shape(), input2->tensor_shape());
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, input2);
@@ -311,8 +317,14 @@ Status NELogicalKernel::validate(const ITensorInfo *input1,
     // Checks performed when output is configured
     if ((output != nullptr) && (output->total_size() != 0))
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON(detail::have_different_dimensions(out_shape, output->tensor_shape(), 0));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, output);
+    }
+    else
+    {
+        const TensorInfo output_info(out_shape, input1->num_channels(), input1->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

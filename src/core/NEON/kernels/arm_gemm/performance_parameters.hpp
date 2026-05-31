@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2024 Arm Limited.
+ * Copyright (c) 2020, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,3 +35,4 @@ struct PerformanceParameters {
 };
 
 } // namespace arm_gemm
+

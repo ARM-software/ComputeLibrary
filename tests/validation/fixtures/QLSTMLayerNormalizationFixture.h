@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023 Arm Limited.
+ * Copyright (c) 2020-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_QLSTM_LAYER_NORMALIZATION_FIXTURE
-#define ARM_COMPUTE_TEST_QLSTM_LAYER_NORMALIZATION_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_QLSTMLAYERNORMALIZATIONFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_QLSTMLAYERNORMALIZATIONFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/QLSTMLayerNormalization.h"
 
@@ -44,7 +45,11 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class QLSTMLayerNormalizationValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape input_shape, TensorShape weight_shape, TensorShape bias_shape, DataType data_type, QuantizationInfo weight_qinfo)
+    void setup(TensorShape      input_shape,
+               TensorShape      weight_shape,
+               TensorShape      bias_shape,
+               DataType         data_type,
+               QuantizationInfo weight_qinfo)
     {
         ARM_COMPUTE_ERROR_ON(data_type != DataType::QSYMM16);
 
@@ -59,7 +64,7 @@ protected:
     template <typename InputType, typename BiasType>
     void fill(InputType &&input_tensor, InputType &&weight_tensor, BiasType &&bias_tensor)
     {
-        switch(_data_type)
+        switch (_data_type)
         {
             case DataType::QSYMM16:
             {
@@ -88,7 +93,7 @@ protected:
 
     void allocate_tensors(const std::vector<TensorType *> &tensors)
     {
-        for(auto t : tensors)
+        for (auto t : tensors)
         {
             ARM_COMPUTE_ASSERT(t->info()->is_resizable());
             t->allocator()->allocate();
@@ -96,7 +101,8 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &weight_shape, const TensorShape &bias_shape)
+    TensorType
+    compute_target(const TensorShape &input_shape, const TensorShape &weight_shape, const TensorShape &bias_shape)
     {
         TensorType input  = create_tensor<TensorType>(input_shape, _data_type, 1);
         TensorType weight = create_tensor<TensorType>(weight_shape, _data_type, 1, _qinfo);
@@ -105,19 +111,20 @@ protected:
 
         FunctionType fn;
         fn.configure(&input, &output, &weight, &bias);
-        allocate_tensors({ &input, &weight, &bias, &output });
+        allocate_tensors({&input, &weight, &bias, &output});
         fill(AccessorType(input), AccessorType(weight), AccessorType(bias));
         fn.run();
 
         return output;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weight_shape, const TensorShape &bias_shape)
+    SimpleTensor<T>
+    compute_reference(const TensorShape &input_shape, const TensorShape &weight_shape, const TensorShape &bias_shape)
     {
         // Create reference
-        SimpleTensor<T>       input{ input_shape, _data_type, 1 };
-        SimpleTensor<T>       weight{ weight_shape, _data_type, 1, _qinfo };
-        SimpleTensor<int32_t> bias{ bias_shape, DataType::S32, 1 };
+        SimpleTensor<T>       input{input_shape, _data_type, 1};
+        SimpleTensor<T>       weight{weight_shape, _data_type, 1, _qinfo};
+        SimpleTensor<int32_t> bias{bias_shape, DataType::S32, 1};
 
         // Fill reference
         fill(input, weight, bias);
@@ -134,4 +141,4 @@ protected:
 } // namespace test
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_TEST_QLSTM_LAYER_NORMALIZATION_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_QLSTMLAYERNORMALIZATIONFIXTURE_H

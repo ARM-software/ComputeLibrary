@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_SRC_CPU_KERNELS_ASSEMBLY_ARM_GEMM_COMPUTE_IFACE_HPP
+#define ACL_SRC_CPU_KERNELS_ASSEMBLY_ARM_GEMM_COMPUTE_IFACE_HPP
+
 #pragma once
 
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Window.h"
 
-#include "ndrange.hpp"
+#include "arm_gemm/ndrange.hpp"
 #include <cassert>
 
 /* This file contains mapping between integral types used in arm_compute and arm_gemm
@@ -120,3 +124,5 @@ inline ndcoord_t to_ndcoord(const arm_compute::Window &win)
 }
 
 } //namespace arm_gemm
+
+#endif // ACL_SRC_CPU_KERNELS_ASSEMBLY_ARM_GEMM_COMPUTE_IFACE_HPP

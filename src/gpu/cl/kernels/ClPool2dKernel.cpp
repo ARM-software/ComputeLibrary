@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -50,6 +51,7 @@ Status validate_arguments(const ITensorInfo      *src,
                           const ITensorInfo      *indices)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::F16, DataType::F32);
@@ -75,6 +77,8 @@ Status validate_arguments(const ITensorInfo      *src,
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((output_width < 1 || output_height < 1),
                                     "Calculated output dimension size is invalid");
 
+    const TensorShape output_shape = compute_pool_shape(*src, pool_info);
+
     // Check indices
     if (indices)
     {
@@ -86,18 +90,23 @@ Status validate_arguments(const ITensorInfo      *src,
 
         if (indices->total_size() != 0)
         {
-            TensorInfo idx_info(TensorInfo(compute_pool_shape(*src, pool_info), 1, DataType::U32));
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(indices, &idx_info);
+            ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(indices);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(indices->tensor_shape(), output_shape);
         }
     }
 
     // Checks performed when dst is configured
     if (dst->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, dst);
-        TensorInfo out_info(TensorInfo(compute_pool_shape(*src, pool_info), 1, dst->data_type()));
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &out_info);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
+    }
+    else
+    {
+        const TensorInfo dst_info(output_shape, src->num_channels(), src->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

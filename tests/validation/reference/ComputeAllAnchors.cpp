@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/misc/Utility.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -50,13 +51,13 @@ SimpleTensor<T> compute_all_anchors(const SimpleTensor<T> &anchors, const Comput
 
     // Iterate over the input grid and anchors
 #if defined(_OPENMP)
-    #pragma omp parallel for schedule(dynamic, 1) collapse(3)
+#pragma omp parallel for schedule(dynamic, 1) collapse(3)
 #endif /* _OPENMP */
-    for(int y = 0; y < height; y++)
+    for (int y = 0; y < height; y++)
     {
-        for(int x = 0; x < width; x++)
+        for (int x = 0; x < width; x++)
         {
-            for(int a = 0; a < num_anchors; a++)
+            for (int a = 0; a < num_anchors; a++)
             {
                 const T      shift_x   = T(x) * T(stride);
                 const T      shift_y   = T(y) * T(stride);
@@ -75,7 +76,7 @@ SimpleTensor<T> compute_all_anchors(const SimpleTensor<T> &anchors, const Comput
     return all_anchors;
 }
 template SimpleTensor<float> compute_all_anchors(const SimpleTensor<float> &anchors, const ComputeAnchorsInfo &info);
-template SimpleTensor<half> compute_all_anchors(const SimpleTensor<half> &anchors, const ComputeAnchorsInfo &info);
+template SimpleTensor<half>  compute_all_anchors(const SimpleTensor<half> &anchors, const ComputeAnchorsInfo &info);
 
 template <>
 SimpleTensor<int16_t> compute_all_anchors(const SimpleTensor<int16_t> &anchors, const ComputeAnchorsInfo &info)

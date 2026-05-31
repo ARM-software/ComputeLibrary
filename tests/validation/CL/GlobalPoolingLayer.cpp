@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,15 +25,16 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/PoolingTypesDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/PoolingLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -41,14 +42,17 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 namespace
 {
 /** Input data set for float data types */
 const auto GlobalPoolingLayerDataset = combine(datasets::GlobalPoolingShapes(), datasets::PoolingTypes());
 
 /** Input data set for quantized data types */
-constexpr AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for FP32 types */
-constexpr AbsoluteTolerance<float> tolerance_f16(0.01f);  /**< Tolerance value for comparing reference's output against implementation's output for FP16 types */
+constexpr AbsoluteTolerance<float> tolerance_f32(
+    0.001f); /**< Tolerance value for comparing reference's output against implementation's output for FP32 types */
+constexpr AbsoluteTolerance<float> tolerance_f16(
+    0.01f); /**< Tolerance value for comparing reference's output against implementation's output for FP16 types */
 } // namespace
 
 TEST_SUITE(CL)
@@ -59,9 +63,12 @@ using CLGlobalPoolingLayerFixture = GlobalPoolingLayerValidationFixture<CLTensor
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunGlobalPooling, CLGlobalPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType",
-                                                                                                                  DataType::F32)),
-                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+FIXTURE_DATA_TEST_CASE(RunGlobalPooling,
+                       CLGlobalPoolingLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(GlobalPoolingLayerDataset,
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -69,9 +76,12 @@ FIXTURE_DATA_TEST_CASE(RunGlobalPooling, CLGlobalPoolingLayerFixture<float>, fra
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunGlobalPooling, CLGlobalPoolingLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType",
-                                                                                                                 DataType::F16)),
-                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+FIXTURE_DATA_TEST_CASE(RunGlobalPooling,
+                       CLGlobalPoolingLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(GlobalPoolingLayerDataset,
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW})))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);

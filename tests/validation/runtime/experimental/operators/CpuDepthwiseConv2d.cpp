@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -166,7 +166,7 @@ TEST_CASE(OpCpuDepthwiseConv2dMemoryInjection, framework::DatasetMode::ALL)
         const float val0 = reinterpret_cast<float *>(result_0.buffer())[i];
         const float val1 = reinterpret_cast<float *>(result_1.buffer())[i];
 
-        if(val0 != val1)
+        if (val0 != val1)
         {
             ARM_COMPUTE_TEST_INFO("val0: " << val0 << ", val1: " << val1);
             framework::ARM_COMPUTE_PRINT_INFO();

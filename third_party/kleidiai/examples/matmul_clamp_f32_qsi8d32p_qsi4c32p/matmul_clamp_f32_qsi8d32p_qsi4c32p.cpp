@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -11,8 +11,12 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
+#include <limits>
 #include <string>
+#include <thread>
+#include <vector>
 
 // Include micro-kernel variants
 #include "kai_lhs_quant_pack_qsi8d32p_f32.h"
@@ -24,6 +28,56 @@
 
 #define INT4_MIN (-8)
 #define INT4_MAX (7)
+
+static size_t parse_thread_count_value(const std::string& value) {
+    char* end = nullptr;
+    const unsigned long parsed = std::strtoul(value.c_str(), &end, 10);
+    if (end == value.c_str() || *end != '\0') {
+        std::cerr << "Invalid thread count: '" << value << "'\n";
+        std::exit(EXIT_FAILURE);
+    }
+    if (parsed == 0 || parsed > std::numeric_limits<size_t>::max()) {
+        std::cerr << "Thread count must be in range [1, " << std::numeric_limits<size_t>::max() << "]\n";
+        std::exit(EXIT_FAILURE);
+    }
+    return static_cast<size_t>(parsed);
+}
+
+static void print_usage(const char* program_name) {
+    std::cerr << "Usage: " << program_name << " [--threads <count> | --threads=<count>]\n";
+}
+
+static size_t parse_thread_count(int argc, char** argv) {
+    size_t thread_count = 1;
+    for (int i = 1; i < argc; ++i) {
+        std::string arg(argv[i]);
+        if (arg == "--help" || arg == "-h") {
+            print_usage(argv[0]);
+            std::exit(EXIT_SUCCESS);
+        }
+
+        if (arg == "--threads" || arg == "-t") {
+            if ((i + 1) >= argc) {
+                std::cerr << "--threads expects a value\n";
+                print_usage(argv[0]);
+                std::exit(EXIT_FAILURE);
+            }
+            thread_count = parse_thread_count_value(argv[++i]);
+            continue;
+        }
+
+        const std::string prefix = "--threads=";
+        if (arg.rfind(prefix, 0) == 0) {
+            thread_count = parse_thread_count_value(arg.substr(prefix.size()));
+            continue;
+        }
+
+        std::cerr << "Unrecognized argument: " << arg << "\n";
+        print_usage(argv[0]);
+        std::exit(EXIT_FAILURE);
+    }
+    return thread_count;
+}
 
 // Micro-kernel interface
 struct kai_matmul_ukernel_f32_qa8d32p_qs4c32p {
@@ -281,6 +335,9 @@ static bool is_output_correct(size_t num_rows, size_t num_cols, float tolerance,
 }
 
 int main(int argc, char** argv) {
+    const size_t num_threads = parse_thread_count(argc, argv);
+    std::cout << "Using " << num_threads << " thread(s) for computations." << std::endl;
+
     const size_t bl = 32;  // Block length. It must be 32
     const size_t m = 71;
     const size_t n = 63;
@@ -365,7 +422,7 @@ int main(int argc, char** argv) {
         params.lhs_zero_point = 1;
         params.rhs_zero_point = 8;
 
-        // RHS packing
+        // RHS packing. RHS is usually constant and packed only once, e.g. at model loading time.
         kai_run_rhs_pack_nxk_qsi4c32pscalef16_qsu4c32s16s0(
             1, n, k,                                  // Dimensions
             nr, kr, sr,                               // Packing arguments
@@ -375,36 +432,67 @@ int main(int argc, char** argv) {
             rhs_packed_mtx_qs4c32,                    // RHS packed
             0, &params);
 
+        // Worker thread function. Multithreads both LHS packing and matmul execution.
+        auto thread_worker = [&](int thread_index) {
+            // Each thread processes m_to_process number of rows. Note that, due to the format block size, each
+            // thread must process an integer multiple of m_step number of rows.
+            const size_t m_step = ukernel_variants[idx_variant].ukernel.get_m_step();
+            const size_t num_m_per_thread = kai_roundup(m, m_step * num_threads) / num_threads;
+            const size_t m_start = thread_index * num_m_per_thread;
+
+            // For small shapes and m_step > 1, there may not be enough parallelism to put all threads to work
+            if (m_start < m) {
+                size_t m_to_process = num_m_per_thread;
+                if (m_start + m_to_process > m) {
+                    m_to_process = m - m_start;
+                }
+
+                // LHS packing
+                const float* src_ptr = (float*)lhs_native_mtx_f32 +
+                    kai_get_lhs_offset_lhs_quant_pack_qsi8d32p_f32(m_start, k * sizeof(float)) / sizeof(float);
+                const size_t lhs_packed_offset =
+                    ukernel_variants[idx_variant].ukernel.get_lhs_packed_offset(m_start, k, bl);
+                void* lhs_packed_ptr = lhs_packed_mtx_qs8d32 + lhs_packed_offset;
+
+                kai_run_lhs_quant_pack_qsi8d32p_f32(
+                    m_to_process, k, bl,  // Dimensions
+                    mr, kr, sr, 0,        // Packing arguments
+                    src_ptr,              // LHS
+                    k * sizeof(float),    // LHS stride
+                    lhs_packed_ptr);      // LHS packed
+
+                // Matmul micro-kernel
+                const size_t dst_stride = n * sizeof(float);
+                const size_t rhs_packed_offset = ukernel_variants[idx_variant].ukernel.get_rhs_packed_offset(0, k, bl);
+                const void* rhs_packed_ptr = rhs_packed_mtx_qs4c32 + rhs_packed_offset;
+                const size_t dst_offset = ukernel_variants[idx_variant].ukernel.get_dst_offset(m_start, 0, dst_stride);
+                float* dst_ptr = (float*)(dst_act_mtx_f32 + dst_offset);
+
+                ukernel_variants[idx_variant].ukernel.run_matmul(
+                    m_to_process, n, k, bl,  // Dimensions
+                    lhs_packed_ptr,          // LHS packed
+                    rhs_packed_ptr,          // RHS packed
+                    dst_ptr,                 // DST
+                    dst_stride,              // DST stride (row)
+                    sizeof(float),           // DST stride (col)
+                    -FLT_MAX, FLT_MAX        // Min and max for the clamp operation
+                );
+            }
+        };
+
         const auto time_s = std::chrono::high_resolution_clock::now();
 
-        // LHS packing
-        kai_run_lhs_quant_pack_qsi8d32p_f32(
-            m, k, bl,                          // Dimensions
-            mr, kr, sr, 0,                     // Packing arguments
-            (const float*)lhs_native_mtx_f32,  // LHS
-            k * sizeof(float),                 // LHS stride
-            lhs_packed_mtx_qs8d32);            // LHS packed
+        std::vector<std::thread> threads;
+        threads.reserve(num_threads);
 
-        // Matmul
-        {
-            const size_t dst_stride = n * sizeof(float);
-            const size_t lhs_offset = ukernel_variants[idx_variant].ukernel.get_lhs_packed_offset(0, k, bl);
-            const size_t rhs_offset = ukernel_variants[idx_variant].ukernel.get_rhs_packed_offset(0, k, bl);
-            const size_t dst_offset = ukernel_variants[idx_variant].ukernel.get_dst_offset(0, 0, dst_stride);
+        // Create worker threads and execute the operator
+        for (int i = 0; i < num_threads; ++i) {
+            threads.emplace_back(thread_worker, i);
+        }
 
-            const void* lhs_ptr = (const void*)((const char*)lhs_packed_mtx_qs8d32 + lhs_offset);
-            const void* rhs_ptr = (const void*)((const char*)rhs_packed_mtx_qs4c32 + rhs_offset);
-            float* dst_ptr = (float*)((uint8_t*)dst_act_mtx_f32 + dst_offset);
-
-            ukernel_variants[idx_variant].ukernel.run_matmul(
-                m, n, k, bl,       // Dimensions
-                lhs_ptr,           // LHS packed
-                rhs_ptr,           // RHS packed
-                dst_ptr,           // DST
-                dst_stride,        // DST stride (row)
-                sizeof(float),     // DST stride (col)
-                -FLT_MAX, FLT_MAX  // Min and max for the clamp operation
-            );
+        // Wait until all threads have finished
+        for (auto& t : threads) {
+            t.join();
         }
 
         const auto time_e = std::chrono::high_resolution_clock::now();

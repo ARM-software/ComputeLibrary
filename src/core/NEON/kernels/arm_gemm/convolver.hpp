@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020,2024 Arm Limited.
+ * Copyright (c) 2020, 2024, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#include "convolution_parameters.hpp"
+#include "arm_gemm/convolution_parameters.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -244,3 +244,4 @@ public:
 };
 
 } // namespace arm_gemm
+

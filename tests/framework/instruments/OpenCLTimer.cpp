@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, 2021 Arm Limited.
+ * Copyright (c) 2017-2019, 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,11 +23,11 @@
  */
 #include "OpenCLTimer.h"
 
-#include "../Framework.h"
-#include "../Utils.h"
-
 #include "arm_compute/graph/INode.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+
+#include "../Framework.h"
+#include "../Utils.h"
 
 #ifndef ARM_COMPUTE_CL
 #error "You can't use OpenCLTimer without OpenCL"
@@ -40,9 +40,9 @@ namespace test
 namespace framework
 {
 template <bool output_timestamps>
-std::string    OpenCLClock<output_timestamps>::id() const
+std::string OpenCLClock<output_timestamps>::id() const
 {
-    if(output_timestamps)
+    if (output_timestamps)
     {
         return "OpenCLTimestamps";
     }
@@ -64,12 +64,12 @@ OpenCLClock<output_timestamps>::OpenCLClock(ScaleFactor scale_factor)
 {
     auto                        q     = CLScheduler::get().queue();
     cl_command_queue_properties props = q.getInfo<CL_QUEUE_PROPERTIES>();
-    if((props & CL_QUEUE_PROFILING_ENABLE) == 0)
+    if ((props & CL_QUEUE_PROFILING_ENABLE) == 0)
     {
         CLScheduler::get().set_queue(cl::CommandQueue(CLScheduler::get().context(), props | CL_QUEUE_PROFILING_ENABLE));
     }
 
-    switch(scale_factor)
+    switch (scale_factor)
     {
         case ScaleFactor::NONE:
             _scale_factor = 1.f;
@@ -93,43 +93,37 @@ OpenCLClock<output_timestamps>::OpenCLClock(ScaleFactor scale_factor)
 }
 
 template <bool output_timestamps>
-void           OpenCLClock<output_timestamps>::test_start()
+void OpenCLClock<output_timestamps>::test_start()
 {
     // Start intercepting enqueues:
     ARM_COMPUTE_ERROR_ON(_real_function != nullptr);
     _real_function   = CLSymbols::get().clEnqueueNDRangeKernel_ptr;
-    auto interceptor = [this](
-                           cl_command_queue command_queue,
-                           cl_kernel        kernel,
-                           cl_uint          work_dim,
-                           const size_t    *gwo,
-                           const size_t    *gws,
-                           const size_t    *lws,
-                           cl_uint          num_events_in_wait_list,
-                           const cl_event * event_wait_list,
-                           cl_event *       event)
+    auto interceptor = [this](cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo,
+                              const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
+                              const cl_event *event_wait_list, cl_event *event)
     {
-        if(this->_timer_enabled)
+        if (this->_timer_enabled)
         {
             kernel_info       info;
             cl::Kernel        cpp_kernel(kernel, true);
             std::stringstream ss;
             ss << this->_prefix << cpp_kernel.getInfo<CL_KERNEL_FUNCTION_NAME>();
-            if(gws != nullptr)
+            if (gws != nullptr)
             {
                 ss << " GWS[" << gws[0] << "," << gws[1] << "," << gws[2] << "]";
             }
-            if(lws != nullptr)
+            if (lws != nullptr)
             {
                 ss << " LWS[" << lws[0] << "," << lws[1] << "," << lws[2] << "]";
             }
             info.name = ss.str();
             cl_event tmp;
-            cl_int   retval = this->_real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
+            cl_int   retval = this->_real_function(command_queue, kernel, work_dim, gwo, gws, lws,
+                                                   num_events_in_wait_list, event_wait_list, &tmp);
             info.event      = tmp;
             this->_kernels.push_back(std::move(info));
 
-            if(event != nullptr)
+            if (event != nullptr)
             {
                 //return cl_event from the intercepted call
                 clRetainEvent(tmp);
@@ -139,7 +133,8 @@ void           OpenCLClock<output_timestamps>::test_start()
         }
         else
         {
-            return this->_real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, event);
+            return this->_real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list,
+                                        event_wait_list, event);
         }
     };
     CLSymbols::get().clEnqueueNDRangeKernel_ptr = interceptor;
@@ -148,9 +143,9 @@ void           OpenCLClock<output_timestamps>::test_start()
     ARM_COMPUTE_ERROR_ON(_real_graph_function != nullptr);
     _real_graph_function = graph::TaskExecutor::get().execute_function;
     // Start intercepting tasks:
-    auto task_interceptor = [this](graph::ExecutionTask & task)
+    auto task_interceptor = [this](graph::ExecutionTask &task)
     {
-        if(task.node != nullptr && !task.node->name().empty())
+        if (task.node != nullptr && !task.node->name().empty())
         {
             this->_prefix = task.node->name() + "/";
         }
@@ -166,19 +161,19 @@ void           OpenCLClock<output_timestamps>::test_start()
 }
 
 template <bool output_timestamps>
-void           OpenCLClock<output_timestamps>::start()
+void OpenCLClock<output_timestamps>::start()
 {
     _kernels.clear();
     _timer_enabled = true;
 }
 template <bool output_timestamps>
-void           OpenCLClock<output_timestamps>::stop()
+void OpenCLClock<output_timestamps>::stop()
 {
     _timer_enabled = false;
 }
 
 template <bool output_timestamps>
-void           OpenCLClock<output_timestamps>::test_stop()
+void OpenCLClock<output_timestamps>::test_stop()
 {
     // Restore real function
     CLSymbols::get().clEnqueueNDRangeKernel_ptr = _real_function;
@@ -189,12 +184,12 @@ void           OpenCLClock<output_timestamps>::test_stop()
 #endif /* ARM_COMPUTE_GRAPH_ENABLED */
 }
 
-template <bool              output_timestamps>
+template <bool output_timestamps>
 Instrument::MeasurementsMap OpenCLClock<output_timestamps>::measurements() const
 {
     MeasurementsMap measurements;
     unsigned int    kernel_number = 0;
-    for(auto const &kernel : _kernels)
+    for (auto const &kernel : _kernels)
     {
         cl_ulong queued;
         cl_ulong flushed;
@@ -206,11 +201,12 @@ Instrument::MeasurementsMap OpenCLClock<output_timestamps>::measurements() const
         kernel.event.getProfilingInfo(CL_PROFILING_COMMAND_END, &end);
         std::string name = kernel.name + " #" + support::cpp11::to_string(kernel_number++);
 
-        if(output_timestamps)
+        if (output_timestamps)
         {
             measurements.emplace("[start]" + name, Measurement(start / static_cast<cl_ulong>(_scale_factor), _unit));
             measurements.emplace("[queued]" + name, Measurement(queued / static_cast<cl_ulong>(_scale_factor), _unit));
-            measurements.emplace("[flushed]" + name, Measurement(flushed / static_cast<cl_ulong>(_scale_factor), _unit));
+            measurements.emplace("[flushed]" + name,
+                                 Measurement(flushed / static_cast<cl_ulong>(_scale_factor), _unit));
             measurements.emplace("[end]" + name, Measurement(end / static_cast<cl_ulong>(_scale_factor), _unit));
         }
         else
@@ -222,12 +218,12 @@ Instrument::MeasurementsMap OpenCLClock<output_timestamps>::measurements() const
     return measurements;
 }
 
-template <bool              output_timestamps>
+template <bool output_timestamps>
 Instrument::MeasurementsMap OpenCLClock<output_timestamps>::test_measurements() const
 {
     MeasurementsMap measurements;
 
-    if(output_timestamps)
+    if (output_timestamps)
     {
         // The OpenCL clock and the wall clock are not in sync, so we use
         // this trick to calculate the offset between the two clocks:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,8 +96,9 @@ Status CLCropResize::validate(const ITensorInfo  *input,
     ARM_COMPUTE_RETURN_ERROR_ON(method == InterpolationPolicy::AREA);
     ARM_COMPUTE_RETURN_ERROR_ON(boxes->tensor_shape()[0] != 4);
     ARM_COMPUTE_RETURN_ERROR_ON(boxes->tensor_shape()[1] != box_ind->tensor_shape()[0]);
-    TensorInfo temp_info;
-    ARM_COMPUTE_RETURN_ON_ERROR(CLCrop::validate(input->clone().get(), &temp_info, {0, 0}, {1, 1},
+    auto temp_info = output->clone();
+    temp_info->set_tensor_shape(TensorShape(input->dimension(0), crop_size.x, crop_size.y));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLCrop::validate(input->clone().get(), temp_info.get(), {0, 0}, {1, 1},
                                                  input->dimension(3) - 1, extrapolation_value));
     if (output->total_size() > 0)
     {

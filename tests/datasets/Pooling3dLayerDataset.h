@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited.
+ * Copyright (c) 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+#ifndef ACL_TESTS_DATASETS_POOLING3DLAYERDATASET_H
+#define ACL_TESTS_DATASETS_POOLING3DLAYERDATASET_H
+
 #ifndef ARM_COMPUTE_TEST_POOLING_3D_LAYER_DATASET
 #define ARM_COMPUTE_TEST_POOLING_3D_LAYER_DATASET
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -43,8 +48,7 @@ public:
     {
         iterator(std::vector<TensorShape>::const_iterator        src_it,
                  std::vector<Pooling3dLayerInfo>::const_iterator infos_it)
-            : _src_it{ std::move(src_it) },
-              _infos_it{ std::move(infos_it) }
+            : _src_it{std::move(src_it)}, _infos_it{std::move(infos_it)}
         {
         }
 
@@ -106,16 +110,28 @@ public:
     Pooling3dLayerDatasetSpecial()
     {
         // Special cases
-        add_config(TensorShape(2U, 3U, 4U, 2U, 4U), Pooling3dLayerInfo(PoolingType::AVG, /*pool size*/ Size3D(2, 2, 1), /*pool strides*/ Size3D(3, 3, 1), /*pool padding*/ Padding3D(0, 0, 0), true));
-        add_config(TensorShape(20U, 22U, 10U, 2U), Pooling3dLayerInfo(PoolingType::AVG, Size3D(100, 100, 100), Size3D(5, 5, 5), Padding3D(50, 50, 50), true));
-        add_config(TensorShape(10U, 20U, 32U, 3U, 2U), Pooling3dLayerInfo(PoolingType::MAX, /*pool size*/ 3, /*pool strides*/ Size3D(2, 2, 2), Padding3D(1, 1, 1, 1, 1, 1), false, false,
-                                                                    DimensionRoundingType::FLOOR));
-        add_config(TensorShape(14U, 10U, 10U, 3U, 5U), Pooling3dLayerInfo(PoolingType::AVG,  Size3D(3, 3, 3), /*pool strides*/ Size3D(3, 3, 3), Padding3D(2, 1, 2), true, false, DimensionRoundingType::CEIL));
-        add_config(TensorShape(14U, 10U, 10U, 2U, 4U), Pooling3dLayerInfo(PoolingType::AVG,  Size3D(3, 3, 3), /*pool strides*/ Size3D(3, 3, 3), Padding3D(2, 1, 2), false, false, DimensionRoundingType::CEIL));
-        add_config(TensorShape(15U, 13U, 13U, 3U, 5U), Pooling3dLayerInfo(PoolingType::AVG,  Size3D(4, 4, 4), /*pool strides*/ Size3D(2, 2, 2), Padding3D(2, 2, 2), true, false, DimensionRoundingType::CEIL));
+        add_config(TensorShape(2U, 3U, 4U, 2U, 4U),
+                   Pooling3dLayerInfo(PoolingType::AVG, /*pool size*/ Size3D(2, 2, 1), /*pool strides*/ Size3D(3, 3, 1),
+                                      /*pool padding*/ Padding3D(0, 0, 0), true));
+        add_config(TensorShape(20U, 22U, 10U, 2U), Pooling3dLayerInfo(PoolingType::AVG, Size3D(100, 100, 100),
+                                                                      Size3D(5, 5, 5), Padding3D(50, 50, 50), true));
+        add_config(TensorShape(10U, 20U, 32U, 3U, 2U),
+                   Pooling3dLayerInfo(PoolingType::MAX, /*pool size*/ 3, /*pool strides*/ Size3D(2, 2, 2),
+                                      Padding3D(1, 1, 1, 1, 1, 1), false, false, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(14U, 10U, 10U, 3U, 5U),
+                   Pooling3dLayerInfo(PoolingType::AVG, Size3D(3, 3, 3), /*pool strides*/ Size3D(3, 3, 3),
+                                      Padding3D(2, 1, 2), true, false, DimensionRoundingType::CEIL));
+        add_config(TensorShape(14U, 10U, 10U, 2U, 4U),
+                   Pooling3dLayerInfo(PoolingType::AVG, Size3D(3, 3, 3), /*pool strides*/ Size3D(3, 3, 3),
+                                      Padding3D(2, 1, 2), false, false, DimensionRoundingType::CEIL));
+        add_config(TensorShape(15U, 13U, 13U, 3U, 5U),
+                   Pooling3dLayerInfo(PoolingType::AVG, Size3D(4, 4, 4), /*pool strides*/ Size3D(2, 2, 2),
+                                      Padding3D(2, 2, 2), true, false, DimensionRoundingType::CEIL));
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_POOLING_3D_LAYER_DATASET */
+
+#endif // ACL_TESTS_DATASETS_POOLING3DLAYERDATASET_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2024 Arm Limited.
+ * Copyright (c) 2018-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,12 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/ConvertFullyConnectedWeights.h"
 
 namespace arm_compute
@@ -45,7 +46,7 @@ class ConvertFullyConnectedWeightsValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape input_shape, unsigned int weights_w, DataLayout training_data_layout, DataType data_type)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -62,7 +63,7 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::QASYMM8:
             {
@@ -72,7 +73,7 @@ protected:
             }
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -87,7 +88,10 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const DataLayout training_data_layout, const DataType data_type)
+    TensorType compute_target(const TensorShape &input_shape,
+                              const TensorShape &weights_shape,
+                              const DataLayout   training_data_layout,
+                              const DataType     data_type)
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(weights_shape, data_type);
@@ -117,10 +121,13 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const DataLayout training_data_layout, const DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape,
+                                      const TensorShape &weights_shape,
+                                      const DataLayout   training_data_layout,
+                                      const DataType     data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ weights_shape, data_type };
+        SimpleTensor<T> src{weights_shape, data_type};
 
         // Fill reference
         fill(src, 0);

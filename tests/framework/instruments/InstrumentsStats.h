@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_INSTRUMENTSMAP
-#define ARM_COMPUTE_TEST_INSTRUMENTSMAP
+#ifndef ACL_TESTS_FRAMEWORK_INSTRUMENTS_INSTRUMENTSSTATS_H
+#define ACL_TESTS_FRAMEWORK_INSTRUMENTS_INSTRUMENTSSTATS_H
 
 #include "Measurement.h"
-
 #include <vector>
 
 namespace arm_compute
@@ -86,4 +85,4 @@ private:
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_INSTRUMENTSMAP */
+#endif // ACL_TESTS_FRAMEWORK_INSTRUMENTS_INSTRUMENTSSTATS_H

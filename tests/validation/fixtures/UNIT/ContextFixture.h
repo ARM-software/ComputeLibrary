@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited.
+ * Copyright (c) 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UNIT_CONTEXT_FIXTURE
-#define ARM_COMPUTE_TEST_UNIT_CONTEXT_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_UNIT_CONTEXTFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_UNIT_CONTEXTFIXTURE_H
 
 #include "arm_compute/Acl.hpp"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
 #include "tests/framework/Macros.h"
@@ -55,12 +56,13 @@ class DestroyInvalidContextFixture : public framework::Fixture
 public:
     void setup()
     {
-        AclContext ctx = nullptr;
+        AclContext            ctx = nullptr;
         std::array<char, 256> empty_array{};
-        AclContext valid_ctx = nullptr;
+        AclContext            valid_ctx = nullptr;
         ARM_COMPUTE_ASSERT(AclCreateContext(&valid_ctx, Target, nullptr) == AclStatus::AclSuccess);
         ARM_COMPUTE_ASSERT(AclDestroyContext(ctx) == AclStatus::AclInvalidArgument);
-        ARM_COMPUTE_ASSERT(AclDestroyContext(reinterpret_cast<AclContext>(empty_array.data())) == AclStatus::AclInvalidArgument);
+        ARM_COMPUTE_ASSERT(AclDestroyContext(reinterpret_cast<AclContext>(empty_array.data())) ==
+                           AclStatus::AclInvalidArgument);
         ARM_COMPUTE_ASSERT(ctx == nullptr);
         ARM_COMPUTE_ASSERT(AclDestroyContext(valid_ctx) == AclStatus::AclSuccess);
     };
@@ -132,9 +134,9 @@ class MultipleContextsFixture : public framework::Fixture
 public:
     void setup()
     {
-        const unsigned int num_tests = 5;
+        const unsigned int                num_tests = 5;
         std::array<AclContext, num_tests> ctxs{};
-        for(unsigned int i = 0; i < num_tests; ++i)
+        for (unsigned int i = 0; i < num_tests; ++i)
         {
             ARM_COMPUTE_ASSERT(AclCreateContext(&ctxs[i], Target, nullptr) == AclStatus::AclSuccess);
             ARM_COMPUTE_ASSERT(ctxs[i] != nullptr);
@@ -145,4 +147,4 @@ public:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UNIT_CONTEXT_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_UNIT_CONTEXTFIXTURE_H

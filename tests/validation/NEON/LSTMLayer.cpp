@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,14 +22,15 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/NEON/functions/NELSTMLayer.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/LSTMLayerDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/LSTMLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -141,7 +142,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
         ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
         ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     }),
-    make("Expected", { false, false, false, false, false, false, false, false })),
+    make("Expected", { false, false, false, false, false, false, false, false })
+    ),
     input_info, input_weights_info, recurrent_weights_info, cell_bias_info,
         projection_bias_info, cell_state_info, output_info, scratch_info, info, expected)
 {
@@ -166,14 +168,15 @@ template <typename T>
 using NELSTMLayerFixture = LSTMLayerValidationFixture<Tensor, Accessor, NELSTMLayer, LSTMParams<ITensor>, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NELSTMLayerFixture<float>, framework::DatasetMode::ALL,
-    combine(
-        datasets::SmallLSTMLayerDataset(),
-        make("DataType", DataType::F32),
-        make("ProjectionOpt", { true, false }),
-        make("PeepholeOpt", { true, false }),
-        make("UseLayerNorm", { true, false }),
-        make("UseMemoryManager", { true, false })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NELSTMLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallLSTMLayerDataset(),
+                               make("DataType", DataType::F32),
+                               make("ProjectionOpt", {true, false}),
+                               make("PeepholeOpt", {true, false}),
+                               make("UseLayerNorm", {true, false}),
+                               make("UseMemoryManager", {true, false})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -183,16 +186,17 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NELSTMLayerFixture<half>, framework::DatasetMode::ALL,
-    combine(
-        datasets::SmallLSTMLayerDataset(),
-        make("DataType", DataType::F16),
-        make("ProjectionOpt", { true, false }),
-        make("PeepholeOpt", { true, false }),
-        make("UseLayerNorm", { true, false }),
-        make("UseMemoryManager", { true, false })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NELSTMLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallLSTMLayerDataset(),
+                               make("DataType", DataType::F16),
+                               make("ProjectionOpt", {true, false}),
+                               make("PeepholeOpt", {true, false}),
+                               make("UseLayerNorm", {true, false}),
+                               make("UseMemoryManager", {true, false})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_f16);
@@ -200,8 +204,8 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NELSTMLayerFixture<half>, framework::DatasetMod
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() // FP16

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,12 +26,13 @@
 #include "arm_compute/runtime/NEON/functions/NEScale.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/benchmark/fixtures/ScaleFixture.h"
 #include "tests/datasets/BorderModeDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -42,18 +43,25 @@ namespace benchmark
 {
 namespace
 {
-const auto interpolation_types = framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR });
+const auto interpolation_types = framework::dataset::make(
+    "InterpolationPolicy", {InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR});
 } // namespace
 
 using NEScaleFixture = ScaleFixture<Tensor, NEScale, Accessor>;
 
 TEST_SUITE(NEON)
 TEST_SUITE(Scale)
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallImageShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16, DataType::F32 })),
-                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                                                                     interpolation_types),
-                                                                                                             datasets::BorderModes()),
-                                                                                                     framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })));
+REGISTER_FIXTURE_DATA_TEST_CASE(
+    RunSmall,
+    NEScaleFixture,
+    framework::DatasetMode::PRECOMMIT,
+    combine(combine(combine(combine(combine(datasets::SmallImageShapes(),
+                                            framework::dataset::make("DataType",
+                                                                     {DataType::U8, DataType::S16, DataType::F32})),
+                                    framework::dataset::make("DataLayout", {DataLayout::NCHW})),
+                            interpolation_types),
+                    datasets::BorderModes()),
+            framework::dataset::make("SamplingPolicy", {SamplingPolicy::CENTER})));
 TEST_SUITE_END() // Scale
 TEST_SUITE_END() // Neon
 } // namespace benchmark

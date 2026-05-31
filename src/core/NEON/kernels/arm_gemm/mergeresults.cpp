@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,10 +28,10 @@
 
 #include <arm_neon.h>
 
-#include "arm_gemm.hpp"
+#include "arm_gemm/arm_gemm.hpp"
 #include "asmlib.hpp"
-#include "bfloat.hpp"
-#include "utils.hpp"
+#include "arm_common/bfloat.hpp"
+#include "arm_common/internal/utils.hpp"
 
 namespace arm_gemm {
 
@@ -66,7 +66,7 @@ void MergeResults(Tout * out, const Tin * in, int ldc, int y0, int ymax, int x0,
             for (int row=0; row < fill_rows; row++) {
                 for (int col=0; col < fill_cols; col++) {
                     Tout &r = out[(ybase + row) * ldc + xbase + col];
-                    Tout v = in[row * width + col];
+                    Tin v = in[row * width + col];
 
                     if (append) {
                         v += r;
@@ -82,11 +82,11 @@ void MergeResults(Tout * out, const Tin * in, int ldc, int y0, int ymax, int x0,
                             break;
 
                         case Activation::Type::ReLU:
-                            v = std::max(v, static_cast<Tout>(0));
+                            v = std::max(v, static_cast<Tin>(0));
                             break;
 
                         case Activation::Type::BoundedReLU:
-                            v = std::max(std::min(v, static_cast<Tout>(act.param1)), static_cast<Tout>(0));
+                            v = std::max(std::min(v, static_cast<Tin>(act.param1)), static_cast<Tin>(0));
                             break;
                     }
 
@@ -107,16 +107,9 @@ void MergeResults(Tout * out, const Tin * in, int ldc, int y0, int ymax, int x0,
 template void MergeResults<6u, 8u, false, float, float>(float *, float const*, int, int, int, int, int, float const *, Activation, bool);
 #endif
 
-#if defined(__aarch64__) && defined(__ARM_FP16_ARGS)
-template void MergeResults<12u, 8u, false, float, __fp16>(__fp16*, float const*, int, int, int, int, int, __fp16 const*, Activation, bool);
-#endif
-
-#if defined(__arm__) && defined(__ARM_FP16_ARGS)
-template void MergeResults<8u, 6u, false, float, __fp16>(__fp16*, float const*, int, int, int, int, int, __fp16 const*, Activation, bool);
-#endif
-
-#if defined(__arm__) && defined(ARM_COMPUTE_ENABLE_BF16)
+#if defined(__arm__)
 template void MergeResults<8u, 6u, false, float, bfloat16>(bfloat16*, float const*, int, int, int, int, int, bfloat16 const*, Activation, bool);
 #endif
 
 } // namespace arm_gemm
+

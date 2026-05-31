@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018,2021 Arm Limited.
+ * Copyright (c) 2017-2018,2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TESTRESULT
-#define ARM_COMPUTE_TEST_TESTRESULT
+#ifndef ACL_TESTS_FRAMEWORK_TESTRESULT_H
+#define ACL_TESTS_FRAMEWORK_TESTRESULT_H
 
 #include "Profiler.h"
 
@@ -56,8 +56,7 @@ struct TestResult
      *
      * @param[in] status Execution status.
      */
-    TestResult(Status status)
-        : status{ status }
+    TestResult(Status status) : status{status}
     {
     }
 
@@ -67,15 +66,15 @@ struct TestResult
      * @param[in] measurements Profiling information.
      */
     TestResult(Status status, const Profiler::MeasurementsMap &measurements)
-        : status{ status }, measurements{ measurements }
+        : status{status}, measurements{measurements}
     {
     }
 
-    Status                    status{ Status::NOT_RUN }; /**< Execution status */
-    Profiler::MeasurementsMap measurements{};            /**< Profiling information */
-    std::string               header_data{};             /**< Test header data */
+    Status                    status{Status::NOT_RUN}; /**< Execution status */
+    Profiler::MeasurementsMap measurements{};          /**< Profiling information */
+    std::string               header_data{};           /**< Test header data */
 };
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TESTRESULT */
+#endif // ACL_TESTS_FRAMEWORK_TESTRESULT_H

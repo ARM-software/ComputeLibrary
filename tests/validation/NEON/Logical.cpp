@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,12 +24,13 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NELogical.h"
 #include "arm_compute/runtime/Tensor.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/LogicalFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -37,19 +38,27 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 
 TEST_SUITE(LogicalAnd)
 template <typename T>
 using NELogicalAndFixture = LogicalAndValidationFixture<Tensor, Accessor, NELogicalAnd, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NELogicalAndFixture<uint8_t>, framework::DatasetMode::ALL, zip(datasets::SmallShapes(), datasets::SmallShapes()))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NELogicalAndFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       zip(datasets::SmallShapes(), datasets::SmallShapes()))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NELogicalAndFixture<uint8_t>, framework::DatasetMode::ALL, datasets::SmallShapesBroadcast())
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
+                       NELogicalAndFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       datasets::SmallShapesBroadcast())
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -60,13 +69,19 @@ TEST_SUITE(LogicalOr)
 template <typename T>
 using NELogicalOrFixture = LogicalOrValidationFixture<Tensor, Accessor, NELogicalOr, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NELogicalOrFixture<uint8_t>, framework::DatasetMode::ALL, zip(datasets::SmallShapes(), datasets::SmallShapes()))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NELogicalOrFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       zip(datasets::SmallShapes(), datasets::SmallShapes()))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmallBroadcast, NELogicalOrFixture<uint8_t>, framework::DatasetMode::ALL, datasets::SmallShapesBroadcast())
+FIXTURE_DATA_TEST_CASE(RunSmallBroadcast,
+                       NELogicalOrFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       datasets::SmallShapesBroadcast())
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -78,8 +93,10 @@ TEST_SUITE(LogicalNot)
 template <typename T>
 using NELogicalNotFixture = LogicalNotValidationFixture<Tensor, Accessor, NELogicalNot, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, NELogicalNotFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                    DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NELogicalNotFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::U8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

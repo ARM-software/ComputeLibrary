@@ -49,11 +49,24 @@ option(ARM_COMPUTE_ENABLE_CODE_COVERAGE "Enable code coverage." OFF)
 option(ARM_COMPUTE_ENABLE_SANITIZERS "Enable sanitizers." OFF)
 option(ARM_COMPUTE_USE_LIBCXX "Use libcxx instead of the default stdlib." OFF)
 
-# * Set architecture.
-set(ARM_COMPUTE_ARCH armv8-a CACHE STRING "Architecture (march) for core library.")
-set(ARM_COMPUTE_CORE_FP16_ARCH armv8.2-a+fp16 CACHE STRING "Architecture (march) for core library that require fp16 support.")
-set(ARM_COMPUTE_SVE_ARCH armv8.2-a+sve+fp16+dotprod CACHE STRING "Architecture (march) for sve library.")
-set(ARM_COMPUTE_SVE2_ARCH armv8.6-a+sve2+fp16+dotprod CACHE STRING "Architecture (march) for sve2 library.")
+# * Build mode: multi-ISA (default) or single-ISA
+option(ACL_MULTI_ISA "Build Multi-ISA as default" ON)
+set(ACL_ARCH_ISA "armv8.6-a" CACHE STRING "Architecture (armv8-a, armv8.2-a, armv8.6-a)")
+set_property(CACHE ACL_ARCH_ISA PROPERTY STRINGS armv8-a armv8.2-a armv8.6-a)
+set(ACL_ARCH_FEATURES "" CACHE STRING "Comma separated features list (sve,sve2,sme2)")
+
+# * Arch features
+option(ACL_BUILD_SVE  "Enable SVE support"  OFF)
+option(ACL_BUILD_SVE2 "Enable SVE2 support" OFF)
+option(ACL_BUILD_SME2 "Enable SME2 support" OFF)
+
+# * Arch feature probing for single-ISA
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-march=armv8-a"                              ACL_HAS_MARCH_V8A)
+check_cxx_compiler_flag("-march=armv8.2-a+fp16+dotprod"               ACL_HAS_MARCH_V82_F16_DOT)
+check_cxx_compiler_flag("-march=armv8.6-a+sve+sve2+fp16+dotprod+i8mm" ACL_HAS_MARCH_V86_ALL)
+check_cxx_compiler_flag("-march=armv8.2-a"                            ACL_HAS_MARCH_V82_BASE)
+check_cxx_compiler_flag("-march=armv8.6-a"                            ACL_HAS_MARCH_V86_BASE)
 
 # * Set variables.
 set(ARM_COMPUTE_C_STANDARD 99 CACHE STRING "C Standard to use for the library.")
@@ -71,6 +84,57 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/configurations.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/compilers/setup.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/version.cmake)
+
+if(ACL_ARCH_ISA STREQUAL "armv8-a" AND (ACL_MULTI_ISA OR ACL_BUILD_SVE OR ACL_BUILD_SVE2 OR ACL_BUILD_SME2))
+  message(FATAL_ERROR
+    "Invalid configuration: '${ACL_ARCH_ISA}' does not support requested features"
+  )
+endif()
+
+# * Print build configuration
+if(ACL_MULTI_ISA)
+  message(STATUS "Multi-ISA build selected. All detectable features are enabled.")
+  message(STATUS "Building arm_compute_(core, core_fp16, sve, sve2).")
+else()
+  message(STATUS "Single-ISA build selected: ${ACL_ARCH_ISA}")
+  if(NOT "${ACL_ARCH_FEATURES}" STREQUAL "")
+    message(STATUS "Requested features: ${ACL_ARCH_FEATURES}")
+  endif()
+  set(libs "core")
+  if(NOT (ACL_ARCH_ISA STREQUAL "armv8-a"))
+    string(APPEND libs ", core_fp16")
+  endif()
+  if(ACL_BUILD_SVE)
+    string(APPEND libs ", sve")
+  endif()
+  if(ACL_BUILD_SVE2)
+    string(APPEND libs ", sve2")
+  endif()
+  message(STATUS "Building arm_compute_(${libs}).")
+endif()
+
+# * Set architecture.
+if(ACL_MULTI_ISA)
+  set(ARM_COMPUTE_ARCH           "-march=armv8-a")
+  set(ARM_COMPUTE_CORE_FP16_ARCH "-march=armv8.2-a+fp16+dotprod")
+  set(ARM_COMPUTE_SVE_ARCH       "-march=armv8.2-a+sve+fp16+dotprod")
+  set(ARM_COMPUTE_SVE2_ARCH      "-march=armv8.6-a+sve2+fp16+dotprod+i8mm")
+else()
+  set(ACL_MARCH "")
+  if(ACL_BUILD_SME2 OR ACL_BUILD_SVE2)
+    set(ACL_MARCH  "+sve2+fp16+dotprod+i8mm")
+  elseif(ACL_BUILD_SVE)
+    set(ACL_MARCH "+sve+fp16+dotprod")
+  elseif(ACL_ARCH_ISA STREQUAL "armv8.2-a" OR ACL_ARCH_ISA STREQUAL "armv8.6-a")
+    set(ACL_MARCH "+fp16+dotprod")
+  endif()
+
+  set(ARM_COMPUTE_ARCH           "-march=${ACL_ARCH_ISA}${ACL_MARCH}" CACHE STRING "Architecture (march) for core library.")
+  set(ARM_COMPUTE_CORE_FP16_ARCH "-march=${ACL_ARCH_ISA}${ACL_MARCH}" CACHE STRING "Architecture (march) for core library with fp16 support.")
+  set(ARM_COMPUTE_SVE_ARCH       "-march=${ACL_ARCH_ISA}${ACL_MARCH}" CACHE STRING "Architecture (march) for SVE library.")
+  set(ARM_COMPUTE_SVE2_ARCH      "-march=${ACL_ARCH_ISA}${ACL_MARCH}" CACHE STRING "Architecture (march) for SVE2 library.")
+  message(STATUS "Using arch: ${ARM_COMPUTE_ARCH}")
+endif()
 
 if(ARM_COMPUTE_ENABLE_OPENMP)
   find_package(OpenMP REQUIRED)
@@ -126,25 +190,33 @@ set(
   ${CMAKE_CURRENT_LIST_DIR}/src/core/NEON/kernels/arm_gemm/merges
 )
 
-add_library(arm_compute_sve OBJECT)
-set_target_properties(
-  arm_compute_sve
-  PROPERTIES
-  COMPILE_OPTIONS "${ARM_COMPUTE_SVE_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
-  COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
-  INCLUDE_DIRECTORIES "${ARM_COMPUTE_SVE_COMMON_INCLUDE}"
-  LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
-)
+if(ACL_MULTI_ISA OR ACL_BUILD_SVE)
+  add_library(arm_compute_sve OBJECT)
+  set_target_properties(
+    arm_compute_sve
+    PROPERTIES
+      COMPILE_OPTIONS "${ARM_COMPUTE_SVE_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
+      COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
+      INCLUDE_DIRECTORIES "${ARM_COMPUTE_SVE_COMMON_INCLUDE}"
+      LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
+  )
+else()
+  add_library(arm_compute_sve OBJECT EXCLUDE_FROM_ALL)
+endif()
 
-add_library(arm_compute_sve2 OBJECT)
-set_target_properties(
-  arm_compute_sve2
-  PROPERTIES
-  COMPILE_OPTIONS "${ARM_COMPUTE_SVE2_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
-  COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
-  INCLUDE_DIRECTORIES "${ARM_COMPUTE_SVE_COMMON_INCLUDE}"
-  LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
-)
+if(ACL_MULTI_ISA OR ACL_BUILD_SVE2)
+  add_library(arm_compute_sve2 OBJECT)
+  set_target_properties(
+    arm_compute_sve2
+    PROPERTIES
+      COMPILE_OPTIONS "${ARM_COMPUTE_SVE2_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
+      COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
+      INCLUDE_DIRECTORIES "${ARM_COMPUTE_SVE_COMMON_INCLUDE}"
+      LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
+  )
+else()
+  add_library(arm_compute_sve2 OBJECT EXCLUDE_FROM_ALL)
+endif()
 
 add_library(arm_compute_core OBJECT)
 set_target_properties(
@@ -156,15 +228,19 @@ set_target_properties(
   LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
 )
 
-add_library(arm_compute_core_fp16 OBJECT)
-set_target_properties(
-  arm_compute_core_fp16
-  PROPERTIES
-  COMPILE_OPTIONS "${ARM_COMPUTE_CORE_FP16_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
-  COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
-  INCLUDE_DIRECTORIES "${ARM_COMPUTE_INCLUDE}"
-  LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
-)
+if(NOT (ACL_ARCH_ISA STREQUAL "armv8-a"))
+  add_library(arm_compute_core_fp16 OBJECT)
+  set_target_properties(
+    arm_compute_core_fp16
+    PROPERTIES
+      COMPILE_OPTIONS "${ARM_COMPUTE_CORE_FP16_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS}"
+      COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
+      INCLUDE_DIRECTORIES "${ARM_COMPUTE_INCLUDE}"
+      LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
+  )
+else()
+  add_library(arm_compute_core_fp16 OBJECT EXCLUDE_FROM_ALL)
+endif()
 
 add_library(arm_compute_graph ${ARM_COMPUTE_LIB_BUILD_TYPE})
 set_target_properties(
@@ -176,14 +252,52 @@ set_target_properties(
         LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}$<IF:$<PLATFORM_ID:Darwin>,;arm_compute,>"
 )
 
-add_library(
-  arm_compute
-  ${ARM_COMPUTE_LIB_BUILD_TYPE}
-  $<TARGET_OBJECTS:arm_compute_core>
-  $<TARGET_OBJECTS:arm_compute_core_fp16>
-  $<TARGET_OBJECTS:arm_compute_sve>
-  $<TARGET_OBJECTS:arm_compute_sve2>
-)
+if(ACL_MULTI_ISA)
+  add_library(arm_compute ${ARM_COMPUTE_LIB_BUILD_TYPE}
+    $<TARGET_OBJECTS:arm_compute_core>
+    $<TARGET_OBJECTS:arm_compute_core_fp16>
+    $<TARGET_OBJECTS:arm_compute_sve>
+    $<TARGET_OBJECTS:arm_compute_sve2>
+  )
+else()
+  set(lib_objs $<TARGET_OBJECTS:arm_compute_core>)
+
+  if(ACL_ARCH_ISA STREQUAL "armv8-a")
+    # base
+
+  elseif(ACL_ARCH_ISA STREQUAL "armv8.2-a")
+    list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_core_fp16>)
+    if(ACL_BUILD_SVE)
+      list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_sve>)
+    endif()
+    if(ACL_BUILD_SVE2)
+      list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_sve2>)
+    endif()
+
+  elseif(ACL_ARCH_ISA STREQUAL "armv8.6-a")
+    list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_core_fp16>)
+    if(ACL_BUILD_SVE)
+      list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_sve>)
+    endif()
+    if(ACL_BUILD_SVE2)
+      list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_sve2>)
+    endif()
+
+  else()
+    message(FATAL_ERROR "Unsupported ACL_ARCH_ISA='${ACL_ARCH_ISA}'")
+  endif()
+
+  add_library(arm_compute ${ARM_COMPUTE_LIB_BUILD_TYPE} ${lib_objs})
+  set_target_properties(arm_compute PROPERTIES OUTPUT_NAME "arm_compute_${ACL_ARCH_ISA}")
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  target_compile_options(arm_compute_core PRIVATE -arch arm64)
+  if(TARGET arm_compute_core_fp16)
+    target_compile_options(arm_compute_core_fp16 PRIVATE -arch arm64)
+  endif()
+endif()
+
 
 # Linking to arm_compute[_graph] should automatically bring includes and dependent libs with it
 foreach(TARGET IN ITEMS arm_compute arm_compute_graph)
@@ -197,7 +311,17 @@ foreach(TARGET IN ITEMS arm_compute arm_compute_graph)
 endforeach()
 
 # Linking to this target should automatically bring includes and dependent libs with it.
-list(APPEND ARM_COMPUTE_TARGETS arm_compute arm_compute_graph arm_compute_core arm_compute_core_fp16 arm_compute_sve arm_compute_sve2)
+set(ARM_COMPUTE_TARGETS arm_compute arm_compute_graph arm_compute_core)
+
+if(TARGET arm_compute_core_fp16)
+  list(APPEND ARM_COMPUTE_TARGETS arm_compute_core_fp16)
+endif()
+if(TARGET arm_compute_sve)
+  list(APPEND ARM_COMPUTE_TARGETS arm_compute_sve)
+endif()
+if(TARGET arm_compute_sve2)
+  list(APPEND ARM_COMPUTE_TARGETS arm_compute_sve2)
+endif()
 
 # Create an alias targets so that a user can download ArmCompute via FetchContent and
 # still link to ArmCompute::Core and ArmCompute::Graph. Otherwise these targets would not

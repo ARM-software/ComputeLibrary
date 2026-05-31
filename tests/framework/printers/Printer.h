@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018,2021 Arm Limited.
+ * Copyright (c) 2017-2018,2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PRINTER
-#define ARM_COMPUTE_TEST_PRINTER
+#ifndef ACL_TESTS_FRAMEWORK_PRINTERS_PRINTER_H
+#define ACL_TESTS_FRAMEWORK_PRINTERS_PRINTER_H
 
 #include "tests/framework/Profiler.h"
 
@@ -119,6 +119,12 @@ public:
      */
     virtual void print_error(const std::exception &error, bool expected) = 0;
 
+    /** Print test log warning.
+     *
+     * @param[in] warning Description of the log.
+     */
+    virtual void print_warning(const std::string &warning) = 0;
+
     /** Print test log info.
      *
      * @param[in] info Description of the log.
@@ -144,9 +150,9 @@ public:
     void set_stream(std::ostream &stream);
 
 protected:
-    std::ostream *_stream{ &std::cout };
+    std::ostream *_stream{&std::cout};
 };
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PRINTER */
+#endif // ACL_TESTS_FRAMEWORK_PRINTERS_PRINTER_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,9 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "GEMM.h"
+
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_GEMMTRANSPOSE1XW_H
+#define ACL_TESTS_VALIDATION_REFERENCE_GEMMTRANSPOSE1XW_H
 
 #include "arm_compute/core/Types.h"
+
+#include "GEMM.h"
 
 namespace arm_compute
 {
@@ -37,7 +41,8 @@ template <typename T>
 SimpleTensor<T> gemm_transpose_1xW(const SimpleTensor<T> &in)
 {
     const int         W = 16 / sizeof(T);
-    const TensorShape shape_out(static_cast<size_t>(in.shape().y() * W), static_cast<size_t>(std::ceil(in.shape().x() / static_cast<float>(W))));
+    const TensorShape shape_out(static_cast<size_t>(in.shape().y() * W),
+                                static_cast<size_t>(std::ceil(in.shape().x() / static_cast<float>(W))));
     SimpleTensor<T>   out(shape_out, in.data_type());
     const int32_t     in_height     = in.shape().y();
     const int32_t     in_width      = in.shape().x();
@@ -45,17 +50,17 @@ SimpleTensor<T> gemm_transpose_1xW(const SimpleTensor<T> &in)
     const T          *in_base_addr  = reinterpret_cast<const T *>(in.data());
     T                *out_base_addr = reinterpret_cast<T *>(out.data());
     int               x             = 0;
-    for(; x < in_width; x += W)
+    for (; x < in_width; x += W)
     {
-        for(int y = 0; y < in_height; y++)
+        for (int y = 0; y < in_height; y++)
         {
             const T *in_addr  = (in_base_addr + x + y * in_width);
             T       *out_addr = (out_base_addr + y * W + (x / W) * out_width);
 
-            for(int k = 0; k < W; ++k)
+            for (int k = 0; k < W; ++k)
             {
                 // If the input width is not multiple of W, we fill the reference with 0s
-                if((x + k) >= in_width)
+                if ((x + k) >= in_width)
                 {
                     out_addr[k] = T(0);
                 }
@@ -73,3 +78,5 @@ SimpleTensor<T> gemm_transpose_1xW(const SimpleTensor<T> &in)
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+
+#endif // ACL_TESTS_VALIDATION_REFERENCE_GEMMTRANSPOSE1XW_H

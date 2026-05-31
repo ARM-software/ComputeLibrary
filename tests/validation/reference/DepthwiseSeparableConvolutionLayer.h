@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DEPTHWISE_SEPARABLE_CONVOLUTION_LAYER_H
-#define ARM_COMPUTE_TEST_DEPTHWISE_SEPARABLE_CONVOLUTION_LAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_DEPTHWISESEPARABLECONVOLUTIONLAYER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_DEPTHWISESEPARABLECONVOLUTIONLAYER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -36,12 +36,17 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> depthwise_separable_convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &depthwise_weights, const SimpleTensor<T> &depthwise_biases,
+SimpleTensor<T> depthwise_separable_convolution_layer(const SimpleTensor<T> &src,
+                                                      const SimpleTensor<T> &depthwise_weights,
+                                                      const SimpleTensor<T> &depthwise_biases,
                                                       const TensorShape     &depthwise_out_shape,
-                                                      const SimpleTensor<T> &pointwise_weights, const SimpleTensor<T> &pointwise_biases, const TensorShape &dst_shape,
-                                                      const PadStrideInfo &depthwise_conv_info, const PadStrideInfo &pointwise_conv_info);
+                                                      const SimpleTensor<T> &pointwise_weights,
+                                                      const SimpleTensor<T> &pointwise_biases,
+                                                      const TensorShape     &dst_shape,
+                                                      const PadStrideInfo   &depthwise_conv_info,
+                                                      const PadStrideInfo   &pointwise_conv_info);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DEPTHWISE_SEPARABLE_CONVOLUTION_LAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_DEPTHWISESEPARABLECONVOLUTIONLAYER_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV4_NORMALIZEPLANARYUV_LAYER_DATASET
-#define ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV4_NORMALIZEPLANARYUV_LAYER_DATASET
-
-#include "tests/datasets/NormalizePlanarYUVLayerDataset.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_GOOGLENET_INCEPTIONV4_GOOGLENETINCEPTIONV4NORMALIZEPLANARYUVLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_GOOGLENET_INCEPTIONV4_GOOGLENETINCEPTIONV4NORMALIZEPLANARYUVLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/datasets/NormalizePlanarYUVLayerDataset.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -91,4 +90,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GOOGLENETINCEPTIONV4_NORMALIZEPLANARYUV_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_GOOGLENET_INCEPTIONV4_GOOGLENETINCEPTIONV4NORMALIZEPLANARYUVLAYERDATASET_H

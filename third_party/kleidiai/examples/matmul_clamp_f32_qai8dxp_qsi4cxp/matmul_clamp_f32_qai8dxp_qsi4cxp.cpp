@@ -16,6 +16,7 @@
 
 // Include micro-kernel variants
 #include "kai_lhs_quant_pack_qai8dxp_f32.h"
+#include "kai_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod.h"
 #include "kai_matmul_clamp_f32_qai8dxp1x8_qsi4cxp4x8_1x4x32_neon_dotprod.h"
 #include "kai_matmul_clamp_f32_qai8dxp1x8_qsi4cxp8x8_1x8x32_neon_dotprod.h"
 #include "kai_matmul_clamp_f32_qai8dxp4x4_qsi4cxp8x4_8x8x32_neon_dotprod.h"
@@ -41,7 +42,9 @@ struct mnk {
     size_t n = 0;
     size_t k = 0;
 };
-mnk matmul_shapes[] = {{13, 33, 32}, {37, 75, 17}, {16, 32, 64}, {7, 17, 33}, {15, 31, 45}};
+
+mnk matmul_shapes[] = {{1, 33, 32}, {13, 33, 32}, {37, 75, 17}, {16, 32, 64}, {7, 17, 33}, {15, 31, 45}};
+
 // Micro-kernel interface
 struct kai_matmul_ukernel_f32_qa8dxp_qs4cxp {
     kai_matmul_clamp_f32_qai8dxp_qsi4cxp_ukernel ukernel;
@@ -145,6 +148,18 @@ kai_matmul_ukernel_f32_qa8dxp_qs4cxp ukernel_variants[] = {
      kai_get_dst_size_matmul_clamp_f32_qai8dxp4x8_qsi4cxp4x4_16x4x32_neon_dotprod,
      kai_run_matmul_clamp_f32_qai8dxp4x8_qsi4cxp4x4_16x4x32_neon_dotprod,
      "matmul_clamp_f32_qai8dxp4x8_qsi4cxp4x4_16x4x32_neon_dotprod"},
+    {kai_get_m_step_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod,
+     kai_get_n_step_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod,
+     kai_get_mr_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod,
+     kai_get_nr_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod,
+     kai_get_kr_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod,
+     kai_get_sr_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod,
+     kai_get_lhs_packed_offset_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod,
+     kai_get_rhs_packed_offset_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod,
+     kai_get_dst_offset_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod,
+     kai_get_dst_size_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod,
+     kai_run_matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod,
+     "matmul_clamp_f32_qai8dxp1x4_qsi4cxp4x4_1x4_neon_dotprod"}
 
 };
 
@@ -604,7 +619,6 @@ int main(int argc, char** argv) {
 
                 if (format == rhs_format::nxk) {
                     rhs_packed_size = kai_get_rhs_packed_size_rhs_pack_nxk_qsi4cxp_qs4cxs1s0(n, k, nr, kr, sr);
-
                 } else {
                     rhs_packed_size = kai_get_rhs_packed_size_rhs_pack_kxn_qsi4cxp_qs4cxs1s0(n, k, nr, kr, sr);
                 }
@@ -631,7 +645,6 @@ int main(int argc, char** argv) {
                         (const float*)(rhs_scales_f32),          // Scale
                         rhs_packed_mtx_qs4cx,                    // RHS packed
                         0, &nxk_params);
-
                 } else {
                     struct kai_rhs_pack_kxn_qsi4cxp_qs4cxs1s0_params kxn_params;
                     kxn_params.lhs_zero_point = 1;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,15 +22,16 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
+
 #include "src/core/CL/kernels/CLFillBorderKernel.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/CL/CLAccessor.h"
-#include "tests/Globals.h"
-#include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 #include "tests/validation/fixtures/UNIT/WeightsRetentionFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -47,12 +48,9 @@ TEST_SUITE(CL)
 TEST_SUITE(UNIT)
 TEST_SUITE(WeightsRetention)
 
-using CLWeightsRetentionFixture = WeightsRetentionReconfigureTestCaseFixture<CLTensor,
-      CLAccessor,
-      CLFullyConnectedLayer>;
-FIXTURE_TEST_CASE(WeightsRetention,
-                  CLWeightsRetentionFixture,
-                  framework::DatasetMode::NIGHTLY)
+using CLWeightsRetentionFixture =
+    WeightsRetentionReconfigureTestCaseFixture<CLTensor, CLAccessor, CLFullyConnectedLayer>;
+FIXTURE_TEST_CASE(WeightsRetention, CLWeightsRetentionFixture, framework::DatasetMode::NIGHTLY)
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);

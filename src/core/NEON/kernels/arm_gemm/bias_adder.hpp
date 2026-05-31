@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -73,3 +73,4 @@ inline void activator(T *out, unsigned int stride, const T *bias, Activation act
 }
 
 } // namespace arm_gemm
+

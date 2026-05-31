@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DEPTHWISE_CONVOLUTION_H
-#define ARM_COMPUTE_TEST_DEPTHWISE_CONVOLUTION_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_DEPTHWISECONVOLUTIONLAYER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_DEPTHWISECONVOLUTIONLAYER_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -36,10 +36,16 @@ namespace validation
 namespace reference
 {
 template <typename T, typename TW, typename TB>
-SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<TW> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info,
-                                      unsigned int depth_multiplier, const Size2D &dilation = Size2D(1U, 1U), const QuantizationInfo &out_quant_info = QuantizationInfo(0.0f, 0));
+SimpleTensor<T> depthwise_convolution(const SimpleTensor<T>  &src,
+                                      const SimpleTensor<TW> &weights,
+                                      const SimpleTensor<TB> &biases,
+                                      const TensorShape      &dst_shape,
+                                      const PadStrideInfo    &conv_info,
+                                      unsigned int            depth_multiplier,
+                                      const Size2D           &dilation       = Size2D(1U, 1U),
+                                      const QuantizationInfo &out_quant_info = QuantizationInfo(0.0f, 0));
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DEPTHWISE_SEPARABLE_CONVOLUTION_LAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_DEPTHWISECONVOLUTIONLAYER_H

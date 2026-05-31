@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2023-2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,10 +23,11 @@
  */
 #include "tests/AssetsLibrary.h"
 
-#include "Utils.h"
+#include "arm_compute/core/ITensor.h"
+
 #include "utils/TypePrinter.h"
 
-#include "arm_compute/core/ITensor.h"
+#include "Utils.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -54,15 +55,17 @@ template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::
 void rgb_to_luminance(const RawTensor &src, RawTensor &dst)
 {
     // Ensure in/out tensors have same image dimensions (independent of element size and number of channels)
-    ARM_COMPUTE_ERROR_ON_MSG(src.num_elements() != dst.num_elements(), "Input and output images must have equal dimensions");
+    ARM_COMPUTE_ERROR_ON_MSG(src.num_elements() != dst.num_elements(),
+                             "Input and output images must have equal dimensions");
 
     const size_t num_elements = dst.num_elements();
 
     // Currently, input is always RGB888 (3 U8 channels per element). Output can be U8, U16/S16 or U32
     // Note that src.data()[i] returns pointer to first channel of element[i], so RGB values have [0,1,2] offsets
-    for(size_t i = 0, j = 0; j < num_elements; i += 3, ++j)
+    for (size_t i = 0, j = 0; j < num_elements; i += 3, ++j)
     {
-        reinterpret_cast<T *>(dst.data())[j] = 0.2126f * src.data()[i] + 0.7152f * src.data()[i + 1] + 0.0722f * src.data()[i + 2];
+        reinterpret_cast<T *>(dst.data())[j] =
+            0.2126f * src.data()[i] + 0.7152f * src.data()[i + 1] + 0.0722f * src.data()[i + 2];
     }
 }
 
@@ -72,7 +75,7 @@ void extract_r_from_rgb(const RawTensor &src, RawTensor &dst)
 
     const size_t num_elements = dst.num_elements();
 
-    for(size_t i = 0, j = 0; j < num_elements; i += 3, ++j)
+    for (size_t i = 0, j = 0; j < num_elements; i += 3, ++j)
     {
         dst.data()[j] = src.data()[i];
     }
@@ -84,7 +87,7 @@ void extract_g_from_rgb(const RawTensor &src, RawTensor &dst)
 
     const size_t num_elements = dst.num_elements();
 
-    for(size_t i = 1, j = 0; j < num_elements; i += 3, ++j)
+    for (size_t i = 1, j = 0; j < num_elements; i += 3, ++j)
     {
         dst.data()[j] = src.data()[i];
     }
@@ -96,7 +99,7 @@ void extract_b_from_rgb(const RawTensor &src, RawTensor &dst)
 
     const size_t num_elements = dst.num_elements();
 
-    for(size_t i = 2, j = 0; j < num_elements; i += 3, ++j)
+    for (size_t i = 2, j = 0; j < num_elements; i += 3, ++j)
     {
         dst.data()[j] = src.data()[i];
     }
@@ -104,7 +107,7 @@ void extract_b_from_rgb(const RawTensor &src, RawTensor &dst)
 
 void discard_comments(std::ifstream &fs)
 {
-    while(fs.peek() == '#')
+    while (fs.peek() == '#')
     {
         fs.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
@@ -112,11 +115,11 @@ void discard_comments(std::ifstream &fs)
 
 void discard_comments_and_spaces(std::ifstream &fs)
 {
-    while(true)
+    while (true)
     {
         discard_comments(fs);
 
-        if(isspace(fs.peek()) == 0)
+        if (isspace(fs.peek()) == 0)
         {
             break;
         }
@@ -128,10 +131,10 @@ void discard_comments_and_spaces(std::ifstream &fs)
 std::tuple<unsigned int, unsigned int, int> parse_netpbm_format_header(std::ifstream &fs, char number)
 {
     // check file type magic number is valid
-    std::array<char, 2> magic_number{ { 0 } };
+    std::array<char, 2> magic_number{{0}};
     fs >> magic_number[0] >> magic_number[1];
 
-    if(magic_number[0] != 'P' || magic_number[1] != number)
+    if (magic_number[0] != 'P' || magic_number[1] != number)
     {
         throw std::runtime_error("File type magic number not supported");
     }
@@ -151,19 +154,19 @@ std::tuple<unsigned int, unsigned int, int> parse_netpbm_format_header(std::ifst
     int max_value = 0;
     fs >> max_value;
 
-    if(!fs.good())
+    if (!fs.good())
     {
         throw std::runtime_error("Cannot read image dimensions");
     }
 
-    if(max_value != 255)
+    if (max_value != 255)
     {
         throw std::runtime_error("RawTensor doesn't have 8-bit values");
     }
 
     discard_comments(fs);
 
-    if(isspace(fs.peek()) == 0)
+    if (isspace(fs.peek()) == 0)
     {
         throw std::runtime_error("Invalid image header");
     }
@@ -190,7 +193,7 @@ void check_image_size(std::ifstream &fs, size_t raw_size)
     const size_t end_position = fs.tellg();
     fs.seekg(current_position, std::ios_base::beg);
 
-    if((end_position - current_position) < raw_size)
+    if ((end_position - current_position) < raw_size)
     {
         throw std::runtime_error("Not enough data in file");
     }
@@ -200,7 +203,7 @@ void read_image_buffer(std::ifstream &fs, RawTensor &raw)
 {
     fs.read(reinterpret_cast<std::fstream::char_type *>(raw.data()), raw.size());
 
-    if(!fs.good())
+    if (!fs.good())
     {
         throw std::runtime_error("Failure while reading image buffer");
     }
@@ -210,7 +213,7 @@ RawTensor load_ppm(const std::string &path)
 {
     std::ifstream file(path, std::ios::in | std::ios::binary);
 
-    if(!file.good())
+    if (!file.good())
     {
         throw framework::FileNotFound("Could not load PPM image: " + path);
     }
@@ -232,7 +235,7 @@ RawTensor load_pgm(const std::string &path)
 {
     std::ifstream file(path, std::ios::in | std::ios::binary);
 
-    if(!file.good())
+    if (!file.good())
     {
         throw framework::FileNotFound("Could not load PGM image: " + path);
     }
@@ -252,8 +255,7 @@ RawTensor load_pgm(const std::string &path)
 } // namespace
 
 AssetsLibrary::AssetsLibrary(std::string path, std::random_device::result_type seed) //NOLINT
-    : _library_path(std::move(path)),
-      _seed{ seed }
+    : _library_path(std::move(path)), _seed{seed}
 {
 }
 
@@ -292,15 +294,11 @@ void AssetsLibrary::fill(RawTensor &raw, const std::string &name, Format format,
 
 const AssetsLibrary::Loader &AssetsLibrary::get_loader(const std::string &extension) const
 {
-    static std::unordered_map<std::string, Loader> loaders =
-    {
-        { "ppm", load_ppm },
-        { "pgm", load_pgm }
-    };
+    static std::unordered_map<std::string, Loader> loaders = {{"ppm", load_ppm}, {"pgm", load_pgm}};
 
     const auto it = loaders.find(extension);
 
-    if(it != loaders.end())
+    if (it != loaders.end())
     {
         return it->second;
     }
@@ -312,17 +310,15 @@ const AssetsLibrary::Loader &AssetsLibrary::get_loader(const std::string &extens
 
 const AssetsLibrary::Converter &AssetsLibrary::get_converter(Format src, Format dst) const
 {
-    static std::map<std::pair<Format, Format>, Converter> converters =
-    {
-        { std::make_pair(Format::RGB888, Format::U8), rgb_to_luminance<uint8_t> },
-        { std::make_pair(Format::RGB888, Format::U16), rgb_to_luminance<uint16_t> },
-        { std::make_pair(Format::RGB888, Format::S16), rgb_to_luminance<int16_t> },
-        { std::make_pair(Format::RGB888, Format::U32), rgb_to_luminance<uint32_t> }
-    };
+    static std::map<std::pair<Format, Format>, Converter> converters = {
+        {std::make_pair(Format::RGB888, Format::U8), rgb_to_luminance<uint8_t>},
+        {std::make_pair(Format::RGB888, Format::U16), rgb_to_luminance<uint16_t>},
+        {std::make_pair(Format::RGB888, Format::S16), rgb_to_luminance<int16_t>},
+        {std::make_pair(Format::RGB888, Format::U32), rgb_to_luminance<uint32_t>}};
 
     const auto it = converters.find(std::make_pair(src, dst));
 
-    if(it != converters.end())
+    if (it != converters.end())
     {
         return it->second;
     }
@@ -340,7 +336,7 @@ const AssetsLibrary::Converter &AssetsLibrary::get_converter(DataType src, Forma
 
     const auto it = converters.find(std::make_pair(src, dst));
 
-    if(it != converters.end())
+    if (it != converters.end())
     {
         return it->second;
     }
@@ -358,7 +354,7 @@ const AssetsLibrary::Converter &AssetsLibrary::get_converter(DataType src, DataT
 
     const auto it = converters.find(std::make_pair(src, dst));
 
-    if(it != converters.end())
+    if (it != converters.end())
     {
         return it->second;
     }
@@ -376,7 +372,7 @@ const AssetsLibrary::Converter &AssetsLibrary::get_converter(Format src, DataTyp
 
     const auto it = converters.find(std::make_pair(src, dst));
 
-    if(it != converters.end())
+    if (it != converters.end())
     {
         return it->second;
     }
@@ -390,16 +386,14 @@ const AssetsLibrary::Converter &AssetsLibrary::get_converter(Format src, DataTyp
 
 const AssetsLibrary::Extractor &AssetsLibrary::get_extractor(Format format, Channel channel) const
 {
-    static std::map<std::pair<Format, Channel>, Extractor> extractors =
-    {
-        { std::make_pair(Format::RGB888, Channel::R), extract_r_from_rgb },
-        { std::make_pair(Format::RGB888, Channel::G), extract_g_from_rgb },
-        { std::make_pair(Format::RGB888, Channel::B), extract_b_from_rgb }
-    };
+    static std::map<std::pair<Format, Channel>, Extractor> extractors = {
+        {std::make_pair(Format::RGB888, Channel::R), extract_r_from_rgb},
+        {std::make_pair(Format::RGB888, Channel::G), extract_g_from_rgb},
+        {std::make_pair(Format::RGB888, Channel::B), extract_b_from_rgb}};
 
     const auto it = extractors.find(std::make_pair(format, channel));
 
-    if(it != extractors.end())
+    if (it != extractors.end())
     {
         return it->second;
     }
@@ -430,14 +424,14 @@ const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &nam
 
     const RawTensor *ptr = _cache.find(std::forward_as_tuple(name, format));
 
-    if(ptr != nullptr)
+    if (ptr != nullptr)
     {
         return *ptr;
     }
 
     RawTensor raw = load_image(name);
 
-    if(raw.format() != format)
+    if (raw.format() != format)
     {
         //FIXME: Remove unnecessary copy
         RawTensor dst(raw.shape(), format);
@@ -454,7 +448,7 @@ const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &nam
 
     const RawTensor *ptr = _cache.find(std::forward_as_tuple(name, format, channel));
 
-    if(ptr != nullptr)
+    if (ptr != nullptr)
     {
         return *ptr;
     }
@@ -524,7 +518,8 @@ RawTensor AssetsLibrary::get(const std::string &name, Format format, Channel cha
 
 namespace detail
 {
-inline void validate_npy_header(std::ifstream &stream, const std::string &expect_typestr, const TensorShape &expect_shape)
+inline void
+validate_npy_header(std::ifstream &stream, const std::string &expect_typestr, const TensorShape &expect_shape)
 {
     ARM_COMPUTE_UNUSED(expect_typestr);
     ARM_COMPUTE_UNUSED(expect_shape);
@@ -543,16 +538,16 @@ inline void validate_npy_header(std::ifstream &stream, const std::string &expect
 
     // Validate tensor shape
     ARM_COMPUTE_ERROR_ON_MSG(shape.size() != expect_shape.num_dimensions(), "Tensor ranks mismatch");
-    if(fortran_order)
+    if (fortran_order)
     {
-        for(size_t i = 0; i < shape.size(); ++i)
+        for (size_t i = 0; i < shape.size(); ++i)
         {
             ARM_COMPUTE_ERROR_ON_MSG(expect_shape[i] != shape[i], "Tensor dimensions mismatch");
         }
     }
     else
     {
-        for(size_t i = 0; i < shape.size(); ++i)
+        for (size_t i = 0; i < shape.size(); ++i)
         {
             ARM_COMPUTE_ERROR_ON_MSG(expect_shape[i] != shape[shape.size() - i - 1], "Tensor dimensions mismatch");
         }

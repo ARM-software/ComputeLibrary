@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited.
+ * Copyright (c) 2019-2022, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,8 @@
 #include "src/core/NEON/wrapper/wrapper.h"
 #include "src/core/utils/helpers/bit_ops.h"
 #include "src/cpu/kernels/crop/list.h"
+
+#include <algorithm>
 
 namespace arm_compute
 {
@@ -227,6 +229,8 @@ Status NECropKernel::validate(const ITensorInfo *input,
                               float              extrapolation_value)
 {
     ARM_COMPUTE_UNUSED(extrapolation_value);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, crop_boxes, box_ind, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, crop_boxes, box_ind);
     const auto *uk = get_implementation(CropSelectorData{input->data_type()});
     ARM_COMPUTE_RETURN_ERROR_ON(uk == nullptr || uk->ukernel == nullptr);
 
@@ -241,10 +245,16 @@ Status NECropKernel::validate(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ERROR_ON(box_ind->tensor_shape()[0] <= crop_box_ind);
     if (output->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(output, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_dimensions() != 3);
         ARM_COMPUTE_RETURN_ERROR_ON(output->has_padding());
+    }
+    else
+    {
+        // Complicated, but since it's crop, `output` should be no larger than
+        // `input` anyway, so there's nothing extra to check in this case.
     }
     return Status{};
 }
@@ -323,7 +333,12 @@ void NECropKernel::run(const Window &window, const ThreadInfo &info)
 
     const auto *uk = get_implementation(CropSelectorData{_input->info()->data_type()});
 
-    uint32_t    batch_index = *(reinterpret_cast<int32_t *>(_box_ind->ptr_to_element(Coordinates(_crop_box_ind))));
+    uint32_t batch_index =
+        std::min(static_cast<uint32_t>(_input->info()->tensor_shape()[3]),
+                 *(reinterpret_cast<uint32_t *>(_box_ind->ptr_to_element(Coordinates(_crop_box_ind)))));
+
+    ARM_COMPUTE_ERROR_ON(batch_index >= _input->info()->tensor_shape()[3]);
+
     Coordinates input_offset(
         0, _end[0] < _start[0] ? _start[0] - _cols_out_of_bounds[0] : _start[0] + _cols_out_of_bounds[0],
         _end[1] < _start[1] ? _start[1] - _rows_out_of_bounds[0] : _start[1] + _rows_out_of_bounds[0], batch_index);

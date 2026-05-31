@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,87 +7,76 @@
 #pragma once
 
 #include <cstdint>
+#include <cstring>
 #include <iosfwd>
 #include <type_traits>
 
+#include "test/common/cpu_info.hpp"
 #include "test/common/type_traits.hpp"
 
+extern "C" {
+
+/// Converts single-precision floating-point to half-precision brain floating-point.
+///
+/// @params[in] value The single-precision floating-point value.
+///
+/// @return The half-precision brain floating-point value reinterpreted as 16-bit unsigned integer.
+uint16_t kai_test_float_to_bfloat16_bfcvt(float value);
+
+}  // extern "C"
 namespace kai::test {
 
 /// Half-precision brain floating-point.
-///
-/// This class encapsulates `bfloat16_t` data type provided by `arm_bf16.h`.
+template <bool hardware_support>
 class BFloat16 {
 public:
     /// Constructor.
     BFloat16() = default;
 
-    /// Destructor.
-    ~BFloat16() = default;
-
-    /// Copy constructor.
-    BFloat16(const BFloat16&) = default;
-
-    /// Copy assignment.
-    BFloat16& operator=(const BFloat16&) = default;
-
-    /// Move constructor.
-    BFloat16(BFloat16&&) = default;
-
-    /// Move assignment.
-    BFloat16& operator=(BFloat16&&) = default;
+    using p_F32BF16convert = uint16_t (*)(float);
 
     /// Creates a new object from the specified numeric value.
-    BFloat16(float value) : _data(0) {
-#ifdef __ARM_FEATURE_BF16
-        __asm__ __volatile__("bfcvt %h[output], %s[input]" : [output] "=w"(_data) : [input] "w"(value));
-#else
-        const uint32_t* value_i32 = reinterpret_cast<const uint32_t*>(&value);
-        _data = (*value_i32 >> 16);
-#endif
+    explicit BFloat16(float value) : m_data(f32_bf16_convertfn(value)) {
+    }
+
+    /// Creates a new half-precision brain floating-point value from the raw data.
+    ///
+    /// @param[in] data The binary representation of the floating-point value.
+    ///
+    /// @return The half-precision brain floating-point value.
+    static constexpr BFloat16 from_binary(uint16_t data) {
+        BFloat16 value{};
+        value.m_data = data;
+        return value;
     }
 
     /// Assigns to the specified numeric value which will be converted to `bfloat16_t`.
     template <typename T, std::enable_if_t<is_arithmetic<T>, bool> = true>
     BFloat16& operator=(T value) {
         const auto value_f32 = static_cast<float>(value);
-#ifdef __ARM_FEATURE_BF16
-        __asm__ __volatile__("bfcvt %h[output], %s[input]" : [output] "=w"(_data) : [input] "w"(value_f32));
-#else
-        const uint32_t* value_i32 = reinterpret_cast<const uint32_t*>(&value_f32);
-        _data = (*value_i32 >> 16);
-#endif
+        m_data = f32_bf16_convertfn(value_f32);
         return *this;
     }
 
-    /// Converts to floating-point.
-    operator float() const {
-        union {
-            float f32;
-            uint32_t u32;
-        } data;
+    /// Converts to single-precision floating-point.
+    explicit operator float() const {
+        float value_f32 = 0.0F;
+        uint32_t value_u32 = static_cast<uint32_t>(m_data) << 16;
 
-        data.u32 = static_cast<uint32_t>(_data) << 16;
+        memcpy(&value_f32, &value_u32, sizeof(float));
 
-        return data.f32;
+        return value_f32;
     }
 
+private:
     /// Equality operator.
-    bool operator==(BFloat16 rhs) const {
-        return _data == rhs._data;
+    [[nodiscard]] friend bool operator==(BFloat16 lhs, BFloat16 rhs) {
+        return lhs.m_data == rhs.m_data;
     }
 
-    /// Unequality operator.
-    bool operator!=(BFloat16 rhs) const {
-        return _data != rhs._data;
-    }
-
-    uint16_t data() const {
-        return _data;
-    }
-
-    void set_data(uint16_t data) {
-        _data = data;
+    /// Inequality operator.
+    [[nodiscard]] friend bool operator!=(BFloat16 lhs, BFloat16 rhs) {
+        return lhs.m_data != rhs.m_data;
     }
 
     /// Writes the value to the output stream.
@@ -96,10 +85,21 @@ public:
     /// @param[in] value Value to be written.
     ///
     /// @return The output stream.
-    friend std::ostream& operator<<(std::ostream& os, BFloat16 value);
+    friend std::ostream& operator<<(std::ostream& os, BFloat16<> value);
 
-private:
-    uint16_t _data;
+    static uint16_t float_to_bfloat16_round_towards_zero(float value) {
+        uint32_t value_u32;
+
+        memcpy(&value_u32, &value, sizeof(value));
+
+        return value_u32 >> 16;
+    }
+
+    inline static p_F32BF16convert f32_bf16_convertfn = (hardware_support && cpu_has_bf16())
+        ? &kai_test_float_to_bfloat16_bfcvt
+        : &float_to_bfloat16_round_towards_zero;
+
+    uint16_t m_data;
 };
 
 }  // namespace kai::test

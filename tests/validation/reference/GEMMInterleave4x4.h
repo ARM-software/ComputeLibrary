@@ -25,9 +25,9 @@
 #ifndef ACL_TESTS_VALIDATION_REFERENCE_GEMMINTERLEAVE4X4_H
 #define ACL_TESTS_VALIDATION_REFERENCE_GEMMINTERLEAVE4X4_H
 
-#include "GEMM.h"
-
 #include "arm_compute/core/Types.h"
+
+#include "GEMM.h"
 
 namespace arm_compute
 {
@@ -46,17 +46,14 @@ SimpleTensor<T> gemm_interleave_4x4(const SimpleTensor<T> &in, SimpleTensor<T> &
     const int32_t in_cols    = in.shape().x();
     const int32_t out_stride = out.shape().x();
     int32_t       y          = 0;
-    for(; y <= (in_rows - 4); y += 4)
+    for (; y <= (in_rows - 4); y += 4)
     {
         const T *in_ptr = &mtx_in[y * in_cols];
 
-        for(int32_t x = 0; x < in_cols; x++)
+        for (int32_t x = 0; x < in_cols; x++)
         {
-            const T tmp[4] = { in_ptr[x + 0 * in_cols],
-                               in_ptr[x + 1 * in_cols],
-                               in_ptr[x + 2 * in_cols],
-                               in_ptr[x + 3 * in_cols]
-                             };
+            const T tmp[4] = {in_ptr[x + 0 * in_cols], in_ptr[x + 1 * in_cols], in_ptr[x + 2 * in_cols],
+                              in_ptr[x + 3 * in_cols]};
 
             T *dst = &mtx_ref[static_cast<size_t>(x * 4.f) + static_cast<size_t>(std::ceil(y / 4.f)) * out_stride];
             memcpy(dst, tmp, sizeof(T) * 4);
@@ -66,20 +63,20 @@ SimpleTensor<T> gemm_interleave_4x4(const SimpleTensor<T> &in, SimpleTensor<T> &
     // Leftover along the Y direction
     const int32_t leftover_y = in_rows - y;
 
-    if(leftover_y != 0)
+    if (leftover_y != 0)
     {
         const T *in_ptr = &mtx_in[y * in_cols];
 
-        for(int32_t x = 0; x < in_cols; x++)
+        for (int32_t x = 0; x < in_cols; x++)
         {
-            T tmp[4] = { 0, 0, 0, 0 };
-            for(int32_t k = 0; k < leftover_y; k++)
+            T tmp[4] = {0, 0, 0, 0};
+            for (int32_t k = 0; k < leftover_y; k++)
             {
 #if defined(__OpenBSD__)
-              // Workaround for compiler error stringop-overflow
-              tmp[k%4] = in_ptr[k * in_cols + x];
+                // Workaround for compiler error stringop-overflow
+                tmp[k % 4] = in_ptr[k * in_cols + x];
 #else  // defined(__OpenBSD__)
-              tmp[k] = in_ptr[k * in_cols + x];
+                tmp[k] = in_ptr[k * in_cols + x];
 #endif // defined(__OpenBSD__)
             }
             T *dst = &mtx_ref[static_cast<size_t>(x * 4.f) + static_cast<size_t>(std::ceil(y / 4.f)) * out_stride];

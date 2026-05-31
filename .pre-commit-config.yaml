@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Arm Limited.
+# Copyright (c) 2023-2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -31,6 +31,8 @@ exclude: |
         src/core/NEON/kernels/convolution/.*|
         src/core/NEON/kernels/arm_gemm/.*|
         src/core/NEON/kernels/arm_conv/.*|
+        src/cpu/kernels/assembly/arm_gemm/.*|
+        src/cpu/kernels/assembly/arm_common/.*|
         third_party/.*|
         LICENSES/.*
     )$
@@ -88,7 +90,7 @@ repos:
         name: Fix header guards in ACL
         stages: [pre-commit]
         language: python
-        entry: python ./scripts/check_header_guards.py --extensions=h,hh,hpp,inl --comment_style=double_slash --prefix=ACL --exclude=src/core/NEON/kernels/convolution/,src/core/NEON/kernels/arm_gemm/,src/core/NEON/kernels/arm_conv/,include/,third_party/ --add_extension
+        entry: python ./scripts/check_header_guards.py --extensions=h,hh,hpp,inl --comment_style=double_slash --prefix=ACL --exclude=src/core/NEON/kernels/convolution/,src/core/NEON/kernels/arm_gemm/,src/core/NEON/kernels/arm_conv/,include/,third_party/,src/cpu/kernels/assembly/arm_gemm,src/cpu/kernels/assembly/arm_common --add_extension
         pass_filenames: true
       - id: pre-push-check
         name: Commit Message Check
@@ -96,15 +98,19 @@ repos:
         always_run: true
         entry: bash -c "pip install -q commitizen && git log -1 --pretty=%s | cz check"
         stages: [pre-push]
+      - id: check-signoff
+        name: Check Signed-off-by
+        entry: >
+          bash -c 'git log -1 --pretty=%B |
+          grep -qiE "^Signed-off-by: .+ <.+@.+>$"'
+        always_run: true
+        language: system
+        stages: [pre-push]
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v14.0.6
     hooks:
       - id: clang-format
         files: .*\.(cpp|h|hpp|hh|cc|inl|c)$
-        exclude: |
-            (?x)^(
-              tests/.*
-            )$
         stages: [pre-commit]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
@@ -121,7 +127,7 @@ repos:
         args: ['--maxkb=100']
         stages: [pre-commit]
   - repo: https://github.com/fsfe/reuse-tool
-    rev: v4.0.3
+    rev: v6.2.0
     hooks:
       - id: reuse
         stages: [ pre-commit ]

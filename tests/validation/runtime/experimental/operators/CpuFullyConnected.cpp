@@ -26,14 +26,15 @@
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 
 #include "arm_compute/runtime/experimental/operators/CpuFullyConnected.h"
+
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
 #include "tests/datasets/FullyConnectedLayerDataset.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
 #include "tests/NEON/Accessor.h"
-#include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/CpuFullyConnectedFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -45,7 +46,8 @@ using framework::dataset::make;
 namespace
 {
 /** Tolerance for float operations */
-constexpr RelativeTolerance<float> tolerance_f32(0.01f);  /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr RelativeTolerance<float> tolerance_f32(
+    0.01f); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 } // namespace
 
 TEST_SUITE(NEON)
@@ -53,13 +55,16 @@ TEST_SUITE(OPERATORS)
 TEST_SUITE(CpuFullyConnected)
 
 template <typename T>
-using CpuFullyConnectedFixture = CpuFullyConnectedValidationFixture<Tensor, Accessor, experimental::op::CpuFullyConnected, T>;
+using CpuFullyConnectedFixture =
+    CpuFullyConnectedValidationFixture<Tensor, Accessor, experimental::op::CpuFullyConnected, T>;
 
 template <typename T>
-using CpuFullyConnectedFixtureNoBias = CpuFullyConnectedValidationFixtureNoBias<Tensor, Accessor, experimental::op::CpuFullyConnected, T>;
+using CpuFullyConnectedFixtureNoBias =
+    CpuFullyConnectedValidationFixtureNoBias<Tensor, Accessor, experimental::op::CpuFullyConnected, T>;
 
 template <typename T>
-using CpuFullyConnectedThreadSafeFixture = CpuFullyConnectedThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuFullyConnected, T>;
+using CpuFullyConnectedThreadSafeFixture =
+    CpuFullyConnectedThreadSafeValidationFixture<Tensor, Accessor, experimental::op::CpuFullyConnected, T>;
 
 TEST_SUITE(SmokeTest)
 // We only test FP32 here because we do not currently have reorder support for
@@ -70,10 +75,11 @@ FIXTURE_DATA_TEST_CASE(SmokeTest,
                        framework::DatasetMode::ALL,
                        combine(datasets::SmallFCFCFullyConnectedLayerDataset(),
                                make("DataType", DataType::F32),
-                               make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationFunction::LOGISTIC) })))
+                               make("ActivationInfo",
+                                    {ActivationLayerInfo(), ActivationLayerInfo(ActivationFunction::LOGISTIC)})))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], tolerance_f32);
     }
@@ -84,10 +90,11 @@ FIXTURE_DATA_TEST_CASE(SmokeTestNoBias,
                        framework::DatasetMode::ALL,
                        combine(datasets::SmallFCFCFullyConnectedLayerDataset(),
                                make("DataType", DataType::F32),
-                               make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationFunction::LOGISTIC) })))
+                               make("ActivationInfo",
+                                    {ActivationLayerInfo(), ActivationLayerInfo(ActivationFunction::LOGISTIC)})))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], tolerance_f32);
     }
@@ -103,10 +110,11 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads,
                        framework::DatasetMode::PRECOMMIT,
                        combine(datasets::SmallFCFCFullyConnectedLayerDataset(),
                                make("DataType", DataType::F32),
-                               make("ActivationInfo", { ActivationLayerInfo(), ActivationLayerInfo(ActivationFunction::LOGISTIC) })))
+                               make("ActivationInfo",
+                                    {ActivationLayerInfo(), ActivationLayerInfo(ActivationFunction::LOGISTIC)})))
 {
     // Validate output
-    for(int i = 0; i < _num_parallel_runs; ++i)
+    for (int i = 0; i < _num_parallel_runs; ++i)
     {
         validate(Accessor(_target[i]), _reference[i], tolerance_f32);
     }

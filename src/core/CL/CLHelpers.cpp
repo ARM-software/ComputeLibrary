@@ -289,6 +289,40 @@ bool device_supports_extension(const cl::Device &device, const char *extension_n
     return (pos != std::string::npos);
 }
 
+bool device_supports_extension_version(const cl::Device &device,
+                                       const char       *extension_name,
+                                       unsigned int      major_required,
+                                       unsigned int      minor_required,
+                                       unsigned int      patch_required = 0)
+{
+    const auto extensions = device.getInfo<CL_DEVICE_EXTENSIONS_WITH_VERSION>();
+
+    for (const auto &ext : extensions)
+    {
+        if (std::strcmp(extension_name, ext.name) == 0)
+        {
+            unsigned int major = CL_VERSION_MAJOR(ext.version);
+            unsigned int minor = CL_VERSION_MINOR(ext.version);
+            unsigned int patch = CL_VERSION_PATCH(ext.version);
+
+            // The device supports the extension if its version >= required
+            if (major > major_required)
+                return true;
+            if (major < major_required)
+                return false;
+
+            if (minor > minor_required)
+                return true;
+            if (minor < minor_required)
+                return false;
+
+            return patch >= patch_required;
+        }
+    }
+
+    return false;
+}
+
 bool cl_winograd_convolution_layer_supported(const Size2D &output_tile,
                                              const Size2D &kernel_size,
                                              DataLayout    data_layout)
@@ -512,7 +546,10 @@ bool arm_matrix_multiply_fp16_supported(const cl::Device &device)
     const auto err  = clGetDeviceInfo( //
         device(), CL_DEVICE_MATRIX_MULTIPLY_CAPABILITIES_ARM, sizeof(caps), &caps, nullptr);
 
-    const auto supported = err == CL_SUCCESS && (caps & CL_DEVICE_MATRIX_MULTIPLY_FP16_WITH_FP16_ACCUMULATORS_ARM) != 0;
+    const auto supported = (err == CL_SUCCESS) &&
+                           device_supports_extension_version(device, "cl_arm_matrix_multiply", 1, 1, 0) &&
+                           (caps & CL_DEVICE_MATRIX_MULTIPLY_FP16_WITH_FP16_ACCUMULATORS_ARM) != 0;
+
     return supported;
 }
 

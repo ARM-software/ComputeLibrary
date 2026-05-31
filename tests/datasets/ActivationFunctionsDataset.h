@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, 2022 Arm Limited.
+ * Copyright (c) 2017-2019, 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ACTIVATIONFUNCTIONS_DATASET_H
-#define ARM_COMPUTE_TEST_ACTIVATIONFUNCTIONS_DATASET_H
+#ifndef ACL_TESTS_DATASETS_ACTIVATIONFUNCTIONSDATASET_H
+#define ACL_TESTS_DATASETS_ACTIVATIONFUNCTIONSDATASET_H
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/framework/datasets/ContainerDataset.h"
 
 #include <vector>
@@ -35,49 +36,51 @@ namespace test
 {
 namespace datasets
 {
-class ActivationFunctions final : public framework::dataset::ContainerDataset<std::vector<ActivationLayerInfo::ActivationFunction>>
+class ActivationFunctions final
+    : public framework::dataset::ContainerDataset<std::vector<ActivationLayerInfo::ActivationFunction>>
 {
 public:
     ActivationFunctions()
         : ContainerDataset("ActivationFunction",
-    {
-        ActivationLayerInfo::ActivationFunction::ABS,
-                            ActivationLayerInfo::ActivationFunction::LINEAR,
-                            ActivationLayerInfo::ActivationFunction::LOGISTIC,
-                            ActivationLayerInfo::ActivationFunction::RELU,
-                            ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
-                            ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
-                            ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
-                            ActivationLayerInfo::ActivationFunction::SOFT_RELU,
-                            ActivationLayerInfo::ActivationFunction::ELU,
-                            ActivationLayerInfo::ActivationFunction::SQRT,
-                            ActivationLayerInfo::ActivationFunction::SQUARE,
-                            ActivationLayerInfo::ActivationFunction::TANH,
-                            ActivationLayerInfo::ActivationFunction::IDENTITY,
+                           {
+                               ActivationLayerInfo::ActivationFunction::ABS,
+                               ActivationLayerInfo::ActivationFunction::LINEAR,
+                               ActivationLayerInfo::ActivationFunction::LOGISTIC,
+                               ActivationLayerInfo::ActivationFunction::RELU,
+                               ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+                               ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                               ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
+                               ActivationLayerInfo::ActivationFunction::SOFT_RELU,
+                               ActivationLayerInfo::ActivationFunction::ELU,
+                               ActivationLayerInfo::ActivationFunction::SQRT,
+                               ActivationLayerInfo::ActivationFunction::SQUARE,
+                               ActivationLayerInfo::ActivationFunction::TANH,
+                               ActivationLayerInfo::ActivationFunction::IDENTITY,
 #ifdef __aarch64__
-                            ActivationLayerInfo::ActivationFunction::GELU,
+                               ActivationLayerInfo::ActivationFunction::GELU,
 #endif /* __aarch64__ */
-    })
+                           })
     {
     }
 };
 
-class ActivationFunctionsQuantized final : public framework::dataset::ContainerDataset<std::vector<ActivationLayerInfo::ActivationFunction>>
+class ActivationFunctionsQuantized final
+    : public framework::dataset::ContainerDataset<std::vector<ActivationLayerInfo::ActivationFunction>>
 {
 public:
     ActivationFunctionsQuantized()
         : ContainerDataset("ActivationFunctionQuantized",
-    {
-        ActivationLayerInfo::ActivationFunction::RELU,
-                            ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
-                            ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
-                            ActivationLayerInfo::ActivationFunction::LOGISTIC,
-                            ActivationLayerInfo::ActivationFunction::TANH,
-    })
+                           {
+                               ActivationLayerInfo::ActivationFunction::RELU,
+                               ActivationLayerInfo::ActivationFunction::BOUNDED_RELU,
+                               ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
+                               ActivationLayerInfo::ActivationFunction::LOGISTIC,
+                               ActivationLayerInfo::ActivationFunction::TANH,
+                           })
     {
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ACTIVATIONFUNCTIONS_DATASET_H */
+#endif // ACL_TESTS_DATASETS_ACTIVATIONFUNCTIONSDATASET_H

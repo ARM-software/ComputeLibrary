@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TEST_CASE_FACTORY
-#define ARM_COMPUTE_TEST_TEST_CASE_FACTORY
+#ifndef ACL_TESTS_FRAMEWORK_TESTCASEFACTORY_H
+#define ACL_TESTS_FRAMEWORK_TESTCASEFACTORY_H
 
 #include "DatasetModes.h"
 #include "TestCase.h"
-
 #include <memory>
 #include <string>
 
@@ -61,7 +60,8 @@ public:
      * @param[in] status      Status of the test case.
      * @param[in] description Description of data arguments.
      */
-    TestCaseFactory(std::string suite_name, std::string name, DatasetMode mode, Status status, std::string description = "");
+    TestCaseFactory(
+        std::string suite_name, std::string name, DatasetMode mode, Status status, std::string description = "");
 
     /** Default destructor. */
     virtual ~TestCaseFactory() = default;
@@ -94,8 +94,8 @@ private:
     const std::string _suite_name;
     const std::string _test_name;
     const std::string _data_description;
-    const DatasetMode _mode{ DatasetMode::ALL };
-    const Status      _status{ Status::ACTIVE };
+    const DatasetMode _mode{DatasetMode::ALL};
+    const Status      _status{Status::ACTIVE};
 };
 
 /** Implementation of a test case factory to create non-data test cases. */
@@ -123,7 +123,12 @@ public:
      * @param[in] description Description of data arguments.
      * @param[in] data        Input data for the test case.
      */
-    DataTestCaseFactory(std::string suite_name, std::string test_name, DatasetMode mode, Status status, std::string description, const D &data);
+    DataTestCaseFactory(std::string suite_name,
+                        std::string test_name,
+                        DatasetMode mode,
+                        Status      status,
+                        std::string description,
+                        const D    &data);
 
     std::unique_ptr<TestCase> make() const override;
 
@@ -131,8 +136,13 @@ private:
     D _data;
 };
 
-inline TestCaseFactory::TestCaseFactory(std::string suite_name, std::string test_name, DatasetMode mode, Status status, std::string description)
-    : _suite_name{ std::move(suite_name) }, _test_name{ std::move(test_name) }, _data_description{ std::move(description) }, _mode{ mode }, _status{ status }
+inline TestCaseFactory::TestCaseFactory(
+    std::string suite_name, std::string test_name, DatasetMode mode, Status status, std::string description)
+    : _suite_name{std::move(suite_name)},
+      _test_name{std::move(test_name)},
+      _data_description{std::move(description)},
+      _mode{mode},
+      _status{status}
 
 {
 }
@@ -141,7 +151,7 @@ inline std::string TestCaseFactory::name() const
 {
     std::string name = _suite_name + "/" + _test_name;
 
-    if(!_data_description.empty())
+    if (!_data_description.empty())
     {
         name += "@" + _data_description;
     }
@@ -161,7 +171,7 @@ inline TestCaseFactory::Status TestCaseFactory::status() const
 
 inline ::std::ostream &operator<<(::std::ostream &stream, TestCaseFactory::Status status)
 {
-    switch(status)
+    switch (status)
     {
         case TestCaseFactory::Status::ACTIVE:
             stream << "ACTIVE";
@@ -186,8 +196,13 @@ inline std::unique_ptr<TestCase> SimpleTestCaseFactory<T>::make() const
 }
 
 template <typename T, typename D>
-inline DataTestCaseFactory<T, D>::DataTestCaseFactory(std::string suite_name, std::string test_name, DatasetMode mode, Status status, std::string description, const D &data)
-    : TestCaseFactory{ std::move(suite_name), std::move(test_name), mode, status, std::move(description) }, _data{ data }
+inline DataTestCaseFactory<T, D>::DataTestCaseFactory(std::string suite_name,
+                                                      std::string test_name,
+                                                      DatasetMode mode,
+                                                      Status      status,
+                                                      std::string description,
+                                                      const D    &data)
+    : TestCaseFactory{std::move(suite_name), std::move(test_name), mode, status, std::move(description)}, _data{data}
 {
 }
 
@@ -199,4 +214,4 @@ inline std::unique_ptr<TestCase> DataTestCaseFactory<T, D>::make() const
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TEST_CASE_FACTORY */
+#endif // ACL_TESTS_FRAMEWORK_TESTCASEFACTORY_H

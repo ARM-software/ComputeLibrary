@@ -36,13 +36,24 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<T> gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta, bool fast_math = false);
+SimpleTensor<T> gemm(const SimpleTensor<T> &a,
+                     const SimpleTensor<T> &b,
+                     const SimpleTensor<T> &c,
+                     float                  alpha,
+                     float                  beta,
+                     bool                   fast_math = false);
 
 template <typename T, typename Tout = T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<Tout> gemm_mixed_precision(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta);
+SimpleTensor<Tout> gemm_mixed_precision(
+    const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta);
 
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-void gemm_accumulate(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta, SimpleTensor<T> &dst);
+void gemm_accumulate(const SimpleTensor<T> &a,
+                     const SimpleTensor<T> &b,
+                     const SimpleTensor<T> &c,
+                     float                  alpha,
+                     float                  beta,
+                     SimpleTensor<T>       &dst);
 
 } // namespace reference
 } // namespace validation

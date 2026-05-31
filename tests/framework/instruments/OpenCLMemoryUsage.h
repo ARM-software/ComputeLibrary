@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_OPENCL_MEMORY_USAGE
-#define ARM_COMPUTE_TEST_OPENCL_MEMORY_USAGE
+#ifndef ACL_TESTS_FRAMEWORK_INSTRUMENTS_OPENCLMEMORYUSAGE_H
+#define ACL_TESTS_FRAMEWORK_INSTRUMENTS_OPENCLMEMORYUSAGE_H
 
 #include "Instrument.h"
 
@@ -66,25 +66,24 @@ private:
     struct Allocation
     {
         Allocation() = default;
-        Allocation(size_t alloc_size)
-            : size(alloc_size)
+        Allocation(size_t alloc_size) : size(alloc_size)
         {
         }
-        size_t size{ 0 };
-        int    refcount{ 1 };
+        size_t size{0};
+        int    refcount{1};
     };
     std::map<cl_mem, Allocation> _allocations;
     std::map<void *, size_t>     _svm_allocations;
     struct Stats
     {
-        size_t total_allocated{ 0 };
-        size_t max_in_use{ 0 };
-        size_t in_use{ 0 };
-        size_t num_allocations{ 0 };
+        size_t total_allocated{0};
+        size_t max_in_use{0};
+        size_t in_use{0};
+        size_t num_allocations{0};
     } _start, _end, _now;
 #endif /* ARM_COMPUTE_CL */
 };
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_OPENCL_MEMORY_USAGE */
+#endif // ACL_TESTS_FRAMEWORK_INSTRUMENTS_OPENCLMEMORYUSAGE_H

@@ -634,14 +634,12 @@ inline float16x4_t vinv_f16(float16x4_t x)
 {
     float16x4_t recip = vrecpe_f16(x);
     recip             = vmul_f16(vrecps_f16(x, recip), recip);
-    recip             = vmul_f16(vrecps_f16(x, recip), recip);
     return recip;
 }
 
 inline float16x8_t vinvq_f16(float16x8_t x)
 {
     float16x8_t recip = vrecpeq_f16(x);
-    recip             = vmulq_f16(vrecpsq_f16(x, recip), recip);
     recip             = vmulq_f16(vrecpsq_f16(x, recip), recip);
     return recip;
 }

@@ -23,6 +23,7 @@
  */
 #include "src/cpu/kernels/internal/CpuDepthwiseConv2dAssemblyWrapperKernel.h"
 
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
@@ -271,6 +272,7 @@ Status CpuDepthwiseConv2dAssemblyWrapperKernel::validate(const ITensorInfo     *
                                                          const ConvolutionInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src, weights, bias);
 
 #if !defined(__aarch64__)
     ARM_COMPUTE_RETURN_ERROR_MSG("32-bit is not supported by assembly kernels");
@@ -307,11 +309,17 @@ Status CpuDepthwiseConv2dAssemblyWrapperKernel::validate(const ITensorInfo     *
         }
     }
 
+    const TensorShape dst_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*src, *weights, info);
     if (dst->total_size() > 0)
     {
-        const TensorShape dst_shape = misc::shape_calculator::compute_depthwise_convolution_shape(*src, *weights, info);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), dst_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+    }
+    else
+    {
+        const auto dst_info = TensorInfo(dst_shape, 1, dst->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     // Assembly kernels cannot work with padding greater than the kernel.

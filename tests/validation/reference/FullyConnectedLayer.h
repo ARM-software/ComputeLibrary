@@ -36,8 +36,12 @@ namespace validation
 namespace reference
 {
 template <typename T, typename TB>
-SimpleTensor<T> fully_connected_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &dst_shape,
-                                      QuantizationInfo out_quant_info = QuantizationInfo(), bool with_bias = true);
+SimpleTensor<T> fully_connected_layer(const SimpleTensor<T>  &src,
+                                      const SimpleTensor<T>  &weights,
+                                      const SimpleTensor<TB> &bias,
+                                      const TensorShape      &dst_shape,
+                                      QuantizationInfo        out_quant_info = QuantizationInfo(),
+                                      bool                    with_bias      = true);
 } // namespace reference
 } // namespace validation
 } // namespace test

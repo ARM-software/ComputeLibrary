@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_WALL_CLOCK_TIMER
-#define ARM_COMPUTE_TEST_WALL_CLOCK_TIMER
+#ifndef ACL_TESTS_FRAMEWORK_INSTRUMENTS_WALLCLOCKTIMER_H
+#define ACL_TESTS_FRAMEWORK_INSTRUMENTS_WALLCLOCKTIMER_H
 
 #include "Instrument.h"
-
 #include <chrono>
 
 namespace arm_compute
@@ -45,7 +44,7 @@ public:
      */
     WallClock(ScaleFactor scale_factor)
     {
-        switch(scale_factor)
+        switch (scale_factor)
         {
             case ScaleFactor::NONE:
                 _scale_factor = 1.f;
@@ -71,13 +70,13 @@ public:
 
 private:
 #if defined(BARE_METAL)
-    uint64_t _start {};
+    uint64_t _start{};
     uint64_t _stop{};
 #else  // !defined(BARE_METAL)
-    std::chrono::system_clock::time_point _start {};
+    std::chrono::system_clock::time_point _start{};
     std::chrono::system_clock::time_point _stop{};
 #endif // defined(BARE_METAL)
-    float _scale_factor {};
+    float _scale_factor{};
 };
 
 using WallClockTimer      = WallClock<false>;
@@ -85,4 +84,4 @@ using WallClockTimestamps = WallClock<true>;
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_WALL_CLOCK_TIMER */
+#endif // ACL_TESTS_FRAMEWORK_INSTRUMENTS_WALLCLOCKTIMER_H

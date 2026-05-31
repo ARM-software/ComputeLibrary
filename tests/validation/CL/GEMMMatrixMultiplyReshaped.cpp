@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023 Arm Limited.
+ * Copyright (c) 2018-2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,18 +26,19 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
+
 #include "src/gpu/cl/kernels/ClGemmMatrixMultiplyReshapedKernel.h"
 #include "src/gpu/cl/kernels/ClGemmReshapeLhsMatrixKernel.h"
 #include "src/gpu/cl/kernels/ClGemmReshapeRhsMatrixKernel.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/GEMMFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -45,6 +46,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 using namespace arm_compute::misc::shape_calculator;
 using namespace arm_compute::opencl::kernels;
 
@@ -59,21 +61,44 @@ using CLGEMMMatrixMultiplyReshaped = CLSynthetizeOperator<ClGemmMatrixMultiplyRe
 
 // Fixture for CLGEMMMatrixMultiplyReshaped
 template <typename T>
-using CLGEMMMatrixMultiplyReshapedFixture = GEMMMatrixMultiplyReshapedValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshaped>;
+using CLGEMMMatrixMultiplyReshapedFixture = GEMMMatrixMultiplyReshapedValidationFixture<CLTensor,
+                                                                                        CLAccessor,
+                                                                                        T,
+                                                                                        CLGEMMReshapeLHSMatrix,
+                                                                                        CLGEMMReshapeRHSMatrix,
+                                                                                        CLGEMMMatrixMultiplyReshaped>;
 
 // Fixture for CLGEMMMatrixMultiplyReshaped mixed precision
 template <typename T>
 using CLGEMMMatrixMultiplyReshapedMixedPrecisionFixture =
-    GEMMMatrixMultiplyReshapedValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshaped, true>;
+    GEMMMatrixMultiplyReshapedValidationFixture<CLTensor,
+                                                CLAccessor,
+                                                T,
+                                                CLGEMMReshapeLHSMatrix,
+                                                CLGEMMReshapeRHSMatrix,
+                                                CLGEMMMatrixMultiplyReshaped,
+                                                true>;
 
 // Fixture for CLGEMMMatrixMultiplyReshaped3D
 template <typename T>
-using CLGEMMMatrixMultiplyReshaped3DFixture = GEMMMatrixMultiplyReshaped3DValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshaped>;
+using CLGEMMMatrixMultiplyReshaped3DFixture =
+    GEMMMatrixMultiplyReshaped3DValidationFixture<CLTensor,
+                                                  CLAccessor,
+                                                  T,
+                                                  CLGEMMReshapeLHSMatrix,
+                                                  CLGEMMReshapeRHSMatrix,
+                                                  CLGEMMMatrixMultiplyReshaped>;
 
 // Fixture for CLGEMMMatrixMultiplyReshaped3D mixed precision
 template <typename T>
 using CLGEMMMatrixMultiplyReshaped3DMixedPrecisionFixture =
-    GEMMMatrixMultiplyReshaped3DValidationFixture<CLTensor, CLAccessor, T, CLGEMMReshapeLHSMatrix, CLGEMMReshapeRHSMatrix, CLGEMMMatrixMultiplyReshaped, true>;
+    GEMMMatrixMultiplyReshaped3DValidationFixture<CLTensor,
+                                                  CLAccessor,
+                                                  T,
+                                                  CLGEMMReshapeLHSMatrix,
+                                                  CLGEMMReshapeRHSMatrix,
+                                                  CLGEMMMatrixMultiplyReshaped,
+                                                  true>;
 
 namespace
 {
@@ -89,89 +114,89 @@ RelativeTolerance<float> rel_tolerance_f16(0.001f);
 constexpr float          abs_tolerance_f16(0.01f);
 
 /** M values to test */
-const auto m_values = framework::dataset::make("M", 17);
+const auto m_values = make("M", 17);
 
 /** M_W values to test */
-const auto m_w_values = framework::dataset::make("M_W", 5);
+const auto m_w_values = make("M_W", 5);
 
 /** M_H values to test */
-const auto m_h_values = framework::dataset::make("M_H", 7);
+const auto m_h_values = make("M_H", 7);
 
 /** N values to test */
-const auto n_values = framework::dataset::make("N", 21);
+const auto n_values = make("N", 21);
 
 /** K values to test */
-const auto k_values = framework::dataset::make("K", 13);
+const auto k_values = make("K", 13);
 
 /** Batch size values to test */
-const auto b_values = framework::dataset::make("batch_size", 2, 3);
+const auto b_values = make("batch_size", 2, 3);
 
 /** Activation values to test */
-const auto act_values = framework::dataset::make("Activation",
+const auto act_values = make("Activation",
 {
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::ELU),
 });
 
 /** Alpha values to test - Precommit */
-const auto a_values_precommit = framework::dataset::make("alpha", {-0.75f} );
+const auto a_values_precommit = make("alpha", {-0.75f} );
 
 /** Beta values to test - Precommit */
-const auto beta_values_precommit = framework::dataset::make("beta", {-0.35f} );
+const auto beta_values_precommit = make("beta", {-0.35f} );
 
 /** M0 values to test - Precommit */
-const auto m0_values_precommit = framework::dataset::make("M0", { 4 });
+const auto m0_values_precommit = make("M0", { 4 });
 
 /** N0 values to test - Precommit */
-const auto n0_values_precommit = framework::dataset::make("N0", { 4 });
+const auto n0_values_precommit = make("N0", { 4 });
 
 /** K0 values to test - Precommit */
-const auto k0_values_precommit = framework::dataset::make("K0", { 4 });
+const auto k0_values_precommit = make("K0", { 4 });
 
 /** V0 values to test - Precommit */
-const auto v0_values_precommit = framework::dataset::make("V0", 1, 3);
+const auto v0_values_precommit = make("V0", 1, 3);
 
 /** H0 values to test - Precommit */
-const auto h0_values_precommit = framework::dataset::make("H0", 1, 3);
+const auto h0_values_precommit = make("H0", 1, 3);
 
 /** Alpha values to test - Nightly */
-const auto a_values_nightly = framework::dataset::make("alpha", {1.0f} );
+const auto a_values_nightly = make("alpha", {1.0f} );
 
 /** Beta values to test - Nightly */
-const auto beta_values_nightly = framework::dataset::make("beta", {1.0f} );
+const auto beta_values_nightly = make("beta", {1.0f} );
 
 /** M0 values to test - Nightly */
-const auto m0_values_nightly = framework::dataset::make("M0", { 8 });
+const auto m0_values_nightly = make("M0", { 8 });
 
 /** N0 values to test - Nightly */
-const auto n0_values_nightly = framework::dataset::make("N0", { 8 });
+const auto n0_values_nightly = make("N0", { 8 });
 
 /** K0 values to test - Nightly */
-const auto k0_values_nightly = framework::dataset::make("K0", { 4 });
+const auto k0_values_nightly = make("K0", { 4 });
 
 /** N0 values to test with export to OpenCL image object - Nightly */
-const auto n0_export_to_cl_image_values_nightly = framework::dataset::make("N0", { 4, 8, 16 });
+const auto n0_export_to_cl_image_values_nightly = make("N0", { 4, 8, 16 });
 
 /** K0 values to test with export to OpenCL image object - Nightly */
-const auto k0_export_to_cl_image_values_nightly = framework::dataset::make("K0", { 4, 8, 16 });
+const auto k0_export_to_cl_image_values_nightly = make("K0", { 4, 8, 16 });
 
 /** V0 values to test - Nightly */
-const auto v0_values_nightly = framework::dataset::make("V0", 1, 3);
+const auto v0_values_nightly = make("V0", 1, 3);
 
 /** H0 values to test - Nightly */
-const auto h0_values_nightly = framework::dataset::make("H0", 1, 3);
+const auto h0_values_nightly = make("H0", 1, 3);
 
 /** Interleave values to test with LHS matrix */
-const auto i_values_lhs = framework::dataset::make("interleave_lhs", { true, false });
+const auto i_values_lhs = make("interleave_lhs", { true, false });
 
 /** Interleave values to test with RHS matrix */
-const auto i_values_rhs = framework::dataset::make("interleave_rhs", { true, false });
+const auto i_values_rhs = make("interleave_rhs", { true, false });
 
 /** Broadcast bias from vector to matrix */
-const auto broadcast_bias_values = framework::dataset::make("broadcast_bias", { false, true } );
+const auto broadcast_bias_values = make("broadcast_bias", { false, true } );
 
 /** LHS transposed values */
-const auto lhs_transpose_values = framework::dataset::make("lhs_transpose", { false, true } );
+const auto lhs_transpose_values = make("lhs_transpose", { false, true } );
 
 } // namespace
 
@@ -180,8 +205,7 @@ TEST_SUITE(GEMMMatrixMultiplyReshaped)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("Input0Info", { TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F32),      // OK
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("Input0Info", { TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F32),      // OK
                                                         TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F16),      // OK
                                                         TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::QASYMM8),  // Data type not supported
                                                         TensorInfo(TensorShape(10U, 5U, 2U), 1, DataType::F32),      // Incorrect dimension bias
@@ -191,7 +215,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                         TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::F16),      // OK, RHS 4,4,2
 
                                                       }),
-               framework::dataset::make("Input1Info",{ TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F32),
+               make("Input1Info",{ TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(64U, 5U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F32),
@@ -200,8 +224,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                        TensorInfo(TensorShape(64U, 6U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(128U, 3U, 2U), 1, DataType::F16),
 
-                      })),
-               framework::dataset::make("Input2Info", { TensorInfo(TensorShape(21U), 1, DataType::F32),
+                      }),
+               make("Input2Info", { TensorInfo(TensorShape(21U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(21U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(21U), 1, DataType::QASYMM8),
                                                         TensorInfo(TensorShape(21U), 1, DataType::F32),
@@ -210,8 +234,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                         TensorInfo(TensorShape(21U,17U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F16),
 
-                                                      })),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F32),
+                                                      }),
+               make("OutputInfo",{ TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(21U,17U,2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F32),
@@ -220,8 +244,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                        TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(21U,17U,2U), 1, DataType::F16),
 
-                           })),
-               framework::dataset::make("LHSMInfo",{
+                           }),
+               make("LHSMInfo",{
                                                           GEMMLHSMatrixInfo(4,4,1,false,true),
                                                           GEMMLHSMatrixInfo(4,4,1,false,true),
                                                           GEMMLHSMatrixInfo(4,4,1,false,true),
@@ -231,8 +255,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                           GEMMLHSMatrixInfo(4,4,1,false,true),
                                                           GEMMLHSMatrixInfo(4,4,1,false,true),
 
-                                })),
-               framework::dataset::make("RHSMInfo",{
+                                }),
+               make("RHSMInfo",{
                                                           GEMMRHSMatrixInfo(4,4,1,true,true,false),
                                                           GEMMRHSMatrixInfo(4,4,1,true,true,false),
                                                           GEMMRHSMatrixInfo(4,4,1,true,true,false),
@@ -243,10 +267,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                           GEMMRHSMatrixInfo(4,4,2,true,false,false),
 
 
-                           })),
+                           }),
 
 
-               framework::dataset::make("GEMMInfo",{
+               make("GEMMInfo",{
                                                             GEMMKernelInfo( 17 /**<M Number of LHS rows*/,
                                                                             21 /**<N Number of RHS columns*/,
                                                                             13 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
@@ -325,8 +349,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                                      GEMMRHSMatrixInfo(4,4,2,true,false,false),
                                                                      0  /**< Offset to be added to each element of the matrix A */,
                                                                      0 /**< Offset to be added to each element of the matrix B */),
-                                                    })),
-               framework::dataset::make("Expected", { true, true, false, false, false, true, true,true})),
+                                                    }),
+               make("Expected", { true, true, false, false, false, true, true,true})),
                     input0_info ,input1_info, input2_info, output_info, lhs_info, rhs_info, gemm_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(ClGemmMatrixMultiplyReshapedKernel::validate(&input0_info.clone()->set_is_resizable(true),
@@ -342,24 +366,23 @@ TEST_SUITE(Float)
 TEST_SUITE(FP32)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   broadcast_bias_values),
-                                                                   lhs_transpose_values),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   v0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F32),
+                                                                   a_values_precommit,
+                                                                   beta_values_precommit,
+                                                                   broadcast_bias_values,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output
@@ -369,30 +392,29 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<float>, fra
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<float>, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_nightly),
-                                                                   n0_values_nightly),
-                                                                   k0_values_nightly),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values_nightly),
-                                                                   beta_values_nightly),
-                                                                   broadcast_bias_values),
-                                                                   lhs_transpose_values),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_nightly,
+                                                                   n0_values_nightly,
+                                                                   k0_values_nightly,
+                                                                   v0_values_nightly,
+                                                                   h0_values_nightly,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F32),
+                                                                   a_values_nightly,
+                                                                   beta_values_nightly,
+                                                                   broadcast_bias_values,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output
@@ -402,30 +424,29 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<float>, fra
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   lhs_transpose_values),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   v0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F32),
+                                                                   a_values_precommit,
+                                                                   beta_values_precommit,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output
@@ -435,30 +456,29 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_nightly),
-                                                                   n0_values_nightly),
-                                                                   k0_values_nightly),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values_nightly),
-                                                                   beta_values_nightly),
-                                                                   lhs_transpose_values),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_nightly,
+                                                                   n0_values_nightly,
+                                                                   k0_values_nightly,
+                                                                   v0_values_nightly,
+                                                                   h0_values_nightly,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F32),
+                                                                   a_values_nightly,
+                                                                   beta_values_nightly,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output
@@ -468,58 +488,57 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 TEST_SUITE(ExportToCLImage)
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("Input0Info", { TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("Input0Info", { TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),  // Incorrect k0
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),  // Incorrect n0
 
                                                       }),
-               framework::dataset::make("Input1Info",{ TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),
+               make("Input1Info",{ TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(512U, 8U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(128U, 32U, 2U), 1, DataType::F32),
 
-                      })),
-               framework::dataset::make("Input2Info", { TensorInfo(TensorShape(64U), 1, DataType::F32),
+                      }),
+               make("Input2Info", { TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F32),
 
-                                                      })),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
+                                                      }),
+               make("OutputInfo",{ TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F32),
 
-                           })),
-               framework::dataset::make("LHSMInfo",{
+                           }),
+               make("LHSMInfo",{
                                                           GEMMLHSMatrixInfo(4, 4, 1, false, true),
                                                           GEMMLHSMatrixInfo(4, 8, 1, false, true),
                                                           GEMMLHSMatrixInfo(4, 4, 1, false, true),
                                                           GEMMLHSMatrixInfo(4, 2, 1, false, false),
                                                           GEMMLHSMatrixInfo(4, 4, 1, false, false),
 
-                                })),
-               framework::dataset::make("RHSMInfo",{
+                                }),
+               make("RHSMInfo",{
                                                           GEMMRHSMatrixInfo(4, 4, 1, true, true, true),
                                                           GEMMRHSMatrixInfo(4, 8, 1, true, true, true),
                                                           GEMMRHSMatrixInfo(8, 4, 1, true, true, true),
                                                           GEMMRHSMatrixInfo(4, 2, 1, true, false, true),
                                                           GEMMRHSMatrixInfo(2, 4, 1, true, false, true),
-                           })),
-               framework::dataset::make("GEMMInfo",{GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
+                           }),
+               make("GEMMInfo",{GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
                                                                     64 /**<N Number of RHS columns*/,
                                                                     64 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
                                                              false /**< reinterpret the input as 3D */,
@@ -590,8 +609,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                              GEMMRHSMatrixInfo(),
                                                              0  /**< Offset to be added to each element of the matrix A */,
                                                              0 /**< Offset to be added to each element of the matrix B */)
-                                                    })),
-               framework::dataset::make("Expected", { true,
+                                                    }),
+               make("Expected", { true,
                                                       true,
                                                       true,
                                                       false,
@@ -608,24 +627,23 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   broadcast_bias_values),
-                                                                   lhs_transpose_values),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   v0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F32),
+                                                                   a_values_precommit,
+                                                                   beta_values_precommit,
+                                                                   broadcast_bias_values,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
      // Validate output only if validate() is successful
@@ -635,31 +653,30 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<float>, fra
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_nightly),
-                                                                   n0_export_to_cl_image_values_nightly),
-                                                                   k0_export_to_cl_image_values_nightly),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values_nightly),
-                                                                   beta_values_nightly),
-                                                                   broadcast_bias_values),
-                                                                   lhs_transpose_values),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_nightly,
+                                                                   n0_export_to_cl_image_values_nightly,
+                                                                   k0_export_to_cl_image_values_nightly,
+                                                                   v0_values_nightly,
+                                                                   h0_values_nightly,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F32),
+                                                                   a_values_nightly,
+                                                                   beta_values_nightly,
+                                                                   broadcast_bias_values,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
      // Validate output only if validate() is successful
@@ -669,30 +686,29 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<float>, fra
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   lhs_transpose_values),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   v0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F32),
+                                                                   a_values_precommit,
+                                                                   beta_values_precommit,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
      // Validate output only if validate() is successful
@@ -702,30 +718,29 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_nightly),
-                                                                   n0_export_to_cl_image_values_nightly),
-                                                                   k0_export_to_cl_image_values_nightly),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-                                                                   a_values_nightly),
-                                                                   beta_values_nightly),
-                                                                   lhs_transpose_values),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_nightly,
+                                                                   n0_export_to_cl_image_values_nightly,
+                                                                   k0_export_to_cl_image_values_nightly,
+                                                                   v0_values_nightly,
+                                                                   h0_values_nightly,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F32),
+                                                                   a_values_nightly,
+                                                                   beta_values_nightly,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output only if validate() is successful
@@ -735,8 +750,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<float>,
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -746,24 +761,23 @@ TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   broadcast_bias_values),
-                                                                   lhs_transpose_values),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   v0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
+                                                                   a_values_precommit,
+                                                                   beta_values_precommit,
+                                                                   broadcast_bias_values,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output
@@ -773,30 +787,29 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<half>, fram
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<half>, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_nightly),
-                                                                   n0_values_nightly),
-                                                                   k0_values_nightly),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_nightly),
-                                                                   beta_values_nightly),
-                                                                   broadcast_bias_values),
-                                                                   lhs_transpose_values),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_nightly,
+                                                                   n0_values_nightly,
+                                                                   k0_values_nightly,
+                                                                   v0_values_nightly,
+                                                                   h0_values_nightly,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
+                                                                   a_values_nightly,
+                                                                   beta_values_nightly,
+                                                                   broadcast_bias_values,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output
@@ -806,30 +819,29 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<half>, fram
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   lhs_transpose_values),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   v0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
+                                                                   a_values_precommit,
+                                                                   beta_values_precommit,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output
@@ -839,30 +851,29 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_nightly),
-                                                                   n0_values_nightly),
-                                                                   k0_values_nightly),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_nightly),
-                                                                   beta_values_nightly),
-                                                                   lhs_transpose_values),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_nightly,
+                                                                   n0_values_nightly,
+                                                                   k0_values_nightly,
+                                                                   v0_values_nightly,
+                                                                   h0_values_nightly,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
+                                                                   a_values_nightly,
+                                                                   beta_values_nightly,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output
@@ -872,58 +883,57 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 TEST_SUITE(ExportToCLImage)
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
-               framework::dataset::make("Input0Info", { TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(make("Input0Info", { TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // OK or incorrect if cl_khr_image2d_from_buffer not supported
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // Incorrect k0
                                                         TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),  // Incorrect n0
 
                                                       }),
-               framework::dataset::make("Input1Info",{ TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),
+               make("Input1Info",{ TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(512U, 8U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(256U, 16U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(128U, 32U, 2U), 1, DataType::F16),
 
-                      })),
-               framework::dataset::make("Input2Info", { TensorInfo(TensorShape(64U), 1, DataType::F16),
+                      }),
+               make("Input2Info", { TensorInfo(TensorShape(64U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F16),
                                                         TensorInfo(TensorShape(64U), 1, DataType::F16),
 
-                                                      })),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
+                                                      }),
+               make("OutputInfo",{ TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(64U, 64U, 2U), 1, DataType::F16),
 
-                           })),
-               framework::dataset::make("LHSMInfo",{
+                           }),
+               make("LHSMInfo",{
                                                           GEMMLHSMatrixInfo(4, 4, 1, false, true),
                                                           GEMMLHSMatrixInfo(4, 8, 1, false, true),
                                                           GEMMLHSMatrixInfo(4, 4, 1, false, true),
                                                           GEMMLHSMatrixInfo(4, 2, 1, false, false),
                                                           GEMMLHSMatrixInfo(4, 4, 1, false, false),
 
-                                })),
-               framework::dataset::make("RHSMInfo",{
+                                }),
+               make("RHSMInfo",{
                                                           GEMMRHSMatrixInfo(4, 4, 1, true, true, true),
                                                           GEMMRHSMatrixInfo(4, 8, 1, true, true, true),
                                                           GEMMRHSMatrixInfo(8, 4, 1, true, true, true),
                                                           GEMMRHSMatrixInfo(4, 2, 1, true, false, true),
                                                           GEMMRHSMatrixInfo(2, 4, 1, true, false, true),
-                           })),
-               framework::dataset::make("GEMMInfo",{GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
+                           }),
+               make("GEMMInfo",{GEMMKernelInfo( 64 /**<M Number of LHS rows*/,
                                                                     64 /**<N Number of RHS columns*/,
                                                                     64 /**<K Number of LHS columns or RHS rows */, 0 /**< Depth of the output tensor in case is reinterpreted as 3D */,
                                                              false /**< reinterpret the input as 3D */,
@@ -994,8 +1004,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
                                                              GEMMRHSMatrixInfo(),
                                                              0  /**< Offset to be added to each element of the matrix A */,
                                                              0 /**< Offset to be added to each element of the matrix B */)
-                                                    })),
-               framework::dataset::make("Expected", { true,
+                                                    }),
+               make("Expected", { true,
                                                       true,
                                                       true,
                                                       false,
@@ -1012,24 +1022,23 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   broadcast_bias_values),
-                                                                   lhs_transpose_values),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   v0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F16),
+                                                                   a_values_precommit,
+                                                                   beta_values_precommit,
+                                                                   broadcast_bias_values,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output only if validate() is successful
@@ -1039,31 +1048,30 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedFixture<half>, fram
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<half>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_nightly),
-                                                                   n0_export_to_cl_image_values_nightly),
-                                                                   k0_export_to_cl_image_values_nightly),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_nightly),
-                                                                   beta_values_nightly),
-                                                                   broadcast_bias_values),
-                                                                   lhs_transpose_values),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_nightly,
+                                                                   n0_export_to_cl_image_values_nightly,
+                                                                   k0_export_to_cl_image_values_nightly,
+                                                                   v0_values_nightly,
+                                                                   h0_values_nightly,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F16),
+                                                                   a_values_nightly,
+                                                                   beta_values_nightly,
+                                                                   broadcast_bias_values,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output only if validate() is successful
@@ -1073,30 +1081,29 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedFixture<half>, fram
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   lhs_transpose_values),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   v0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F16),
+                                                                   a_values_precommit,
+                                                                   beta_values_precommit,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output only if validate() is successful
@@ -1106,30 +1113,29 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_nightly),
-                                                                   n0_export_to_cl_image_values_nightly),
-                                                                   k0_export_to_cl_image_values_nightly),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", true)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_nightly),
-                                                                   beta_values_nightly),
-                                                                   lhs_transpose_values),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_nightly,
+                                                                   n0_export_to_cl_image_values_nightly,
+                                                                   k0_export_to_cl_image_values_nightly,
+                                                                   v0_values_nightly,
+                                                                   h0_values_nightly,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", true),
+                                                                   make("DataType", DataType::F16),
+                                                                   a_values_nightly,
+                                                                   beta_values_nightly,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output only if validate() is successful
@@ -1139,8 +1145,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DFixture<half>, 
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -1150,24 +1156,23 @@ TEST_SUITE_END() // FP16
 TEST_SUITE(MixedPrecision)
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedMixedPrecisionFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   broadcast_bias_values),
-                                                                   lhs_transpose_values),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   v0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
+                                                                   a_values_precommit,
+                                                                   beta_values_precommit,
+                                                                   broadcast_bias_values,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output
@@ -1177,30 +1182,29 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMMatrixMultiplyReshapedMixedPrecisionFixtu
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedMixedPrecisionFixture<half>, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_values,
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_nightly),
-                                                                   n0_values_nightly),
-                                                                   k0_values_nightly),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_nightly),
-                                                                   beta_values_nightly),
-                                                                   broadcast_bias_values),
-                                                                   lhs_transpose_values),
+                combine(m_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_nightly,
+                                                                   n0_values_nightly,
+                                                                   k0_values_nightly,
+                                                                   v0_values_nightly,
+                                                                   h0_values_nightly,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
+                                                                   a_values_nightly,
+                                                                   beta_values_nightly,
+                                                                   broadcast_bias_values,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output
@@ -1210,30 +1214,29 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMMatrixMultiplyReshapedMixedPrecisionFixtu
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DMixedPrecisionFixture<half>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_precommit),
-                                                                   n0_values_precommit),
-                                                                   k0_values_precommit),
-                                                                   v0_values_precommit),
-                                                                   h0_values_precommit),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_precommit),
-                                                                   beta_values_precommit),
-                                                                   lhs_transpose_values),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_precommit,
+                                                                   n0_values_precommit,
+                                                                   k0_values_precommit,
+                                                                   v0_values_precommit,
+                                                                   h0_values_precommit,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
+                                                                   a_values_precommit,
+                                                                   beta_values_precommit,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output
@@ -1243,30 +1246,29 @@ FIXTURE_DATA_TEST_CASE(RunSmall3D, CLGEMMMatrixMultiplyReshaped3DMixedPrecisionF
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DMixedPrecisionFixture<half>, framework::DatasetMode::DISABLED,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(
-                                                                   m_w_values,
-                                                                   m_h_values),
-                                                                   n_values),
-                                                                   k_values),
-                                                                   b_values),
-                                                                   m0_values_nightly),
-                                                                   n0_values_nightly),
-                                                                   k0_values_nightly),
-                                                                   v0_values_nightly),
-                                                                   h0_values_nightly),
-                                                                   i_values_lhs),
-                                                                   i_values_rhs),
-                                                                   framework::dataset::make("export_to_cl_image_rhs", false)),
-                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                   a_values_nightly),
-                                                                   beta_values_nightly),
-                                                                   lhs_transpose_values),
+                combine(m_w_values,
+                                                                   m_h_values,
+                                                                   n_values,
+                                                                   k_values,
+                                                                   b_values,
+                                                                   m0_values_nightly,
+                                                                   n0_values_nightly,
+                                                                   k0_values_nightly,
+                                                                   v0_values_nightly,
+                                                                   h0_values_nightly,
+                                                                   i_values_lhs,
+                                                                   i_values_rhs,
+                                                                   make("export_to_cl_image_rhs", false),
+                                                                   make("DataType", DataType::F16),
+                                                                   a_values_nightly,
+                                                                   beta_values_nightly,
+                                                                   lhs_transpose_values,
                                                                    act_values))
 {
     // Validate output
@@ -1276,8 +1278,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge3D, CLGEMMMatrixMultiplyReshaped3DMixedPrecisionF
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("cl_khr_image2d_from_buffer not supported. TEST skipped");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("cl_khr_image2d_from_buffer not supported. TEST skipped");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 

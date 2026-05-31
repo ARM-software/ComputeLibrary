@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_COMPARISON_OPERATIONS_DATASET_H
-#define ARM_COMPUTE_TEST_COMPARISON_OPERATIONS_DATASET_H
+#ifndef ACL_TESTS_DATASETS_COMPARISONOPERATIONSDATASET_H
+#define ACL_TESTS_DATASETS_COMPARISONOPERATIONSDATASET_H
 
 #include "arm_compute/core/Types.h"
-#include "tests/framework/datasets/ContainerDataset.h"
 
+#include "tests/framework/datasets/ContainerDataset.h"
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -40,18 +40,13 @@ class ComparisonOperations final : public framework::dataset::ContainerDataset<s
 public:
     ComparisonOperations()
         : ContainerDataset("ComparisonOperation",
-    {
-        ComparisonOperation::Equal,
-                            ComparisonOperation::NotEqual,
-                            ComparisonOperation::Greater,
-                            ComparisonOperation::GreaterEqual,
-                            ComparisonOperation::Less,
-                            ComparisonOperation::LessEqual
-    })
+                           {ComparisonOperation::Equal, ComparisonOperation::NotEqual, ComparisonOperation::Greater,
+                            ComparisonOperation::GreaterEqual, ComparisonOperation::Less,
+                            ComparisonOperation::LessEqual})
     {
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_COMPARISON_OPERATIONS_DATASET_H */
+#endif // ACL_TESTS_DATASETS_COMPARISONOPERATIONSDATASET_H

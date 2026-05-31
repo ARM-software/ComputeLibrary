@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2025 Arm Limited.
+ * Copyright (c) 2016-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -112,6 +112,7 @@
 #include "arm_compute/runtime/NEON/functions/NEStackLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEStridedSlice.h"
 #include "arm_compute/runtime/NEON/functions/NETile.h"
+#include "arm_compute/runtime/NEON/functions/NETopKV.h"
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 #include "arm_compute/runtime/NEON/functions/NEUnstack.h"
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"

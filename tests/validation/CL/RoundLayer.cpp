@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/CL/functions/CLElementwiseUnaryLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/ElementwiseUnaryFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -40,6 +41,7 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(RoundLayer)
 template <typename T>
@@ -47,14 +49,18 @@ using CLRoundLayerFixture = RoundValidationFixture<CLTensor, CLAccessor, CLRound
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLRoundLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                       DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLRoundLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLRoundLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                     DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLRoundLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -62,14 +68,18 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLRoundLayerFixture<half>, framework::DatasetMo
 
 TEST_SUITE_END() // FP16
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLRoundLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                        DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLRoundLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLRoundLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType",
-                                                                                                      DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLRoundLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

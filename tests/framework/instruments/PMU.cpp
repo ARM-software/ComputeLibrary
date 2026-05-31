@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,8 +34,7 @@ namespace test
 {
 namespace framework
 {
-PMU::PMU()
-    : _perf_config()
+PMU::PMU() : _perf_config()
 {
     _perf_config.type = PERF_TYPE_HARDWARE;
     _perf_config.size = sizeof(perf_event_attr);
@@ -49,8 +48,7 @@ PMU::PMU()
     _perf_config.inherit_stat = 1;
 }
 
-PMU::PMU(uint64_t config)
-    : PMU()
+PMU::PMU(uint64_t config) : PMU()
 {
     open(config);
 }
@@ -74,7 +72,7 @@ void PMU::open(const perf_event_attr &perf_config)
     ARM_COMPUTE_ERROR_ON_MSG(_fd < 0, "perf_event_open failed");
 
     const int result = ioctl(_fd, PERF_EVENT_IOC_ENABLE, 0);
-    if(result == -1)
+    if (result == -1)
     {
         ARM_COMPUTE_ERROR_VAR("Failed to enable PMU counter: %d", errno);
     }
@@ -82,7 +80,7 @@ void PMU::open(const perf_event_attr &perf_config)
 
 void PMU::close()
 {
-    if(_fd != -1)
+    if (_fd != -1)
     {
         ::close(_fd);
         _fd = -1;
@@ -92,7 +90,7 @@ void PMU::close()
 void PMU::reset()
 {
     const int result = ioctl(_fd, PERF_EVENT_IOC_RESET, 0);
-    if(result == -1)
+    if (result == -1)
     {
         ARM_COMPUTE_ERROR_VAR("Failed to reset PMU counter: %d", errno);
     }

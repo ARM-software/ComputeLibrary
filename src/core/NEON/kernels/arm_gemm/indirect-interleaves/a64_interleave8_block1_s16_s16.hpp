@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2019-2021,2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,11 @@
 template<>
 void interleave_block<8, 1, VLType::None, false>(
   int16_t * &out_ptr, const int16_t * const * in, size_t width, size_t height,
-  size_t row_offset, bool
+  size_t row_offset, bool, int32_t
 )
 {
   __asm__ __volatile__(
-      "ldr x28, [%x[in], #0x0]\n"
+      "ldr x28, [%x[in], #0]\n"
       "ldr x27, [%x[in], #0x8]\n"
       "cmp %x[height], #0x8\n"
       "ldr x26, [%x[in], #0x10]\n"
@@ -61,14 +61,14 @@ void interleave_block<8, 1, VLType::None, false>(
       "csel x22, x22, x28, GT\n"
       "1:"  // no_pointer_adj
       "cmp %x[width], #0x8\n"
-      "prfm pldl1keep, [x28, #0x0]\n"
-      "prfm pldl1keep, [x27, #0x0]\n"
-      "prfm pldl1keep, [x26, #0x0]\n"
-      "prfm pldl1keep, [x25, #0x0]\n"
-      "prfm pldl1keep, [x24, #0x0]\n"
-      "prfm pldl1keep, [x23, #0x0]\n"
-      "prfm pldl1keep, [x22, #0x0]\n"
-      "prfm pldl1keep, [x21, #0x0]\n"
+      "prfm pldl1keep, [x28, #0]\n"
+      "prfm pldl1keep, [x27, #0]\n"
+      "prfm pldl1keep, [x26, #0]\n"
+      "prfm pldl1keep, [x25, #0]\n"
+      "prfm pldl1keep, [x24, #0]\n"
+      "prfm pldl1keep, [x23, #0]\n"
+      "prfm pldl1keep, [x22, #0]\n"
+      "prfm pldl1keep, [x21, #0]\n"
       "prfm pldl1keep, [x28, #0x40]\n"
       "prfm pldl1keep, [x27, #0x40]\n"
       "prfm pldl1keep, [x26, #0x40]\n"
@@ -119,7 +119,7 @@ void interleave_block<8, 1, VLType::None, false>(
       "zip2 v20.8h, v20.8h, v19.8h\n"
       "zip1 v19.8h, v24.8h, v18.8h\n"
       "zip2 v18.8h, v24.8h, v18.8h\n"
-      "str q17, [%x[out_ptr], #0x0]\n"
+      "str q17, [%x[out_ptr], #0]\n"
       "str q16, [%x[out_ptr], #0x10]\n"
       "zip1 v17.8h, v23.8h, v22.8h\n"
       "zip2 v16.8h, v23.8h, v22.8h\n"
@@ -199,15 +199,15 @@ void interleave_block<8, 1, VLType::None, false>(
       "ld1 { v23.h }[2], [x21]\n"
       "b 7f\n"
       "6:"  // odd_loads_1_0
-      "ldr h30, [x28, #0x0]\n"
-      "ldr h29, [x27, #0x0]\n"
+      "ldr h30, [x28, #0]\n"
+      "ldr h29, [x27, #0]\n"
       "mov x20, #0x1\n"
-      "ldr h28, [x26, #0x0]\n"
-      "ldr h27, [x25, #0x0]\n"
-      "ldr h26, [x24, #0x0]\n"
-      "ldr h25, [x23, #0x0]\n"
-      "ldr h24, [x22, #0x0]\n"
-      "ldr h23, [x21, #0x0]\n"
+      "ldr h28, [x26, #0]\n"
+      "ldr h27, [x25, #0]\n"
+      "ldr h26, [x24, #0]\n"
+      "ldr h25, [x23, #0]\n"
+      "ldr h24, [x22, #0]\n"
+      "ldr h23, [x21, #0]\n"
       "7:"  // Odd load end
       "zip1 v22.8h, v30.8h, v26.8h\n"
       "zip1 v21.8h, v28.8h, v24.8h\n"
@@ -217,24 +217,24 @@ void interleave_block<8, 1, VLType::None, false>(
       "zip1 v18.8h, v22.8h, v21.8h\n"
       "zip1 v17.8h, v20.8h, v19.8h\n"
       "zip1 v16.8h, v18.8h, v17.8h\n"
-      "str q16, [%x[out_ptr], #0x0]\n"
+      "str q16, [%x[out_ptr], #0]\n"
       "add %x[out_ptr], %x[out_ptr], #0x10\n"
       "beq 8f\n"
       "subs x20, x20, #0x1\n"
       "zip2 v16.8h, v18.8h, v17.8h\n"
-      "str q16, [%x[out_ptr], #0x0]\n"
+      "str q16, [%x[out_ptr], #0]\n"
       "add %x[out_ptr], %x[out_ptr], #0x10\n"
       "beq 8f\n"
       "zip2 v18.8h, v22.8h, v21.8h\n"
       "zip2 v17.8h, v20.8h, v19.8h\n"
       "subs x20, x20, #0x1\n"
       "zip1 v16.8h, v18.8h, v17.8h\n"
-      "str q16, [%x[out_ptr], #0x0]\n"
+      "str q16, [%x[out_ptr], #0]\n"
       "add %x[out_ptr], %x[out_ptr], #0x10\n"
       "beq 8f\n"
       "subs x20, x20, #0x1\n"
       "zip2 v16.8h, v18.8h, v17.8h\n"
-      "str q16, [%x[out_ptr], #0x0]\n"
+      "str q16, [%x[out_ptr], #0]\n"
       "add %x[out_ptr], %x[out_ptr], #0x10\n"
       "beq 8f\n"
       "zip2 v22.8h, v30.8h, v26.8h\n"
@@ -245,18 +245,18 @@ void interleave_block<8, 1, VLType::None, false>(
       "zip1 v18.8h, v22.8h, v21.8h\n"
       "zip1 v17.8h, v20.8h, v19.8h\n"
       "zip1 v16.8h, v18.8h, v17.8h\n"
-      "str q16, [%x[out_ptr], #0x0]\n"
+      "str q16, [%x[out_ptr], #0]\n"
       "add %x[out_ptr], %x[out_ptr], #0x10\n"
       "beq 8f\n"
       "subs x20, x20, #0x1\n"
       "zip2 v16.8h, v18.8h, v17.8h\n"
-      "str q16, [%x[out_ptr], #0x0]\n"
+      "str q16, [%x[out_ptr], #0]\n"
       "add %x[out_ptr], %x[out_ptr], #0x10\n"
       "beq 8f\n"
       "zip2 v17.8h, v22.8h, v21.8h\n"
       "zip2 v16.8h, v20.8h, v19.8h\n"
       "zip1 v16.8h, v17.8h, v16.8h\n"
-      "str q16, [%x[out_ptr], #0x0]\n"
+      "str q16, [%x[out_ptr], #0]\n"
       "add %x[out_ptr], %x[out_ptr], #0x10\n"
       "8:"  // Odds skip
       : [out_ptr] "+&r" (out_ptr), [width] "+&r" (width)
@@ -268,14 +268,15 @@ void interleave_block<8, 1, VLType::None, false>(
 template<>
 void interleave_block<8, 1, VLType::None, false>(
   uint16_t * &out_ptr, const uint16_t * const * in, size_t width, size_t height,
-  size_t row_offset, bool
+  size_t row_offset, bool, int32_t
 )
 {
   int16_t * &out_cast = reinterpret_cast<int16_t * &>(out_ptr);
   const int16_t * const * in_cast = reinterpret_cast<const int16_t * const *>(in);
 
-  interleave_block<8, 1, VLType::None, false>(out_cast, in_cast, width, height, row_offset, false);
+  interleave_block<8, 1, VLType::None, false>(out_cast, in_cast, width, height, row_offset, false, 0);
 }
 
 
 #endif // __aarch64__
+

@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -22,10 +22,10 @@ size_t kai_get_n_step_rhs_pack_nxk_f32p2vlx1biasf32_f32_f32_sme(void);
 /// Gets the offset in bytes to the data element in the RHS matrix buffer.
 ///
 /// @param[in] n_idx Column index.
-/// @param[in] rhs_offset Row stride in bytes of the RHS matrix.
+/// @param[in] rhs_stride Row stride in bytes of the RHS matrix.
 ///
 /// @return The offset in bytes to the data element.
-size_t kai_get_rhs_offset_rhs_pack_nxk_f32p2vlx1biasf32_f32_f32_sme(size_t n_idx, size_t rhs_offset);
+size_t kai_get_rhs_offset_rhs_pack_nxk_f32p2vlx1biasf32_f32_f32_sme(size_t n_idx, size_t rhs_stride);
 
 /// Gets the offset in bytes to the data element in the bias buffer.
 ///
@@ -33,6 +33,13 @@ size_t kai_get_rhs_offset_rhs_pack_nxk_f32p2vlx1biasf32_f32_f32_sme(size_t n_idx
 ///
 /// @return The offset in bytes to the data element.
 size_t kai_get_bias_offset_rhs_pack_nxk_f32p2vlx1biasf32_f32_f32_sme(size_t n_idx);
+
+/// Gets the row stride in bytes of the packed RHS matrix.
+///
+/// @param[in] k The number of columns in the transposed RHS matrix.
+///
+/// @return The row stride in bytes.
+size_t kai_get_rhs_packed_stride_rhs_pack_nxk_f32p2vlx1biasf32_f32_f32_sme(size_t k);
 
 /// Gets the offset in bytes to the data element in the packed RHS buffer.
 ///
@@ -62,7 +69,7 @@ size_t kai_get_rhs_packed_size_rhs_pack_nxk_f32p2vlx1biasf32_f32_f32_sme(size_t 
 /// @param[in] num_groups Number of groups. It must be 1.
 /// @param[in] n Number of columns of the output matrix.
 /// @param[in] k Common dimension between the LHS and RHS matrix.
-/// @param[in] nr Block size in N dimension. It must be 2 * kai_get_sme_vector_length_u32().
+/// @param[in] nr Block size in N dimension. It must match kai_get_n_step_rhs_pack_nxk_f32p2vlx1biasf32_f32_f32_sme().
 /// @param[in] kr Block size in K dimension. It must be 1.
 /// @param[in] sr Number of kr splits. It must be 1.
 /// @param[in] rhs_stride Row stride in bytes of the RHS matrix.

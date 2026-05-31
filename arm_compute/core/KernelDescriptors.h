@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, 2025 Arm Limited.
+ * Copyright (c) 2019-2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -208,7 +208,7 @@ struct ScaleKernelInfo
      * @param[in] border_mode           Border mode policy
      * @param[in] constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT and use_padding is set to false. Defaults to default @ref PixelValue
      * @param[in] sampling_policy       (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
-     * @param[in] use_padding           (Optional) Is padding in use or not. Defaults to true.
+     * @param[in] use_padding           (Optional) Is padding in use or not. Defaults to false.
      * @param[in] align_corners         (Optional) Align corners of input and output, only affecting bilinear policy with TOP_LEFT sampling policy. Defaults to false.
      * @param[in] data_layout           (Optional) Data layout used by the layer. Defaults to @ref DataLayout::UNKNOWN
      */
@@ -216,7 +216,7 @@ struct ScaleKernelInfo
                     BorderMode          border_mode,
                     PixelValue          constant_border_value = PixelValue(),
                     SamplingPolicy      sampling_policy       = SamplingPolicy::CENTER,
-                    bool                use_padding           = true,
+                    bool                use_padding           = false,
                     bool                align_corners         = false,
                     DataLayout          data_layout           = DataLayout::UNKNOWN) noexcept
         : interpolation_policy{interpolation_policy},

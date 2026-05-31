@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, 2022-2023 Arm Limited.
+ * Copyright (c) 2018-2019, 2022-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 
-#ifndef ARM_COMPUTE_TEST_GATHER_DATASET
-#define ARM_COMPUTE_TEST_GATHER_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_GATHERDATASET_H
+#define ACL_TESTS_DATASETS_GATHERDATASET_H
 
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -45,9 +45,9 @@ public:
         iterator(std::vector<TensorShape>::const_iterator input_shapes_it,
                  std::vector<TensorShape>::const_iterator starts_values_it,
                  std::vector<int>::const_iterator         axis_it)
-            : _input_shapes_it{ std::move(input_shapes_it) },
-              _indices_shapes_it{ std::move(starts_values_it) },
-              _axis_it{ std::move(axis_it) }
+            : _input_shapes_it{std::move(input_shapes_it)},
+              _indices_shapes_it{std::move(starts_values_it)},
+              _axis_it{std::move(axis_it)}
         {
         }
 
@@ -140,7 +140,7 @@ public:
         add_config(TensorShape(9U), TensorShape(3U, 2U, 4U), 0);
         add_config(TensorShape(5U, 3U, 4U), TensorShape(5U, 6U), 0);
 
-        add_config(TensorShape(7U, 4U, 5U), TensorShape(2U, 3U),0);
+        add_config(TensorShape(7U, 4U, 5U), TensorShape(2U, 3U), 0);
 
         add_config(TensorShape(2U, 6U), TensorShape(4U, 9U), 1);
         add_config(TensorShape(15U, 15U), TensorShape(3U, 2U, 2U), 1);
@@ -151,7 +151,7 @@ public:
         add_config(TensorShape(9U), TensorShape(3U, 2U, 4U), 1);
         add_config(TensorShape(5U, 3U, 4U), TensorShape(5U, 6U), 1);
 
-        add_config(TensorShape(7U, 4U, 5U), TensorShape(2U, 3U),1);
+        add_config(TensorShape(7U, 4U, 5U), TensorShape(2U, 3U), 1);
 
         add_config(TensorShape(2U, 6U), TensorShape(4U, 9U), 2);
         add_config(TensorShape(15U, 15U), TensorShape(2U, 11U), 2);
@@ -160,7 +160,7 @@ public:
         add_config(TensorShape(3U, 5U), TensorShape(2U, 3U), 2);
         add_config(TensorShape(5U, 3U, 4U), TensorShape(5U, 6U), 2);
 
-        add_config(TensorShape(7U, 4U, 5U), TensorShape(2U, 3U),2);
+        add_config(TensorShape(7U, 4U, 5U), TensorShape(2U, 3U), 2);
     }
 };
 
@@ -224,4 +224,4 @@ public:
 } // namespace test
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_TEST_GATHER_DATASET */
+#endif // ACL_TESTS_DATASETS_GATHERDATASET_H

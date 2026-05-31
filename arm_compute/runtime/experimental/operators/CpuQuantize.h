@@ -31,8 +31,6 @@
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/runtime/NEON/INEOperator.h"
 
-#include "src/cpu/ICpuOperator.h"
-
 #include <memory>
 
 /*

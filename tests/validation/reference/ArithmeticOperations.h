@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_H
-#define ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_ARITHMETICOPERATIONS_H
+#define ACL_TESTS_VALIDATION_REFERENCE_ARITHMETICOPERATIONS_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -43,12 +43,20 @@ enum class ArithmeticOperation
 };
 
 template <typename T>
-SimpleTensor<T> arithmetic_operation(ArithmeticOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst, ConvertPolicy convert_policy);
+SimpleTensor<T> arithmetic_operation(ArithmeticOperation    op,
+                                     const SimpleTensor<T> &src1,
+                                     const SimpleTensor<T> &src2,
+                                     SimpleTensor<T>       &dst,
+                                     ConvertPolicy          convert_policy);
 
 template <typename T>
-SimpleTensor<T> arithmetic_operation(ArithmeticOperation op, const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
+SimpleTensor<T> arithmetic_operation(ArithmeticOperation    op,
+                                     const SimpleTensor<T> &src1,
+                                     const SimpleTensor<T> &src2,
+                                     DataType               dst_data_type,
+                                     ConvertPolicy          convert_policy);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ARITHMETIC_OPERATIONS_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_ARITHMETICOPERATIONS_H

@@ -1,0 +1,51 @@
+#
+# SPDX-FileCopyrightText: Copyright 2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+load(
+    "//:kai_defs.bzl",
+    "kai_c_library",
+    "kai_cpu_sme2",
+)
+
+package(default_visibility = ["//visibility:private"])
+
+# buildifier: keep sorted
+SME2_KERNELS = [
+    "pack/kai_rhs_dwconv_pack_x32p1vlx1b_x32_x32_sme",
+]
+
+# buildifier: keep sorted
+SME2_KERNELS_ASM = [
+    "dwconv_f32_f32_f32p/kai_dwconv_clamp_f32_f32_f32p1vlx1b_3x3_s1_4xc_sme2_mla",
+]
+
+kai_c_library(
+    name = "sme2_impl",
+    cpu_uarch = kai_cpu_sme2(),
+    kernels = SME2_KERNELS,
+)
+
+kai_c_library(
+    name = "sme2_impl_asm",
+    cpu_uarch = kai_cpu_sme2(),
+    kernels_asm = SME2_KERNELS_ASM,
+)
+
+kai_c_library(
+    name = "interface",
+    textual_hdrs = glob(["**/*_interface.h"]),
+    visibility = ["//visibility:public"],
+)
+
+kai_c_library(
+    name = "dwconv",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":interface",
+        ":sme2_impl",
+        ":sme2_impl_asm",
+    ],
+)

@@ -1,5 +1,5 @@
 #
-# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+# SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -17,34 +17,40 @@ def kai_gcc_warn_copts():
     return [
         "-Wall",
         "-Wdisabled-optimization",
-        "-Werror",
         "-Wextra",
         "-Wformat-security",
         "-Wformat=2",
         "-Winit-self",
-        "-Wno-ignored-attributes",
-        "-Wno-misleading-indentation",
-        "-Wno-overlength-strings",
         "-Wstrict-overflow=2",
         "-Wswitch-default",
         "-Wno-vla",
+        "-Wcast-qual",
     ]
 
+# GCC/CLANG C only warning options
+def kai_gcc_warn_conlyopts():
+    return [
+        "-Wmissing-prototypes",
+        "-Wstrict-prototypes",
+        "-Wpedantic",
+    ]
+
+# GCC/CLANG C++ only warning options
 def kai_gcc_warn_cxxopts():
-    return kai_gcc_warn_copts() + [
+    return [
         "-Wctor-dtor-privacy",
-        "-Weffc++",
         "-Woverloaded-virtual",
         "-Wsign-promo",
+        "-Wmissing-declarations",
     ]
 
 # GCC/CLANG compiler options
 def kai_gcc_std_copts():
-    return ["-std=c99", "-Wpedantic"] + kai_gcc_warn_copts()
+    return ["-std=c99"] + kai_gcc_warn_copts() + kai_gcc_warn_conlyopts()
 
 # GCC/CLANG compiler options
 def kai_gcc_std_cxxopts():
-    return ["-std=c++17"] + kai_gcc_warn_cxxopts()
+    return ["-std=c++17"] + kai_gcc_warn_copts() + kai_gcc_warn_cxxopts()
 
 def kai_cpu_select(cpu_uarch):
     if len(cpu_uarch) == 0:
@@ -150,6 +156,18 @@ def _kai_c_cxx_common(name, copts_def_func, **kwargs):
     # Remove custom cpu_uarch paramter before passing it to cc_library
     if "cpu_uarch" in kwargs:
         kwargs.pop("cpu_uarch")
+
+    # Add kernels source files
+    if "kernels" in kwargs:
+        kwargs["srcs"] = kwargs.get("srcs", []) + [ukernel + ".c" for ukernel in kwargs["kernels"]]
+        kwargs["textual_hdrs"] = kwargs.get("textual_hdrs", []) + [ukernel + ".h" for ukernel in kwargs["kernels"]]
+        kwargs.pop("kernels")
+
+    # Add assembly kernels source files
+    if "kernels_asm" in kwargs:
+        kwargs["srcs"] = kwargs.get("srcs", []) + [ukernel + "_asm.S" for ukernel in kwargs["kernels_asm"]] + [ukernel + ".c" for ukernel in kwargs["kernels_asm"]]
+        kwargs["textual_hdrs"] = kwargs.get("textual_hdrs", []) + [ukernel + ".h" for ukernel in kwargs["kernels_asm"]]
+        kwargs.pop("kernels_asm")
 
     native.cc_library(
         name = name,

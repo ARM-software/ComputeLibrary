@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023,2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(ARM_COMPUTE_ENABLE_SME)
+#if defined(ARM_COMPUTE_ENABLE_SME2) && defined(__aarch64__) && ((defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) || defined(ARM_COMPUTE_ENABLE_BF16))
 
 namespace {
 
@@ -40,15 +40,18 @@ void sme_transpose_interleave_16VL_2x2(uint16_t *out, const uint16_t *in, size_t
 
     __asm__ __volatile__(
       ".inst 0xd503477f  // SMSTART ZA\n"
+      "mov x26, %x[height]\n"
       "ptrue p6.b\n"
+      "cbz %x[height], 4f\n"
       "1:"  // Main row loop: Head
       "mov x25, %x[in]\n"
-      "cmp %x[height], #0x1\n"
+      "cmp x26, #0x1\n"
       "add x24, x25, %x[in_stride]\n"
       "mov x23, %x[out]\n"
       "add %x[in], x24, %x[in_stride]\n"
+      "sub x26, x26, #0x2\n"
+      "csel %x[in], %x[in], x24, GT\n"
       "csel x24, x24, %x[pad_row], GT\n"
-      "sub %x[height], %x[height], #0x2\n"
       "mov x22, %x[width]\n"
       "2:"  // Main row loop: Column loop
       "mov x21, x22\n"
@@ -79,7 +82,7 @@ void sme_transpose_interleave_16VL_2x2(uint16_t *out, const uint16_t *in, size_t
       "ld1h { z16.h }, p4/Z, [x24, #3, MUL VL]\n"
       "zip1 z23.h, z21.h, z19.h\n"
       "zip2 z22.h, z21.h, z19.h\n"
-      "cmp x22, #0x0\n"
+      "cmp x22, #0\n"
       "ld1h { z21.h }, p3/Z, [x25, #4, MUL VL]\n"
       "zip1 z31.h, z20.h, z18.h\n"
       "zip2 z30.h, z20.h, z18.h\n"
@@ -123,19 +126,20 @@ void sme_transpose_interleave_16VL_2x2(uint16_t *out, const uint16_t *in, size_t
       "st1h { z17.h }, p6, [x20, #-2, MUL VL]\n"
       "st1h { z16.h }, p6, [x20, #-1, MUL VL]\n"
       "bgt 2b\n"
-      "3:"  // Main row loop: Column loop skip
-      "cmp %x[height], #0x1\n"
+      "cmp x26, #0x1\n"
       "addvl %x[out], %x[out], #16\n"
       "bge 1b\n"
+      "4:"  // Done
       ".inst 0xd503467f  // SMSTOP\n"
-      : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
-      : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
-      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "x20", "x21", "x22", "x23", "x24", "x25", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
+      : [in] "+&r" (in), [out] "+&r" (out)
+      : [height] "r" (height), [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
+      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
     );
 }
 
 } // anonymous namespace
 
+#ifdef ARM_COMPUTE_ENABLE_BF16
 template<>
 void Transform<16, 2, true, VLType::SME>(
     bfloat16 *out, const bfloat16 *in, int stride, int x0, int xmax, int k0, int kmax)
@@ -148,7 +152,9 @@ void Transform<16, 2, true, VLType::SME>(
         (kmax-k0)
     );
 }
+#endif // ARM_COMPUTE_ENABLE_BF16
 
+#if (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
 template<>
 void Transform<16, 2, true, VLType::SME>(
     __fp16 *out, const __fp16 *in, int stride, int x0, int xmax, int k0, int kmax)
@@ -161,6 +167,7 @@ void Transform<16, 2, true, VLType::SME>(
         (kmax-k0)
     );
 }
+#endif // (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
 
+#endif // defined(ARM_COMPUTE_ENABLE_SME2) && defined(__aarch64__) && ((defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) || defined(ARM_COMPUTE_ENABLE_BF16))
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SME)

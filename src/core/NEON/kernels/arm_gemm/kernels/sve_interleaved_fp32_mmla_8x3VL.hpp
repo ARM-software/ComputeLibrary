@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, 2024 Arm Limited.
+ * Copyright (c) 2019-2020, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,52 +22,54 @@
  * SOFTWARE.
  */
 #pragma once
-
-#ifdef ARM_COMPUTE_ENABLE_SVE
-
-
 #include "../std_transforms_sve.hpp"
 
-namespace arm_gemm {
+#define ARGLIST  \
+    const float *, const float *, \
+    float *, int, int, int
 
+namespace arm_gemm
+{
 // Actual kernel implementations
-void sve_interleaved_fp32_mmla_8x3VL(const float *, const float *, float *, int, int, int);
+void sve_interleaved_fp32_mmla_8x3VL( ARGLIST );
 
-class cls_sve_interleaved_fp32_mmla_8x3VL {
+class cls_sve_interleaved_fp32_mmla_8x3VL
+{
 public:
     typedef float lhs_operand_type;
     typedef float rhs_operand_type;
     typedef float result_type;
 
-    typedef void (*kern_type)(const float *, const float *, float *, int, int, int);
+    typedef void (*kern_type)( ARGLIST );
 
     /* Kernel blocking parameters */
+    static constexpr unsigned int out_height()
+    {
+        return 8;
+    }
+
     static unsigned int out_width()
     {
         return get_vector_length<float>() * 3;
     }
 
-    static unsigned int out_height()
-    {
-        return 8;
-    }
-
-    static unsigned int k_unroll()
+    static constexpr unsigned int k_unroll()
     {
         return 2;
     }
 
-    // Use the standard fixed size transforms.
+
     StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 8, 6, 2, 2> transforms = {};
+    StdTransformsSVE<lhs_operand_type, rhs_operand_type, result_type, 8, 6, 2, 2, true> transforms_quantized = {};
 
+    // Default to the generic kernel
     kern_type kernel=sve_interleaved_fp32_mmla_8x3VL;
-
     cls_sve_interleaved_fp32_mmla_8x3VL(const CPUInfo *)
     {
-
     }
 };
 
 } // namespace arm_gemm
 
-#endif // ARM_COMPUTE_ENABLE_SVE
+#undef ARGLIST
+

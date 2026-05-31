@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_POOLING_TYPES_DATASET_H
-#define ARM_COMPUTE_TEST_POOLING_TYPES_DATASET_H
+#ifndef ACL_TESTS_DATASETS_POOLINGTYPESDATASET_H
+#define ACL_TESTS_DATASETS_POOLINGTYPESDATASET_H
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/framework/datasets/ContainerDataset.h"
 
 #include <vector>
@@ -39,11 +40,7 @@ namespace datasets
 class PoolingTypes final : public framework::dataset::ContainerDataset<std::vector<PoolingType>>
 {
 public:
-    PoolingTypes()
-        : ContainerDataset("PoolType",
-    {
-        PoolingType::MAX, PoolingType::AVG, PoolingType::L2
-    })
+    PoolingTypes() : ContainerDataset("PoolType", {PoolingType::MAX, PoolingType::AVG, PoolingType::L2})
     {
     }
 };
@@ -51,4 +48,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_NORMALIZATION_TYPES_DATASET_H */
+#endif // ACL_TESTS_DATASETS_POOLINGTYPESDATASET_H

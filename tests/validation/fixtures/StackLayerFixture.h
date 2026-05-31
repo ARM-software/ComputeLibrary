@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,11 +28,12 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/StackLayer.h"
 #include "tests/validation/reference/Utils.h"
@@ -71,7 +72,7 @@ protected:
         std::vector<AbstractTensorType *> src(num_tensors);
 
         // Create vector of input tensors
-        for(int i = 0; i < num_tensors; ++i)
+        for (int i = 0; i < num_tensors; ++i)
         {
             tensors[i] = create_tensor<TensorType>(shape_src, data_type);
             src[i]     = &(tensors[i]);
@@ -88,9 +89,9 @@ protected:
         stack.configure(src, axis, &dst);
 
         // Allocate and fill the input tensors
-        for(int i = 0; i < num_tensors; ++i)
+        for (int i = 0; i < num_tensors; ++i)
         {
-            if(add_x_padding)
+            if (add_x_padding)
             {
                 add_padding_x({&tensors[i]}, DataLayout::NHWC);
             }
@@ -103,7 +104,7 @@ protected:
             fill(AccessorType(tensors[i]), i);
         }
 
-        if(add_x_padding)
+        if (add_x_padding)
         {
             add_padding_x({&dst}, DataLayout::NHWC);
         }
@@ -123,7 +124,7 @@ protected:
     {
         std::vector<SimpleTensor<T>> src;
 
-        for(int i = 0; i < num_tensors; ++i)
+        for (int i = 0; i < num_tensors; ++i)
         {
             src.emplace_back(std::move(SimpleTensor<T>(shape_src, data_type, 1)));
 
@@ -143,8 +144,8 @@ protected:
 };
 
 template <typename TensorType, typename AbstractTensorType, typename AccessorType, typename FunctionType, typename T>
-class StackLayerWithPaddingValidationFixture :
-    public StackLayerValidationFixture<TensorType, AbstractTensorType, AccessorType, FunctionType, T>
+class StackLayerWithPaddingValidationFixture
+    : public StackLayerValidationFixture<TensorType, AbstractTensorType, AccessorType, FunctionType, T>
 {
 public:
     using Parent = StackLayerValidationFixture<TensorType, AbstractTensorType, AccessorType, FunctionType, T>;

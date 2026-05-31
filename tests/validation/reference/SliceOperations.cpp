@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,10 +42,8 @@ SimpleTensor<T> slice(const SimpleTensor<T> &src, Coordinates starts, Coordinate
     // Validation checks
     ARM_COMPUTE_ERROR_ON(src.shape().num_dimensions() > 4);
     ARM_COMPUTE_ERROR_ON(starts.num_dimensions() > src.shape().num_dimensions());
-    ARM_COMPUTE_ERROR_ON(std::any_of(starts.cbegin(), starts.cbegin() + starts.num_dimensions(), [](int i)
-    {
-        return i < 0;
-    }));
+    ARM_COMPUTE_ERROR_ON(
+        std::any_of(starts.cbegin(), starts.cbegin() + starts.num_dimensions(), [](int i) { return i < 0; }));
     ARM_COMPUTE_ERROR_ON(ends.num_dimensions() > src.shape().num_dimensions());
 
     // Get source shape
@@ -55,31 +53,37 @@ SimpleTensor<T> slice(const SimpleTensor<T> &src, Coordinates starts, Coordinate
     TensorShape dst_shape = arm_compute::misc::shape_calculator::compute_slice_shape(src_shape, starts, ends);
 
     // Create destination tensor
-    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1 };
+    SimpleTensor<T> dst{dst_shape, src.data_type(), 1};
 
     // Perform slice
     Window win;
     win.use_tensor_dimensions(dst_shape);
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        Coordinates offset;
-        for(unsigned int i = 0; i < id.num_dimensions(); ++i)
-        {
-            offset.set(i, starts[i] + id[i]);
-        }
-        *reinterpret_cast<T *>(dst(id)) = *reinterpret_cast<const T *>(src(offset));
-    });
+    execute_window_loop(win,
+                        [&](const Coordinates &id)
+                        {
+                            Coordinates offset;
+                            for (unsigned int i = 0; i < id.num_dimensions(); ++i)
+                            {
+                                offset.set(i, starts[i] + id[i]);
+                            }
+                            *reinterpret_cast<T *>(dst(id)) = *reinterpret_cast<const T *>(src(offset));
+                        });
 
     return dst;
 }
 
 template SimpleTensor<float> slice(const SimpleTensor<float> &src, Coordinates starts, Coordinates ends);
-template SimpleTensor<half_float::half> slice(const SimpleTensor<half_float::half> &src, Coordinates starts, Coordinates ends);
+template SimpleTensor<half_float::half>
+slice(const SimpleTensor<half_float::half> &src, Coordinates starts, Coordinates ends);
 
 template <typename T>
 SimpleTensor<T> strided_slice(const SimpleTensor<T> &src,
-                              Coordinates starts, Coordinates ends, BiStrides strides,
-                              int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+                              Coordinates            starts,
+                              Coordinates            ends,
+                              BiStrides              strides,
+                              int32_t                begin_mask,
+                              int32_t                end_mask,
+                              int32_t                shrink_axis_mask)
 {
     using namespace arm_compute::helpers::tensor_transform;
 
@@ -88,53 +92,59 @@ SimpleTensor<T> strided_slice(const SimpleTensor<T> &src,
     ARM_COMPUTE_ERROR_ON(starts.num_dimensions() > src.shape().num_dimensions());
     ARM_COMPUTE_ERROR_ON(ends.num_dimensions() > src.shape().num_dimensions());
     ARM_COMPUTE_ERROR_ON(strides.num_dimensions() > src.shape().num_dimensions());
-    ARM_COMPUTE_ERROR_ON(std::any_of(strides.cbegin(), strides.cbegin() + strides.num_dimensions(), [](int i)
-    {
-        return i == 0;
-    }));
+    ARM_COMPUTE_ERROR_ON(
+        std::any_of(strides.cbegin(), strides.cbegin() + strides.num_dimensions(), [](int i) { return i == 0; }));
 
     // Get source shape
     const TensorShape &src_shape = src.shape();
 
     // Get destination shape
-    const TensorShape dst_shape = compute_strided_slice_output_shape(src_shape, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
+    const TensorShape dst_shape =
+        compute_strided_slice_output_shape(src_shape, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 
     // Create destination tensor
-    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1 };
+    SimpleTensor<T> dst{dst_shape, src.data_type(), 1};
 
     // Get coordinates
     Coordinates starts_abs{};
     Coordinates ends_abs{};
     Coordinates final_strides{};
-    std::tie(starts_abs, ends_abs, final_strides) = calculate_strided_slice_coords(src_shape,
-                                                                                   starts, ends, strides,
-                                                                                   begin_mask, end_mask, shrink_axis_mask);
+    std::tie(starts_abs, ends_abs, final_strides) =
+        calculate_strided_slice_coords(src_shape, starts, ends, strides, begin_mask, end_mask, shrink_axis_mask);
 
     // Perform strided slice
     unsigned int idx = 0;
     Window       win;
-    win.use_tensor_dimensions(compute_strided_slice_output_shape(src_shape,
-                                                                 starts, ends, strides,
-                                                                 begin_mask, end_mask, shrink_axis_mask, true));
-    execute_window_loop(win, [&](const Coordinates & id)
-    {
-        Coordinates offset;
-        for(unsigned int i = 0; i < id.num_dimensions(); ++i)
-        {
-            offset.set(i, starts_abs[i] + id[i] * final_strides[i]);
-        }
-        dst.data()[idx++] = *reinterpret_cast<const T *>(src(offset));
-    });
+    win.use_tensor_dimensions(compute_strided_slice_output_shape(src_shape, starts, ends, strides, begin_mask, end_mask,
+                                                                 shrink_axis_mask, true));
+    execute_window_loop(win,
+                        [&](const Coordinates &id)
+                        {
+                            Coordinates offset;
+                            for (unsigned int i = 0; i < id.num_dimensions(); ++i)
+                            {
+                                offset.set(i, starts_abs[i] + id[i] * final_strides[i]);
+                            }
+                            dst.data()[idx++] = *reinterpret_cast<const T *>(src(offset));
+                        });
 
     return dst;
 }
 
-template SimpleTensor<float> strided_slice(const SimpleTensor<float> &src,
-                                           Coordinates starts, Coordinates ends, BiStrides strides,
-                                           int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
+template SimpleTensor<float>            strided_slice(const SimpleTensor<float> &src,
+                                                      Coordinates                starts,
+                                                      Coordinates                ends,
+                                                      BiStrides                  strides,
+                                                      int32_t                    begin_mask,
+                                                      int32_t                    end_mask,
+                                                      int32_t                    shrink_axis_mask);
 template SimpleTensor<half_float::half> strided_slice(const SimpleTensor<half_float::half> &src,
-                                                      Coordinates starts, Coordinates ends, BiStrides strides,
-                                                      int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
+                                                      Coordinates                           starts,
+                                                      Coordinates                           ends,
+                                                      BiStrides                             strides,
+                                                      int32_t                               begin_mask,
+                                                      int32_t                               end_mask,
+                                                      int32_t                               shrink_axis_mask);
 } // namespace reference
 } // namespace validation
 } // namespace test

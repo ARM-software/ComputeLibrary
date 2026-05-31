@@ -34,6 +34,7 @@
 
 #include "src/common/utils/profile/acl_profile.h"
 #include "src/core/AccessWindowStatic.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/core/NEON/wrapper/wrapper.h"
@@ -55,6 +56,7 @@ Status validate_arguments(const ITensorInfo             *src,
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src, bias);
 
     ARM_COMPUTE_RETURN_ERROR_ON(
         output_stage->gemmlowp_max_bound >
@@ -74,6 +76,7 @@ Status validate_arguments(const ITensorInfo             *src,
 
     if (dst->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         if (dst->data_type() != output_stage->output_data_type &&
             (output_stage->output_data_type == DataType::QASYMM8 ||
              output_stage->output_data_type == DataType::QASYMM8_SIGNED))

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,23 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/CLTensorAllocator.h"
-
 #include "arm_compute/core/utils/misc/MMappedFile.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMConvolutionLayer.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/PoolManager.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/Globals.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
+#include "tests/Globals.h"
 #include "tests/validation/reference/ActivationLayer.h"
+#include "tests/validation/Validation.h"
 
 #include <memory>
 #include <random>
@@ -52,15 +52,11 @@ namespace
 {
 cl_mem import_malloc_memory_helper(void *ptr, size_t size)
 {
-    const cl_import_properties_arm import_properties[] =
-    {
-        CL_IMPORT_TYPE_ARM,
-        CL_IMPORT_TYPE_HOST_ARM,
-        0
-    };
+    const cl_import_properties_arm import_properties[] = {CL_IMPORT_TYPE_ARM, CL_IMPORT_TYPE_HOST_ARM, 0};
 
     cl_int err = CL_SUCCESS;
-    cl_mem buf = clImportMemoryARM(CLKernelLibrary::get().context().get(), CL_MEM_READ_WRITE, import_properties, ptr, size, &err);
+    cl_mem buf = clImportMemoryARM(CLKernelLibrary::get().context().get(), CL_MEM_READ_WRITE, import_properties, ptr,
+                                   size, &err);
     ARM_COMPUTE_ASSERT(err == CL_SUCCESS);
 
     return buf;
@@ -116,7 +112,7 @@ void run_conv2d(std::shared_ptr<IMemoryManager> mm, IAllocator &mm_allocator)
     dst.allocator()->allocate();
 
     // Finalize memory manager
-    if(mm != nullptr)
+    if (mm != nullptr)
     {
         mm->populate(mm_allocator, 1 /* num_pools */);
         ARM_COMPUTE_EXPECT(mm->lifetime_manager()->are_all_finalized(), framework::LogLevel::ERRORS);
@@ -212,7 +208,7 @@ TEST_CASE(ImportMemoryBuffer, framework::DatasetMode::ALL)
 TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
 {
     // Check if import extension is supported
-    if(!device_supports_extension(CLKernelLibrary::get().get_device(), "cl_arm_import_memory_host"))
+    if (!device_supports_extension(CLKernelLibrary::get().get_device(), "cl_arm_import_memory_host"))
     {
         return;
     }
@@ -234,9 +230,9 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
         // Allocate and import tensor
         const size_t total_size_in_elems = tensor.info()->tensor_shape().total_size();
         const size_t total_size_in_bytes = tensor.info()->total_size();
-        const size_t alignment           = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE>();
-        size_t       space               = total_size_in_bytes + alignment;
-        auto         raw_data            = std::make_unique<uint8_t[]>(space);
+        const size_t alignment = CLKernelLibrary::get().get_device().getInfo<CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE>();
+        size_t       space     = total_size_in_bytes + alignment;
+        auto         raw_data  = std::make_unique<uint8_t[]>(space);
 
         void *aligned_ptr = raw_data.get();
         std::align(alignment, total_size_in_bytes, aligned_ptr, space);
@@ -249,7 +245,7 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
         std::uniform_real_distribution<float> distribution(-5.f, 5.f);
         std::mt19937                          gen(library->seed());
         auto                                 *typed_ptr = reinterpret_cast<float *>(aligned_ptr);
-        for(unsigned int i = 0; i < total_size_in_elems; ++i)
+        for (unsigned int i = 0; i < total_size_in_elems; ++i)
         {
             typed_ptr[i] = distribution(gen);
         }
@@ -259,7 +255,7 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
         CLScheduler::get().sync();
 
         // Validate result by checking that the input has no negative values
-        for(unsigned int i = 0; i < total_size_in_elems; ++i)
+        for (unsigned int i = 0; i < total_size_in_elems; ++i)
         {
             ARM_COMPUTE_EXPECT(typed_ptr[i] >= 0, framework::LogLevel::ERRORS);
         }
@@ -275,7 +271,7 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
 TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
 {
     // Check if import extension is supported
-    if(!device_supports_extension(CLKernelLibrary::get().get_device(), "cl_arm_import_memory_host"))
+    if (!device_supports_extension(CLKernelLibrary::get().get_device(), "cl_arm_import_memory_host"))
     {
         return;
     }
@@ -317,7 +313,7 @@ TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
         std::uniform_real_distribution<float> distribution(-5.f, 5.f);
         std::mt19937                          gen(library->seed());
         auto                                 *typed_ptr = reinterpret_cast<float *>(data);
-        for(unsigned int i = 0; i < total_size_in_elems; ++i)
+        for (unsigned int i = 0; i < total_size_in_elems; ++i)
         {
             typed_ptr[i] = distribution(gen);
         }
@@ -327,7 +323,7 @@ TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
         CLScheduler::get().sync();
 
         // Validate result by checking that the input has no negative values
-        for(unsigned int i = 0; i < total_size_in_elems; ++i)
+        for (unsigned int i = 0; i < total_size_in_elems; ++i)
         {
             ARM_COMPUTE_EXPECT(typed_ptr[i] >= 0, framework::LogLevel::ERRORS);
         }
@@ -344,7 +340,7 @@ TEST_CASE(Symm8PerChannelQuantizationInfo, framework::DatasetMode::ALL)
 {
     // Create tensor
     CLTensor                 tensor;
-    const std::vector<float> scale = { 0.25f, 1.4f, 3.2f, 2.3f, 4.7f };
+    const std::vector<float> scale = {0.25f, 1.4f, 3.2f, 2.3f, 4.7f};
     const TensorInfo         info(TensorShape(32U, 16U), 1, DataType::QSYMM8_PER_CHANNEL, QuantizationInfo(scale));
     tensor.allocator()->init(info);
 
@@ -369,9 +365,10 @@ TEST_CASE(Symm8PerChannelQuantizationInfo, framework::DatasetMode::ALL)
 
     // Validate that the scale values are the same
     auto  cl_scale_buffer = quantization.scale->cl_buffer();
-    void *mapped_ptr      = CLScheduler::get().queue().enqueueMapBuffer(cl_scale_buffer, CL_TRUE, CL_MAP_READ, 0, scale.size());
-    auto  cl_scale_ptr    = static_cast<float *>(mapped_ptr);
-    for(unsigned int i = 0; i < scale.size(); ++i)
+    void *mapped_ptr =
+        CLScheduler::get().queue().enqueueMapBuffer(cl_scale_buffer, CL_TRUE, CL_MAP_READ, 0, scale.size());
+    auto cl_scale_ptr = static_cast<float *>(mapped_ptr);
+    for (unsigned int i = 0; i < scale.size(); ++i)
     {
         ARM_COMPUTE_EXPECT(cl_scale_ptr[i] == scale[i], framework::LogLevel::ERRORS);
     }

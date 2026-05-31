@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,20 +27,20 @@ namespace arm_compute
 {
 namespace test
 {
-RawTensor::RawTensor(TensorShape shape, Format format)
-    : SimpleTensor(shape, format)
+RawTensor::RawTensor(TensorShape shape, Format format) : SimpleTensor(shape, format)
 {
-    _buffer = std::make_unique<uint8_t[]>(SimpleTensor::num_elements() * SimpleTensor::num_channels() * SimpleTensor::element_size());
+    _buffer = std::make_unique<uint8_t[]>(SimpleTensor::num_elements() * SimpleTensor::num_channels() *
+                                          SimpleTensor::element_size());
 }
 
 RawTensor::RawTensor(TensorShape shape, DataType data_type, int num_channels)
     : SimpleTensor(shape, data_type, num_channels)
 {
-    _buffer = std::make_unique<uint8_t[]>(SimpleTensor::num_elements() * SimpleTensor::num_channels() * SimpleTensor::element_size());
+    _buffer = std::make_unique<uint8_t[]>(SimpleTensor::num_elements() * SimpleTensor::num_channels() *
+                                          SimpleTensor::element_size());
 }
 
-RawTensor::RawTensor(const RawTensor &tensor)
-    : SimpleTensor(tensor.shape(), tensor.data_type(), tensor.num_channels())
+RawTensor::RawTensor(const RawTensor &tensor) : SimpleTensor(tensor.shape(), tensor.data_type(), tensor.num_channels())
 {
     _format = tensor.format();
     _buffer = std::make_unique<uint8_t[]>(num_elements() * num_channels() * element_size());

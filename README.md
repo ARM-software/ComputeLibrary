@@ -1,13 +1,9 @@
 > [!IMPORTANT]
-> **Versioning Change: CalVer → SemVer**
+> **Static Library Name Change**
 >
-> We have updated our versioning scheme for the Arm Compute Library.
+> - libarm_compute-static.a will be renamed to libarm_compute.a in distributed pre-built binaries.
+> - This change will be in effect starting from the first release in or after Jan 2026.
 >
-> - **v25.04** is the **last release** using Calendar Versioning (**CalVer**).
-> - Starting from the next release, we are switching to **Semantic Versioning (**SemVer**).
-> - The next version will be: **v52.0.0**
->
-> This change provides clearer version semantics and better compatibility tracking for users and integrators.
 
 <br>
 <div align="center">
@@ -73,10 +69,11 @@ Pre-build binaries are generated with the following security / good coding pract
 - Android™
 - Bare Metal
 - Linux®
-- OpenBSD®
+- OpenBSD® (Experimental)
 - macOS®
 - Tizen™
 - QNX® (Experimental)
+- FreeBSD® (Experimental)
 
 <br>
 
@@ -164,3 +161,5 @@ Tizen is a registered trademark of The Linux Foundation.
 Windows® is a trademark of the Microsoft group of companies.
 
 QNX® is a trademark of QNX, a division of BlackBerry.
+
+FreeBSD® is a registered trademark of The FreeBSD Foundation.

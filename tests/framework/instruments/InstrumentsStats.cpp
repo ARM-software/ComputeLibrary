@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "InstrumentsStats.h"
+
 #include "arm_compute/core/utils/misc/Utility.h"
 
 namespace arm_compute
@@ -31,12 +32,13 @@ namespace test
 namespace framework
 {
 InstrumentsStats::InstrumentsStats(const std::vector<Measurement> &measurements)
-    : _min(nullptr), _max(nullptr), _median(nullptr), _mean(measurements.begin()->value().is_floating_point), _stddev(0.0)
+    : _min(nullptr),
+      _max(nullptr),
+      _median(nullptr),
+      _mean(measurements.begin()->value().is_floating_point),
+      _stddev(0.0)
 {
-    auto add_measurements = [](Measurement::Value a, const Measurement & b)
-    {
-        return a + b.value();
-    };
+    auto add_measurements = [](Measurement::Value a, const Measurement &b) { return a + b.value(); };
 
     //Calculate min, max & median values
     auto indices = arm_compute::utility::sort_indices(measurements);
@@ -44,16 +46,17 @@ InstrumentsStats::InstrumentsStats(const std::vector<Measurement> &measurements)
     _min         = &measurements[indices[0]];
     _max         = &measurements[indices[measurements.size() - 1]];
 
-    Measurement::Value sum_values = std::accumulate(measurements.begin(), measurements.end(), Measurement::Value(_min->value().is_floating_point), add_measurements);
+    Measurement::Value sum_values =
+        std::accumulate(measurements.begin(), measurements.end(), Measurement::Value(_min->value().is_floating_point),
+                        add_measurements);
 
     // Calculate the relative standard deviation
     _mean = sum_values / measurements.size();
     std::vector<Measurement::Value> diff(measurements.size(), _min->value().is_floating_point);
-    std::transform(measurements.begin(), measurements.end(), diff.begin(), [&](const Measurement & x)
-    {
-        return x.value() - _mean;
-    });
-    auto sq_sum   = std::inner_product(diff.begin(), diff.end(), diff.begin(), Measurement::Value(_min->value().is_floating_point));
+    std::transform(measurements.begin(), measurements.end(), diff.begin(),
+                   [&](const Measurement &x) { return x.value() - _mean; });
+    auto sq_sum =
+        std::inner_product(diff.begin(), diff.end(), diff.begin(), Measurement::Value(_min->value().is_floating_point));
     auto variance = sq_sum / measurements.size();
     _stddev       = Measurement::Value::relative_standard_deviation(variance, _mean);
 }

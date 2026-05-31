@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -100,15 +100,19 @@ size_t kai_get_sr_matmul_clamp_f32_qsi8d32p1x4_qsi4c32p4vlx4_1x4vl_sme2_sdot(voi
 size_t kai_get_lhs_packed_offset_matmul_clamp_f32_qsi8d32p1x4_qsi4c32p4vlx4_1x4vl_sme2_sdot(
     size_t m_idx, size_t k, size_t bl) {
     const size_t m_step = kai_get_m_step_matmul_clamp_f32_qsi8d32p1x4_qsi4c32p4vlx4_1x4vl_sme2_sdot();
+    const size_t mr = kai_get_mr_matmul_clamp_f32_qsi8d32p1x4_qsi4c32p4vlx4_1x4vl_sme2_sdot();
+
     KAI_ASSUME((m_idx % m_step) == 0);
 
-    return (m_idx / m_step) * kai_get_lhs_packed_stride(k, bl);
+    return (m_idx / mr) * kai_get_lhs_packed_stride(k, bl);
 }
 
 size_t kai_get_rhs_packed_offset_matmul_clamp_f32_qsi8d32p1x4_qsi4c32p4vlx4_1x4vl_sme2_sdot(
     size_t n_idx, size_t k, size_t bl) {
     const size_t n_step = kai_get_n_step_matmul_clamp_f32_qsi8d32p1x4_qsi4c32p4vlx4_1x4vl_sme2_sdot();
-    KAI_ASSUME((n_idx % n_step) == 0);
+    const size_t nr = kai_get_nr_matmul_clamp_f32_qsi8d32p1x4_qsi4c32p4vlx4_1x4vl_sme2_sdot();
+
+    KAI_ASSUME((n_idx % nr) == 0);
 
     return (n_idx / n_step) * kai_get_rhs_packed_stride(k, bl);
 }
@@ -157,10 +161,12 @@ void kai_run_matmul_clamp_f32_qsi8d32p1x4_qsi4c32p4vlx4_1x4vl_sme2_sdot(
     const size_t mr = kai_get_mr_matmul_clamp_f32_qsi8d32p1x4_qsi4c32p4vlx4_1x4vl_sme2_sdot();
     const size_t nr = kai_get_nr_matmul_clamp_f32_qsi8d32p1x4_qsi4c32p4vlx4_1x4vl_sme2_sdot();
 
-    const uint16_t* lhs_scales =
-        (uint16_t*)((const int8_t*)lhs_packed + lhs_packed_stride - (mr * num_blocks) * kai_num_bytes_multiplier_lhs);
-    const uint16_t* rhs_scales =
-        (uint16_t*)((const uint8_t*)rhs_packed + rhs_packed_stride - (nr * num_blocks) * kai_num_bytes_multiplier_rhs);
+    const uint16_t* lhs_scales = (const uint16_t*)((const int8_t*)lhs_packed + lhs_packed_stride -
+                                                   (mr * num_blocks) * kai_num_bytes_multiplier_lhs);
+    const uint16_t* rhs_scales = (const uint16_t*)((const uint8_t*)rhs_packed + rhs_packed_stride -
+                                                   (nr * num_blocks) * kai_num_bytes_multiplier_rhs);
+
+    kai_commit_za();
 
     __asm__ volatile(
         // Switch to streaming mode with ZA enabling

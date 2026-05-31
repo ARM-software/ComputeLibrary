@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022 Arm Limited.
+ * Copyright (c) 2017-2020, 2022, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,12 +22,12 @@
  * SOFTWARE.
  */
 #include "src/core/NEON/kernels/NEFillBorderKernel.h"
-#include "tests/Globals.h"
-#include "tests/NEON/Accessor.h"
 #include "tests/datasets/BorderModeDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
+#include "tests/Globals.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/Validation.h"
 
 namespace arm_compute
@@ -36,29 +36,31 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(FillBorder)
 
 // *INDENT-OFF*
 // clang-format off
-const auto PaddingSizesDataset = concat(concat(
-                                 framework::dataset::make("PaddingSize", PaddingSize{ 0 }),
-                                 framework::dataset::make("PaddingSize", PaddingSize{ 1, 0, 1, 2 })),
-                                 framework::dataset::make("PaddingSize", PaddingSize{ 10 }));
+const auto PaddingSizesDataset = concat(
+                                 make("PaddingSize", PaddingSize{ 0 }),
+                                 make("PaddingSize", PaddingSize{ 1, 0, 1, 2 }),
+                                 make("PaddingSize", PaddingSize{ 10 }));
 
-const auto BorderSizesDataset  = framework::dataset::make("BorderSize", 0, 6);
+const auto BorderSizesDataset  = make("BorderSize", 0, 6);
 
-DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(combine(combine(combine(
+DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(
                datasets::SmallShapes(),
-               datasets::BorderModes()),
-               BorderSizesDataset),
-               PaddingSizesDataset),
-               framework::dataset::make("DataType", DataType::U8)),
+               datasets::BorderModes(),
+               BorderSizesDataset,
+               PaddingSizesDataset,
+               make("DataType", DataType::U8)),
                shape, border_mode, size, padding, data_type)
 // clang-format on
 // *INDENT-ON*
 {
-    BorderSize border_size{ static_cast<unsigned int>(size) };
+    BorderSize border_size{static_cast<unsigned int>(size)};
 
     std::mt19937                            generator(library->seed());
     std::uniform_int_distribution<uint32_t> distribution_u8(0, 255);
@@ -77,7 +79,7 @@ DATA_TEST_CASE(FillBorder, framework::DatasetMode::ALL, combine(combine(combine(
     validate(src.info()->padding(), padding);
 
     // Fill tensor with constant value
-    std::uniform_int_distribution<uint32_t> distribution{ tensor_value, tensor_value };
+    std::uniform_int_distribution<uint32_t> distribution{tensor_value, tensor_value};
     library->fill(Accessor(src), distribution, 0);
 
     // Create and configure kernel

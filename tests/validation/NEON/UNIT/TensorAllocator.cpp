@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,12 +29,12 @@
 #include "arm_compute/runtime/MemoryRegion.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 
-#include "tests/Globals.h"
-#include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
-#include "tests/validation/Validation.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 #include "tests/validation/reference/ActivationLayer.h"
+#include "tests/validation/Validation.h"
 
 #include <memory>
 #include <random>
@@ -127,7 +127,7 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
     std::uniform_real_distribution<float> distribution(-5.f, 5.f);
     std::mt19937                          gen(library->seed());
     auto                                 *typed_ptr = reinterpret_cast<float *>(aligned_ptr);
-    for(unsigned int i = 0; i < total_size_in_elems; ++i)
+    for (unsigned int i = 0; i < total_size_in_elems; ++i)
     {
         typed_ptr[i] = distribution(gen);
     }
@@ -136,7 +136,7 @@ TEST_CASE(ImportMemoryMalloc, framework::DatasetMode::ALL)
     act_func.run();
 
     // Validate result by checking that the input has no negative values
-    for(unsigned int i = 0; i < total_size_in_elems; ++i)
+    for (unsigned int i = 0; i < total_size_in_elems; ++i)
     {
         ARM_COMPUTE_EXPECT(typed_ptr[i] >= 0, framework::LogLevel::ERRORS);
     }
@@ -177,22 +177,22 @@ TEST_CASE(ImportMemoryMallocPadded, framework::DatasetMode::ALL)
     tensor_window.use_tensor_dimensions(tensor.info()->tensor_shape());
     Iterator tensor_it(&tensor, tensor_window);
 
-    execute_window_loop(tensor_window, [&](const Coordinates &)
-    {
-        *reinterpret_cast<float *>(tensor_it.ptr()) = distribution(gen);
-    },
-    tensor_it);
+    execute_window_loop(
+        tensor_window, [&](const Coordinates &) { *reinterpret_cast<float *>(tensor_it.ptr()) = distribution(gen); },
+        tensor_it);
 
     // Execute function and sync
     act_func.run();
 
     // Validate result by checking that the input has no negative values
-    execute_window_loop(tensor_window, [&](const Coordinates &)
-    {
-        const float val = *reinterpret_cast<float *>(tensor_it.ptr());
-        ARM_COMPUTE_EXPECT(val >= 0, framework::LogLevel::ERRORS);
-    },
-    tensor_it);
+    execute_window_loop(
+        tensor_window,
+        [&](const Coordinates &)
+        {
+            const float val = *reinterpret_cast<float *>(tensor_it.ptr());
+            ARM_COMPUTE_EXPECT(val >= 0, framework::LogLevel::ERRORS);
+        },
+        tensor_it);
 
     // Release resources
     tensor.allocator()->free();
@@ -238,7 +238,7 @@ TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
     std::uniform_real_distribution<float> distribution(-5.f, 5.f);
     std::mt19937                          gen(library->seed());
     auto                                 *typed_ptr = reinterpret_cast<float *>(data);
-    for(unsigned int i = 0; i < total_size_in_elems; ++i)
+    for (unsigned int i = 0; i < total_size_in_elems; ++i)
     {
         typed_ptr[i] = distribution(gen);
     }
@@ -247,7 +247,7 @@ TEST_CASE(ImportMemoryMappedFile, framework::DatasetMode::ALL)
     act_func.run();
 
     // Validate result by checking that the input has no negative values
-    for(unsigned int i = 0; i < total_size_in_elems; ++i)
+    for (unsigned int i = 0; i < total_size_in_elems; ++i)
     {
         ARM_COMPUTE_EXPECT(typed_ptr[i] >= 0, framework::LogLevel::ERRORS);
     }

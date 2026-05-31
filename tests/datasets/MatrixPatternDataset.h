@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,19 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_MATRIX_PATTERN_DATASET_H
-#define ARM_COMPUTE_TEST_MATRIX_PATTERN_DATASET_H
+#ifndef ACL_TESTS_DATASETS_MATRIXPATTERNDATASET_H
+#define ACL_TESTS_DATASETS_MATRIXPATTERNDATASET_H
 
+#include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "tests/framework/datasets/ContainerDataset.h"
 
+#include "tests/framework/datasets/ContainerDataset.h"
 #include "utils/TypePrinter.h"
 
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
-
-#include "arm_compute/core/TensorShape.h"
-#include "arm_compute/core/Types.h"
 #include <vector>
 
 namespace arm_compute
@@ -46,16 +42,11 @@ class MatrixPatterns final : public framework::dataset::ContainerDataset<std::ve
 {
 public:
     MatrixPatterns()
-        : ContainerDataset("MatrixPattern",
-    {
-        MatrixPattern::BOX,
-                      MatrixPattern::CROSS,
-                      MatrixPattern::DISK
-    })
+        : ContainerDataset("MatrixPattern", {MatrixPattern::BOX, MatrixPattern::CROSS, MatrixPattern::DISK})
     {
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_MATRIX_PATTERN_DATASET_H */
+#endif // ACL_TESTS_DATASETS_MATRIXPATTERNDATASET_H

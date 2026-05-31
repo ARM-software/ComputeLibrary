@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,12 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ReshapeLayer.h"
 
@@ -58,7 +59,10 @@ protected:
         library->fill_tensor_uniform(tensor, i);
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type, bool add_x_padding = false)
+    TensorType compute_target(const TensorShape &input_shape,
+                              const TensorShape &output_shape,
+                              DataType           data_type,
+                              bool               add_x_padding = false)
     {
         // Check if indeed the input shape can be reshape to the output one
         ARM_COMPUTE_ASSERT(input_shape.total_size() == output_shape.total_size());
@@ -75,10 +79,10 @@ protected:
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
-        if(add_x_padding)
+        if (add_x_padding)
         {
             // Add random padding in x dimension
-            add_padding_x({ &src, &dst });
+            add_padding_x({&src, &dst});
         }
 
         // Allocate tensors
@@ -97,10 +101,11 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
+    SimpleTensor<T>
+    compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type };
+        SimpleTensor<T> src{input_shape, data_type};
 
         // Fill reference
         fill(src, 0);
@@ -113,21 +118,25 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ReshapeLayerValidationFixture : public ReshapeLayerGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
+class ReshapeLayerValidationFixture
+    : public ReshapeLayerGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(TensorShape input_shape, TensorShape output_shape, DataType data_type)
     {
-        ReshapeLayerGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, output_shape, data_type);
+        ReshapeLayerGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape,
+                                                                                               output_shape, data_type);
     }
 };
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ReshapeLayerPaddedValidationFixture : public ReshapeLayerGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
+class ReshapeLayerPaddedValidationFixture
+    : public ReshapeLayerGenericValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(TensorShape input_shape, TensorShape output_shape, DataType data_type)
     {
-        ReshapeLayerGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, output_shape, data_type, true /* add_x_padding */);
+        ReshapeLayerGenericValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            input_shape, output_shape, data_type, true /* add_x_padding */);
     }
 };
 /** [ReshapeLayer fixture] **/

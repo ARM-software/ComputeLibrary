@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_NON_MAX_SUPPRESION_H
-#define ARM_COMPUTE_TEST_NON_MAX_SUPPRESION_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_NONMAXSUPPRESSION_H
+#define ACL_TESTS_VALIDATION_REFERENCE_NONMAXSUPPRESSION_H
 
 #include "tests/SimpleTensor.h"
 
@@ -34,11 +34,15 @@ namespace validation
 {
 namespace reference
 {
-SimpleTensor<int> non_max_suppression(const SimpleTensor<float> &bboxes, const SimpleTensor<float> &scores, SimpleTensor<int> &indices,
-                                      unsigned int max_output_size, float score_threshold, float nms_threshold);
+SimpleTensor<int> non_max_suppression(const SimpleTensor<float> &bboxes,
+                                      const SimpleTensor<float> &scores,
+                                      SimpleTensor<int>         &indices,
+                                      unsigned int               max_output_size,
+                                      float                      score_threshold,
+                                      float                      nms_threshold);
 
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_NON_MAX_SUPPRESION_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_NONMAXSUPPRESSION_H

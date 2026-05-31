@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, 2023 Arm Limited.
+ * Copyright (c) 2020-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -49,6 +50,7 @@ Status validate_arguments(const ITensorInfo      *input,
                           const ITensorInfo      *indices)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, indices);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, indices);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
                                                          DataType::F16, DataType::F32);
@@ -67,10 +69,19 @@ Status validate_arguments(const ITensorInfo      *input,
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_type != PoolingType::MAX,
                                     "Pooling indices only supported for MAX pooling method");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((pool_size != Size2D(2, 2)), "Pooling indices only supported for pool size 2x2");
+
+    const TensorShape output_shape = compute_unpool_shape(*input, pool_info);
+
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
+    }
+    else
+    {
+        const auto output_info = TensorInfo(output_shape, input->num_channels(), input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

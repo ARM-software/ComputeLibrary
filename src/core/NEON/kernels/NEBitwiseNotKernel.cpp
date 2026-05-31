@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -64,6 +65,7 @@ void NEBitwiseNotKernel::configure(const ITensor *input, ITensor *output)
     set_format_if_unknown(*output->info(), Format::U8);
     set_format_if_unknown(*input->info(), Format::U8);
 
+    ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(input->info(), output->info());
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);

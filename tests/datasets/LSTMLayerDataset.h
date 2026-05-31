@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_LSTM_LAYER_DATASET
-#define ARM_COMPUTE_TEST_LSTM_LAYER_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_LSTMLAYERDATASET_H
+#define ACL_TESTS_DATASETS_LSTMLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -38,7 +38,16 @@ namespace datasets
 class LSTMLayerDataset
 {
 public:
-    using type = std::tuple<TensorShape, TensorShape, TensorShape, TensorShape, TensorShape, TensorShape, TensorShape, ActivationLayerInfo, float, float>;
+    using type = std::tuple<TensorShape,
+                            TensorShape,
+                            TensorShape,
+                            TensorShape,
+                            TensorShape,
+                            TensorShape,
+                            TensorShape,
+                            ActivationLayerInfo,
+                            float,
+                            float>;
 
     struct iterator
     {
@@ -52,16 +61,16 @@ public:
                  std::vector<ActivationLayerInfo>::const_iterator infos_it,
                  std::vector<float>::const_iterator               cell_threshold_it,
                  std::vector<float>::const_iterator               projection_threshold_it)
-            : _src_it{ std::move(src_it) },
-              _input_weights_it{ std::move(input_weights_it) },
-              _recurrent_weights_it{ std::move(recurrent_weights_it) },
-              _cells_bias_it{ std::move(cells_bias_it) },
-              _output_cell_it{ std::move(output_cell_it) },
-              _dst_it{ std::move(dst_it) },
-              _scratch_it{ std::move(scratch_it) },
-              _infos_it{ std::move(infos_it) },
-              _cell_threshold_it{ std::move(cell_threshold_it) },
-              _projection_threshold_it{ std::move(projection_threshold_it) }
+            : _src_it{std::move(src_it)},
+              _input_weights_it{std::move(input_weights_it)},
+              _recurrent_weights_it{std::move(recurrent_weights_it)},
+              _cells_bias_it{std::move(cells_bias_it)},
+              _output_cell_it{std::move(output_cell_it)},
+              _dst_it{std::move(dst_it)},
+              _scratch_it{std::move(scratch_it)},
+              _infos_it{std::move(infos_it)},
+              _cell_threshold_it{std::move(cell_threshold_it)},
+              _projection_threshold_it{std::move(projection_threshold_it)}
         {
         }
 
@@ -79,7 +88,9 @@ public:
 
         LSTMLayerDataset::type operator*() const
         {
-            return std::make_tuple(*_src_it, *_input_weights_it, *_recurrent_weights_it, *_cells_bias_it, *_output_cell_it, *_dst_it, *_scratch_it, *_infos_it, *_cell_threshold_it, *_projection_threshold_it);
+            return std::make_tuple(*_src_it, *_input_weights_it, *_recurrent_weights_it, *_cells_bias_it,
+                                   *_output_cell_it, *_dst_it, *_scratch_it, *_infos_it, *_cell_threshold_it,
+                                   *_projection_threshold_it);
         }
 
         iterator &operator++()
@@ -113,18 +124,37 @@ public:
 
     iterator begin() const
     {
-        return iterator(_src_shapes.begin(), _input_weights_shapes.begin(), _recurrent_weights_shapes.begin(), _cell_bias_shapes.begin(), _output_cell_shapes.begin(), _dst_shapes.begin(),
-                        _scratch_shapes.begin(), _infos.begin(), _cell_threshold.begin(), _projection_threshold.begin());
+        return iterator(_src_shapes.begin(), _input_weights_shapes.begin(), _recurrent_weights_shapes.begin(),
+                        _cell_bias_shapes.begin(), _output_cell_shapes.begin(), _dst_shapes.begin(),
+                        _scratch_shapes.begin(), _infos.begin(), _cell_threshold.begin(),
+                        _projection_threshold.begin());
     }
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_input_weights_shapes.size(), std::min(_recurrent_weights_shapes.size(), std::min(_cell_bias_shapes.size(), std::min(_output_cell_shapes.size(),
-                                                                                            std::min(_dst_shapes.size(), std::min(_scratch_shapes.size(), std::min(_cell_threshold.size(), std::min(_projection_threshold.size(), _infos.size())))))))));
+        return std::min(
+            _src_shapes.size(),
+            std::min(_input_weights_shapes.size(),
+                     std::min(_recurrent_weights_shapes.size(),
+                              std::min(_cell_bias_shapes.size(),
+                                       std::min(_output_cell_shapes.size(),
+                                                std::min(_dst_shapes.size(),
+                                                         std::min(_scratch_shapes.size(),
+                                                                  std::min(_cell_threshold.size(),
+                                                                           std::min(_projection_threshold.size(),
+                                                                                    _infos.size())))))))));
     }
 
-    void add_config(TensorShape src, TensorShape input_weights, TensorShape recurrent_weights, TensorShape cell_bias_weights, TensorShape output_cell_state, TensorShape dst, TensorShape scratch,
-                    ActivationLayerInfo info, float cell_threshold, float projection_threshold)
+    void add_config(TensorShape         src,
+                    TensorShape         input_weights,
+                    TensorShape         recurrent_weights,
+                    TensorShape         cell_bias_weights,
+                    TensorShape         output_cell_state,
+                    TensorShape         dst,
+                    TensorShape         scratch,
+                    ActivationLayerInfo info,
+                    float               cell_threshold,
+                    float               projection_threshold)
     {
         _src_shapes.emplace_back(std::move(src));
         _input_weights_shapes.emplace_back(std::move(input_weights));
@@ -160,11 +190,14 @@ class SmallLSTMLayerDataset final : public LSTMLayerDataset
 public:
     SmallLSTMLayerDataset()
     {
-        add_config(TensorShape(8U), TensorShape(8U, 16U), TensorShape(16U, 16U), TensorShape(16U), TensorShape(16U), TensorShape(16U), TensorShape(64U),
+        add_config(TensorShape(8U), TensorShape(8U, 16U), TensorShape(16U, 16U), TensorShape(16U), TensorShape(16U),
+                   TensorShape(16U), TensorShape(64U),
                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU), 0.05f, 0.93f);
-        add_config(TensorShape(8U, 2U), TensorShape(8U, 16U), TensorShape(16U, 16U), TensorShape(16U), TensorShape(16U, 2U), TensorShape(16U, 2U), TensorShape(64U, 2U),
+        add_config(TensorShape(8U, 2U), TensorShape(8U, 16U), TensorShape(16U, 16U), TensorShape(16U),
+                   TensorShape(16U, 2U), TensorShape(16U, 2U), TensorShape(64U, 2U),
                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU), 0.05f, 0.93f);
-        add_config(TensorShape(8U, 2U), TensorShape(8U, 16U), TensorShape(16U, 16U), TensorShape(16U), TensorShape(16U, 2U), TensorShape(16U, 2U), TensorShape(48U, 2U),
+        add_config(TensorShape(8U, 2U), TensorShape(8U, 16U), TensorShape(16U, 16U), TensorShape(16U),
+                   TensorShape(16U, 2U), TensorShape(16U, 2U), TensorShape(48U, 2U),
                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU), 0.05f, 0.93f);
     }
 };
@@ -172,4 +205,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_LSTM_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_LSTMLAYERDATASET_H

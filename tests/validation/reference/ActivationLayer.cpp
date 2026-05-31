@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020,2024 Arm Limited.
+ * Copyright (c) 2017-2020,2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@ SimpleTensor<T> activation_layer(const SimpleTensor<T> &src, ActivationLayerInfo
     const T a(info.a());
     const T b(info.b());
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
     for (int i = 0; i < src.num_elements(); ++i)
     {

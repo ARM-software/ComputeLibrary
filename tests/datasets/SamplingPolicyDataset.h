@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SAMPLING_POLICY_DATASET_H
-#define ARM_COMPUTE_TEST_SAMPLING_POLICY_DATASET_H
+#ifndef ACL_TESTS_DATASETS_SAMPLINGPOLICYDATASET_H
+#define ACL_TESTS_DATASETS_SAMPLINGPOLICYDATASET_H
 
 #include "arm_compute/core/Types.h"
 
@@ -35,16 +35,11 @@ namespace datasets
 class SamplingPolicies final : public framework::dataset::ContainerDataset<std::vector<SamplingPolicy>>
 {
 public:
-    SamplingPolicies()
-        : ContainerDataset("SamplingPolicy",
-    {
-        SamplingPolicy::CENTER,
-                       SamplingPolicy::TOP_LEFT
-    })
+    SamplingPolicies() : ContainerDataset("SamplingPolicy", {SamplingPolicy::CENTER, SamplingPolicy::TOP_LEFT})
     {
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SAMPLING_POLICY_DATASET_H */
+#endif // ACL_TESTS_DATASETS_SAMPLINGPOLICYDATASET_H

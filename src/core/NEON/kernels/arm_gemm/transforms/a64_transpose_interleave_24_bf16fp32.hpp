@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(__aarch64__)
+#if defined(ARM_COMPUTE_ENABLE_BF16) && defined(__aarch64__)
 
 namespace {
 
@@ -33,13 +33,14 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
     size_t out_stride = 12 * height * sizeof(float);
 
     __asm__ __volatile__(
-      "cmp %x[height], #0x4\n"
+      "mov x26, %x[height]\n"
+      "cmp x26, #0x4\n"
       "blt 11f\n"
       "1:"  // Main row loop: Head
       "mov x25, %x[in]\n"
       "mov x24, %x[width]\n"
       "mov x23, %x[out]\n"
-      "sub %x[height], %x[height], #0x4\n"
+      "sub x26, x26, #0x4\n"
       "add x22, x25, %x[in_stride]\n"
       "add x21, x22, %x[in_stride]\n"
       "add x20, x21, %x[in_stride]\n"
@@ -69,7 +70,7 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
       "ldr q31, [x20], #0x10\n"
       "shll v18.4s, v17.4h, #0x10\n"
       "shll2 v17.4s, v17.8h, #0x10\n"
-      "str q16, [x23, #0x0]\n"
+      "str q16, [x23, #0]\n"
       "shll v16.4s, v2.4h, #0x10\n"
       "shll v30.4s, v27.4h, #0x10\n"
       "str q25, [x23, #0x10]\n"
@@ -98,7 +99,7 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
       "str q29, [x23, #0xa0]\n"
       "str q28, [x23, #0xb0]\n"
       "add x23, x23, %x[out_stride]\n"
-      "str q27, [x23, #0x0]\n"
+      "str q27, [x23, #0]\n"
       "str q26, [x23, #0x10]\n"
       "str q25, [x23, #0x20]\n"
       "str q24, [x23, #0x30]\n"
@@ -134,7 +135,7 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
       "shll v22.4s, v20.4h, #0x10\n"
       "shll v21.4s, v27.4h, #0x10\n"
       "shll2 v20.4s, v27.8h, #0x10\n"
-      "str q18, [x23, #0x0]\n"
+      "str q18, [x23, #0]\n"
       "shll v19.4s, v19.4h, #0x10\n"
       "shll v18.4s, v26.4h, #0x10\n"
       "str q17, [x23, #0x10]\n"
@@ -155,8 +156,8 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
       "5:"  // Main row loop: Column loop skip
       "cbz x24, 10f\n"
       "cmp x24, #0x4\n"
-      "movi v16.16b, #0x0\n"
-      "str q16, [x23, #0x0]\n"
+      "movi v16.16b, #0\n"
+      "str q16, [x23, #0]\n"
       "str q16, [x23, #0x10]\n"
       "str q16, [x23, #0x20]\n"
       "str q16, [x23, #0x30]\n"
@@ -180,7 +181,7 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
       "shll v18.4s, v18.4h, #0x10\n"
       "shll v17.4s, v17.4h, #0x10\n"
       "shll v16.4s, v16.4h, #0x10\n"
-      "str q19, [x23, #0x0]\n"
+      "str q19, [x23, #0]\n"
       "str q18, [x23, #0x30]\n"
       "str q17, [x23, #0x60]\n"
       "str q16, [x23, #0x90]\n"
@@ -200,7 +201,7 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
       "shll v18.4s, v18.4h, #0x10\n"
       "shll v17.4s, v17.4h, #0x10\n"
       "shll v16.4s, v16.4h, #0x10\n"
-      "str s19, [x23, #0x0]\n"
+      "str s19, [x23, #0]\n"
       "str s18, [x23, #0x30]\n"
       "str s17, [x23, #0x60]\n"
       "str s16, [x23, #0x90]\n"
@@ -208,16 +209,16 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
       "bge 8b\n"
       "9:"  // Main row loop: width 1 loop: skip
       "10:"  // Main row loop: odd col skip
-      "cmp %x[height], #0x4\n"
+      "cmp x26, #0x4\n"
       "add %x[out], %x[out], #0xc0\n"
       "bge 1b\n"
-      "cbz %x[height], 22f\n"
+      "cbz x26, 22f\n"
       "11:"  // Main loop skip
       "12:"  // Tail row loop: Head
       "mov x20, %x[width]\n"
       "mov x25, %x[in]\n"
       "mov x23, %x[out]\n"
-      "sub %x[height], %x[height], #0x1\n"
+      "sub x26, x26, #0x1\n"
       "cmp x20, #0x18\n"
       "add %x[in], x25, %x[in_stride]\n"
       "blt 14f\n"
@@ -231,13 +232,13 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
       "shll2 v16.4s, v16.8h, #0x10\n"
       "shll v19.4s, v18.4h, #0x10\n"
       "shll2 v18.4s, v18.8h, #0x10\n"
-      "str q17, [x23, #0x0]\n"
+      "str q17, [x23, #0]\n"
       "str q16, [x23, #0x10]\n"
       "shll v17.4s, v20.4h, #0x10\n"
       "shll2 v16.4s, v20.8h, #0x10\n"
       "str q19, [x23, #0x20]\n"
       "add x23, x23, %x[out_stride]\n"
-      "str q18, [x23, #0x0]\n"
+      "str q18, [x23, #0]\n"
       "str q17, [x23, #0x10]\n"
       "str q16, [x23, #0x20]\n"
       "add x23, x23, %x[out_stride]\n"
@@ -253,7 +254,7 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
       "shll v18.4s, v17.4h, #0x10\n"
       "shll2 v17.4s, v17.8h, #0x10\n"
       "shll v16.4s, v16.4h, #0x10\n"
-      "str q18, [x23, #0x0]\n"
+      "str q18, [x23, #0]\n"
       "str q17, [x23, #0x10]\n"
       "str q16, [x23, #0x20]\n"
       "add x23, x23, %x[out_stride]\n"
@@ -261,8 +262,8 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
       "16:"  // Tail row loop: Column loop skip
       "cbz x20, 21f\n"
       "cmp x20, #0x4\n"
-      "movi v16.16b, #0x0\n"
-      "str q16, [x23, #0x0]\n"
+      "movi v16.16b, #0\n"
+      "str q16, [x23, #0]\n"
       "str q16, [x23, #0x10]\n"
       "str q16, [x23, #0x20]\n"
       "blt 18f\n"
@@ -271,7 +272,7 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
       "sub x20, x20, #0x4\n"
       "cmp x20, #0x4\n"
       "shll v16.4s, v16.4h, #0x10\n"
-      "str q16, [x23, #0x0]\n"
+      "str q16, [x23, #0]\n"
       "add x23, x23, #0x10\n"
       "bge 17b\n"
       "18:"  // Tail row loop: width 4 loop: skip
@@ -282,22 +283,23 @@ void a64_transpose_interleave_24_bf16fp32(float *out, const bfloat16 *in, size_t
       "sub x20, x20, #0x1\n"
       "cmp x20, #0x1\n"
       "shll v16.4s, v16.4h, #0x10\n"
-      "str s16, [x23, #0x0]\n"
+      "str s16, [x23, #0]\n"
       "add x23, x23, #0x4\n"
       "bge 19b\n"
       "20:"  // Tail row loop: width 1 loop: skip
       "21:"  // Tail row loop: odd col skip
-      "cmp %x[height], #0x1\n"
+      "cmp x26, #0x1\n"
       "add %x[out], %x[out], #0x30\n"
       "bge 12b\n"
       "22:"  // Done
-      : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
-      : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [width] "r" (width)
-      : "cc", "memory", "v0", "v1", "v2", "v3", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x20", "x21", "x22", "x23", "x24", "x25"
+      : [in] "+&r" (in), [out] "+&r" (out)
+      : [height] "r" (height), [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [width] "r" (width)
+      : "cc", "memory", "v0", "v1", "v2", "v3", "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23", "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31", "x20", "x21", "x22", "x23", "x24", "x25", "x26"
     );
 }
 
 } // anonymous namespace
+
 template<>
 void Transform<12, 1, true, VLType::None>(
     float *out, const bfloat16 *in, int stride, int x0, int xmax, int k0, int kmax)
@@ -311,5 +313,5 @@ void Transform<12, 1, true, VLType::None>(
     );
 }
 
+#endif // defined(ARM_COMPUTE_ENABLE_BF16) && defined(__aarch64__)
 
-#endif  // defined(__aarch64__)

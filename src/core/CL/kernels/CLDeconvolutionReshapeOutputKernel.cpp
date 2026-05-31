@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,10 +27,12 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -47,6 +49,7 @@ Status validate_arguments(const ITensorInfo   *input,
                           const PadStrideInfo &deconv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, input_info, weights_info);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, input_info, weights_info);
     const DataLayout data_layout = input_info->data_layout();
 
     const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -58,8 +61,8 @@ Status validate_arguments(const ITensorInfo   *input,
     ARM_COMPUTE_RETURN_ERROR_ON(weights_info->dimension(idx_w) != deconv_info.stride().first);
     ARM_COMPUTE_RETURN_ERROR_ON(weights_info->dimension(idx_h) != deconv_info.stride().second);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16, DataType::QASYMM8,
-                                                         DataType::QASYMM8_SIGNED, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, ITensorInfo::one_channel, DataType::F32, DataType::F16,
+                                                         DataType::QASYMM8, DataType::QASYMM8_SIGNED, DataType::S32);
     if (!is_qasymm)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, input_info, weights_info);
@@ -72,9 +75,10 @@ Status validate_arguments(const ITensorInfo   *input,
 
     if (bias != nullptr)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(bias);
         if (is_qasymm)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, ITensorInfo::one_channel, DataType::S32);
         }
         else
         {
@@ -83,17 +87,24 @@ Status validate_arguments(const ITensorInfo   *input,
         ARM_COMPUTE_RETURN_ERROR_ON(bias->dimension(0) != weights_info->dimension(idx_b));
     }
 
+    const PadStrideInfo stride_info(deconv_info.stride().first, deconv_info.stride().second);
+    const auto          out_dims =
+        deconvolution_output_dimensions(input_info->dimension(idx_w), input_info->dimension(idx_h),
+                                        weights_info->dimension(idx_w), weights_info->dimension(idx_h), stride_info);
+
+    const TensorShape output_shape =
+        misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input_info, *weights_info);
+
     if (output->total_size() != 0)
     {
-        const PadStrideInfo stride_info(deconv_info.stride().first, deconv_info.stride().second);
-        auto out_dims = deconvolution_output_dimensions(input_info->dimension(idx_w), input_info->dimension(idx_h),
-                                                        weights_info->dimension(idx_w), weights_info->dimension(idx_h),
-                                                        stride_info);
-
-        const TensorShape output_shape =
-            misc::shape_calculator::compute_deconvolution_output_shape(out_dims, *input_info, *weights_info);
-
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(output, input);
+    }
+    else
+    {
+        const auto output_info = TensorInfo(output_shape, ITensorInfo::one_channel, input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
     return Status{};
 }

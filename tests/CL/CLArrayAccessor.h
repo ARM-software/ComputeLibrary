@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CLARRAYACCESSOR_H
-#define ARM_COMPUTE_TEST_CLARRAYACCESSOR_H
+#ifndef ACL_TESTS_CL_CLARRAYACCESSOR_H
+#define ACL_TESTS_CL_CLARRAYACCESSOR_H
 
 #include "arm_compute/runtime/CL/CLArray.h"
+
 #include "tests/IArrayAccessor.h"
 
 namespace arm_compute
@@ -43,8 +44,7 @@ public:
      * @note The CL memory is mapped by the constructor.
      *
      */
-    CLArrayAccessor(CLArray<T> &array)
-        : _array{ array }
+    CLArrayAccessor(CLArray<T> &array) : _array{array}
     {
         _array.map();
     }
@@ -91,4 +91,4 @@ private:
 };
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CLARRAYACCESSOR_H */
+#endif // ACL_TESTS_CL_CLARRAYACCESSOR_H

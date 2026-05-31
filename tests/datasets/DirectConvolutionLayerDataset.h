@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DIRECT_CONVOLUTION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_DIRECT_CONVOLUTION_LAYER_DATASET
-
-#include "tests/datasets/ConvolutionLayerDataset.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_DIRECTCONVOLUTIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_DIRECTCONVOLUTIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/datasets/ConvolutionLayerDataset.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -43,14 +42,19 @@ class DirectConvolutionLayerDataset final : public ConvolutionLayerDataset
 public:
     DirectConvolutionLayerDataset()
     {
-        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 3U), TensorShape(3U), TensorShape(13U, 13U, 3U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 384U), TensorShape(3U, 3U, 384U, 4U), TensorShape(4U), TensorShape(13U, 13U, 4U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 3U), TensorShape(3U), TensorShape(7U, 7U, 3U), PadStrideInfo(2, 2, 1, 1));
-        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 3U), TensorShape(3U), TensorShape(12U, 12U, 3U), PadStrideInfo(1, 1, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
-        add_config(TensorShape(13U, 13U, 384U), TensorShape(3U, 3U, 384U, 5U), TensorShape(5U), TensorShape(12U, 12U, 5U), PadStrideInfo(1, 1, 1, 0, 1, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 3U), TensorShape(3U),
+                   TensorShape(13U, 13U, 3U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 384U), TensorShape(3U, 3U, 384U, 4U), TensorShape(4U),
+                   TensorShape(13U, 13U, 4U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 3U), TensorShape(3U), TensorShape(7U, 7U, 3U),
+                   PadStrideInfo(2, 2, 1, 1));
+        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 3U), TensorShape(3U),
+                   TensorShape(12U, 12U, 3U), PadStrideInfo(1, 1, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(13U, 13U, 384U), TensorShape(3U, 3U, 384U, 5U), TensorShape(5U),
+                   TensorShape(12U, 12U, 5U), PadStrideInfo(1, 1, 1, 0, 1, 0, DimensionRoundingType::FLOOR));
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DIRECT_CONVOLUTION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_DIRECTCONVOLUTIONLAYERDATASET_H

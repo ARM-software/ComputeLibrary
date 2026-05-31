@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PIXEL_WISE_MULTIPLICATION_H
-#define ARM_COMPUTE_TEST_PIXEL_WISE_MULTIPLICATION_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_PIXELWISEMULTIPLICATION_H
+#define ACL_TESTS_VALIDATION_REFERENCE_PIXELWISEMULTIPLICATION_H
 
 #include "tests/SimpleTensor.h"
 
@@ -35,11 +35,15 @@ namespace validation
 namespace reference
 {
 template <typename T1, typename T2, typename T3>
-SimpleTensor<T3> pixel_wise_multiplication(const SimpleTensor<T1> &src1, const SimpleTensor<T2> &src2, float scale,
-                                           ConvertPolicy convert_policy, RoundingPolicy rounding_policy, DataType dt_out,
+SimpleTensor<T3> pixel_wise_multiplication(const SimpleTensor<T1> &src1,
+                                           const SimpleTensor<T2> &src2,
+                                           float                   scale,
+                                           ConvertPolicy           convert_policy,
+                                           RoundingPolicy          rounding_policy,
+                                           DataType                dt_out,
                                            const QuantizationInfo &qout = QuantizationInfo());
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PIXEL_WISE_MULTIPLICATION_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_PIXELWISEMULTIPLICATION_H

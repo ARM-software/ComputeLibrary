@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(ARM_COMPUTE_ENABLE_SME)
+#if defined(__aarch64__) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
 
 namespace {
 
@@ -40,23 +40,28 @@ void sme_transpose_interleave_1VL_1x4(uint8_t *out, const uint8_t *in, size_t wi
 
     __asm__ __volatile__(
       ".inst 0xd503477f  // SMSTART ZA\n"
+      "mov x27, %x[height]\n"
       "ptrue p1.b\n"
+      "cbz %x[height], 6f\n"
       "1:"  // Main row loop: Head
       "mov x26, %x[in]\n"
-      "cmp %x[height], #0x3\n"
+      "cmp x27, #0x3\n"
       "add x25, x26, %x[in_stride]\n"
       "mov x24, %x[width]\n"
       "add x23, x25, %x[in_stride]\n"
       "cntb x22\n"
       "add x21, x23, %x[in_stride]\n"
-      "csel x23, x23, %x[pad_row], GE\n"
-      "add %x[in], x21, %x[in_stride]\n"
-      "csel x21, x21, %x[pad_row], GT\n"
-      "cmp %x[height], #0x1\n"
       "mov x20, %x[out]\n"
+      "add %x[in], x21, %x[in_stride]\n"
+      "csel %x[in], %x[in], x21, GT\n"
+      "csel x21, x21, %x[pad_row], GT\n"
+      "csel %x[in], %x[in], x23, GE\n"
+      "csel x23, x23, %x[pad_row], GE\n"
+      "cmp x27, #0x1\n"
+      "sub x27, x27, #0x4\n"
+      "csel %x[in], %x[in], x25, GT\n"
       "csel x25, x25, %x[pad_row], GT\n"
       "cmp x24, x22\n"
-      "sub %x[height], %x[height], #0x4\n"
       "blt 3f\n"
       "2:"  // Main row loop: Unroll column loop
       "ld1b { z20.b }, p1/Z, [x26]\n"
@@ -92,7 +97,7 @@ void sme_transpose_interleave_1VL_1x4(uint8_t *out, const uint8_t *in, size_t wi
       "whilelt p0.b, XZR, x24\n"
       "decw x24\n"
       "ld1b { z19.b }, p0/Z, [x26]\n"
-      "cmp x24, #0x0\n"
+      "cmp x24, #0\n"
       "incd x26, ALL, MUL #2\n"
       "ld1b { z18.b }, p0/Z, [x25]\n"
       "incd x25, ALL, MUL #2\n"
@@ -107,18 +112,20 @@ void sme_transpose_interleave_1VL_1x4(uint8_t *out, const uint8_t *in, size_t wi
       "add x20, x20, %x[out_stride]\n"
       "bgt 4b\n"
       "5:"  // Main row loop: Column loop skip
-      "cmp %x[height], #0x1\n"
+      "cmp x27, #0x1\n"
       "addvl %x[out], %x[out], #1\n"
       "bge 1b\n"
+      "6:"  // Done
       ".inst 0xd503467f  // SMSTOP\n"
-      : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
-      : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
-      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
+      : [in] "+&r" (in), [out] "+&r" (out)
+      : [height] "r" (height), [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
+      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
     );
 }
 
 } // anonymous namespace
 
+#if defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2)
 template<>
 void Transform<1, 4, true, VLType::SME>(
     uint8_t *out, const uint8_t *in, int stride, int x0, int xmax, int k0, int kmax)
@@ -131,7 +138,9 @@ void Transform<1, 4, true, VLType::SME>(
         (kmax-k0)
     );
 }
+#endif // defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2)
 
+#if defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2)
 template<>
 void Transform<1, 4, true, VLType::SME>(
     int8_t *out, const int8_t *in, int stride, int x0, int xmax, int k0, int kmax)
@@ -144,6 +153,7 @@ void Transform<1, 4, true, VLType::SME>(
         (kmax-k0)
     );
 }
+#endif // defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2)
 
+#endif // defined(__aarch64__) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SME)

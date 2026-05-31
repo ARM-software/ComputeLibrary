@@ -33,6 +33,7 @@
 #include "arm_compute/core/Window.h"
 
 #include "src/common/utils/profile/acl_profile.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -684,6 +685,7 @@ Status validate_arguments(const ITensorInfo *src0, const ITensorInfo *src1, cons
                                                          DataType::QSYMM8, DataType::QSYMM8_PER_CHANNEL, DataType::S8,
                                                          DataType::U8);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src0, src1, dst);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src0->data_type() == DataType::QASYMM8_SIGNED &&
                                         src1->data_type() == DataType::QASYMM8,

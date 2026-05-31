@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ SimpleTensor<T> reorg_layer(const SimpleTensor<T> &src, int32_t stride)
     const TensorShape output_shape = misc::shape_calculator::compute_reorg_output_shape(input_info, stride);
 
     // Create destination tensor
-    SimpleTensor<T> dst{ output_shape, src.data_type() };
+    SimpleTensor<T> dst{output_shape, src.data_type()};
 
     const unsigned int W          = dst.shape().x();
     const unsigned int H          = dst.shape().y();
@@ -56,19 +56,19 @@ SimpleTensor<T> reorg_layer(const SimpleTensor<T> &src, int32_t stride)
     Coordinates map_coords;
 
 #if defined(_OPENMP)
-    #pragma omp parallel for private(map_coords)
+#pragma omp parallel for private(map_coords)
 #endif /* _OPENMP */
-    for(unsigned int b = 0; b < outer_dims; ++b)
+    for (unsigned int b = 0; b < outer_dims; ++b)
     {
         map_coords.set(3, b);
-        for(unsigned int c = 0; c < C; ++c)
+        for (unsigned int c = 0; c < C; ++c)
         {
             map_coords.set(2, c % out_c);
             const unsigned int offset = c / out_c;
-            for(unsigned int h = 0; h < H; ++h)
+            for (unsigned int h = 0; h < H; ++h)
             {
                 map_coords.set(1, h * stride + offset / stride);
-                for(unsigned int w = 0; w < W; ++w)
+                for (unsigned int w = 0; w < W; ++w)
                 {
                     const unsigned int dst_idx = w + W * (h + H * (c + C * b));
                     map_coords.set(0, w * stride + offset % stride);
@@ -83,7 +83,7 @@ SimpleTensor<T> reorg_layer(const SimpleTensor<T> &src, int32_t stride)
 
 template SimpleTensor<int32_t> reorg_layer(const SimpleTensor<int32_t> &src, int32_t stride);
 template SimpleTensor<int16_t> reorg_layer(const SimpleTensor<int16_t> &src, int32_t stride);
-template SimpleTensor<int8_t> reorg_layer(const SimpleTensor<int8_t> &src, int32_t stride);
+template SimpleTensor<int8_t>  reorg_layer(const SimpleTensor<int8_t> &src, int32_t stride);
 } // namespace reference
 } // namespace validation
 } // namespace test

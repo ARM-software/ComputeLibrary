@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GEMMLOWP_DATASET
-#define ARM_COMPUTE_TEST_GEMMLOWP_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_GEMMLOWPDATASET_H
+#define ACL_TESTS_DATASETS_GEMMLOWPDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -46,11 +46,11 @@ public:
                  std::vector<TensorShape>::const_iterator c_it,
                  std::vector<int32_t>::const_iterator     a_offset_it,
                  std::vector<int32_t>::const_iterator     b_offset_it)
-            : _a_it{ std::move(a_it) },
-              _b_it{ std::move(b_it) },
-              _c_it{ std::move(c_it) },
-              _a_offset_it{ std::move(a_offset_it) },
-              _b_offset_it{ std::move(b_offset_it) }
+            : _a_it{std::move(a_it)},
+              _b_it{std::move(b_it)},
+              _c_it{std::move(c_it)},
+              _a_offset_it{std::move(a_offset_it)},
+              _b_offset_it{std::move(b_offset_it)}
         {
         }
 
@@ -96,7 +96,9 @@ public:
 
     int size() const
     {
-        return std::min(_a_shapes.size(), std::min(_b_shapes.size(), std::min(_c_shapes.size(), std::min(_a_offset.size(), _b_offset.size()))));
+        return std::min(
+            _a_shapes.size(),
+            std::min(_b_shapes.size(), std::min(_c_shapes.size(), std::min(_a_offset.size(), _b_offset.size()))));
     }
 
     void add_config(TensorShape a, TensorShape b, TensorShape c, int32_t a_offset, int32_t b_offset)
@@ -122,4 +124,4 @@ private:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GEMMLOWP_DATASET */
+#endif // ACL_TESTS_DATASETS_GEMMLOWPDATASET_H

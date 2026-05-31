@@ -1,14 +1,10 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 
 #pragma once
-
-#if !defined(__aarch64__) || !defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC)
-#error This file must be compiled for AArch64, FEAT_BF16.
-#else  // Architectural features check.
 
 #include <stddef.h>
 #include <stdint.h>
@@ -124,5 +120,3 @@ void kai_run_matmul_clamp_f32_bf16p8x4_bf16p12x4b_8x12_neon_mmla(
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus
-
-#endif  // Architectural features check.

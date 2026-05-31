@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,13 +22,14 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/utils/StringUtils.h"
+
 #include "src/cpu/kernels/CpuDepthwiseConv2dNativeKernel.h"
+#include "tests/framework/datasets/Datasets.h"
+#include "tests/framework/Macros.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
-#include "tests/framework/Macros.h"
-#include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/DepthwiseConvolutionLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -36,14 +37,18 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 using namespace arm_compute::misc::shape_calculator;
 
 // Create function for CpuDepthwiseConvolutionKernel
-using CpuDepthwiseConvolutionNative = NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuDepthwiseConv2dNativeKernel>;
+using CpuDepthwiseConvolutionNative =
+    NESynthetizeFunctionWithZeroConstantKernelBorder<cpu::kernels::CpuDepthwiseConv2dNativeKernel>;
 
 // Fixture for NEDepthwiseConvolutionLayerKernel
 template <typename T>
-using CpuDepthwiseConvolutionNativeFixture = DepthwiseConvolutionLayerNativeValidationFixture<Tensor, Accessor, CpuDepthwiseConvolutionNative, T>;
+using CpuDepthwiseConvolutionNativeFixture =
+    DepthwiseConvolutionLayerNativeValidationFixture<Tensor, Accessor, CpuDepthwiseConvolutionNative, T>;
 
 namespace
 {
@@ -53,52 +58,52 @@ RelativeTolerance<float> rel_tolerance_f32(0.001f);
 constexpr float          abs_tolerance_f32(0.0001f);
 
 /** Width values to test - Precommit */
-const auto width_values_precommit = framework::dataset::make("width", { 17U } );
+const auto width_values_precommit = make("width", { 17U } );
 
 /** Width values to test - Nightly */
-const auto width_values_nightly = framework::dataset::make("width", { 53U, 47U } );
+const auto width_values_nightly = make("width", { 53U, 47U } );
 
 /** Height values to test - Precommit */
-const auto height_values_precommit = framework::dataset::make("height", { 19U } );
+const auto height_values_precommit = make("height", { 19U } );
 
 /** Height values to test - Nightly */
-const auto height_values_nightly = framework::dataset::make("height", { 39U, 43U } );
+const auto height_values_nightly = make("height", { 39U, 43U } );
 
 /** Channel values to test - Precommit */
-const auto channel_values_precommit = framework::dataset::make("channels", { 15U });
+const auto channel_values_precommit = make("channels", { 15U });
 
 /** Channel values to test - Nightly */
-const auto channel_values_nightly = framework::dataset::make("channels", { 33U, 19U });
+const auto channel_values_nightly = make("channels", { 33U, 19U });
 
 /** Batch values to test - Precommit */
-const auto batch_values_precommit = framework::dataset::make("batch", { 1U, 2U });
+const auto batch_values_precommit = make("batch", { 1U, 2U });
 
 /** Batch values to test - Nightly */
-const auto batch_values_nightly = framework::dataset::make("batch", { 1U, 3U });
+const auto batch_values_nightly = make("batch", { 1U, 3U });
 
 /** Kernel size values to test - Precommit */
-const auto kernel_sz_values_precommit = framework::dataset::make("kernel_size", { Size2D(1U, 1U), Size2D(1U, 3U) });
+const auto kernel_sz_values_precommit = make("kernel_size", { Size2D(1U, 1U), Size2D(1U, 3U) });
 
 /** Kernel size values to test - Nightly */
-const auto kernel_sz_values_nightly = framework::dataset::make("kernel_size", { Size2D(3U, 5U), Size2D(5U, 1U), Size2D(1U, 7U), Size2D(9U, 7U) });
+const auto kernel_sz_values_nightly = make("kernel_size", { Size2D(3U, 5U), Size2D(5U, 1U), Size2D(1U, 7U), Size2D(9U, 7U) });
 
 /** Depth multiplier values to test - All */
-const auto depth_multiplier_values = framework::dataset::make("depth_multiplier", { 1U, 3U });
+const auto depth_multiplier_values = make("depth_multiplier", { 1U, 3U });
 
 /** Dilation values to test - All */
-const auto dilation_values = framework::dataset::make("dilation", { Size2D(1U, 1U), Size2D(3U, 3U) });
+const auto dilation_values = make("dilation", { Size2D(1U, 1U), Size2D(3U, 3U) });
 
 /** Stride values to test - All */
-const auto stride_values = framework::dataset::make("stride", { Size2D(1U, 1U), Size2D(3U, 2U) });
+const auto stride_values = make("stride", { Size2D(1U, 1U), Size2D(3U, 2U) });
 
 /** Padding values to test - All */
-const auto padding_valid_values = framework::dataset::make("padding_valid", { true, false });
+const auto padding_valid_values = make("padding_valid", { true, false });
 
 /** Data type values to test - All */
-const auto data_type_values = framework::dataset::make("data_type", { DataType::F32 });
+const auto data_type_values = make("data_type", { DataType::F32 });
 
 /** Data layout values to test - All */
-const auto data_layout_values = framework::dataset::make("data_layout", { DataLayout::NHWC });
+const auto data_layout_values = make("data_layout", { DataLayout::NHWC });
 } // namespace
 
 TEST_SUITE(NEON)
@@ -137,14 +142,14 @@ TEST_CASE(ValidateNoPadding, framework::DatasetMode::ALL)
 
 TEST_SUITE(KERNEL_SELECTION)
 DATA_TEST_CASE(KernelSelection_mul_and_add, framework::DatasetMode::ALL,
-               combine(combine(framework::dataset::make("CpuExt", std::string("NEON")),
-                       framework::dataset::make("DataType", { DataType::F32,
+               combine(make("CpuExt", std::string("NEON")),
+                       make("DataType", { DataType::F32,
                                                               DataType::F16,
                                                               DataType::QASYMM8_SIGNED,
                                                               DataType::QASYMM8,
                                                               DataType::QSYMM8_PER_CHANNEL
-                                                            })),
-                       framework::dataset::make("DataType_per_channel", { DataType::QASYMM8,
+                                                            }),
+                       make("DataType_per_channel", { DataType::QASYMM8,
                                                                           DataType::QASYMM8_SIGNED
                                                             })),
                 cpu_ext, data_type, data_type_per_channel)
@@ -176,16 +181,16 @@ TEST_SUITE_END() // KERNEL_SELECTION
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CpuDepthwiseConvolutionNativeFixture<float>, framework::DatasetMode::ALL,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(width_values_precommit,
-                                                                                                height_values_precommit),
-                                                                                                channel_values_precommit),
-                                                                                                batch_values_precommit),
-                                                                                                kernel_sz_values_precommit),
-                                                                                                depth_multiplier_values),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                data_type_values),
+                combine(width_values_precommit,
+                                                                                                height_values_precommit,
+                                                                                                channel_values_precommit,
+                                                                                                batch_values_precommit,
+                                                                                                kernel_sz_values_precommit,
+                                                                                                depth_multiplier_values,
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                data_type_values,
                                                                                                 data_layout_values))
 {
     // Validate output
@@ -193,16 +198,16 @@ FIXTURE_DATA_TEST_CASE_NEW(RunSmall, CpuDepthwiseConvolutionNativeFixture<float>
 }
 
 FIXTURE_DATA_TEST_CASE_NEW(RunLarge, CpuDepthwiseConvolutionNativeFixture<float>, framework::DatasetMode::NIGHTLY,
-                combine(combine(combine(combine(combine(combine(combine(combine(combine(combine(width_values_nightly,
-                                                                                                height_values_nightly),
-                                                                                                channel_values_nightly),
-                                                                                                batch_values_nightly),
-                                                                                                kernel_sz_values_nightly),
-                                                                                                depth_multiplier_values),
-                                                                                                dilation_values),
-                                                                                                stride_values),
-                                                                                                padding_valid_values),
-                                                                                                data_type_values),
+                combine(width_values_nightly,
+                                                                                                height_values_nightly,
+                                                                                                channel_values_nightly,
+                                                                                                batch_values_nightly,
+                                                                                                kernel_sz_values_nightly,
+                                                                                                depth_multiplier_values,
+                                                                                                dilation_values,
+                                                                                                stride_values,
+                                                                                                padding_valid_values,
+                                                                                                data_type_values,
                                                                                                 data_layout_values))
 {
     // Validate output

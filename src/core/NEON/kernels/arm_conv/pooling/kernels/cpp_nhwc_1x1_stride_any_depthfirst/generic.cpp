@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, 2023 Arm Limited.
+ * Copyright (c) 2020, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #include <cstdint>
 #include <cstring>
 #ifdef ARM_COMPUTE_ENABLE_BF16
-#include "bfloat.hpp"
+#include "arm_common/bfloat.hpp"
 using arm_gemm::bfloat16;
 #endif
 

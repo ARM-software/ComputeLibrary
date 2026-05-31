@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_TESTS_DATASETS_MATMULDATASET
-#define ACL_TESTS_DATASETS_MATMULDATASET
+#ifndef ACL_TESTS_DATASETS_MATMULDATASET_H
+#define ACL_TESTS_DATASETS_MATMULDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
+
 #include "utils/TypePrinter.h"
 
 namespace arm_compute
@@ -43,9 +44,7 @@ public:
         iterator(std::vector<TensorShape>::const_iterator a_it,
                  std::vector<TensorShape>::const_iterator b_it,
                  std::vector<TensorShape>::const_iterator dst_it)
-            : _a_it{ std::move(a_it) },
-              _b_it{ std::move(b_it) },
-              _dst_it{ std::move(dst_it) }
+            : _a_it{std::move(a_it)}, _b_it{std::move(b_it)}, _dst_it{std::move(dst_it)}
         {
         }
 
@@ -107,4 +106,4 @@ private:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ACL_TESTS_DATASETS_MATMULDATASET */
+#endif // ACL_TESTS_DATASETS_MATMULDATASET_H

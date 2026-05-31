@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,14 @@
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/ConvertFullyConnectedWeightsFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -39,9 +40,11 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
-auto params = combine(framework::dataset::make("WeightsWidth", { 16, 32, 64 }), framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
+auto params = combine(make("WeightsWidth", {16, 32, 64}), make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}));
 } // namespace
 
 TEST_SUITE(NEON)
@@ -49,28 +52,29 @@ TEST_SUITE(ConvertFullyConnectedWeights)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
-    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Mismatching data types
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+    make("InputInfo", { TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Mismatching data types
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),     // Valid
                                             TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Mismatching shapes
                                             TensorInfo(TensorShape(27U, 42U), 1, DataType::F32),     // Wrong DataLayout
                                           }),
-    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 42U), 1, DataType::F16),
+    make("OutputInfo",{ TensorInfo(TensorShape(27U, 42U), 1, DataType::F16),
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),
                                             TensorInfo(TensorShape(32U, 42U), 1, DataType::F32),
-                                          })),
-    framework::dataset::make("OriginalInput", { TensorShape(7U, 3U, 2U),
+                                          }),
+    make("OriginalInput", { TensorShape(7U, 3U, 2U),
                                                 TensorShape(7U, 3U, 2U),
                                                 TensorShape(7U, 3U, 2U),
                                                 TensorShape(7U, 3U, 2U),
-                                               })),
-    framework::dataset::make("DataLayout", { DataLayout::NCHW,
+                                               }),
+    make("DataLayout", { DataLayout::NCHW,
                                              DataLayout::NCHW,
                                              DataLayout::NCHW,
                                              DataLayout::UNKNOWN,
-                                               })),
-    framework::dataset::make("Expected", { false, true, false, false})),
+                                               }),
+    make("Expected", { false, true, false, false})
+    ),
     input_info, output_info, original_input_shape, data_layout, expected)
 {
     bool is_valid = bool(NEConvertFullyConnectedWeights::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), original_input_shape, data_layout));
@@ -80,17 +84,22 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 // *INDENT-ON*
 
 template <typename T>
-using NEConvertFullyConnectedWeightsFixture = ConvertFullyConnectedWeightsValidationFixture<Tensor, Accessor, NEConvertFullyConnectedWeights, T>;
+using NEConvertFullyConnectedWeightsFixture =
+    ConvertFullyConnectedWeightsValidationFixture<Tensor, Accessor, NEConvertFullyConnectedWeights, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                    DataType::F32))))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEConvertFullyConnectedWeightsFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small3DShapes(), params, make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                        DataType::F32))))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEConvertFullyConnectedWeightsFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::Large3DShapes(), params, make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -99,47 +108,54 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                   DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEConvertFullyConnectedWeightsFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small3DShapes(), params, make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                       DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEConvertFullyConnectedWeightsFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::Large3DShapes(), params, make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), combine(params, framework::dataset::make("DataType",
-                                                                                                                      DataType::QASYMM8))))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEConvertFullyConnectedWeightsFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::Small3DShapes(), params, make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), combine(params,
-                       framework::dataset::make("DataType",
-                                                DataType::QASYMM8))))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEConvertFullyConnectedWeightsFixture<uint8_t>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::Large3DShapes(), params, make("DataType", DataType::QASYMM8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

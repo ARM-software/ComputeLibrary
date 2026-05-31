@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ SimpleTensor<T> table_lookup(const SimpleTensor<T> &src, const std::map<T, T> &r
 {
     SimpleTensor<T> result(src.shape(), src.data_type());
 
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
         result[i] = rawlut.at(src[i]);
     }

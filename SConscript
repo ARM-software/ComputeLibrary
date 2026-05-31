@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2025 Arm Limited.
+# Copyright (c) 2016-2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -399,7 +399,7 @@ arm_compute_env = env.Clone()
 version_file = arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file)
 arm_compute_env.AlwaysBuild(version_file)
 
-default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos', 'openbsd'] else 'clang++'
+default_cpp_compiler = 'g++' if env['os'] not in ['android', 'macos', 'openbsd', 'freebsd'] else 'clang++'
 cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 
 # Generate embed files
@@ -650,6 +650,8 @@ misa_lib_files_neon_fp16 = []
 misa_lib_files_sve_fp16 = []
 misa_lib_files_sve2_fp16 = []
 
+arm_compute_env.Append(CPPPATH = ["src/cpu/kernels/assembly/"])
+
 if env['neon']:
     # build winograd/depthwise sources for either v7a / v8a
     arm_compute_env.Append(CPPPATH = ["src/core/NEON/kernels/arm_gemm",
@@ -744,6 +746,13 @@ if (env['multi_isa']):
     lib_static_objs, lib_shared_objs = build_multiisa_lib_objects()
     # STATIC library build.
     arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_static_objs, static=True)
+
+    if(env['os'] == 'linux' and not env['opencl']):
+        # -static suffix in static libraries is deprecated, and will be removed in COMPMID-8696.
+        # This additional static binary is provided temporarily for multi-isa builds upon user request,
+        # and after the deprecation notice, the version with -static suffix will be removed in a
+        # future major release.
+        arm_compute_a_wo_suffix = build_library('arm_compute', arm_compute_env, lib_static_objs, static=True)
 else:
     if 'sve2' in env['arch']:
         lib_files += lib_files_sve
@@ -754,6 +763,10 @@ else:
     arm_compute_a = build_library('arm_compute-static', arm_compute_env, lib_files, static=True)
 
 Export('arm_compute_a')
+
+if (env['multi_isa'] and env['os'] == 'linux' and not env['opencl']):
+    # Remove this part as part of COMPMID-8696
+    Export('arm_compute_a_wo_suffix')
 
 # SHARED library build.
 if env['os'] != 'bare_metal' and not env['standalone']:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,9 @@
  */
 #include "PriorBoxLayer.h"
 
-#include "ActivationLayer.h"
-
 #include "tests/validation/Helpers.h"
+
+#include "ActivationLayer.h"
 
 namespace arm_compute
 {
@@ -36,14 +36,17 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> prior_box_layer(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, const PriorBoxLayerInfo &info, const TensorShape &output_shape)
+SimpleTensor<T> prior_box_layer(const SimpleTensor<T>   &src1,
+                                const SimpleTensor<T>   &src2,
+                                const PriorBoxLayerInfo &info,
+                                const TensorShape       &output_shape)
 {
     const auto layer_width  = static_cast<int>(src1.shape()[0]);
     const auto layer_height = static_cast<int>(src1.shape()[1]);
 
     int img_width  = info.img_size().x;
     int img_height = info.img_size().y;
-    if(img_width == 0 || img_height == 0)
+    if (img_width == 0 || img_height == 0)
     {
         img_width  = static_cast<int>(src2.shape()[0]);
         img_height = static_cast<int>(src2.shape()[1]);
@@ -51,7 +54,7 @@ SimpleTensor<T> prior_box_layer(const SimpleTensor<T> &src1, const SimpleTensor<
 
     float step_x = info.steps()[0];
     float step_y = info.steps()[1];
-    if(step_x == 0.f || step_y == 0.f)
+    if (step_x == 0.f || step_y == 0.f)
     {
         step_x = static_cast<float>(img_width) / layer_width;
         step_x = static_cast<float>(img_height) / layer_height;
@@ -64,15 +67,15 @@ SimpleTensor<T> prior_box_layer(const SimpleTensor<T> &src1, const SimpleTensor<
     SimpleTensor<T> result(output_shape, src1.data_type());
 
     int idx = 0;
-    for(int y = 0; y < layer_height; ++y)
+    for (int y = 0; y < layer_height; ++y)
     {
-        for(int x = 0; x < layer_width; ++x)
+        for (int x = 0; x < layer_width; ++x)
         {
             const float center_x = (x + info.offset()) * step_x;
             const float center_y = (y + info.offset()) * step_y;
             float       box_width;
             float       box_height;
-            for(unsigned int i = 0; i < info.min_sizes().size(); ++i)
+            for (unsigned int i = 0; i < info.min_sizes().size(); ++i)
             {
                 const float min_size = info.min_sizes().at(i);
                 box_width            = min_size;
@@ -83,7 +86,7 @@ SimpleTensor<T> prior_box_layer(const SimpleTensor<T> &src1, const SimpleTensor<
                 result[idx++] = (center_x + box_width / 2.f) / img_width;
                 result[idx++] = (center_y + box_height / 2.f) / img_height;
 
-                if(!info.max_sizes().empty())
+                if (!info.max_sizes().empty())
                 {
                     const float max_size = info.max_sizes().at(i);
                     box_width            = sqrt(min_size * max_size);
@@ -97,9 +100,9 @@ SimpleTensor<T> prior_box_layer(const SimpleTensor<T> &src1, const SimpleTensor<
                 }
 
                 // rest of priors
-                for(auto ar : info.aspect_ratios())
+                for (auto ar : info.aspect_ratios())
                 {
-                    if(fabs(ar - 1.) < 1e-6)
+                    if (fabs(ar - 1.) < 1e-6)
                     {
                         continue;
                     }
@@ -118,28 +121,28 @@ SimpleTensor<T> prior_box_layer(const SimpleTensor<T> &src1, const SimpleTensor<
     }
 
     // clip the coordinates
-    if(info.clip())
+    if (info.clip())
     {
-        for(int i = 0; i < total_elements; ++i)
+        for (int i = 0; i < total_elements; ++i)
         {
             result[i] = std::min<T>(std::max<T>(result[i], 0.f), 1.f);
         }
     }
 
     // set the variance.
-    if(info.variances().size() == 1)
+    if (info.variances().size() == 1)
     {
         std::fill_n(result.data() + idx, total_elements, info.variances().at(0));
     }
     else
     {
-        for(int h = 0; h < layer_height; ++h)
+        for (int h = 0; h < layer_height; ++h)
         {
-            for(int w = 0; w < layer_width; ++w)
+            for (int w = 0; w < layer_width; ++w)
             {
-                for(int i = 0; i < num_priors; ++i)
+                for (int i = 0; i < num_priors; ++i)
                 {
-                    for(int j = 0; j < 4; ++j)
+                    for (int j = 0; j < 4; ++j)
                     {
                         result[idx++] = info.variances().at(j);
                     }
@@ -150,7 +153,10 @@ SimpleTensor<T> prior_box_layer(const SimpleTensor<T> &src1, const SimpleTensor<
 
     return result;
 }
-template SimpleTensor<float> prior_box_layer(const SimpleTensor<float> &src1, const SimpleTensor<float> &src2, const PriorBoxLayerInfo &info, const TensorShape &output_shape);
+template SimpleTensor<float> prior_box_layer(const SimpleTensor<float> &src1,
+                                             const SimpleTensor<float> &src2,
+                                             const PriorBoxLayerInfo   &info,
+                                             const TensorShape         &output_shape);
 
 } // namespace reference
 } // namespace validation

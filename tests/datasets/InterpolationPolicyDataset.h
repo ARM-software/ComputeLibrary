@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_INTEPOLATIONPOLICY_DATASET_H
-#define ARM_COMPUTE_TEST_INTEPOLATIONPOLICY_DATASET_H
+#ifndef ACL_TESTS_DATASETS_INTERPOLATIONPOLICYDATASET_H
+#define ACL_TESTS_DATASETS_INTERPOLATIONPOLICYDATASET_H
 
 #include "arm_compute/core/Types.h"
 
@@ -36,16 +36,13 @@ class InterpolationPolicies final : public framework::dataset::ContainerDataset<
 {
 public:
     InterpolationPolicies()
-        : ContainerDataset("InterpolationPolicy",
-    {
-        InterpolationPolicy::NEAREST_NEIGHBOR,
-                            InterpolationPolicy::BILINEAR,
-                            InterpolationPolicy::AREA
-    })
+        : ContainerDataset(
+              "InterpolationPolicy",
+              {InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR, InterpolationPolicy::AREA})
     {
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_INTEPOLATIONPOLICY_DATASET_H */
+#endif // ACL_TESTS_DATASETS_INTERPOLATIONPOLICYDATASET_H

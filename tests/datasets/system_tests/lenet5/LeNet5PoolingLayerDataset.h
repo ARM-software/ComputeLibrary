@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_LENET5_POOLING_LAYER_DATASET
-#define ARM_COMPUTE_TEST_LENET5_POOLING_LAYER_DATASET
-
-#include "tests/datasets/PoolingLayerDataset.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_LENET5_LENET5POOLINGLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_LENET5_LENET5POOLINGLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/datasets/PoolingLayerDataset.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -49,4 +48,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_LENET5_POOLING_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_LENET5_LENET5POOLINGLAYERDATASET_H

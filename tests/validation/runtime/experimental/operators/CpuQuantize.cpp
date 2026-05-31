@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,16 +22,17 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/experimental/operators/CpuQuantize.h"
+
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/CpuQuantizeFixture.h"
-
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -51,15 +52,16 @@ using arm_compute::test::validation::CpuQuantizationValidationFixture;
 namespace
 {
 /** Tolerance for quantization */
-constexpr AbsoluteTolerance<uint8_t>  tolerance_u8(1);  /**< Tolerance value for comparing reference's output against implementation's output for QASYMM8 data types */
-const auto                            QuantizationSmallShapes = concat(datasets::Small3DShapes(), datasets::Small4DShapes());
+constexpr AbsoluteTolerance<uint8_t> tolerance_u8(
+    1); /**< Tolerance value for comparing reference's output against implementation's output for QASYMM8 data types */
+const auto QuantizationSmallShapes = concat(datasets::Small3DShapes(), datasets::Small4DShapes());
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(OPERATORS)
 TEST_SUITE(CpuQuantize)
 
-using framework::dataset::make ;
+using framework::dataset::make;
 
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
@@ -83,11 +85,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 template <typename T>
 using CpuQuantizeQASYMM8Fixture = CpuQuantizationValidationFixture<Tensor, Accessor, CpuQuantize, T, uint8_t>;
 
-FIXTURE_DATA_TEST_CASE(SmokeTest, CpuQuantizeQASYMM8Fixture<float>, framework::DatasetMode::ALL, combine(QuantizationSmallShapes,
-                       make("DataType", DataType::F32),
-                       make("DataTypeOut", { DataType::QASYMM8 }),
-                      make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })
-                      ))
+FIXTURE_DATA_TEST_CASE(SmokeTest,
+                       CpuQuantizeQASYMM8Fixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(QuantizationSmallShapes,
+                               make("DataType", DataType::F32),
+                               make("DataTypeOut", {DataType::QASYMM8}),
+                               make("QuantizationInfo", {QuantizationInfo(0.5f, 10)})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_u8);

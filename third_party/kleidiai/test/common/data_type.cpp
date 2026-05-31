@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -46,23 +46,23 @@ bool data_type_is_integral(DataType dt) {
 }
 
 bool data_type_is_float(DataType dt) {
-    KAI_ASSERT(data_type_is_signed(dt));
+    KAI_ASSERT_ALWAYS(data_type_is_signed(dt));
     return !data_type_is_integral(dt);
 }
 
 bool data_type_is_float_fp(DataType dt) {
-    KAI_ASSERT(data_type_is_float(dt));
+    KAI_ASSERT_ALWAYS(data_type_is_float(dt));
     return !has_q(dt);
 }
 
 bool data_type_is_float_bf(DataType dt) {
-    KAI_ASSERT(data_type_is_float(dt));
+    KAI_ASSERT_ALWAYS(data_type_is_float(dt));
     return has_q(dt);
 }
 
 bool data_type_is_signed(DataType dt) {
     if (!has_s(dt)) {
-        KAI_ASSERT(data_type_is_integral(dt));
+        KAI_ASSERT_ALWAYS(data_type_is_integral(dt));
     }
 
     return has_s(dt);
@@ -74,6 +74,14 @@ bool data_type_is_quantized(DataType dt) {
 
 bool data_type_is_quantized_asymm(DataType dt) {
     return data_type_is_quantized(dt) && has_a(dt);
+}
+
+bool data_type_is_quantized_int8(DataType dt) {
+    return data_type_is_quantized(dt) && data_type_size_in_bits(dt) == 8;
+}
+
+bool data_type_is_quantized_int4(DataType dt) {
+    return data_type_is_quantized(dt) && data_type_size_in_bits(dt) == 4;
 }
 
 }  // namespace kai::test

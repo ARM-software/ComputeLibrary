@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -8,6 +8,8 @@
 
 #include <cstdint>
 #include <tuple>
+
+#include "test/common/buffer.hpp"
 
 namespace kai::test {
 
@@ -114,5 +116,12 @@ public:
 private:
     int8_t _value;
 };
+
+/// Reverses the two 4-bit unsigned integer values in the byte in the buffer.
+///
+/// @param[in] src The data buffer.
+///
+/// @return The buffer with packed byte, where the high and low nibbles reversed.
+Buffer convert_s0s1_s1s0(const Buffer& src);
 
 }  // namespace kai::test

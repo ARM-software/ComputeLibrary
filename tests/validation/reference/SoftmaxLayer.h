@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,8 @@ SimpleTensor<T> softmax_layer_bfloat16(const SimpleTensor<T> &src, float beta, i
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
 SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t axis = 0, bool is_log = false);
 
-template < typename T, typename std::enable_if < std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int >::type = 0 >
+template <typename T,
+          typename std::enable_if<std::is_same<T, uint8_t>::value || std::is_same<T, int8_t>::value, int>::type = 0>
 SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta, int32_t axis = 0, bool is_log = false);
 } // namespace reference
 } // namespace validation

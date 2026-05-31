@@ -35,8 +35,13 @@ namespace validation
 namespace reference
 {
 template <typename T>
-void im2col(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims,
-    const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups, unsigned int channel_pad_right);
+void im2col(const SimpleTensor<T> &src,
+            SimpleTensor<T>       &dst,
+            const Size2D          &kernel_dims,
+            const PadStrideInfo   &conv_info,
+            bool                   has_bias,
+            unsigned int           num_groups,
+            unsigned int           channel_pad_right);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -14,8 +14,14 @@ bool cpu_has_advsimd();
 /// Returns a value indicating whether the current CPU supports FEAT_DotProd.
 bool cpu_has_dotprod();
 
+/// Returns a value indicating whether the current CPU supports FEAT_DotProd and FEAT_FP16.
+bool cpu_has_dotprod_and_fp16();
+
 /// Returns a value indicating whether the current CPU supports FEAT_I8MM.
 bool cpu_has_i8mm();
+
+/// Returns a value indicating whether the current CPU supports FEAT_I8MM and FEAT_FP16.
+bool cpu_has_i8mm_and_fp16();
 
 /// Returns a value indicating whether the current CPU supports FEAT_FP16.
 bool cpu_has_fp16();
@@ -26,6 +32,9 @@ bool cpu_has_bf16();
 /// Returns a value indicating whether the current CPU supports FEAT_SVE.
 bool cpu_has_sve();
 
+/// Returns a value indicating whether the current CPU supports FEAT_SVE with 256-bit vector lengths.
+bool cpu_has_sve_vl256();
+
 /// Returns a value indicating whether the current CPU supports FEAT_SVE2.
 bool cpu_has_sve2();
 
@@ -34,5 +43,17 @@ bool cpu_has_sme();
 
 /// Returns a value indicating whether the current CPU supports FEAT_SME2.
 bool cpu_has_sme2();
+
+/// Returns a value indicating whether the current CPU supports FEAT_BF16 and FEAT_DotProd
+bool cpu_has_dotprod_and_bf16();
+
+/// Returns a value indicating whether the current CPU supports FEAT_BF16 and FEAT_I8MM
+bool cpu_has_i8mm_and_bf16();
+
+/// Returns a value indicating whether the current CPU supports a set of features
+template <bool (*... Pred)()>
+bool cpu_check() {
+    return (Pred() && ...);
+}
 
 }  // namespace kai::test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022-2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,16 +26,17 @@
 #include "arm_compute/runtime/NEON/functions/NEFloor.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "src/common/cpuinfo/CpuIsaInfo.h"
 #include "src/cpu/kernels/CpuFloorKernel.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/FloorFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -43,23 +44,26 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 TEST_SUITE(NEON)
 TEST_SUITE(Floor)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),  // Wrong data type
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+        make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::U8),  // Wrong data type
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Invalid data type combination
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
         }),
-        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+        make("OutputInfo",{ TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
                                                 TensorInfo(TensorShape(48U, 11U, 2U), 1, DataType::F32),
                                                 TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-        })),
-                                                          framework::dataset::make("Expected", { false, false, false, true })),
+        }),
+        make("Expected", { false, false, false, true })
+                                                          ),
                input_info, output_info, expected)
 {
     const Status status = NEFloor::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false));
@@ -68,8 +72,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 
 
 DATA_TEST_CASE(KernelSelection, framework::DatasetMode::ALL,
-               combine(framework::dataset::make("CpuExt", std::string("NEON")),
-                       framework::dataset::make("DataType", { DataType::F32,
+               combine(make("CpuExt", std::string("NEON")),
+                       make("DataType", { DataType::F32,
                                                               DataType::F16,
                                                             })),
                cpu_ext, data_type)
@@ -98,42 +102,54 @@ using NEFloorFixture = FloorValidationFixture<Tensor, Accessor, NEFloor, T>;
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFloorFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEFloorFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEFloorFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEFloorFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F16)))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() // FP16
 #endif           // ARM_COMPUTE_ENABLE_FP16
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFloorFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEFloorFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEFloorFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       NEFloorFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(datasets::LargeShapes(), make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference);

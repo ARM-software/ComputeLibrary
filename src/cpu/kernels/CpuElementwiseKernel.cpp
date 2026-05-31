@@ -24,6 +24,7 @@
 #include "src/cpu/kernels/CpuElementwiseKernel.h"
 
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
 
 #include "src/common/utils/profile/acl_profile.h"
 #include "src/core/common/Registrars.h"
@@ -230,6 +231,7 @@ Status CpuElementwiseKernel<Derived>::validate_arguments_common(const ITensorInf
 
     if (!src0.is_dynamic() && !src1.is_dynamic() && !dst.is_dynamic())
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&src0, &src1, &dst);
         const TensorShape out_shape = TensorShape::broadcast_shape(src0.tensor_shape(), src1.tensor_shape());
 
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
@@ -239,6 +241,11 @@ Status CpuElementwiseKernel<Derived>::validate_arguments_common(const ITensorInf
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0),
                                             "Wrong shape for output");
+        }
+        else
+        {
+            const TensorInfo dst_info = TensorInfo(out_shape, 1, src0.data_type());
+            ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
         }
     }
 
@@ -283,6 +290,7 @@ void CpuComparisonKernel::configure_common(const ITensorInfo *src0, const ITenso
     // If any of shapes is dynamic, expect a configured window and dst at run-time.
     if (src0->is_dynamic() || src1->is_dynamic())
     {
+        _dynamic_shape_configure = true;
         return;
     }
 
@@ -301,6 +309,14 @@ void CpuElementwiseKernel<Derived>::run_op(ITensorPack &tensors, const Window &w
     auto src0 = tensors.get_const_tensor(TensorType::ACL_SRC_0);
     auto src1 = tensors.get_const_tensor(TensorType::ACL_SRC_1);
     auto dst  = tensors.get_tensor(TensorType::ACL_DST);
+
+    if (_dynamic_shape_configure)
+    {
+        // Shapes couldn't be validated at validate() and/or configure() time
+        ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(src0->info());
+        ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(src1->info());
+        ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(dst->info());
+    }
 
     _run_method(src0, src1, dst, window);
 }

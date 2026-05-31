@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PADLAYER_H
-#define ARM_COMPUTE_TEST_PADLAYER_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_PADLAYER_H
+#define ACL_TESTS_VALIDATION_REFERENCE_PADLAYER_H
 
 #include "arm_compute/core/Types.h"
+
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
 
@@ -47,9 +48,12 @@ namespace reference
  * @return The padded Tensor
  */
 template <typename T>
-SimpleTensor<T> pad_layer(const SimpleTensor<T> &src, const PaddingList &paddings, const PixelValue const_value = PixelValue(), const PaddingMode mode = PaddingMode::CONSTANT);
+SimpleTensor<T> pad_layer(const SimpleTensor<T> &src,
+                          const PaddingList     &paddings,
+                          const PixelValue       const_value = PixelValue(),
+                          const PaddingMode      mode        = PaddingMode::CONSTANT);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PADLAYER_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_PADLAYER_H

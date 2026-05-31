@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -63,7 +63,7 @@ size_t kai_get_sr_matmul_clamp_qai8_qai8p2vlx4_qsi8cxpsb2vlx4_2vlx2vl_sme2_mopa(
 
 /// Gets the offset in bytes to the data element in the packed LHS matrix buffer.
 ///
-/// @param[in] m_idx Row index in the unpacked LHS matrix.
+/// @param[in] m_idx Row index in the unpacked LHS matrix. Must be a multiple of `m_step`.
 /// @param[in] k Number of columns in the unpacked LHS matrix.
 ///
 /// @return The offset in bytes to the data element.
@@ -71,21 +71,21 @@ size_t kai_get_lhs_packed_offset_matmul_clamp_qai8_qai8p2vlx4_qsi8cxpsb2vlx4_2vl
 
 /// Gets the offset in bytes to the data element in the packed RHS matrix buffer.
 ///
-/// @param[in] n_idx Column index in the unpacked RHS matrix.
-/// @param[in] k Number of rows in the unpacked RHS matrix.
+/// @param[in] n_idx Column index in the unpacked RHS matrix. Must be a multiple of `n_step`.
+/// @param[in] k Number of columns in the unpacked LHS matrix.
 ///
 /// @return The offset in bytes to the data element.
 size_t kai_get_rhs_packed_offset_matmul_clamp_qai8_qai8p2vlx4_qsi8cxpsb2vlx4_2vlx2vl_sme2_mopa(size_t n_idx, size_t k);
 
 /// Gets the offset in bytes to the data element in the destination matrix buffer.
 ///
-/// @param[in] m_idx Row index.
-/// @param[in] n_idx Column index.
-/// @param[in] dst_stride Row stride in bytes.
+/// @param[in] m_idx Row index. Must be a multiple of `m_step`.
+/// @param[in] n_idx Column index. Must be a multiple of `n_step`.
+/// @param[in] dst_stride_row Row stride in bytes.
 ///
 /// @return The offset in bytes to the data element.
 size_t kai_get_dst_offset_matmul_clamp_qai8_qai8p2vlx4_qsi8cxpsb2vlx4_2vlx2vl_sme2_mopa(
-    size_t m_idx, size_t n_idx, size_t dst_stride);
+    size_t m_idx, size_t n_idx, size_t dst_stride_row);
 
 /// Gets the size in bytes of the destination matrix buffer.
 ///
@@ -106,13 +106,13 @@ size_t kai_get_dst_size_matmul_clamp_qai8_qai8p2vlx4_qsi8cxpsb2vlx4_2vlx2vl_sme2
 ///
 /// @param[in] m Number of output rows to be computed.
 /// @param[in] n Number of output columns to be computed.
-/// @param[in] k Common dimension of the LHS and RHS operands.
-/// @param[in] packed_lhs Packed LHS matrix buffer.
-/// @param[in] packed_rhs Packed RHS matrix buffer.
+/// @param[in] k Number of columns in the unpacked LHS matrix.
+/// @param[in] lhs_packed Packed LHS matrix buffer.
+/// @param[in] rhs_packed Packed RHS matrix buffer.
 /// @param[out] dst Output matrix buffer.
 /// @param[in] dst_stride_row Row stride in bytes of the output matrix.
-/// @param[in] dst_stride_col Column stride in bytes of the output matrix.
-/// @param[in] params Requantization and clamp parmaters.
+/// @param[in] dst_stride_col Column stride in bytes of the output matrix. Unused
+/// @param[in] params Requantization and clamp parameters.
 void kai_run_matmul_clamp_qai8_qai8p2vlx4_qsi8cxpsb2vlx4_2vlx2vl_sme2_mopa(
     size_t m, size_t n, size_t k, const void* lhs_packed, const void* rhs_packed, void* dst, size_t dst_stride_row,
     size_t dst_stride_col, const struct kai_matmul_requantize32_params* params);

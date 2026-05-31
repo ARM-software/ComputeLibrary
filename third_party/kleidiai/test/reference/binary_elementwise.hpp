@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,9 +7,8 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
-#include <vector>
 
+#include "test/common/buffer.hpp"
 #include "test/common/data_type.hpp"
 
 namespace kai::test {
@@ -28,7 +27,7 @@ namespace kai::test {
 /// @param[in] rhs_width RHS width.
 ///
 /// @return The result matrix.
-std::vector<uint8_t> add(
+Buffer add(
     const void* lhs, DataType lhs_dt, size_t lhs_height, size_t lhs_width,  //
     const void* rhs, DataType rhs_dt, size_t rhs_height, size_t rhs_width);
 
@@ -46,7 +45,7 @@ std::vector<uint8_t> add(
 /// @param[in] rhs_width RHS width.
 ///
 /// @return The result matrix.
-std::vector<uint8_t> sub(
+Buffer sub(
     const void* lhs, DataType lhs_dt, size_t lhs_height, size_t lhs_width,  //
     const void* rhs, DataType rhs_dt, size_t rhs_height, size_t rhs_width);
 
@@ -65,7 +64,7 @@ std::vector<uint8_t> sub(
 ///
 /// @return The result matrix.
 template <typename T>
-std::vector<uint8_t> sub(
+Buffer sub(
     const void* lhs, size_t lhs_height, size_t lhs_width,  //
     const void* rhs, size_t rhs_height, size_t rhs_width);
 
@@ -83,7 +82,7 @@ std::vector<uint8_t> sub(
 /// @param[in] rhs_width RHS width.
 ///
 /// @return The result matrix.
-std::vector<uint8_t> mul(
+Buffer mul(
     const void* lhs, DataType lhs_dt, size_t lhs_height, size_t lhs_width,  //
     const void* rhs, DataType rhs_dt, size_t rhs_height, size_t rhs_width);
 
@@ -102,7 +101,7 @@ std::vector<uint8_t> mul(
 ///
 /// @return The result matrix.
 template <typename T>
-std::vector<uint8_t> mul(
+Buffer mul(
     const void* lhs, size_t lhs_height, size_t lhs_width,  //
     const void* rhs, size_t rhs_height, size_t rhs_width);
 
@@ -120,7 +119,7 @@ std::vector<uint8_t> mul(
 /// @param[in] rhs_width RHS width.
 ///
 /// @return The result matrix.
-std::vector<uint8_t> div(
+Buffer div(
     const void* lhs, DataType lhs_dt, size_t lhs_height, size_t lhs_width,  //
     const void* rhs, DataType rhs_dt, size_t rhs_height, size_t rhs_width);
 

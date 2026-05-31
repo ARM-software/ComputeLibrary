@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,6 +105,8 @@ Status ClCropKernel::validate(const ITensorInfo *src,
                               Window            *dst_window)
 {
     ARM_COMPUTE_UNUSED(extrapolation_value, dst_window);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(src, DataLayout::NHWC);
     ARM_COMPUTE_RETURN_ERROR_ON(src->tensor_shape().num_dimensions() > 4);
@@ -117,12 +119,12 @@ Status ClCropKernel::validate(const ITensorInfo *src,
     {
         ARM_COMPUTE_RETURN_ERROR_ON(dst_window->x().step() != 1);
     }
-    if (dst->total_size() > 0)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(dst, DataType::F32);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, dst);
-        ARM_COMPUTE_RETURN_ERROR_ON(dst->num_dimensions() > 3);
-    }
+
+    // There's no default configuration, so we expect that dst is initialized.
+    ARM_COMPUTE_RETURN_ERROR_ON(dst->total_size() == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(dst, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON(dst->num_dimensions() > 3);
     return Status{};
 }
 

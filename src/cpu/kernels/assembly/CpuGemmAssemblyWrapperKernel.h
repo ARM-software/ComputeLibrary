@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, 2024-2025 Arm Limited.
+ * Copyright (c) 2018-2022, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,8 +32,8 @@
 #include "src/core/NEON/INEKernel.h"
 #include "src/cpu/kernels/assembly/arm_gemm_compute_iface.hpp"
 
-#include "gemm_arrays.hpp"
-#include "gemm_common.hpp"
+#include "arm_gemm/gemm_arrays.hpp"
+#include "arm_gemm/gemm_common.hpp"
 
 namespace arm_compute
 {

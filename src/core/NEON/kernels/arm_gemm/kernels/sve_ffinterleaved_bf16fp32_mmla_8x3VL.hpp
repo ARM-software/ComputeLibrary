@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,10 +22,8 @@
  * SOFTWARE.
  */
 #pragma once
-#ifdef ARM_COMPUTE_ENABLE_SVE
-
 #include "../std_transforms_sve.hpp"
-#include "../bfloat.hpp"
+#include "arm_common/bfloat.hpp"
 #include "../kernel_weight_format.hpp"
 #include "../performance_parameters.hpp"
 
@@ -107,4 +105,4 @@ public:
 } // namespace arm_gemm
 
 #undef ARGLIST
-#endif // ARM_COMPUTE_ENABLE_SVE
+

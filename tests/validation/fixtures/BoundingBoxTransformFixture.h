@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,12 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/BoundingBoxTransform.h"
 
@@ -42,7 +43,8 @@ namespace validation
 {
 namespace
 {
-std::vector<float> generate_deltas(std::vector<float> &boxes, const TensorShape &image_shape, size_t num_boxes, size_t num_classes, std::mt19937 &gen)
+std::vector<float> generate_deltas(
+    std::vector<float> &boxes, const TensorShape &image_shape, size_t num_boxes, size_t num_classes, std::mt19937 &gen)
 {
     std::vector<float> deltas(num_boxes * 4 * num_classes);
 
@@ -51,14 +53,14 @@ std::vector<float> generate_deltas(std::vector<float> &boxes, const TensorShape 
     std::uniform_int_distribution<> dist_w(1, image_shape[0]);
     std::uniform_int_distribution<> dist_h(1, image_shape[1]);
 
-    for(size_t i = 0; i < num_boxes; ++i)
+    for (size_t i = 0; i < num_boxes; ++i)
     {
         const float ex_width  = boxes[4 * i + 2] - boxes[4 * i] + 1.f;
         const float ex_height = boxes[4 * i + 3] - boxes[4 * i + 1] + 1.f;
         const float ex_ctr_x  = boxes[4 * i] + 0.5f * ex_width;
         const float ex_ctr_y  = boxes[4 * i + 1] + 0.5f * ex_height;
 
-        for(size_t j = 0; j < num_classes; ++j)
+        for (size_t j = 0; j < num_classes; ++j)
         {
             const float x1     = dist_x1(gen);
             const float y1     = dist_y1(gen);
@@ -85,7 +87,7 @@ std::vector<float> generate_boxes(const TensorShape &image_shape, size_t num_box
     std::uniform_int_distribution<> dist_w(1, image_shape[0]);
     std::uniform_int_distribution<> dist_h(1, image_shape[1]);
 
-    for(size_t i = 0; i < num_boxes; ++i)
+    for (size_t i = 0; i < num_boxes; ++i)
     {
         boxes[4 * i]     = dist_x1(gen);
         boxes[4 * i + 1] = dist_y1(gen);
@@ -100,11 +102,15 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class BoundingBoxTransformGenericFixture : public framework::Fixture
 {
 public:
-    using TDeltas = typename std::conditional<std::is_same<typename std::decay<T>::type, uint16_t>::value, uint8_t, T>::type;
+    using TDeltas =
+        typename std::conditional<std::is_same<typename std::decay<T>::type, uint16_t>::value, uint8_t, T>::type;
 
-    void setup(TensorShape deltas_shape, const BoundingBoxTransformInfo &info, DataType data_type, QuantizationInfo deltas_qinfo)
+    void setup(TensorShape                     deltas_shape,
+               const BoundingBoxTransformInfo &info,
+               DataType                        data_type,
+               QuantizationInfo                deltas_qinfo)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -126,31 +132,33 @@ protected:
     void fill(U &&tensor, std::vector<float> values)
     {
         data_type *data_ptr = reinterpret_cast<data_type *>(tensor.data());
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::QASYMM8:
-                for(size_t i = 0; i < values.size(); ++i)
+                for (size_t i = 0; i < values.size(); ++i)
                 {
                     data_ptr[i] = quantize_qasymm8(values[i], tensor.quantization_info());
                 }
                 break;
             case DataType::QASYMM16:
-                for(size_t i = 0; i < values.size(); ++i)
+                for (size_t i = 0; i < values.size(); ++i)
                 {
                     data_ptr[i] = quantize_qasymm16(values[i], tensor.quantization_info());
                 }
                 break;
             default:
-                for(size_t i = 0; i < values.size(); ++i)
+                for (size_t i = 0; i < values.size(); ++i)
                 {
                     data_ptr[i] = static_cast<data_type>(values[i]);
                 }
         }
     }
 
-    TensorType compute_target(const TensorShape &deltas_shape, DataType data_type,
-                              const BoundingBoxTransformInfo &bbox_info, std::mt19937 &gen,
-                              QuantizationInfo deltas_qinfo)
+    TensorType compute_target(const TensorShape              &deltas_shape,
+                              DataType                        data_type,
+                              const BoundingBoxTransformInfo &bbox_info,
+                              std::mt19937                   &gen,
+                              QuantizationInfo                deltas_qinfo)
     {
         // Create tensors
         TensorShape boxes_shape(4, deltas_shape[1]);
@@ -175,9 +183,10 @@ protected:
         ARM_COMPUTE_ASSERT(!boxes.info()->is_resizable());
 
         // Fill tensors
-        TensorShape        img_shape(bbox_info.scale() * bbox_info.img_width(), bbox_info.scale() * bbox_info.img_height());
-        std::vector<float> boxes_vec  = generate_boxes(img_shape, boxes_shape[1], gen);
-        std::vector<float> deltas_vec = generate_deltas(boxes_vec, img_shape, deltas_shape[1], deltas_shape[0] / 4, gen);
+        TensorShape img_shape(bbox_info.scale() * bbox_info.img_width(), bbox_info.scale() * bbox_info.img_height());
+        std::vector<float> boxes_vec = generate_boxes(img_shape, boxes_shape[1], gen);
+        std::vector<float> deltas_vec =
+            generate_deltas(boxes_vec, img_shape, deltas_shape[1], deltas_shape[0] / 4, gen);
         fill<T>(AccessorType(boxes), boxes_vec);
         fill<TDeltas>(AccessorType(deltas), deltas_vec);
 
@@ -195,13 +204,14 @@ protected:
     {
         // Create reference tensor
         TensorShape           boxes_shape(4, deltas_shape[1]);
-        SimpleTensor<T>       boxes{ boxes_shape, data_type, 1, _boxes_qinfo };
-        SimpleTensor<TDeltas> deltas{ deltas_shape, _data_type_deltas, 1, deltas_qinfo };
+        SimpleTensor<T>       boxes{boxes_shape, data_type, 1, _boxes_qinfo};
+        SimpleTensor<TDeltas> deltas{deltas_shape, _data_type_deltas, 1, deltas_qinfo};
 
         // Fill reference tensor
-        TensorShape        img_shape(bbox_info.scale() * bbox_info.img_width(), bbox_info.scale() * bbox_info.img_height());
-        std::vector<float> boxes_vec  = generate_boxes(img_shape, boxes_shape[1], gen);
-        std::vector<float> deltas_vec = generate_deltas(boxes_vec, img_shape, deltas_shape[1], deltas_shape[0] / 4, gen);
+        TensorShape img_shape(bbox_info.scale() * bbox_info.img_width(), bbox_info.scale() * bbox_info.img_height());
+        std::vector<float> boxes_vec = generate_boxes(img_shape, boxes_shape[1], gen);
+        std::vector<float> deltas_vec =
+            generate_deltas(boxes_vec, img_shape, deltas_shape[1], deltas_shape[0] / 4, gen);
         fill<T>(boxes, boxes_vec);
         fill<TDeltas>(deltas, deltas_vec);
 
@@ -222,19 +232,25 @@ class BoundingBoxTransformFixture : public BoundingBoxTransformGenericFixture<Te
 public:
     void setup(TensorShape deltas_shape, const BoundingBoxTransformInfo &info, DataType data_type)
     {
-        BoundingBoxTransformGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(deltas_shape, info, data_type, QuantizationInfo());
+        BoundingBoxTransformGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            deltas_shape, info, data_type, QuantizationInfo());
     }
 
 private:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class BoundingBoxTransformQuantizedFixture : public BoundingBoxTransformGenericFixture<TensorType, AccessorType, FunctionType, T>
+class BoundingBoxTransformQuantizedFixture
+    : public BoundingBoxTransformGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape deltas_shape, const BoundingBoxTransformInfo &info, DataType data_type, QuantizationInfo deltas_qinfo)
+    void setup(TensorShape                     deltas_shape,
+               const BoundingBoxTransformInfo &info,
+               DataType                        data_type,
+               QuantizationInfo                deltas_qinfo)
     {
-        BoundingBoxTransformGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(deltas_shape, info, data_type, deltas_qinfo);
+        BoundingBoxTransformGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(deltas_shape, info,
+                                                                                             data_type, deltas_qinfo);
     }
 };
 } // namespace validation

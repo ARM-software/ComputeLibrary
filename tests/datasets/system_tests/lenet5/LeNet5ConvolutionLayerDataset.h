@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_LENET5_CONVOLUTION_LAYER_DATASET
-#define ARM_COMPUTE_TEST_LENET5_CONVOLUTION_LAYER_DATASET
-
-#include "tests/datasets/ConvolutionLayerDataset.h"
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SYSTEM_TESTS_LENET5_LENET5CONVOLUTIONLAYERDATASET_H
+#define ACL_TESTS_DATASETS_SYSTEM_TESTS_LENET5_LENET5CONVOLUTIONLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/datasets/ConvolutionLayerDataset.h"
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -42,11 +41,13 @@ class LeNet5ConvolutionLayerDataset final : public ConvolutionLayerDataset
 public:
     LeNet5ConvolutionLayerDataset()
     {
-        add_config(TensorShape(28U, 28U, 1U), TensorShape(5U, 5U, 1U, 20U), TensorShape(20U), TensorShape(24U, 24U, 20U), PadStrideInfo(1, 1, 0, 0));
-        add_config(TensorShape(12U, 12U, 20U), TensorShape(5U, 5U, 20U, 50U), TensorShape(50U), TensorShape(8U, 8U, 50U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(28U, 28U, 1U), TensorShape(5U, 5U, 1U, 20U), TensorShape(20U),
+                   TensorShape(24U, 24U, 20U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(12U, 12U, 20U), TensorShape(5U, 5U, 20U, 50U), TensorShape(50U),
+                   TensorShape(8U, 8U, 50U), PadStrideInfo(1, 1, 0, 0));
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_LENET5_CONVOLUTION_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SYSTEM_TESTS_LENET5_LENET5CONVOLUTIONLAYERDATASET_H

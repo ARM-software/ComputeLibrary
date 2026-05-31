@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,9 +22,12 @@
  * SOFTWARE.
  */
 
+#ifndef ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_DEPTHWISE_COMMON_HPP
+#define ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_DEPTHWISE_COMMON_HPP
+
 #pragma once
 
-#include "arm_gemm.hpp"
+#include "arm_gemm/arm_gemm.hpp"
 #include "common.hpp"
 #include <cstddef>
 #include <tuple>
@@ -144,3 +147,5 @@ std::tuple<size_t, size_t, size_t, size_t, size_t> get_reduced_view_for_dilation
 
 } // namespace depthwise
 } // namespace arm_conv
+
+#endif // ACL_SRC_CORE_NEON_KERNELS_ASSEMBLY_DEPTHWISE_COMMON_HPP

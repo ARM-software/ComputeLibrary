@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,7 @@
  */
 #pragma once
 
-#ifdef ARM_COMPUTE_ENABLE_SME2
-
-#include "../bfloat.hpp"
+#include "arm_common/bfloat.hpp"
 #include "../std_transforms_sme.hpp"
 
 namespace arm_gemm
@@ -59,17 +57,7 @@ public:
     return 2;
   }
 
-  static constexpr bool supports_accumulate()
-  {
-    return true;
-  }
-
   static constexpr bool supports_bias()
-  {
-    return true;
-  }
-
-  static constexpr bool supports_activation()
   {
     return true;
   }
@@ -91,4 +79,3 @@ public:
 
 } // namespace arm_gemm
 
-#endif // ARM_COMPUTE_ENABLE_SME2

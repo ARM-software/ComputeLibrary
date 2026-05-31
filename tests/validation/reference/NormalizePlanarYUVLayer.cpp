@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,8 @@ namespace reference
 {
 // NormalizePlanarYUV Layer for floating point type
 template <typename T>
-SimpleTensor<T> normalize_planar_yuv_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &mean, const SimpleTensor<T> &std)
+SimpleTensor<T>
+normalize_planar_yuv_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &mean, const SimpleTensor<T> &std)
 {
     SimpleTensor<T> result(src.shape(), src.data_type());
 
@@ -44,13 +45,13 @@ SimpleTensor<T> normalize_planar_yuv_layer(const SimpleTensor<T> &src, const Sim
     const auto depth      = static_cast<int>(src.shape()[2]);
     const int  upper_dims = src.shape().total_size() / (cols * rows * depth);
 
-    for(int r = 0; r < upper_dims; ++r)
+    for (int r = 0; r < upper_dims; ++r)
     {
-        for(int i = 0; i < depth; ++i)
+        for (int i = 0; i < depth; ++i)
         {
-            for(int k = 0; k < rows; ++k)
+            for (int k = 0; k < rows; ++k)
             {
-                for(int l = 0; l < cols; ++l)
+                for (int l = 0; l < cols; ++l)
                 {
                     const int pos = l + k * cols + i * rows * cols + r * cols * rows * depth;
                     result[pos]   = (src[pos] - mean[i]) / std[i];
@@ -62,7 +63,9 @@ SimpleTensor<T> normalize_planar_yuv_layer(const SimpleTensor<T> &src, const Sim
 }
 
 template <>
-SimpleTensor<uint8_t> normalize_planar_yuv_layer<uint8_t>(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &mean, const SimpleTensor<uint8_t> &std)
+SimpleTensor<uint8_t> normalize_planar_yuv_layer<uint8_t>(const SimpleTensor<uint8_t> &src,
+                                                          const SimpleTensor<uint8_t> &mean,
+                                                          const SimpleTensor<uint8_t> &std)
 {
     SimpleTensor<float>   src_tmp  = convert_from_asymmetric(src);
     SimpleTensor<float>   mean_tmp = convert_from_asymmetric(mean);
@@ -73,7 +76,9 @@ SimpleTensor<uint8_t> normalize_planar_yuv_layer<uint8_t>(const SimpleTensor<uin
 }
 
 template <>
-SimpleTensor<int8_t> normalize_planar_yuv_layer<int8_t>(const SimpleTensor<int8_t> &src, const SimpleTensor<int8_t> &mean, const SimpleTensor<int8_t> &std)
+SimpleTensor<int8_t> normalize_planar_yuv_layer<int8_t>(const SimpleTensor<int8_t> &src,
+                                                        const SimpleTensor<int8_t> &mean,
+                                                        const SimpleTensor<int8_t> &std)
 {
     SimpleTensor<float>  src_tmp  = convert_from_asymmetric(src);
     SimpleTensor<float>  mean_tmp = convert_from_asymmetric(mean);
@@ -83,8 +88,12 @@ SimpleTensor<int8_t> normalize_planar_yuv_layer<int8_t>(const SimpleTensor<int8_
     return dst;
 }
 
-template SimpleTensor<half> normalize_planar_yuv_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &mean, const SimpleTensor<half> &std);
-template SimpleTensor<float> normalize_planar_yuv_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &mean, const SimpleTensor<float> &std);
+template SimpleTensor<half>  normalize_planar_yuv_layer(const SimpleTensor<half> &src,
+                                                        const SimpleTensor<half> &mean,
+                                                        const SimpleTensor<half> &std);
+template SimpleTensor<float> normalize_planar_yuv_layer(const SimpleTensor<float> &src,
+                                                        const SimpleTensor<float> &mean,
+                                                        const SimpleTensor<float> &std);
 } // namespace reference
 } // namespace validation
 } // namespace test

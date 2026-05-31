@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ class CastValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             (dt_in == DataType::F16 || dt_out == DataType::F16) && !CPUInfo::get().has_fp16())
         {
             return;
@@ -53,14 +53,14 @@ protected:
     void fill(U &&tensor, int i, DataType dt_in, DataType dt_out)
     {
         // Restricting range to avoid inf values
-        if(dt_out == DataType::F16)
+        if (dt_out == DataType::F16)
         {
             const int signed_min   = -32000;
             const int signed_max   = 32000;
             const int unsigned_min = 0;
             const int unsigned_max = 65000;
 
-            switch(dt_in)
+            switch (dt_in)
             {
                 case DataType::U8:
                 case DataType::QASYMM8:
@@ -77,32 +77,38 @@ protected:
                 }
                 case DataType::U16:
                 {
-                    library->fill_tensor_uniform(tensor, i, static_cast<uint16_t>(unsigned_min), static_cast<uint16_t>(unsigned_max));
+                    library->fill_tensor_uniform(tensor, i, static_cast<uint16_t>(unsigned_min),
+                                                 static_cast<uint16_t>(unsigned_max));
                     break;
                 }
                 case DataType::S16:
                 {
-                    library->fill_tensor_uniform(tensor, i, static_cast<int16_t>(signed_min), static_cast<int16_t>(signed_max));
+                    library->fill_tensor_uniform(tensor, i, static_cast<int16_t>(signed_min),
+                                                 static_cast<int16_t>(signed_max));
                     break;
                 }
                 case DataType::U32:
                 {
-                    library->fill_tensor_uniform(tensor, i, static_cast<uint32_t>(unsigned_min), static_cast<uint32_t>(unsigned_max));
+                    library->fill_tensor_uniform(tensor, i, static_cast<uint32_t>(unsigned_min),
+                                                 static_cast<uint32_t>(unsigned_max));
                     break;
                 }
                 case DataType::S32:
                 {
-                    library->fill_tensor_uniform(tensor, i, static_cast<int32_t>(signed_min), static_cast<int32_t>(signed_max));
+                    library->fill_tensor_uniform(tensor, i, static_cast<int32_t>(signed_min),
+                                                 static_cast<int32_t>(signed_max));
                     break;
                 }
                 case DataType::U64:
                 {
-                    library->fill_tensor_uniform(tensor, i, static_cast<uint64_t>(unsigned_min), static_cast<uint64_t>(unsigned_max));
+                    library->fill_tensor_uniform(tensor, i, static_cast<uint64_t>(unsigned_min),
+                                                 static_cast<uint64_t>(unsigned_max));
                     break;
                 }
                 case DataType::S64:
                 {
-                    library->fill_tensor_uniform(tensor, i, static_cast<int64_t>(signed_min), static_cast<int64_t>(signed_max));
+                    library->fill_tensor_uniform(tensor, i, static_cast<int64_t>(signed_min),
+                                                 static_cast<int64_t>(signed_max));
                     break;
                 }
                 default:
@@ -151,7 +157,7 @@ protected:
     SimpleTensor<T2> compute_reference(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy)
     {
         // Create reference
-        SimpleTensor<T1> src{ shape, dt_in, 1 };
+        SimpleTensor<T1> src{shape, dt_in, 1};
 
         // Fill reference
         fill(src, 0, dt_in, dt_out);

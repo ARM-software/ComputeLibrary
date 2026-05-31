@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FFT_FIXTURE
-#define ARM_COMPUTE_TEST_FFT_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_FFTFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_FFTFIXTURE_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/FunctionDescriptors.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
 #include "tests/validation/reference/DFT.h"
@@ -58,11 +59,11 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -5.0f, 5.0f };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-5.0f, 5.0f};
                 library->fill(tensor, distribution, 0);
                 break;
             }
@@ -90,7 +91,7 @@ protected:
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
-        add_padding_x({ &src, &dst });
+        add_padding_x({&src, &dst});
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -111,11 +112,11 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 2 };
+        SimpleTensor<T> src{shape, data_type, 2};
 
         // Fill reference
         fill(src);
-        if(std::is_same<InfoType, FFT1DInfo>::value)
+        if (std::is_same<InfoType, FFT1DInfo>::value)
         {
             return reference::dft_1d(src, reference::FFTDirection::Forward);
         }
@@ -133,8 +134,16 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class FFTConvolutionValidationGenericFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
-               DataType data_type, DataLayout data_layout, ActivationLayerInfo act_info, bool mixed_layout = false)
+    void setup(TensorShape         input_shape,
+               TensorShape         weights_shape,
+               TensorShape         bias_shape,
+               TensorShape         output_shape,
+               PadStrideInfo       info,
+               Size2D              dilation,
+               DataType            data_type,
+               DataLayout          data_layout,
+               ActivationLayerInfo act_info,
+               bool                mixed_layout = false)
     {
         _mixed_layout = mixed_layout;
         _data_type    = data_type;
@@ -162,11 +171,11 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -181,13 +190,18 @@ protected:
         }
     }
 
-    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, const TensorShape &bias_shape, TensorShape output_shape, const PadStrideInfo &info,
-                              const Size2D &dilation, const ActivationLayerInfo act_info)
+    TensorType compute_target(TensorShape               input_shape,
+                              TensorShape               weights_shape,
+                              const TensorShape        &bias_shape,
+                              TensorShape               output_shape,
+                              const PadStrideInfo      &info,
+                              const Size2D             &dilation,
+                              const ActivationLayerInfo act_info)
     {
         ARM_COMPUTE_UNUSED(dilation);
         ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
 
-        if(_data_layout == DataLayout::NHWC)
+        if (_data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
             permute(weights_shape, PermutationVector(2U, 0U, 1U));
@@ -200,7 +214,7 @@ protected:
         TensorType bias    = create_tensor<TensorType>(bias_shape, _data_type, 1, QuantizationInfo(), _data_layout);
         TensorType dst     = create_tensor<TensorType>(output_shape, _data_type, 1, QuantizationInfo(), _data_layout);
 
-        add_padding_x({ &src, &weights, &bias, &dst }, _data_layout);
+        add_padding_x({&src, &weights, &bias, &dst}, _data_layout);
 
         // Create and configure function
         FunctionType conv;
@@ -227,7 +241,7 @@ protected:
         fill(AccessorType(weights), 1);
         fill(AccessorType(bias), 2);
 
-        if(_mixed_layout)
+        if (_mixed_layout)
         {
             mix_layout(conv, src, dst);
         }
@@ -239,44 +253,60 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                                      const Size2D &dilation, const ActivationLayerInfo act_info)
+    SimpleTensor<T> compute_reference(const TensorShape        &input_shape,
+                                      const TensorShape        &weights_shape,
+                                      const TensorShape        &bias_shape,
+                                      const TensorShape        &output_shape,
+                                      const PadStrideInfo      &info,
+                                      const Size2D             &dilation,
+                                      const ActivationLayerInfo act_info)
     {
         ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
 
         // Create reference
-        SimpleTensor<T> src{ input_shape, _data_type, 1 };
-        SimpleTensor<T> weights{ weights_shape, _data_type, 1 };
-        SimpleTensor<T> bias{ bias_shape, _data_type, 1 };
+        SimpleTensor<T> src{input_shape, _data_type, 1};
+        SimpleTensor<T> weights{weights_shape, _data_type, 1};
+        SimpleTensor<T> bias{bias_shape, _data_type, 1};
 
         // Fill reference
         fill(src, 0);
         fill(weights, 1);
         fill(bias, 2);
 
-        return (act_info.enabled()) ? reference::activation_layer<T>(reference::convolution_layer<T>(src, weights, bias, output_shape, info, dilation), act_info) : reference::convolution_layer<T>(src,
-                weights, bias, output_shape, info, dilation);
+        return (act_info.enabled())
+                   ? reference::activation_layer<T>(
+                         reference::convolution_layer<T>(src, weights, bias, output_shape, info, dilation), act_info)
+                   : reference::convolution_layer<T>(src, weights, bias, output_shape, info, dilation);
     }
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
     DataType        _data_type{};
     DataLayout      _data_layout{};
-    bool            _mixed_layout{ false };
+    bool            _mixed_layout{false};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
-class FFTConvolutionValidationFixture : public FFTConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class FFTConvolutionValidationFixture
+    : public FFTConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
-               DataType data_type, DataLayout data_layout, ActivationLayerInfo act_info)
+    void setup(TensorShape         input_shape,
+               TensorShape         weights_shape,
+               TensorShape         bias_shape,
+               TensorShape         output_shape,
+               PadStrideInfo       info,
+               Size2D              dilation,
+               DataType            data_type,
+               DataLayout          data_layout,
+               ActivationLayerInfo act_info)
     {
-        FFTConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation,
-                                                                                                 data_type, data_layout, act_info, mixed_layout);
+        FFTConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type, data_layout, act_info,
+            mixed_layout);
     }
 };
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FFT_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_FFTFIXTURE_H

@@ -24,9 +24,11 @@
 #include "src/cpu/kernels/CpuWeightsReshapeKernel.h"
 
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/profile/acl_profile.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -55,6 +57,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *biases, con
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src, biases);
 
     if (biases != nullptr)
     {
@@ -68,15 +71,21 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *biases, con
     }
 
     // Checks performed when output is configured
+    const TensorShape out_shape = get_output_shape(src, biases != nullptr);
     if (dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(),
-                                                           get_output_shape(src, biases != nullptr));
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), out_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         if (!src->quantization_info().is_dynamic())
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
         }
+    }
+    else
+    {
+        const auto dst_info = TensorInfo(out_shape, 1, src->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

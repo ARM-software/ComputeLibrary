@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(ARM_COMPUTE_ENABLE_SVE)
+#if defined(ARM_COMPUTE_ENABLE_SVE) && defined(__aarch64__)
 
 namespace {
 
@@ -33,15 +33,16 @@ void sve_transpose_interleave_1VL(uint32_t *out, const uint32_t *in, size_t widt
     size_t out_stride = 1 * height * get_vector_length<uint8_t>();
 
     __asm__ __volatile__(
-      "cmp %x[height], #0x4\n"
+      "mov x27, %x[height]\n"
       "ptrue p1.b\n"
+      "cmp x27, #0x4\n"
       "blt 6f\n"
       "1:"  // Main row loop: Head
       "mov x26, %x[in]\n"
       "mov x25, %x[width]\n"
       "cntw x24, ALL, MUL #2\n"
       "mov x23, %x[out]\n"
-      "sub %x[height], %x[height], #0x4\n"
+      "sub x27, x27, #0x4\n"
       "add x22, x26, %x[in_stride]\n"
       "add x21, x22, %x[in_stride]\n"
       "add x20, x21, %x[in_stride]\n"
@@ -79,7 +80,7 @@ void sve_transpose_interleave_1VL(uint32_t *out, const uint32_t *in, size_t widt
       "4:"  // Main row loop: Column loop
       "whilelt p0.s, XZR, x25\n"
       "decw x25\n"
-      "cmp x25, #0x0\n"
+      "cmp x25, #0\n"
       "ld1w { z19.s }, p0/Z, [x26]\n"
       "addvl x26, x26, #1\n"
       "ld1w { z18.s }, p0/Z, [x22]\n"
@@ -95,17 +96,17 @@ void sve_transpose_interleave_1VL(uint32_t *out, const uint32_t *in, size_t widt
       "add x23, x23, %x[out_stride]\n"
       "bgt 4b\n"
       "5:"  // Main row loop: Column loop skip
-      "cmp %x[height], #0x4\n"
+      "cmp x27, #0x4\n"
       "addvl %x[out], %x[out], #4\n"
       "bge 1b\n"
-      "cbz %x[height], 12f\n"
+      "cbz x27, 12f\n"
       "6:"  // Main loop skip
       "7:"  // Tail row loop: Head
       "mov x21, %x[width]\n"
       "cntw x20, ALL, MUL #2\n"
       "mov x26, %x[in]\n"
       "mov x23, %x[out]\n"
-      "sub %x[height], %x[height], #0x1\n"
+      "sub x27, x27, #0x1\n"
       "cmp x21, x20\n"
       "add %x[in], x26, %x[in_stride]\n"
       "blt 9f\n"
@@ -125,20 +126,20 @@ void sve_transpose_interleave_1VL(uint32_t *out, const uint32_t *in, size_t widt
       "10:"  // Tail row loop: Column loop
       "whilelt p0.s, XZR, x21\n"
       "decw x21\n"
-      "cmp x21, #0x0\n"
+      "cmp x21, #0\n"
       "ld1w { z16.s }, p0/Z, [x26]\n"
       "addvl x26, x26, #1\n"
       "st1w { z16.s }, p1, [x23]\n"
       "add x23, x23, %x[out_stride]\n"
       "bgt 10b\n"
       "11:"  // Tail row loop: Column loop skip
-      "cmp %x[height], #0x1\n"
+      "cmp x27, #0x1\n"
       "addvl %x[out], %x[out], #1\n"
       "bge 7b\n"
       "12:"  // Done
-      : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
-      : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [width] "r" (width)
-      : "cc", "memory", "p0", "p1", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23"
+      : [in] "+&r" (in), [out] "+&r" (out)
+      : [height] "r" (height), [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [width] "r" (width)
+      : "cc", "memory", "p0", "p1", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23"
     );
 }
 
@@ -157,5 +158,5 @@ void Transform<1, 1, true, VLType::SVE>(
     );
 }
 
+#endif // defined(ARM_COMPUTE_ENABLE_SVE) && defined(__aarch64__)
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SVE)

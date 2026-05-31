@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, 2023 Arm Limited.
+ * Copyright (c) 2019-2020, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,12 +23,12 @@
  */
 #include "DFT.h"
 
+#include "support/ToolchainSupport.h"
+
 #include "PadLayer.h"
 #include "Permute.h"
 #include "Reverse.h"
 #include "SliceOperations.h"
-#include "support/ToolchainSupport.h"
-
 #include <cmath>
 
 namespace arm_compute
@@ -52,13 +52,13 @@ template <typename T>
 void rdft_1d_step(const T *src_ptr, size_t N, T *dst_ptr, size_t K)
 {
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(unsigned int k = 0; k < K; ++k)
+    for (unsigned int k = 0; k < K; ++k)
     {
         float Xr = 0;
         float Xi = 0;
-        for(unsigned int n = 0; n < N; ++n)
+        for (unsigned int n = 0; n < N; ++n)
         {
             const float alpha = (2 * M_PI * k * n) / N;
             const float val_r = src_ptr[n];
@@ -82,13 +82,13 @@ template <typename T>
 void dft_1d_step(const T *src_ptr, T *dst_ptr, size_t N)
 {
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(unsigned int k = 0; k < N; ++k)
+    for (unsigned int k = 0; k < N; ++k)
     {
         float Xr = 0;
         float Xi = 0;
-        for(unsigned int n = 0; n < N; ++n)
+        for (unsigned int n = 0; n < N; ++n)
         {
             const float alpha     = (2 * M_PI * k * n) / N;
             const float val_r     = src_ptr[2 * n];
@@ -119,19 +119,19 @@ void irdft_1d_step(const T *src_ptr, size_t K, T *dst_ptr, size_t N)
     const unsigned int Nleft      = N - K;
     const int          tail_start = is_odd ? K - 1 : K - 2;
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(unsigned int n = 0; n < N; ++n)
+    for (unsigned int n = 0; n < N; ++n)
     {
         float xr = 0;
-        for(unsigned int k = 0; k < K; ++k)
+        for (unsigned int k = 0; k < K; ++k)
         {
             const float alpha = (2 * M_PI * k * n) / N;
             xr += src_ptr[2 * k] * cos(alpha) - src_ptr[2 * k + 1] * sin(alpha);
         }
 
         unsigned int j = tail_start;
-        for(unsigned int k = 0; k < Nleft; ++k)
+        for (unsigned int k = 0; k < Nleft; ++k)
         {
             const float alpha = (2 * M_PI * (k + K) * n) / N;
             xr += src_ptr[2 * j] * cos(alpha) + src_ptr[2 * j + 1] * sin(alpha);
@@ -152,13 +152,13 @@ template <typename T>
 void idft_1d_step(const T *src_ptr, T *dst_ptr, size_t N)
 {
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(unsigned int n = 0; n < N; ++n)
+    for (unsigned int n = 0; n < N; ++n)
     {
         float xr = 0;
         float xi = 0;
-        for(unsigned int k = 0; k < N; ++k)
+        for (unsigned int k = 0; k < N; ++k)
         {
             const float alpha     = (2 * M_PI * k * n) / N;
             const float cos_alpha = cos(alpha);
@@ -194,13 +194,14 @@ SimpleTensor<T> rdft_1d_core(const SimpleTensor<T> &src, FFTDirection direction,
 
     const unsigned int upper_dims = src.shape().total_size_upper(1);
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(unsigned int du = 0; du < upper_dims; ++du)
+    for (unsigned int du = 0; du < upper_dims; ++du)
     {
         const T *src_row_ptr = src.data() + du * N * src.num_channels();
         T       *dst_row_ptr = dst.data() + du * K * dst.num_channels();
-        direction == FFTDirection::Forward ? rdft_1d_step(src_row_ptr, N, dst_row_ptr, K) : irdft_1d_step(src_row_ptr, N, dst_row_ptr, K);
+        direction == FFTDirection::Forward ? rdft_1d_step(src_row_ptr, N, dst_row_ptr, K)
+                                                 : irdft_1d_step(src_row_ptr, N, dst_row_ptr, K);
     }
 
     return dst;
@@ -217,13 +218,14 @@ SimpleTensor<T> dft_1d_core(const SimpleTensor<T> &src, FFTDirection direction)
 
     const unsigned int upper_dims = src.shape().total_size_upper(1);
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(unsigned int du = 0; du < upper_dims; ++du)
+    for (unsigned int du = 0; du < upper_dims; ++du)
     {
         const T *src_row_ptr = src.data() + du * N * src.num_channels();
         T       *dst_row_ptr = dst.data() + du * N * dst.num_channels();
-        direction == FFTDirection::Forward ? dft_1d_step(src_row_ptr, dst_row_ptr, N) : idft_1d_step(src_row_ptr, dst_row_ptr, N);
+        direction == FFTDirection::Forward ? dft_1d_step(src_row_ptr, dst_row_ptr, N)
+                                                 : idft_1d_step(src_row_ptr, dst_row_ptr, N);
     }
 
     return dst;
@@ -240,9 +242,9 @@ void scale(SimpleTensor<T> &tensor, T scaling_factor)
     const int total_elements = tensor.num_elements() * tensor.num_channels();
     T        *data_ptr       = tensor.data();
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < total_elements; ++i)
+    for (int i = 0; i < total_elements; ++i)
     {
         data_ptr[i] /= scaling_factor;
     }
@@ -272,15 +274,15 @@ SimpleTensor<T> complex_mul_and_reduce(const SimpleTensor<T> &input, const Simpl
     const auto total_element_count = dst.num_channels() * dst.num_elements();
     std::fill_n(dst.data(), total_element_count, 0);
 
-    for(uint32_t b = 0; b < N; ++b)
+    for (uint32_t b = 0; b < N; ++b)
     {
-        for(uint32_t co = 0; co < Co; ++co)
+        for (uint32_t co = 0; co < Co; ++co)
         {
-            for(uint32_t ci = 0; ci < Ci; ++ci)
+            for (uint32_t ci = 0; ci < Ci; ++ci)
             {
-                for(uint32_t h = 0; h < H; ++h)
+                for (uint32_t h = 0; h < H; ++h)
                 {
-                    for(uint32_t w = 0; w < W; ++w)
+                    for (uint32_t w = 0; w < W; ++w)
                     {
                         const uint32_t    i_index  = w + h * W + ci * H * W + b * H * W * Ci;
                         const uint32_t    w_index  = w + h * W + ci * H * W + co * H * W * Ci;
@@ -330,7 +332,7 @@ template <typename T>
 SimpleTensor<T> dft_1d(const SimpleTensor<T> &src, FFTDirection direction)
 {
     auto dst = dft_1d_core(src, direction);
-    if(direction == FFTDirection::Inverse)
+    if (direction == FFTDirection::Inverse)
     {
         const T scaling_factor = T(dst.shape()[0]);
         scale(dst, scaling_factor);
@@ -371,7 +373,7 @@ SimpleTensor<T> dft_2d(const SimpleTensor<T> &src, FFTDirection direction)
 {
     ARM_COMPUTE_ERROR_ON(src.num_channels() != 2);
 
-    if(direction == FFTDirection::Forward)
+    if (direction == FFTDirection::Forward)
     {
         auto first_pass  = dft_1d_core(src, direction);
         auto transposed  = permute(first_pass, PermutationVector(1U, 0U));
@@ -396,17 +398,17 @@ template <typename T>
 SimpleTensor<T> conv2d_dft(const SimpleTensor<T> &src, const SimpleTensor<T> &w, const PadStrideInfo &conv_info)
 {
     // Pad input to full padding
-    const PaddingList padding_in = { { 0, w.shape()[0] - 1 }, { 0, w.shape()[1] - 1 } };
+    const PaddingList padding_in = {{0, w.shape()[0] - 1}, {0, w.shape()[1] - 1}};
     auto              padded_src = pad_layer(src, padding_in);
 
     // Flip weights
-    std::vector<uint32_t> axis_v = { 0, 1 };
-    SimpleTensor<int32_t> axis{ TensorShape(2U), DataType::S32 };
+    std::vector<uint32_t> axis_v = {0, 1};
+    SimpleTensor<int32_t> axis{TensorShape(2U), DataType::S32};
     std::copy(axis_v.begin(), axis_v.begin() + axis.shape().x(), axis.data());
     auto flipped_w = reverse(w, axis, /* use_inverted_axis */ false);
 
     // Pad weights to have the same size as input
-    const PaddingList paddings_w = { { 0, src.shape()[0] - 1 }, { 0, src.shape()[1] - 1 } };
+    const PaddingList paddings_w = {{0, src.shape()[0] - 1}, {0, src.shape()[1] - 1}};
     auto              padded_w   = pad_layer(flipped_w, paddings_w);
 
     // Transform input and weights to frequency domain
@@ -436,7 +438,8 @@ template SimpleTensor<float> rdft_2d(const SimpleTensor<float> &src);
 template SimpleTensor<float> ridft_2d(const SimpleTensor<float> &src, bool is_odd);
 template SimpleTensor<float> dft_2d(const SimpleTensor<float> &src, FFTDirection direction);
 
-template SimpleTensor<float> conv2d_dft(const SimpleTensor<float> &src, const SimpleTensor<float> &w, const PadStrideInfo &conv_info);
+template SimpleTensor<float>
+conv2d_dft(const SimpleTensor<float> &src, const SimpleTensor<float> &w, const PadStrideInfo &conv_info);
 
 // FP16
 template SimpleTensor<half> rdft_1d(const SimpleTensor<half> &src);
@@ -447,7 +450,8 @@ template SimpleTensor<half> rdft_2d(const SimpleTensor<half> &src);
 template SimpleTensor<half> ridft_2d(const SimpleTensor<half> &src, bool is_odd);
 template SimpleTensor<half> dft_2d(const SimpleTensor<half> &src, FFTDirection direction);
 
-template SimpleTensor<half> conv2d_dft(const SimpleTensor<half> &src, const SimpleTensor<half> &w, const PadStrideInfo &conv_info);
+template SimpleTensor<half>
+conv2d_dft(const SimpleTensor<half> &src, const SimpleTensor<half> &w, const PadStrideInfo &conv_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

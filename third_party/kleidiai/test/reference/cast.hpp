@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -7,9 +7,8 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
-#include <vector>
 
+#include "test/common/buffer.hpp"
 #include "test/common/data_type.hpp"
 
 namespace kai::test {
@@ -24,7 +23,7 @@ namespace kai::test {
 ///
 /// @return A new data buffer containing casted values.
 template <typename DstType, typename SrcType>
-std::vector<uint8_t> cast(const void* src, size_t length);
+Buffer cast(const void* src, size_t length);
 
 /// Converts each element of the source matrix to the new data type.
 ///
@@ -35,7 +34,7 @@ std::vector<uint8_t> cast(const void* src, size_t length);
 /// @param[in] width Number of columns.
 ///
 /// @return The result matrix containing data in the destination data type.
-std::vector<uint8_t> cast(const void* src, DataType src_dt, DataType dst_dt, size_t height, size_t width);
+Buffer cast(const void* src, DataType src_dt, DataType dst_dt, size_t height, size_t width);
 
 /// Converts each element of the source data from 4-bit signed symmetric quantized
 /// to 4-bit unsigned symmetric quantized.
@@ -44,6 +43,6 @@ std::vector<uint8_t> cast(const void* src, DataType src_dt, DataType dst_dt, siz
 /// @param[in] length The number of elements.
 ///
 /// @return A new data buffer with converted values.
-std::vector<uint8_t> cast_qsu4_qsi4(const void* src, size_t length);
+Buffer cast_qsu4_qsi4(const void* src, size_t length);
 
 }  // namespace kai::test

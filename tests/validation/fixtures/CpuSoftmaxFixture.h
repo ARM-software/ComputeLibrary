@@ -27,12 +27,14 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/SoftmaxLayer.h"
+
 #include <random>
 
 #if !defined(BARE_METAL)
@@ -48,24 +50,28 @@ namespace validation
 {
 namespace
 {
-constexpr int NUM_THREADS =  3;
-}// namespace
+constexpr int NUM_THREADS = 3;
+} // namespace
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool IS_LOG = false>
 class CpuSoftmaxValidationGenericFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape, DataType data_type, float beta, size_t axis, QuantizationInfo qinfo,
-               TestType test_type = TestType::ConfigureOnceRunOnce)
+    void setup(TensorShape      shape,
+               DataType         data_type,
+               float            beta,
+               size_t           axis,
+               QuantizationInfo qinfo,
+               TestType         test_type = TestType::ConfigureOnceRunOnce)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
         }
 
-        quantization_info_  = qinfo;
-        test_type_          = test_type;
-        num_parallel_runs_  = (test_type_ == TestType::ConfigureOnceRunMultiThreaded ? NUM_THREADS : 1);
+        quantization_info_ = qinfo;
+        test_type_         = test_type;
+        num_parallel_runs_ = (test_type_ == TestType::ConfigureOnceRunMultiThreaded ? NUM_THREADS : 1);
 
         compute_reference(shape, data_type, quantization_info_, beta, axis);
         compute_target(shape, data_type, quantization_info_, beta, axis);
@@ -75,17 +81,17 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(tensor.data_type() == DataType::F32)
+        if (tensor.data_type() == DataType::F32)
         {
             std::uniform_real_distribution<float> distribution(-10.0f, 10.0f);
             library->fill(tensor, distribution, 0);
         }
-        else if(tensor.data_type() == DataType::F16)
+        else if (tensor.data_type() == DataType::F16)
         {
-            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -10.0f, 10.0f };
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-10.0f, 10.0f};
             library->fill(tensor, distribution, 0);
         }
-        else if(!is_data_type_quantized(tensor.data_type()))
+        else if (!is_data_type_quantized(tensor.data_type()))
         {
             std::uniform_int_distribution<> distribution(0, 100);
             library->fill(tensor, distribution, 0);
@@ -96,9 +102,10 @@ protected:
         }
     }
 
-    void allocate_and_fill_tensors(TensorType *src, TensorType *dst){
-        for(int i = 0; i < num_parallel_runs_; ++i){
-
+    void allocate_and_fill_tensors(TensorType *src, TensorType *dst)
+    {
+        for (int i = 0; i < num_parallel_runs_; ++i)
+        {
             ARM_COMPUTE_ASSERT(src[i].info()->is_resizable());
             ARM_COMPUTE_ASSERT(dst[i].info()->is_resizable());
 
@@ -114,19 +121,21 @@ protected:
         }
     }
 
-    void compute_target(const TensorShape &shape, DataType data_type,
-                              QuantizationInfo quantization_info, float beta, int32_t axis)
+    void compute_target(
+        const TensorShape &shape, DataType data_type, QuantizationInfo quantization_info, float beta, int32_t axis)
     {
-        TensorType src[NUM_THREADS];
-        TensorType dst[NUM_THREADS];
+        TensorType  src[NUM_THREADS];
+        TensorType  dst[NUM_THREADS];
         ITensorPack run_pack[NUM_THREADS];
         TensorType *dst_ptrs[NUM_THREADS];
-        auto mg = MemoryGroup{};
+        auto        mg = MemoryGroup{};
 
         // Create tensors
-        for(int i = 0; i < num_parallel_runs_; ++i){
-            src[i]  = create_tensor<TensorType>(shape, data_type, 1, quantization_info);
-            dst[i]  = create_tensor<TensorType>(shape, data_type, 1, get_softmax_output_quantization_info(data_type, IS_LOG));
+        for (int i = 0; i < num_parallel_runs_; ++i)
+        {
+            src[i] = create_tensor<TensorType>(shape, data_type, 1, quantization_info);
+            dst[i] =
+                create_tensor<TensorType>(shape, data_type, 1, get_softmax_output_quantization_info(data_type, IS_LOG));
             dst_ptrs[i] = &dst[i];
         }
 
@@ -136,26 +145,27 @@ protected:
 
         allocate_and_fill_tensors(src, dst);
 
-        if(test_type_ == TestType::ConfigureOnceRunMultiThreaded)
+        if (test_type_ == TestType::ConfigureOnceRunMultiThreaded)
         {
 #ifndef BARE_METAL
             std::vector<std::thread> threads;
 
             threads.reserve(num_parallel_runs_);
-            for(int i = 0; i < num_parallel_runs_; ++i)
+            for (int i = 0; i < num_parallel_runs_; ++i)
             {
                 // Compute function
                 run_pack[i] = {{arm_compute::TensorType::ACL_SRC_0, &src[i]},
                                {arm_compute::TensorType::ACL_DST, dst_ptrs[i]}};
 
-                threads.emplace_back([&,i]
-                {
-                    auto ws = manage_workspace<Tensor>(softmax.workspace(), mg, run_pack[i]);
-                    softmax.run(run_pack[i]);
-                    target_[i] = std::move(*(dst_ptrs[i]));
-                });
+                threads.emplace_back(
+                    [&, i]
+                    {
+                        auto ws = manage_workspace<Tensor>(softmax.workspace(), mg, run_pack[i]);
+                        softmax.run(run_pack[i]);
+                        target_[i] = std::move(*(dst_ptrs[i]));
+                    });
             }
-            for(int i = 0; i < num_parallel_runs_; ++i)
+            for (int i = 0; i < num_parallel_runs_; ++i)
             {
                 threads[i].join();
             }
@@ -166,7 +176,7 @@ protected:
             // Compute function
             ITensorPack run_pack{{arm_compute::TensorType::ACL_SRC_0, &src[0]},
                                  {arm_compute::TensorType::ACL_DST, dst_ptrs[0]}};
-            auto ws = manage_workspace<Tensor>(softmax.workspace(), mg, run_pack);
+            auto        ws = manage_workspace<Tensor>(softmax.workspace(), mg, run_pack);
 
             // Compute function
             softmax.run(run_pack);
@@ -174,14 +184,14 @@ protected:
         }
     }
 
-    void compute_reference(const TensorShape &shape, DataType data_type,
-                                      QuantizationInfo quantization_info, float beta, int32_t axis)
+    void compute_reference(
+        const TensorShape &shape, DataType data_type, QuantizationInfo quantization_info, float beta, int32_t axis)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 1, quantization_info };
+        SimpleTensor<T> src{shape, data_type, 1, quantization_info};
 
         // Fill reference
-        for(int i = 0; i < num_parallel_runs_; ++i)
+        for (int i = 0; i < num_parallel_runs_; ++i)
         {
             // Fill reference
             fill(src);
@@ -197,8 +207,7 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class CpuSoftmaxValidationFixture
-    : public CpuSoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class CpuSoftmaxValidationFixture : public CpuSoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(TensorShape shape, DataType data_type, float beta, size_t axis)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,14 +27,15 @@
 #include "arm_compute/runtime/NEON/functions/NEStackLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/StackLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 #include <vector>
 
@@ -111,7 +112,8 @@ make("OutputInfo",
     TensorInfo(TensorShape(1U, 2U, 3U), 1, DataType::U8),   // fails mismatching data types
 }),
 make("Axis", { -3, 1, -4, -3, 1 }),
-make("Expected", { true, true, false, false, false })),
+make("Expected", { true, true, false, false, false })
+),
 input_info, output_info, axis, expected)
 {
     std::vector<TensorInfo>    ti(input_info);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SPACE_TO_DEPTH_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_SPACE_TO_DEPTH_LAYER_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_SPACETODEPTHFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_SPACETODEPTHFIXTURE_H
 
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "tests/Globals.h"
+
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
 #include "tests/validation/reference/SpaceToDepth.h"
 
 namespace arm_compute
@@ -40,7 +41,11 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class SpaceToDepthLayerValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape input_shape, TensorShape output_shape, const int block_shape, DataType data_type, DataLayout data_layout)
+    void setup(TensorShape input_shape,
+               TensorShape output_shape,
+               const int   block_shape,
+               DataType    data_type,
+               DataLayout  data_layout)
     {
         _target    = compute_target(input_shape, output_shape, block_shape, data_type, data_layout);
         _reference = compute_reference(input_shape, output_shape, block_shape, data_type);
@@ -50,16 +55,22 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
-        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value,
+                      "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value,
+                                                           arm_compute::utils::uniform_real_distribution_16bit<T>,
+                                                           std::uniform_real_distribution<T>>::type;
 
-        DistributionType distribution{ T(-1.0f), T(1.0f) };
+        DistributionType distribution{T(-1.0f), T(1.0f)};
         library->fill(tensor, distribution, i);
     }
-    TensorType compute_target(TensorShape input_shape, TensorShape output_shape, const int block_shape,
-                              DataType data_type, DataLayout data_layout)
+    TensorType compute_target(TensorShape input_shape,
+                              TensorShape output_shape,
+                              const int   block_shape,
+                              DataType    data_type,
+                              DataLayout  data_layout)
     {
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
             permute(output_shape, PermutationVector(2U, 0U, 1U));
@@ -97,11 +108,13 @@ protected:
         return output;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape,
-                                      const int block_shape, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape,
+                                      const TensorShape &output_shape,
+                                      const int          block_shape,
+                                      DataType           data_type)
     {
         // Create reference
-        SimpleTensor<T> input{ input_shape, data_type };
+        SimpleTensor<T> input{input_shape, data_type};
 
         // Fill reference
         fill(input, 0);
@@ -116,4 +129,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SPACE_TO_DEPTH_LAYER_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_SPACETODEPTHFIXTURE_H

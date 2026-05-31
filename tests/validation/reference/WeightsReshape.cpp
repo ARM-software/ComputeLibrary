@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,27 +35,30 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> weights_reshape(const SimpleTensor<T> &src, const SimpleTensor<T> &biases, const TensorShape &dst_shape, const unsigned int num_groups)
+SimpleTensor<T> weights_reshape(const SimpleTensor<T> &src,
+                                const SimpleTensor<T> &biases,
+                                const TensorShape     &dst_shape,
+                                const unsigned int     num_groups)
 {
-    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1 };
+    SimpleTensor<T> dst{dst_shape, src.data_type(), 1};
 
     // Compute reference
     const bool   has_bias  = biases.size() > 0;
     const size_t linear_sz = src.shape().total_size_lower(3);
     const size_t group_sz  = src.shape()[3] / num_groups;
 
-    for(size_t g = 0; g < num_groups; ++g)
+    for (size_t g = 0; g < num_groups; ++g)
     {
-        for(size_t w = 0; w < group_sz; ++w)
+        for (size_t w = 0; w < group_sz; ++w)
         {
             const size_t curr_weight = g * group_sz + w;
 
             size_t i = 0;
-            for(; i < linear_sz; ++i)
+            for (; i < linear_sz; ++i)
             {
                 dst[coord2index(dst.shape(), Coordinates(w, i, g))] = src[curr_weight * linear_sz + i];
             }
-            if(has_bias)
+            if (has_bias)
             {
                 dst[coord2index(dst.shape(), Coordinates(w, i, g))] = static_cast<T>(biases[curr_weight]);
             }
@@ -65,9 +68,18 @@ SimpleTensor<T> weights_reshape(const SimpleTensor<T> &src, const SimpleTensor<T
     return dst;
 }
 
-template SimpleTensor<float> weights_reshape(const SimpleTensor<float> &src, const SimpleTensor<float> &biases, const TensorShape &dst_shape, const unsigned int num_groups);
-template SimpleTensor<half> weights_reshape(const SimpleTensor<half> &src, const SimpleTensor<half> &biases, const TensorShape &dst_shape, const unsigned int num_groups);
-template SimpleTensor<uint8_t> weights_reshape(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &biases, const TensorShape &dst_shape, const unsigned int num_groups);
+template SimpleTensor<float>   weights_reshape(const SimpleTensor<float> &src,
+                                               const SimpleTensor<float> &biases,
+                                               const TensorShape         &dst_shape,
+                                               const unsigned int         num_groups);
+template SimpleTensor<half>    weights_reshape(const SimpleTensor<half> &src,
+                                               const SimpleTensor<half> &biases,
+                                               const TensorShape        &dst_shape,
+                                               const unsigned int        num_groups);
+template SimpleTensor<uint8_t> weights_reshape(const SimpleTensor<uint8_t> &src,
+                                               const SimpleTensor<uint8_t> &biases,
+                                               const TensorShape           &dst_shape,
+                                               const unsigned int           num_groups);
 } // namespace reference
 } // namespace validation
 } // namespace test

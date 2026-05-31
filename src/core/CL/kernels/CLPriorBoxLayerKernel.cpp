@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited.
+ * Copyright (c) 2018-2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -48,6 +49,7 @@ Status validate_arguments(const ITensorInfo       *input1,
                           const PriorBoxLayerInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input1, input2, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input1, input2);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, input2);
@@ -77,10 +79,9 @@ Status validate_arguments(const ITensorInfo       *input1,
                                         "Max size should be greater than min size");
     }
 
-    if (output != nullptr && output->total_size() != 0)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) != 2);
-    }
+    // There is no default configure, so we expect output to be initialized.
+    ARM_COMPUTE_RETURN_ERROR_ON(output->total_size() == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) != 2);
 
     return Status{};
 }

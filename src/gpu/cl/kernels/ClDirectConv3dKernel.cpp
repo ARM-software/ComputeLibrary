@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Arm Limited.
+ * Copyright (c) 2021-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,12 +24,14 @@
 #include "src/gpu/cl/kernels/ClDirectConv3dKernel.h"
 
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
 
@@ -47,6 +49,8 @@ Status validate_arguments(const ITensorInfo *src0,
                           const ITensorInfo *dst,
                           const Conv3dInfo  &conv3d_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src0, src1);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_LAYOUT(src0, src1, dst);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src0->data_layout() != DataLayout::NDHWC, "Only NDHWC layout supported");
 
@@ -72,6 +76,7 @@ Status validate_arguments(const ITensorInfo *src0,
 
     if (src2 != nullptr)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src2);
         if (is_data_type_quantized(src0->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src2, 1, DataType::S32);
@@ -85,14 +90,21 @@ Status validate_arguments(const ITensorInfo *src0,
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(src2->num_dimensions() > 1, "Biases should be one dimensional");
     }
 
+    const TensorShape output_shape =
+        misc::shape_calculator::compute_conv3d_shape(src0->tensor_shape(), src1->tensor_shape(), conv3d_info);
+
     // Checks performed when dst is configured
     if (dst->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(dst->dimension(0) != src1->dimension(0), "Weights and dst OFMs should match");
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
-            dst->tensor_shape(),
-            misc::shape_calculator::compute_conv3d_shape(src0->tensor_shape(), src1->tensor_shape(), conv3d_info));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, dst);
+    }
+    else
+    {
+        const TensorInfo dst_info(output_shape, src0->num_channels(), src0->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

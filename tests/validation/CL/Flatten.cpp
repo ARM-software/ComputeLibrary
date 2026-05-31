@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/FlattenLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -40,6 +41,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::concat;
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(FlattenLayer)
 
@@ -48,14 +51,20 @@ using CLFlattenLayerFixture = FlattenLayerValidationFixture<CLTensor, CLAccessor
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFlattenLayerFixture<float>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                    framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLFlattenLayerFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFlattenLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
-                                                                                                        framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLFlattenLayerFixture<float>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
+                               make("DataType", DataType::F32)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -63,14 +72,20 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLFlattenLayerFixture<float>, framework::Datase
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFlattenLayerFixture<half>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                   framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLFlattenLayerFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
+                               make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFlattenLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
-                                                                                                       framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge,
+                       CLFlattenLayerFixture<half>,
+                       framework::DatasetMode::NIGHTLY,
+                       combine(concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
+                               make("DataType", DataType::F16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

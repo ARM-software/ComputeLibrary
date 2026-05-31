@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_THRESHOLD_DATASET
-#define ARM_COMPUTE_TEST_THRESHOLD_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_THRESHOLDDATASET_H
+#define ACL_TESTS_DATASETS_THRESHOLDDATASET_H
 
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -46,11 +46,11 @@ public:
                  std::vector<uint8_t>::const_iterator       true_value_it,
                  std::vector<ThresholdType>::const_iterator type_it,
                  std::vector<uint8_t>::const_iterator       upper_it)
-            : _threshold_it{ std::move(threshold_it) },
-              _false_value_it{ std::move(false_value_it) },
-              _true_value_it{ std::move(true_value_it) },
-              _type_it{ std::move(type_it) },
-              _upper_it{ std::move(upper_it) }
+            : _threshold_it{std::move(threshold_it)},
+              _false_value_it{std::move(false_value_it)},
+              _true_value_it{std::move(true_value_it)},
+              _type_it{std::move(type_it)},
+              _upper_it{std::move(upper_it)}
         {
         }
 
@@ -92,15 +92,19 @@ public:
 
     iterator begin() const
     {
-        return iterator(_thresholds.begin(), _false_values.begin(), _true_values.begin(), _types.begin(), _uppers.begin());
+        return iterator(_thresholds.begin(), _false_values.begin(), _true_values.begin(), _types.begin(),
+                        _uppers.begin());
     }
 
     int size() const
     {
-        return std::min(_thresholds.size(), std::min(_false_values.size(), std::min(_true_values.size(), std::min(_types.size(), _uppers.size()))));
+        return std::min(
+            _thresholds.size(),
+            std::min(_false_values.size(), std::min(_true_values.size(), std::min(_types.size(), _uppers.size()))));
     }
 
-    void add_config(uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType threshold_type, uint8_t upper)
+    void
+    add_config(uint8_t threshold, uint8_t false_value, uint8_t true_value, ThresholdType threshold_type, uint8_t upper)
     {
         _thresholds.emplace_back(std::move(threshold));
         _false_values.emplace_back(std::move(false_value));
@@ -135,4 +139,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_THRESHOLD_DATASET */
+#endif // ACL_TESTS_DATASETS_THRESHOLDDATASET_H

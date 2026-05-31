@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SCALE_LAYER_DATASET
-#define ARM_COMPUTE_TEST_SCALE_LAYER_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_SCALELAYERDATASET_H
+#define ACL_TESTS_DATASETS_SCALELAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -48,12 +48,12 @@ public:
                  std::vector<SamplingPolicy>::const_iterator      sampling_policy_it,
                  std::vector<float>::const_iterator               scale_x_it,
                  std::vector<float>::const_iterator               scale_y_it)
-            : _src_it{ std::move(src_it) },
-              _policy_it{ std::move(policy_it) },
-              _border_mode_it{ std::move(border_mode_it) },
-              _sampling_policy_it{ std::move(sampling_policy_it) },
-              _scale_x_it{ std::move(scale_x_it) },
-              _scale_y_it{ std::move(scale_y_it) }
+            : _src_it{std::move(src_it)},
+              _policy_it{std::move(policy_it)},
+              _border_mode_it{std::move(border_mode_it)},
+              _sampling_policy_it{std::move(sampling_policy_it)},
+              _scale_x_it{std::move(scale_x_it)},
+              _scale_y_it{std::move(scale_y_it)}
         {
         }
 
@@ -71,7 +71,8 @@ public:
 
         ScaleLayerDataset::type operator*() const
         {
-            return std::make_tuple(*_src_it, *_policy_it, *_border_mode_it, *_sampling_policy_it, *_scale_x_it, *_scale_y_it);
+            return std::make_tuple(*_src_it, *_policy_it, *_border_mode_it, *_sampling_policy_it, *_scale_x_it,
+                                   *_scale_y_it);
         }
 
         iterator &operator++()
@@ -97,15 +98,24 @@ public:
 
     iterator begin() const
     {
-        return iterator(_src_shapes.begin(), _policy.begin(), _border_mode.begin(), _sampling_policy.begin(), _scale_x.begin(), _scale_y.begin());
+        return iterator(_src_shapes.begin(), _policy.begin(), _border_mode.begin(), _sampling_policy.begin(),
+                        _scale_x.begin(), _scale_y.begin());
     }
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_policy.size(), std::min(_border_mode.size(), std::min(_sampling_policy.size(), std::min(_scale_x.size(), _scale_y.size())))));
+        return std::min(_src_shapes.size(),
+                        std::min(_policy.size(),
+                                 std::min(_border_mode.size(), std::min(_sampling_policy.size(),
+                                                                        std::min(_scale_x.size(), _scale_y.size())))));
     }
 
-    void add_config(TensorShape src, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy, float scale_x, float scale_y)
+    void add_config(TensorShape         src,
+                    InterpolationPolicy policy,
+                    BorderMode          border_mode,
+                    SamplingPolicy      sampling_policy,
+                    float               scale_x,
+                    float               scale_y)
     {
         _src_shapes.emplace_back(std::move(src));
         _policy.emplace_back(std::move(policy));
@@ -134,9 +144,12 @@ class SmallScaleLayerShapes final : public ScaleLayerDataset
 public:
     SmallScaleLayerShapes()
     {
-        add_config(TensorShape(128U, 64U, 1U, 3U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 5, 5);
-        add_config(TensorShape(9U, 9U, 3U, 4U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 7, 7);
-        add_config(TensorShape(27U, 13U, 2U, 4U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 9, 9);
+        add_config(TensorShape(128U, 64U, 1U, 3U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 5, 5);
+        add_config(TensorShape(9U, 9U, 3U, 4U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 7, 7);
+        add_config(TensorShape(27U, 13U, 2U, 4U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 9, 9);
     }
 };
 
@@ -146,24 +159,36 @@ class LargeScaleLayerShapes final : public ScaleLayerDataset
 public:
     LargeScaleLayerShapes()
     {
-        add_config(TensorShape(1920U, 1080U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 0.5, 0.5);
-        add_config(TensorShape(640U, 480U, 2U, 3U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 0.5, 0.5);
-        add_config(TensorShape(4160U, 3120U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 0.5, 0.5);
-        add_config(TensorShape(800U, 600U, 1U, 4U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 0.5, 0.5);
+        add_config(TensorShape(1920U, 1080U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 0.5, 0.5);
+        add_config(TensorShape(640U, 480U, 2U, 3U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 0.5, 0.5);
+        add_config(TensorShape(4160U, 3120U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 0.5, 0.5);
+        add_config(TensorShape(800U, 600U, 1U, 4U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 0.5, 0.5);
 
-        add_config(TensorShape(1920U, 1080U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 2, 2);
-        add_config(TensorShape(640U, 480U, 2U, 3U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 2, 2);
-        add_config(TensorShape(4160U, 3120U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 2, 2);
-        add_config(TensorShape(800U, 600U, 1U, 4U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 2, 2);
+        add_config(TensorShape(1920U, 1080U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 2, 2);
+        add_config(TensorShape(640U, 480U, 2U, 3U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 2, 2);
+        add_config(TensorShape(4160U, 3120U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 2, 2);
+        add_config(TensorShape(800U, 600U, 1U, 4U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 2, 2);
 
-        add_config(TensorShape(1920U, 1080U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 3, 3);
-        add_config(TensorShape(640U, 480U, 2U, 3U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 3, 3);
-        add_config(TensorShape(4160U, 3120U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 3, 3);
-        add_config(TensorShape(800U, 600U, 1U, 4U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED, SamplingPolicy::CENTER, 3, 3);
+        add_config(TensorShape(1920U, 1080U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 3, 3);
+        add_config(TensorShape(640U, 480U, 2U, 3U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 3, 3);
+        add_config(TensorShape(4160U, 3120U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 3, 3);
+        add_config(TensorShape(800U, 600U, 1U, 4U), InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED,
+                   SamplingPolicy::CENTER, 3, 3);
     }
 };
 
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SCALE_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_SCALELAYERDATASET_H

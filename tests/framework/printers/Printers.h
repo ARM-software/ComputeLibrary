@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PRINTERS
-#define ARM_COMPUTE_TEST_PRINTERS
+#ifndef ACL_TESTS_FRAMEWORK_PRINTERS_PRINTERS_H
+#define ACL_TESTS_FRAMEWORK_PRINTERS_PRINTERS_H
 
 #include "JSONPrinter.h"
 #include "PrettyPrinter.h"
@@ -52,7 +52,7 @@ inline ::std::stringstream &operator>>(::std::stringstream &stream, LogFormat &f
 
 inline ::std::stringstream &operator<<(::std::stringstream &stream, LogFormat format)
 {
-    switch(format)
+    switch (format)
     {
         case LogFormat::PRETTY:
             stream << "PRETTY";
@@ -72,4 +72,4 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, LogFormat fo
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PRINTERS */
+#endif // ACL_TESTS_FRAMEWORK_PRINTERS_PRINTERS_H

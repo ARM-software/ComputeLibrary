@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PADDING_CALCULATOR_H
-#define ARM_COMPUTE_TEST_PADDING_CALCULATOR_H
+#ifndef ACL_TESTS_PADDINGCALCULATOR_H
+#define ACL_TESTS_PADDINGCALCULATOR_H
 
 #include "arm_compute/core/Types.h"
 
@@ -49,7 +49,7 @@ public:
      * @param[in] processed_elements Number of elements processed per iteration.
      */
     PaddingCalculator(int size, int processed_elements)
-        : _size{ size }, _num_processed_elements{ processed_elements }, _num_accessed_elements{ processed_elements }
+        : _size{size}, _num_processed_elements{processed_elements}, _num_accessed_elements{processed_elements}
     {
     }
 
@@ -109,9 +109,9 @@ private:
     int        _size;
     int        _num_processed_elements;
     int        _num_accessed_elements;
-    BorderMode _mode{ BorderMode::UNDEFINED };
-    int        _border_size{ 0 };
-    int        _offset{ 0 };
+    BorderMode _mode{BorderMode::UNDEFINED};
+    int        _border_size{0};
+    int        _offset{0};
 };
 
 inline void PaddingCalculator::set_border_mode(BorderMode mode)
@@ -145,17 +145,23 @@ inline PaddingSize PaddingCalculator::required_padding() const
 
 inline PaddingSize PaddingCalculator::required_padding(Option option) const
 {
-    PaddingSize padding{ (_mode == BorderMode::UNDEFINED || option == Option::EXCLUDE_BORDER) ? 0U : static_cast<unsigned int>(std::max(0, _border_size)) };
+    PaddingSize padding{(_mode == BorderMode::UNDEFINED || option == Option::EXCLUDE_BORDER)
+                            ? 0U
+                            : static_cast<unsigned int>(std::max(0, _border_size))};
 
     int padding_right = 0;
 
-    if(_mode == BorderMode::UNDEFINED)
+    if (_mode == BorderMode::UNDEFINED)
     {
-        padding_right = (((_size - 2 * _border_size + _num_processed_elements - 1) / _num_processed_elements) - 1) * _num_processed_elements + _num_accessed_elements - _size + _border_size + _offset;
+        padding_right = (((_size - 2 * _border_size + _num_processed_elements - 1) / _num_processed_elements) - 1) *
+                            _num_processed_elements +
+                        _num_accessed_elements - _size + _border_size + _offset;
     }
     else
     {
-        padding_right = (((_size + _num_processed_elements - 1) / _num_processed_elements) - 1) * _num_processed_elements + _num_accessed_elements - _size + _offset;
+        padding_right =
+            (((_size + _num_processed_elements - 1) / _num_processed_elements) - 1) * _num_processed_elements +
+            _num_accessed_elements - _size + _offset;
     }
 
     padding.right = std::max(0, padding_right);
@@ -164,4 +170,4 @@ inline PaddingSize PaddingCalculator::required_padding(Option option) const
 }
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PADDING_CALCULATOR_H */
+#endif // ACL_TESTS_PADDINGCALCULATOR_H

@@ -58,6 +58,7 @@ Status validate_arguments(const ITensorInfo *mm_result,
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(mm_result, 1, DataType::S32, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(mm_result);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(mm_result, vector_sum_col, vector_sum_row);
 
     // We run if the offset is nonzero or a sum col has been provided, we need
     // the second option in case the QuantizationInfo is dynamic

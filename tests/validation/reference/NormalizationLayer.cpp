@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@ template <typename T>
 SimpleTensor<T> normalization_layer(const SimpleTensor<T> &src, NormalizationLayerInfo info)
 {
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
+    SimpleTensor<T> dst{src.shape(), src.data_type(), 1};
 
     // Compute reference
     const uint32_t norm_size = info.norm_size();
@@ -56,34 +56,35 @@ SimpleTensor<T> normalization_layer(const SimpleTensor<T> &src, NormalizationLay
     // IN_MAP_1D and CROSS_MAP normalize over a single axis only
     int radius_rows = (NormType::IN_MAP_2D == type) ? norm_size / 2 : 0;
 
-    if(info.is_cross_map())
+    if (info.is_cross_map())
     {
         // Remove also depth from upper dimensions since it is the dimension we
         // want to use for normalization
         upper_dims /= depth;
 
-        for(int r = 0; r < upper_dims; ++r)
+        for (int r = 0; r < upper_dims; ++r)
         {
-            for(int i = 0; i < rows; ++i)
+            for (int i = 0; i < rows; ++i)
             {
-                for(int k = 0; k < cols; ++k)
+                for (int k = 0; k < cols; ++k)
                 {
-                    for(int l = 0; l < depth; ++l)
+                    for (int l = 0; l < depth; ++l)
                     {
                         float accumulated_scale = 0.f;
 
-                        for(int j = -radius_cols; j <= radius_cols; ++j)
+                        for (int j = -radius_cols; j <= radius_cols; ++j)
                         {
                             const int z = l + j;
 
-                            if(z >= 0 && z < depth)
+                            if (z >= 0 && z < depth)
                             {
                                 const T value = src[k + i * cols + z * rows * cols + r * cols * rows * depth];
                                 accumulated_scale += value * value;
                             }
                         }
 
-                        dst[k + i * cols + l * rows * cols + r * cols * rows * depth] = kappa + accumulated_scale * coeff;
+                        dst[k + i * cols + l * rows * cols + r * cols * rows * depth] =
+                            kappa + accumulated_scale * coeff;
                     }
                 }
             }
@@ -91,22 +92,22 @@ SimpleTensor<T> normalization_layer(const SimpleTensor<T> &src, NormalizationLay
     }
     else
     {
-        for(int r = 0; r < upper_dims; ++r)
+        for (int r = 0; r < upper_dims; ++r)
         {
-            for(int i = 0; i < rows; ++i)
+            for (int i = 0; i < rows; ++i)
             {
-                for(int k = 0; k < cols; ++k)
+                for (int k = 0; k < cols; ++k)
                 {
                     float accumulated_scale = 0.f;
 
-                    for(int j = -radius_rows; j <= radius_rows; ++j)
+                    for (int j = -radius_rows; j <= radius_rows; ++j)
                     {
                         const int y = i + j;
-                        for(int l = -radius_cols; l <= radius_cols; ++l)
+                        for (int l = -radius_cols; l <= radius_cols; ++l)
                         {
                             const int x = k + l;
 
-                            if((x >= 0 && y >= 0) && (x < cols && y < rows))
+                            if ((x >= 0 && y >= 0) && (x < cols && y < rows))
                             {
                                 const T value = src[x + y * cols + r * cols * rows];
                                 accumulated_scale += value * value;
@@ -120,23 +121,23 @@ SimpleTensor<T> normalization_layer(const SimpleTensor<T> &src, NormalizationLay
         }
     }
 
-    if(beta == 1.f)
+    if (beta == 1.f)
     {
-        for(int i = 0; i < dst.num_elements(); ++i)
+        for (int i = 0; i < dst.num_elements(); ++i)
         {
             dst[i] = src[i] / dst[i];
         }
     }
-    else if(beta == 0.5f)
+    else if (beta == 0.5f)
     {
-        for(int i = 0; i < dst.num_elements(); ++i)
+        for (int i = 0; i < dst.num_elements(); ++i)
         {
             dst[i] = src[i] / std::sqrt(dst[i]);
         }
     }
     else
     {
-        for(int i = 0; i < dst.num_elements(); ++i)
+        for (int i = 0; i < dst.num_elements(); ++i)
         {
             dst[i] = src[i] * std::exp(std::log(dst[i]) * -beta);
         }
@@ -146,7 +147,7 @@ SimpleTensor<T> normalization_layer(const SimpleTensor<T> &src, NormalizationLay
 }
 
 template SimpleTensor<float> normalization_layer(const SimpleTensor<float> &src, NormalizationLayerInfo info);
-template SimpleTensor<half> normalization_layer(const SimpleTensor<half> &src, NormalizationLayerInfo info);
+template SimpleTensor<half>  normalization_layer(const SimpleTensor<half> &src, NormalizationLayerInfo info);
 } // namespace reference
 } // namespace validation
 } // namespace test

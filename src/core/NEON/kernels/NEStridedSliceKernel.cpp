@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,6 +57,7 @@ Status validate_arguments(const ITensorInfo *input,
     ARM_COMPUTE_RETURN_ERROR_ON(strides.num_dimensions() > input->num_dimensions());
     ARM_COMPUTE_RETURN_ERROR_ON(
         std::any_of(strides.cbegin(), strides.cbegin() + strides.num_dimensions(), [](int i) { return i == 0; }));
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input);
 
     // Get expected output shape
     const TensorShape exp_output_shape = arm_compute::misc::shape_calculator::compute_strided_slice_shape(
@@ -66,9 +67,15 @@ Status validate_arguments(const ITensorInfo *input,
     // Checks output if configured
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         const TensorInfo exp_output_info = output->clone()->set_tensor_shape(exp_output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &exp_output_info);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
+    else
+    {
+        const auto output_info = TensorInfo(exp_output_shape, input->num_channels(), input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

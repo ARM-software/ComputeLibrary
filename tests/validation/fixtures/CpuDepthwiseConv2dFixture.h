@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
+#include "src/core/helpers/MemoryHelpers.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
@@ -41,7 +42,6 @@
 #include "tests/validation/reference/DepthwiseConvolutionLayer.h"
 #include "utils/Utils.h"
 
-#include "src/core/helpers/MemoryHelpers.h"
 #include <cstdint>
 #include <random>
 

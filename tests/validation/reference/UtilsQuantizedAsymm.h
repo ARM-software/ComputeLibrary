@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024 Arm Limited.
+ * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,26 +52,30 @@ inline int64_t to_int64(int32_t val)
  * This implements the documented behaviour of SRSHL with a negative shift. */
 inline int32_t asymm_rounding_divide_by_pow2(int32_t x, int exponent)
 {
-    return (exponent == 0) ? x : ((x + (1 << (exponent-1))) >> exponent);
+    return (exponent == 0) ? x : ((x + (1 << (exponent - 1))) >> exponent);
 }
 
 /** Doubling multiplication of two integers, returning high half.
  * This implements the documented behaviour of SQDMULH */
 inline int32_t asymm_int_mult(int32_t a, int32_t b)
 {
-    const bool    overflow     = a == b && a == std::numeric_limits<int32_t>::min();
-    const int64_t a_64         = to_int64(a);
-    const int64_t b_64         = to_int64(b);
-    const int64_t ab_x2_64     = a_64 * b_64 * 2;
+    const bool    overflow = a == b && a == std::numeric_limits<int32_t>::min();
+    const int64_t a_64     = to_int64(a);
+    const int64_t b_64     = to_int64(b);
+    const int64_t ab_x2_64 = a_64 * b_64 * 2;
     return overflow ? std::numeric_limits<int32_t>::max() : (ab_x2_64 >> 32);
 }
 
 /** Quantize down the input value in range [min, max]. */
-inline int32_t quantize_down_scale_by_fixedpoint(int32_t val, int32_t result_mult_int, int32_t result_shift,
-                                                 int32_t result_offset_after_shift, int32_t min, int32_t max)
+inline int32_t quantize_down_scale_by_fixedpoint(int32_t val,
+                                                 int32_t result_mult_int,
+                                                 int32_t result_shift,
+                                                 int32_t result_offset_after_shift,
+                                                 int32_t min,
+                                                 int32_t max)
 {
     int32_t res = 0;
-    if(result_shift < 0)
+    if (result_shift < 0)
     {
         res = asymm_int_mult(val * (1 << (-result_shift)), result_mult_int);
     }

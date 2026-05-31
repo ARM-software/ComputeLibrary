@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2019-2021,2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,16 +22,16 @@
  * SOFTWARE.
  */
 
-#ifdef __aarch64__
+#if defined(ARM_COMPUTE_ENABLE_BF16) && defined(__aarch64__)
 
 template<>
 void interleave_block<8, 4, VLType::None, false>(
   bfloat16 * &out_ptr, const bfloat16 * const * in, size_t width, size_t height,
-  size_t row_offset, bool
+  size_t row_offset, bool, int32_t
 )
 {
   __asm__ __volatile__(
-      "ldr x28, [%x[in], #0x0]\n"
+      "ldr x28, [%x[in], #0]\n"
       "ldr x27, [%x[in], #0x8]\n"
       "cmp %x[height], #0x8\n"
       "ldr x26, [%x[in], #0x10]\n"
@@ -61,14 +61,14 @@ void interleave_block<8, 4, VLType::None, false>(
       "csel x22, x22, x28, GT\n"
       "1:"  // no_pointer_adj
       "cmp %x[width], #0x8\n"
-      "prfm pldl1keep, [x28, #0x0]\n"
-      "prfm pldl1keep, [x27, #0x0]\n"
-      "prfm pldl1keep, [x26, #0x0]\n"
-      "prfm pldl1keep, [x25, #0x0]\n"
-      "prfm pldl1keep, [x24, #0x0]\n"
-      "prfm pldl1keep, [x23, #0x0]\n"
-      "prfm pldl1keep, [x22, #0x0]\n"
-      "prfm pldl1keep, [x21, #0x0]\n"
+      "prfm pldl1keep, [x28, #0]\n"
+      "prfm pldl1keep, [x27, #0]\n"
+      "prfm pldl1keep, [x26, #0]\n"
+      "prfm pldl1keep, [x25, #0]\n"
+      "prfm pldl1keep, [x24, #0]\n"
+      "prfm pldl1keep, [x23, #0]\n"
+      "prfm pldl1keep, [x22, #0]\n"
+      "prfm pldl1keep, [x21, #0]\n"
       "prfm pldl1keep, [x28, #0x40]\n"
       "prfm pldl1keep, [x27, #0x40]\n"
       "prfm pldl1keep, [x26, #0x40]\n"
@@ -101,7 +101,7 @@ void interleave_block<8, 4, VLType::None, false>(
       "zip2 v18.2d, v24.2d, v18.2d\n"
       "prfm pldl1keep, [x24, #0x70]\n"
       "prfm pldl1keep, [x23, #0x70]\n"
-      "str q17, [%x[out_ptr], #0x0]\n"
+      "str q17, [%x[out_ptr], #0]\n"
       "zip1 v17.2d, v23.2d, v22.2d\n"
       "prfm pldl1keep, [x22, #0x70]\n"
       "prfm pldl1keep, [x21, #0x70]\n"
@@ -181,22 +181,22 @@ void interleave_block<8, 4, VLType::None, false>(
       "ld1 { v20.h }[2], [x21]\n"
       "b 7f\n"
       "6:"  // odd_loads_1_0
-      "ldr h27, [x28, #0x0]\n"
-      "ldr h26, [x27, #0x0]\n"
+      "ldr h27, [x28, #0]\n"
+      "ldr h26, [x27, #0]\n"
       "mov x20, #0x1\n"
-      "ldr h25, [x26, #0x0]\n"
-      "ldr h24, [x25, #0x0]\n"
-      "ldr h23, [x24, #0x0]\n"
-      "ldr h22, [x23, #0x0]\n"
-      "ldr h21, [x22, #0x0]\n"
-      "ldr h20, [x21, #0x0]\n"
+      "ldr h25, [x26, #0]\n"
+      "ldr h24, [x25, #0]\n"
+      "ldr h23, [x24, #0]\n"
+      "ldr h22, [x23, #0]\n"
+      "ldr h21, [x22, #0]\n"
+      "ldr h20, [x21, #0]\n"
       "7:"  // Odd load end
       "subs x20, x20, #0x1\n"
       "zip1 v19.2d, v27.2d, v26.2d\n"
       "zip1 v18.2d, v25.2d, v24.2d\n"
       "zip1 v17.2d, v23.2d, v22.2d\n"
       "zip1 v16.2d, v21.2d, v20.2d\n"
-      "str q19, [%x[out_ptr], #0x0]\n"
+      "str q19, [%x[out_ptr], #0]\n"
       "str q18, [%x[out_ptr], #0x10]\n"
       "str q17, [%x[out_ptr], #0x20]\n"
       "str q16, [%x[out_ptr], #0x30]\n"
@@ -206,7 +206,7 @@ void interleave_block<8, 4, VLType::None, false>(
       "zip2 v18.2d, v25.2d, v24.2d\n"
       "zip2 v17.2d, v23.2d, v22.2d\n"
       "zip2 v16.2d, v21.2d, v20.2d\n"
-      "str q19, [%x[out_ptr], #0x0]\n"
+      "str q19, [%x[out_ptr], #0]\n"
       "str q18, [%x[out_ptr], #0x10]\n"
       "str q17, [%x[out_ptr], #0x20]\n"
       "str q16, [%x[out_ptr], #0x30]\n"
@@ -219,4 +219,5 @@ void interleave_block<8, 4, VLType::None, false>(
 }
 
 
-#endif // __aarch64__
+#endif // defined(ARM_COMPUTE_ENABLE_BF16) && defined(__aarch64__)
+

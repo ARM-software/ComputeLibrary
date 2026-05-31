@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
 #include <cstddef>
@@ -49,11 +50,13 @@ Status validate_arguments(const ITensorInfo            *input_box_encoding,
                           const unsigned int            kBatchSize,
                           const unsigned int            kNumCoordBox)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input_box_encoding, input_class_score, input_anchors);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input_box_encoding, input_class_score, input_anchors, output_boxes,
+                                        output_classes, output_scores, num_detection);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input_box_encoding, input_class_score, input_anchors);
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input_box_encoding, input_class_score, input_anchors, output_boxes,
                                               output_classes, output_scores, num_detection);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_box_encoding, 1, DataType::F32, DataType::QASYMM8,
-                                                         DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_box_encoding, ITensorInfo::one_channel, DataType::F32,
+                                                         DataType::QASYMM8, DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_box_encoding, input_anchors);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input_box_encoding->num_dimensions() > 3,
                                     "The location input tensor shape should be [4, N, kBatchSize].");
@@ -90,29 +93,57 @@ Status validate_arguments(const ITensorInfo            *input_box_encoding,
 
     const unsigned int num_detected_boxes = info.max_detections() * info.max_classes_per_detection();
 
+    const TensorShape output_boxes_shape(4U, num_detected_boxes, 1U);
+    const TensorShape output_classes_shape(num_detected_boxes, 1U);
+    const TensorShape output_scores_shape(num_detected_boxes, 1U);
+    const TensorShape num_detection_shape(1U);
+    const auto        output_data_type = DataType::F32;
+
     // Validate configured outputs
     if (output_boxes->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output_boxes->tensor_shape(),
-                                                           TensorShape(4U, num_detected_boxes, 1U));
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_boxes, 1, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output_boxes);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output_boxes->tensor_shape(), output_boxes_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_boxes, ITensorInfo::one_channel, output_data_type);
+    }
+    else
+    {
+        const TensorInfo output_boxes_info(output_boxes_shape, ITensorInfo::one_channel, output_data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_boxes_info);
     }
     if (output_classes->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output_classes->tensor_shape(),
-                                                           TensorShape(num_detected_boxes, 1U));
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_classes, 1, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output_classes);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output_classes->tensor_shape(), output_classes_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_classes, ITensorInfo::one_channel,
+                                                             output_data_type);
+    }
+    else
+    {
+        const TensorInfo output_classes_info(output_classes_shape, ITensorInfo::one_channel, output_data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_classes_info);
     }
     if (output_scores->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output_scores->tensor_shape(),
-                                                           TensorShape(num_detected_boxes, 1U));
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_scores, 1, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output_scores);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output_scores->tensor_shape(), output_scores_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_scores, ITensorInfo::one_channel, output_data_type);
+    }
+    else
+    {
+        const TensorInfo output_scores_info(output_scores_shape, ITensorInfo::one_channel, output_data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_scores_info);
     }
     if (num_detection->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(num_detection->tensor_shape(), TensorShape(1U));
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(num_detection, 1, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(num_detection);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(num_detection->tensor_shape(), num_detection_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(num_detection, ITensorInfo::one_channel, output_data_type);
+    }
+    else
+    {
+        const TensorInfo num_detection_info(num_detection_shape, ITensorInfo::one_channel, output_data_type);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&num_detection_info);
     }
 
     return Status{};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited.
+ * Copyright (c) 2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_COL2IM_DATASET
-#define ARM_COMPUTE_TEST_COL2IM_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_COL2IMLAYERDATASET_H
+#define ACL_TESTS_DATASETS_COL2IMLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -46,10 +46,10 @@ public:
                  std::vector<unsigned int>::const_iterator convolved_width_it,
                  std::vector<unsigned int>::const_iterator convolved_height_it,
                  std::vector<unsigned int>::const_iterator num_groups_it)
-            : _src_it{ std::move(src_it) },
-              _convolved_width_it{ std::move(convolved_width_it) },
-              _convolved_height_it{ std::move(convolved_height_it) },
-              _num_groups_it{ std::move(num_groups_it) }
+            : _src_it{std::move(src_it)},
+              _convolved_width_it{std::move(convolved_width_it)},
+              _convolved_height_it{std::move(convolved_height_it)},
+              _num_groups_it{std::move(num_groups_it)}
         {
         }
 
@@ -87,12 +87,14 @@ public:
 
     iterator begin() const
     {
-        return iterator(_src_shapes.begin(), _convolved_widths.begin(), _convolved_heights.begin(), _num_groups.begin());
+        return iterator(_src_shapes.begin(), _convolved_widths.begin(), _convolved_heights.begin(),
+                        _num_groups.begin());
     }
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_convolved_widths.size(), std::min(_convolved_heights.size(), _num_groups.size())));
+        return std::min(_src_shapes.size(),
+                        std::min(_convolved_widths.size(), std::min(_convolved_heights.size(), _num_groups.size())));
     }
 
     void add_config(TensorShape src, unsigned int convolved_width, unsigned int convolved_height, unsigned int info)
@@ -152,4 +154,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_COL2IM_DATASET */
+#endif // ACL_TESTS_DATASETS_COL2IMLAYERDATASET_H

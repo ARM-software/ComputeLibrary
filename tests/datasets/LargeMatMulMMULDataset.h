@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,11 +22,12 @@
  * SOFTWARE.
  */
 
-#ifndef ACL_TESTS_DATASETS_LARGEMATMULMMULDATASET
-#define ACL_TESTS_DATASETS_LARGEMATMULMMULDATASET
+#ifndef ACL_TESTS_DATASETS_LARGEMATMULMMULDATASET_H
+#define ACL_TESTS_DATASETS_LARGEMATMULMMULDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/datasets/MatMulDataset.h"
 
 namespace arm_compute
@@ -53,7 +54,8 @@ class HighDimensionalMatMulMMULDataset final : public MatMulDataset
 public:
     HighDimensionalMatMulMMULDataset()
     {
-        add_config(TensorShape(4U, 5U, 2U, 2U, 2U, 2U), TensorShape(5U, 4U, 2U, 2U, 2U, 2U), TensorShape(5U, 5U, 2U, 2U, 2U, 2U)); // 6D tensor
+        add_config(TensorShape(4U, 5U, 2U, 2U, 2U, 2U), TensorShape(5U, 4U, 2U, 2U, 2U, 2U),
+                   TensorShape(5U, 5U, 2U, 2U, 2U, 2U)); // 6D tensor
     }
 };
 
@@ -61,4 +63,4 @@ public:
 } // namespace test
 } // namespace arm_compute
 
-#endif /* ACL_TESTS_DATASETS_LARGEMATMULMMULDATASET */
+#endif // ACL_TESTS_DATASETS_LARGEMATMULMMULDATASET_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, 2025 Arm Limited.
+ * Copyright (c) 2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,6 +66,7 @@ Status validate_arguments(const ITensorInfo         *input1,
                           const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input1, input2, bn_mul, bn_add, final_output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input1, input2, bn_mul, bn_add);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(policy != ConvertPolicy::SATURATE, "Only Saturate Policy is supported");
 
@@ -100,15 +101,27 @@ Status validate_arguments(const ITensorInfo         *input1,
     // Validate in case we have add layer's output (intermediate) initialized
     if (add_output != nullptr && add_output->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(add_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, add_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, add_output);
+    }
+    else
+    {
+        // No configured output. Since `add_output` is expected to match `input1`,
+        // there's nothing extra to check in this case.
     }
 
     // Validate in case final output has been initialized
     if (final_output->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(final_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input1, final_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, final_output);
+    }
+    else
+    {
+        // No configured output. Since `final_output` is expected to match `input1`,
+        // there's nothing extra to check in this case.
     }
 
     const auto uk = CpuAddMulAddKernel::get_implementation<DataTypeISASelectorData>(

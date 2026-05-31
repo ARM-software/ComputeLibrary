@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -8,8 +8,8 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <vector>
 
+#include "test/common/buffer.hpp"
 #include "test/common/data_type.hpp"
 
 namespace kai::test {
@@ -28,7 +28,7 @@ class DataFormat;
 /// @param[in] transposing Perform transpose then pack.
 ///
 /// @return The packed RHS matrix.
-std::vector<uint8_t> matmul_pack_rhs(
+Buffer matmul_pack_rhs(
     const void* data, const void* scales, const void* zero_points, const DataFormat& src_format,
     const DataFormat& dst_format, size_t n, size_t k, bool transposing);
 
@@ -57,13 +57,44 @@ std::vector<uint8_t> matmul_pack_rhs(
 /// @param[in] rhs_transposed `true` if RHS operand is transposed.
 ///
 /// @return The result data buffer.
-std::vector<uint8_t> matmul(
+Buffer matmul(
     const void* lhs, const void* lhs_scales, const void* lhs_zero_points, DataType lhs_dt,      //
     const void* rhs, const void* rhs_scales, const void* rhs_zero_points, DataType rhs_dt,      //
     const void* bias, const void* bias_scales, const void* bias_zero_points, DataType bias_dt,  //
     DataType dst_dt,                                                                            //
     size_t m, size_t n, size_t k,                                                               //
     bool lhs_transposed, bool rhs_transposed);
+
+/// Indirect matrix multiplication.
+///
+/// @param[in] lhs_idata The indirect LHS data matrix.
+/// @param[in] lhs_scales (Optional) LHS operand quantization scales.
+/// @param[in] lhs_offset The indirection LHS data matrix offset, applied to non-padding pointers
+/// @param[in] lhs_padding_ptr The indirection LHS padding chunk pointer
+/// @param[in] lhs_zero_points (Optional) LHS operand quantization zero point.
+/// @param[in] lhs_dt LHS operand data type.
+/// @param[in] rhs RHS operand data.
+/// @param[in] rhs_scales (Optional) RHS operand quantization scales.
+/// @param[in] rhs_zero_points (Optional) RHS operand quantization zero point.
+/// @param[in] rhs_dt RHS operand data type.
+/// @param[in] bias Bias operand data.
+/// @param[in] bias_scales (Optional) Bias operand quantization scales.
+/// @param[in] bias_zero_points (Optional) Bias operand quantization zero point.
+/// @param[in] bias_dt Bias operand data type.
+/// @param[in] dst_dt Output data type.
+/// @param[in] m Output height.
+/// @param[in] n Output width.
+/// @param[in] k_chunk_count Number pointers per row in lhs_idata
+/// @param[in] k_chunk_size Number of elements in each LHS K chunk
+///
+/// @return The result data buffer.
+Buffer indirect_matmul(
+    const void* const* lhs_idata, uintptr_t lhs_offset, const void* lhs_padding_ptr, const void* lhs_scales,
+    const void* lhs_zero_points, DataType lhs_dt,                                               //
+    const void* rhs, const void* rhs_scales, const void* rhs_zero_points, DataType rhs_dt,      //
+    const void* bias, const void* bias_scales, const void* bias_zero_points, DataType bias_dt,  //
+    DataType dst_dt,                                                                            //
+    size_t m, size_t n, size_t k_chunk_count, size_t k_chunk_length);
 
 /// Matrix multiplication with quantized input and floating-point output.
 ///
@@ -98,7 +129,7 @@ std::vector<uint8_t> matmul(
 template <
     typename LhsData, typename LhsScale, typename LhsZeroPoint, typename RhsData, typename RhsScale,
     typename RhsZeroPoint, typename Bias, typename IntAcc, typename DstData>
-std::vector<uint8_t> matmul_clamp_nt_t(
+Buffer matmul_clamp_nt_t(
     size_t m, size_t n, size_t k,                                                                       //
     const void* lhs_data, const void* lhs_scales, const void* lhs_zero_points, size_t lhs_quant_width,  //
     const void* rhs_data, const void* rhs_scales, const void* rhs_zero_points, size_t rhs_quant_width,  //
@@ -122,7 +153,12 @@ std::vector<uint8_t> matmul_clamp_nt_t(
 /// @param[in] m The LHS and output height.
 /// @param[in] n The RHS height and output width.
 /// @param[in] k The LHS and RHS width.
+/// @param[in] k_chunk_count Number of K chunk pointers per row in lhs_ptrs matrix
+/// @param[in] k_chunk_length Lenght of each K chunk pointed to in lhs_ptrs matrix
 /// @param[in] lhs_data The LHS data matrix.
+/// @param[in] lhs_ptrs The indirect LHS data matrix.
+/// @param[in] lhs_offset The indirection LHS data matrix offset, applied to non-padding pointers
+/// @param[in] lhs_padding_ptr The indirection LHS padding chunk pointer
 /// @param[in] lhs_scales The LHS quantization scales matrix.
 /// @param[in] lhs_zero_points The LHS quantization zero points matrix.
 /// @param[in] lhs_quant_width The LHS quantization block width.
@@ -138,7 +174,7 @@ std::vector<uint8_t> matmul_clamp_nt_t(
 template <
     typename LhsData, typename LhsScale, typename LhsZeroPoint, typename RhsData, typename RhsScale,
     typename RhsZeroPoint, typename Bias, typename IntAcc, typename DstData>
-std::vector<uint8_t> matmul_clamp_nt_nt(
+Buffer matmul_clamp_nt_nt(
     size_t m, size_t n, size_t k,                                                                       //
     const void* lhs_data, const void* lhs_scales, const void* lhs_zero_points, size_t lhs_quant_width,  //
     const void* rhs_data, const void* rhs_scales, const void* rhs_zero_points, size_t rhs_quant_width,  //
@@ -148,9 +184,32 @@ std::vector<uint8_t> matmul_clamp_nt_nt(
 template <
     typename LhsData, typename LhsScale, typename LhsZeroPoint, typename RhsData, typename RhsScale,
     typename RhsZeroPoint, typename BiasData, typename BiasScale, typename BiasZeroPoint, typename DstData>
-std::vector<uint8_t> matmul_nt_t_quantized(
+Buffer matmul_nt_t_quantized(
     size_t m, size_t n, size_t k,  //
     const void* lhs_data, const void* lhs_scales, const void* lhs_zero_points, size_t lhs_quant_height,
+    size_t lhs_quant_width,  //
+    const void* rhs_data, const void* rhs_scales, const void* rhs_zero_points, size_t rhs_quant_height,
+    size_t rhs_quant_width,  //
+    const void* bias_data, const void* bias_scales, const void* bias_zero_points, size_t bias_quant_width);
+
+template <
+    typename LhsData, typename LhsScale, typename LhsZeroPoint, typename RhsData, typename RhsScale,
+    typename RhsZeroPoint, typename BiasData, typename BiasScale, typename BiasZeroPoint, typename DstData>
+Buffer matmul_nt_nt_quantized(
+    size_t m, size_t n, size_t k,  //
+    const void* lhs_data, const void* lhs_scales, const void* lhs_zero_points, size_t lhs_quant_height,
+    size_t lhs_quant_width,  //
+    const void* rhs_data, const void* rhs_scales, const void* rhs_zero_points, size_t rhs_quant_height,
+    size_t rhs_quant_width,  //
+    const void* bias_data, const void* bias_scales, const void* bias_zero_points, size_t bias_quant_width);
+
+template <
+    typename LhsData, typename LhsScale, typename LhsZeroPoint, typename RhsData, typename RhsScale,
+    typename RhsZeroPoint, typename BiasData, typename BiasScale, typename BiasZeroPoint, typename DstData>
+Buffer indirect_matmul_nt_t_quantized(
+    size_t m, size_t n, size_t k_chunk_count, size_t k_chunk_length,  //
+    const void* const* lhs_ptrs, uintptr_t lhs_offset, const void* lhs_padding_ptr, const void* lhs_scales,
+    const void* lhs_zero_points, size_t lhs_quant_height,
     size_t lhs_quant_width,  //
     const void* rhs_data, const void* rhs_scales, const void* rhs_zero_points, size_t rhs_quant_height,
     size_t rhs_quant_width,  //

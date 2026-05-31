@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2023 Arm Limited.
+ * Copyright (c) 2019-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,10 +25,12 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -41,6 +43,8 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, int32_t block_shape)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->num_channels() != ITensorInfo::one_channel);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
     ARM_COMPUTE_RETURN_ERROR_ON(block_shape < 2);
@@ -49,17 +53,21 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
     const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
     ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_channel] % (block_shape * block_shape) != 0);
 
+    const TensorShape output_shape =
+        compute_depth_to_space_shape(input->tensor_shape(), input->data_layout(), block_shape);
+    const auto output_info = TensorInfo(output_shape, ITensorInfo::one_channel, input->data_type());
+
     // Validate output if initialized
     if (output->total_size() != 0)
     {
-        const int idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-        const int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_width] !=
-                                    (block_shape * input->tensor_shape()[idx_width]));
-        ARM_COMPUTE_RETURN_ERROR_ON(output->tensor_shape()[idx_height] !=
-                                    (block_shape * input->tensor_shape()[idx_height]));
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &output_info);
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_dimensions() > 4);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

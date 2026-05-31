@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 #include "arm_compute/core/Validate.h"
 
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -58,7 +59,9 @@ Status validate_arguments(const ITensorInfo       *src0,
                           const GEMMReshapeInfo   &gemm_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src0, src1, dst);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src0, src1);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src0, ITensorInfo::one_channel, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src0, src1);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src0->num_dimensions() > 4,
                                     "The number of dimensions for the LHS matrix must be <= 4");
@@ -98,11 +101,18 @@ Status validate_arguments(const ITensorInfo       *src0,
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src0, &tensor_info_reshaped0);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src1, &tensor_info_reshaped1);
 
+    const TensorShape output_shape = compute_mm_shape(*src0, *src1, gemm_info);
+
     if (dst->total_size() != 0)
     {
-        const TensorInfo tensor_info_dst = dst->clone()->set_tensor_shape(compute_mm_shape(*src0, *src1, gemm_info));
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &tensor_info_dst);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, ITensorInfo::one_channel, DataType::S32);
+    }
+    else
+    {
+        const TensorInfo dst_info(output_shape, ITensorInfo::one_channel, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

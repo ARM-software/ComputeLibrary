@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2024 Arm Limited.
+ * Copyright (c) 2021, 2024, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,9 @@
  * SOFTWARE.
  */
 
-#include "sve_merge_fp16_3VLx8.hpp"
-#include "sve_merge_fp32_3VLx8.hpp"
+#include "sve_merge_fp16_fp16_8x3VL.hpp"
 #include "sve_merge_fp32_bf16_8x3VL.hpp"
-#include "sve_merge_s32_3VLx8.hpp"
-#include "sve_merge_u32_3VLx8.hpp"
+#include "sve_merge_fp32_fp32_8x3VL.hpp"
+#include "sve_merge_s32_s32_8x3VL.hpp"
+#include "sve_merge_u32_u32_8x3VL.hpp"
+

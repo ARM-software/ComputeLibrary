@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022 Arm Limited.
+ * Copyright (c) 2018-2022, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -155,6 +155,7 @@ Status
 NESelectKernel::validate(const ITensorInfo *c, const ITensorInfo *x, const ITensorInfo *y, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(c, x, y);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(c, x, y);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(x);
     ARM_COMPUTE_RETURN_ERROR_ON(x->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(x, y);
@@ -169,8 +170,14 @@ NESelectKernel::validate(const ITensorInfo *c, const ITensorInfo *x, const ITens
 
     if (output != nullptr && output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(x, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(x, output);
+    }
+    else
+    {
+        // No configured output. Since `output` is expected to match `x`,
+        // there's nothing extra to check in this case.
     }
 
     return Status{};

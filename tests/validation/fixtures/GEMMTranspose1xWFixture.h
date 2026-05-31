@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_GEMM_TRANSPOSE_1XW_FIXTURE
-#define ARM_COMPUTE_TEST_GEMM_TRANSPOSE_1XW_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_GEMMTRANSPOSE1XWFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_GEMMTRANSPOSE1XWFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/GEMMTranspose1xW.h"
 
@@ -51,7 +52,8 @@ public:
         _data_type = data_type;
         const TensorShape  shape_a(x, y);
         const unsigned int transpose_w = 16 / data_size_from_type(data_type);
-        const TensorShape  shape_b(static_cast<size_t>(y * transpose_w), static_cast<size_t>(std::ceil(x / static_cast<float>(transpose_w))));
+        const TensorShape  shape_b(static_cast<size_t>(y * transpose_w),
+                                   static_cast<size_t>(std::ceil(x / static_cast<float>(transpose_w))));
         _target    = compute_target(shape_a, shape_b, data_type);
         _reference = compute_reference(shape_a, data_type);
     }
@@ -60,11 +62,11 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        switch(tensor.data_type())
+        switch (tensor.data_type())
         {
             case DataType::F16:
             {
-                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
+                arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -105,7 +107,7 @@ protected:
         fill(AccessorType(b), 1);
 
         // Compute GEMM function
-        ITensorPack tensors{ { ACL_SRC, &a }, { ACL_DST, &b } };
+        ITensorPack tensors{{ACL_SRC, &a}, {ACL_DST, &b}};
         f.run(tensors);
 
         return b;
@@ -114,7 +116,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape_a, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> a{ shape_a, data_type, 1 };
+        SimpleTensor<T> a{shape_a, data_type, 1};
 
         // Fill reference
         fill(a, 0);
@@ -129,4 +131,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_GEMM_TRANSPOSE_1XW_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_GEMMTRANSPOSE1XWFIXTURE_H

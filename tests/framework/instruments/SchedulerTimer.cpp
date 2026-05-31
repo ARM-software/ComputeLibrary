@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,12 +23,14 @@
  */
 #include "SchedulerTimer.h"
 
-#include "Instruments.h"
-#include "WallClockTimer.h"
 #include "arm_compute/core/CPP/ICPPKernel.h"
 #include "arm_compute/graph/DataLayerVisitor.h"
 #include "arm_compute/graph/INode.h"
+
 #include "support/Cast.h"
+
+#include "Instruments.h"
+#include "WallClockTimer.h"
 
 namespace arm_compute
 {
@@ -37,9 +39,9 @@ namespace test
 namespace framework
 {
 template <bool output_timestamps>
-std::string    SchedulerClock<output_timestamps>::id() const
+std::string SchedulerClock<output_timestamps>::id() const
 {
-    if(output_timestamps)
+    if (output_timestamps)
     {
         return "SchedulerTimestamps";
     }
@@ -49,14 +51,15 @@ std::string    SchedulerClock<output_timestamps>::id() const
     }
 }
 
-template <bool    output_timestamps>
+template <bool output_timestamps>
 class Interceptor final : public IScheduler
 {
 public:
     /** Default constructor. */
     Interceptor(std::list<struct SchedulerClock<output_timestamps>::kernel_info> &kernels,
-                std::map<std::string, SchedulerTimer::LayerData> &layers, IScheduler &real_scheduler,
-                ScaleFactor scale_factor)
+                std::map<std::string, SchedulerTimer::LayerData>                 &layers,
+                IScheduler                                                       &real_scheduler,
+                ScaleFactor                                                       scale_factor)
         : _kernels(kernels), _layer_data_map(layers), _real_scheduler(real_scheduler), _timer(scale_factor), _prefix()
     {
     }
@@ -129,10 +132,10 @@ protected:
 
 private:
     std::list<struct SchedulerClock<output_timestamps>::kernel_info> &_kernels;
-    std::map<std::string, SchedulerTimer::LayerData> &_layer_data_map;
-    IScheduler                  &_real_scheduler;
-    WallClock<output_timestamps> _timer;
-    std::string                  _prefix;
+    std::map<std::string, SchedulerTimer::LayerData>                 &_layer_data_map;
+    IScheduler                                                       &_real_scheduler;
+    WallClock<output_timestamps>                                      _timer;
+    std::string                                                       _prefix;
 };
 
 template <bool output_timestamps>
@@ -148,30 +151,31 @@ SchedulerClock<output_timestamps>::SchedulerClock(ScaleFactor scale_factor)
       _interceptor(nullptr),
       _scheduler_users()
 {
-    if(instruments_info != nullptr)
+    if (instruments_info != nullptr)
     {
         _scheduler_users = instruments_info->_scheduler_users;
     }
 }
 
 template <bool output_timestamps>
-void           SchedulerClock<output_timestamps>::test_start()
+void SchedulerClock<output_timestamps>::test_start()
 {
 #ifdef ARM_COMPUTE_GRAPH_ENABLED
     // Start intercepting tasks:
     ARM_COMPUTE_ERROR_ON(_real_graph_function != nullptr);
     _real_graph_function  = graph::TaskExecutor::get().execute_function;
-    auto task_interceptor = [this](graph::ExecutionTask & task)
+    auto task_interceptor = [this](graph::ExecutionTask &task)
     {
         Interceptor<output_timestamps> *scheduler = nullptr;
-        if(dynamic_cast<Interceptor<output_timestamps> *>(this->_interceptor.get()) != nullptr)
+        if (dynamic_cast<Interceptor<output_timestamps> *>(this->_interceptor.get()) != nullptr)
         {
-            scheduler = arm_compute::utils::cast::polymorphic_downcast<Interceptor<output_timestamps> *>(_interceptor.get());
-            if(task.node != nullptr && !task.node->name().empty())
+            scheduler =
+                arm_compute::utils::cast::polymorphic_downcast<Interceptor<output_timestamps> *>(_interceptor.get());
+            if (task.node != nullptr && !task.node->name().empty())
             {
                 scheduler->set_prefix(task.node->name() + "/");
 
-                if(_layer_data_map.find(task.node->name()) == _layer_data_map.end())
+                if (_layer_data_map.find(task.node->name()) == _layer_data_map.end())
                 {
                     arm_compute::graph::DataLayerVisitor dlv = {};
                     task.node->accept(dlv);
@@ -186,7 +190,7 @@ void           SchedulerClock<output_timestamps>::test_start()
 
         this->_real_graph_function(task);
 
-        if(scheduler != nullptr)
+        if (scheduler != nullptr)
         {
             scheduler->set_prefix("");
         }
@@ -196,10 +200,11 @@ void           SchedulerClock<output_timestamps>::test_start()
     ARM_COMPUTE_ERROR_ON(_real_scheduler != nullptr);
     _real_scheduler_type = Scheduler::get_type();
     //Note: We can't currently replace a custom scheduler
-    if(_real_scheduler_type != Scheduler::Type::CUSTOM)
+    if (_real_scheduler_type != Scheduler::Type::CUSTOM)
     {
         _real_scheduler = &Scheduler::get();
-        _interceptor    = std::make_shared<Interceptor<output_timestamps>>(_kernels, _layer_data_map, *_real_scheduler, _scale_factor);
+        _interceptor    = std::make_shared<Interceptor<output_timestamps>>(_kernels, _layer_data_map, *_real_scheduler,
+                                                                        _scale_factor);
         Scheduler::set(std::static_pointer_cast<IScheduler>(_interceptor));
 #ifdef ARM_COMPUTE_GRAPH_ENABLED
         graph::TaskExecutor::get().execute_function = task_interceptor;
@@ -208,24 +213,25 @@ void           SchedulerClock<output_timestamps>::test_start()
         // Create an interceptor for each scheduler
         // TODO(COMPID-2638) : Allow multiple schedulers, now it assumes the same scheduler is used.
         std::for_each(std::begin(_scheduler_users), std::end(_scheduler_users),
-                      [&](ISchedulerUser * user)
-        {
-            if(user != nullptr && user->scheduler() != nullptr)
-            {
-                user->intercept_scheduler(std::make_unique<Interceptor<output_timestamps>>(_kernels, _layer_data_map, *user->scheduler(), _scale_factor));
-            }
-        });
+                      [&](ISchedulerUser *user)
+                      {
+                          if (user != nullptr && user->scheduler() != nullptr)
+                          {
+                              user->intercept_scheduler(std::make_unique<Interceptor<output_timestamps>>(
+                                  _kernels, _layer_data_map, *user->scheduler(), _scale_factor));
+                          }
+                      });
     }
 }
 
 template <bool output_timestamps>
-void           SchedulerClock<output_timestamps>::start()
+void SchedulerClock<output_timestamps>::start()
 {
     _kernels.clear();
 }
 
 template <bool output_timestamps>
-void           SchedulerClock<output_timestamps>::test_stop()
+void SchedulerClock<output_timestamps>::test_stop()
 {
     // Restore real scheduler
     Scheduler::set(_real_scheduler_type);
@@ -238,33 +244,33 @@ void           SchedulerClock<output_timestamps>::test_stop()
 
     // Restore schedulers
     std::for_each(std::begin(_scheduler_users), std::end(_scheduler_users),
-                  [&](ISchedulerUser * user)
-    {
-        if(user != nullptr)
-        {
-            user->restore_scheduler();
-        }
-    });
+                  [&](ISchedulerUser *user)
+                  {
+                      if (user != nullptr)
+                      {
+                          user->restore_scheduler();
+                      }
+                  });
 }
 
-template <bool              output_timestamps>
+template <bool output_timestamps>
 Instrument::MeasurementsMap SchedulerClock<output_timestamps>::measurements() const
 {
     MeasurementsMap measurements;
     unsigned int    kernel_number = 0;
-    for(auto kernel : _kernels)
+    for (auto kernel : _kernels)
     {
         std::string name = kernel.prefix + kernel.name + " #" + support::cpp11::to_string(kernel_number++);
-        if(output_timestamps)
+        if (output_timestamps)
         {
             ARM_COMPUTE_ERROR_ON(kernel.measurements.size() != 2);
-            for(auto const &m : kernel.measurements)
+            for (auto const &m : kernel.measurements)
             {
-                if(m.first.find("[start]") != std::string::npos)
+                if (m.first.find("[start]") != std::string::npos)
                 {
                     measurements.emplace("[start]" + name, m.second);
                 }
-                else if(m.first.find("[end]") != std::string::npos)
+                else if (m.first.find("[end]") != std::string::npos)
                 {
                     measurements.emplace("[end]" + name, m.second);
                 }
@@ -284,27 +290,28 @@ Instrument::MeasurementsMap SchedulerClock<output_timestamps>::measurements() co
 }
 
 template <bool output_timestamps>
-std::string    SchedulerClock<output_timestamps>::instrument_header() const
+std::string SchedulerClock<output_timestamps>::instrument_header() const
 {
-    std::string output{ "" };
+    std::string output{""};
     output += R"("layer_data" : {)";
-    for(auto i_it = _layer_data_map.cbegin(), i_end = _layer_data_map.cend(); i_it != i_end; ++i_it)
+    for (auto i_it = _layer_data_map.cbegin(), i_end = _layer_data_map.cend(); i_it != i_end; ++i_it)
     {
         output += "\"" + i_it->first + "\" : {";
-        if(i_it->second.size() != 0)
+        if (i_it->second.size() != 0)
         {
             // Print for each entry in layer
-            for(auto entry_it = i_it->second.cbegin(), entry_end = i_it->second.cend(); entry_it != entry_end; ++entry_it)
+            for (auto entry_it = i_it->second.cbegin(), entry_end = i_it->second.cend(); entry_it != entry_end;
+                 ++entry_it)
             {
                 output += "\"" + entry_it->first + "\" : \"" + entry_it->second + "\"";
-                if(std::next(entry_it) != entry_end)
+                if (std::next(entry_it) != entry_end)
                 {
                     output += ",";
                 }
             }
         }
         output += "}";
-        if(std::next(i_it) != i_end)
+        if (std::next(i_it) != i_end)
         {
             output += ",";
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2024-2025 Arm Limited.
+ * Copyright (c) 2017-2021, 2024, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,22 +26,23 @@
 #include <algorithm>
 #include <cassert>
 
-#include "arm_gemm.hpp"
+#include "arm_gemm/arm_gemm.hpp"
 #include "bias_adder.hpp"
-#include "ndrange.hpp"
+#include "arm_gemm/ndrange.hpp"
 #include "performance_parameters.hpp"
-#include "utils.hpp"
+#include "arm_common/internal/utils.hpp"
 
 #ifdef CYCLE_PROFILING
-#include "profiler.hpp"
+#include "arm_common/profiler.hpp"
 #endif
 
 namespace arm_gemm {
 
 // Implementation of the GemmCommon abstract class.
-template<typename strategy, typename To, typename Tr>
-class GemmHybrid : public GemmCommon<To, To, Tr> {
-    typedef typename strategy::operand_type Toi;
+template<typename strategy, typename Tlo, typename Tro, typename Tr>
+class GemmHybrid : public GemmCommon<Tlo, Tro, Tr> {
+    typedef typename strategy::operand_type Tloi;
+    typedef typename strategy::operand_type Troi;
     typedef typename strategy::result_type Tri;
 
     /* const properties set by constructor */
@@ -62,7 +63,7 @@ class GemmHybrid : public GemmCommon<To, To, Tr> {
     const unsigned int _Mround;
 
     /* Pretransposed buffer. */
-    const Toi *_B_transposed=nullptr;
+    const Troi *_B_transposed=nullptr;
 
     const NDRange<4> _window_range;
 
@@ -77,7 +78,7 @@ class GemmHybrid : public GemmCommon<To, To, Tr> {
         }
 
         // Target block size (512 for FP32, scaling for other types).  Don't block until size reaches 1.5X this.
-        unsigned int target_block_size = 2048 / sizeof(To);
+        unsigned int target_block_size = 2048 / sizeof(Tlo);
 
         if (args._Ksize >= ((3 * target_block_size) / 2)) {
             unsigned int target_blocks = iceildiv(args._Ksize, target_block_size);
@@ -153,8 +154,8 @@ public:
 
         /* Make sure we've been set up correctly. */
         assert(_B_transposed);
-        static_assert(std::is_same<To, Toi>::value, "gemm_native: Operand types must be the same.");
-        static_assert(std::is_same<Tr, Tri>::value, "gemm_native: Result types must be the same.");
+        static_assert(std::is_same<Tlo, Tloi>::value, "gemm_hybrid: LHS operand types must be the same.");
+        static_assert(std::is_same<Tr, Tri>::value, "gemm_hybrid: Result type must be the same.");
 
         auto &g_arrays = this->_gemm_arrays;
 
@@ -182,7 +183,7 @@ public:
                 const unsigned int nmax    = std::min(n0 + _n_block, _Nsize);
                 const unsigned int multi   = p.dim(3);
 
-                const Toi *b_panel = _B_transposed +
+                const Troi *b_panel = _B_transposed +
                                      (multi * roundup(_Nsize, strategy::out_width()) * roundup(_Ksize, strategy::k_unroll())) +
                                      (k0 * roundup(_Nsize, strategy::out_width())) +
                                      (n0 * kern_k);
@@ -220,13 +221,13 @@ public:
     }
 
     size_t get_B_pretransposed_array_size() const override {
-        return roundup(_Nsize, strategy::out_width()) * roundup(_Ksize, strategy::k_unroll()) * _nmulti * sizeof(Toi);
+        return roundup(_Nsize, strategy::out_width()) * roundup(_Ksize, strategy::k_unroll()) * _nmulti * sizeof(Troi);
     }
 
-    void pretranspose_B_array(void *in_buffer, const To *B, const int ldb, const int B_multi_stride, bool transposed) override {
+    void pretranspose_B_array(void *in_buffer, const Tro *B, const int ldb, const int B_multi_stride, bool transposed) override {
         assert(!transposed);
 
-        Toi *buffer = reinterpret_cast<Toi *>(in_buffer);
+        Troi *buffer = reinterpret_cast<Troi *>(in_buffer);
         _B_transposed = buffer;
         strategy strat(_ci);
 
@@ -250,7 +251,7 @@ public:
     }
 
     void set_pretransposed_B_data(void *in_buffer) override {
-        _B_transposed = reinterpret_cast<Toi *>(in_buffer);
+        _B_transposed = reinterpret_cast<Troi *>(in_buffer);
     }
 
     // Estimate cycles for given problem given provided parameters
@@ -278,7 +279,6 @@ public:
     GemmConfig get_config() override {
         GemmConfig c;
 
-        c.method = GemmMethod::GEMM_HYBRID;
         c.inner_block_size = _k_block;
         c.outer_block_size = _n_block;
         c.filter = get_type_name<strategy>();
@@ -288,3 +288,4 @@ public:
 };
 
 } // namespace arm_gemm
+

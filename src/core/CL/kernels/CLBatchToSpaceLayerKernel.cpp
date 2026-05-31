@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -42,15 +43,21 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *block_info, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, block_info, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(block_info, 1, DataType::S32);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, block_info);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(block_info, ITensorInfo::one_channel, DataType::S32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::UNKNOWN);
 
     // Validate output if initialized
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_dimensions() > 4);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
+    else
+    {
+        // Ignored; dynamic block is deprecated.
     }
 
     return Status{};
@@ -62,6 +69,8 @@ Status validate_arguments_static(const ITensorInfo *input,
                                  const CropInfo    &crop_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->num_channels() != ITensorInfo::one_channel);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
     ARM_COMPUTE_RETURN_ERROR_ON(block_shape_x <= 0);
     ARM_COMPUTE_RETURN_ERROR_ON(block_shape_y <= 0);
@@ -70,15 +79,22 @@ Status validate_arguments_static(const ITensorInfo *input,
     const int        idx_batch   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
     ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape()[idx_batch] % (block_shape_x * block_shape_y) != 0);
 
+    const TensorShape expected_output_shape = compute_batch_to_space_shape(input->data_layout(), input->tensor_shape(),
+                                                                           block_shape_x, block_shape_y, crop_info);
+
     // Validate output if initialized
     if (output->total_size() != 0)
     {
-        const TensorShape expected_output_shape = compute_batch_to_space_shape(
-            input->data_layout(), input->tensor_shape(), block_shape_x, block_shape_y, crop_info);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         const TensorInfo expected_output = output->clone()->set_tensor_shape(expected_output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &expected_output);
         ARM_COMPUTE_RETURN_ERROR_ON(output->num_dimensions() > 4);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
+    else
+    {
+        const auto output_info = TensorInfo(expected_output_shape, ITensorInfo::one_channel, input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,11 +28,12 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/ChannelShuffle.h"
 
 namespace arm_compute
@@ -47,7 +48,7 @@ class ChannelShuffleLayerValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, unsigned int num_groups, DataType data_type, DataLayout data_layout)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -67,7 +68,7 @@ protected:
     TensorType compute_target(TensorShape shape, DataType data_type, unsigned int num_groups, DataLayout data_layout)
     {
         // Note: The input shape passed to the function is always in NCHW
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(shape, PermutationVector(2U, 0U, 1U));
         }
@@ -102,7 +103,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type, unsigned int num_groups)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type };
+        SimpleTensor<T> src{shape, data_type};
 
         // Fill reference
         fill(src);

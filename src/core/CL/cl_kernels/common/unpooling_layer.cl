@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited.
+ * Copyright (c) 2020-2021,2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,5 +68,9 @@ __kernel void max_unpooling_layer_2(
     unsigned int index = *((__global unsigned int *)indices.ptr);
     DATA_TYPE value    = *((__global DATA_TYPE *)input.ptr);
 
-    *((__global DATA_TYPE *)tensor3D_index2ptr(&output, WIDTH_DST, HEIGHT_DST, DEPTH_DST, index)) = value;
+    unsigned int total_elements = (unsigned int) (WIDTH_DST * HEIGHT_DST * DEPTH_DST);
+    if(index < total_elements)
+    {
+        *((__global DATA_TYPE *)tensor3D_index2ptr(&output, WIDTH_DST, HEIGHT_DST, DEPTH_DST, index)) = value;
+    }
 }

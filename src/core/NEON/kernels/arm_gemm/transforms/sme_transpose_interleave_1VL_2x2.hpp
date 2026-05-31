@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Arm Limited.
+ * Copyright (c) 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#if defined(ARM_COMPUTE_ENABLE_SME)
+#if defined(__aarch64__) && (((defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && defined(ARM_COMPUTE_ENABLE_SME)) || ((defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && defined(ARM_COMPUTE_ENABLE_SME2)) || (defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_SME)) || (defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_SME2)))
 
 namespace {
 
@@ -39,8 +39,9 @@ void sme_transpose_interleave_1VL_2x2(uint16_t *out, const uint16_t *in, size_t 
     size_t out_stride = 1 * roundup<size_t>(height, 2) * sme::get_vector_length<uint16_t>();
 
     __asm__ __volatile__(
+      "mov x27, %x[height]\n"
       ".inst 0xd503477f  // SMSTART ZA\n"
-      "cmp %x[height], #0x4\n"
+      "cmp x27, #0x4\n"
       "ptrue p1.b\n"
       "blt 6f\n"
       "1:"  // Main row loop: Head
@@ -53,7 +54,7 @@ void sme_transpose_interleave_1VL_2x2(uint16_t *out, const uint16_t *in, size_t 
       "add x20, x21, %x[in_stride]\n"
       "mov x22, %x[out]\n"
       "add %x[in], x20, %x[in_stride]\n"
-      "sub %x[height], %x[height], #0x4\n"
+      "sub x27, x27, #0x4\n"
       "blt 3f\n"
       "2:"  // Main row loop: Unroll column loop
       "ld1h { z18.h }, p1/Z, [x26]\n"
@@ -97,7 +98,7 @@ void sme_transpose_interleave_1VL_2x2(uint16_t *out, const uint16_t *in, size_t 
       "whilelt p0.h, XZR, x25\n"
       "decw x25\n"
       "ld1h { z19.h }, p0/Z, [x26]\n"
-      "cmp x25, #0x0\n"
+      "cmp x25, #0\n"
       "incd x26, ALL, MUL #4\n"
       "ld1h { z17.h }, p0/Z, [x24]\n"
       "incd x24, ALL, MUL #4\n"
@@ -112,22 +113,23 @@ void sme_transpose_interleave_1VL_2x2(uint16_t *out, const uint16_t *in, size_t 
       "add x22, x22, %x[out_stride]\n"
       "bgt 4b\n"
       "5:"  // Main row loop: Column loop skip
-      "cmp %x[height], #0x4\n"
+      "cmp x27, #0x4\n"
       "addvl %x[out], %x[out], #2\n"
       "bge 1b\n"
-      "cbz %x[height], 12f\n"
+      "cbz x27, 12f\n"
       "6:"  // Main loop skip
       "7:"  // Tail row loop: Head
       "mov x26, %x[in]\n"
-      "cmp %x[height], #0x1\n"
+      "cmp x27, #0x1\n"
       "add x24, x26, %x[in_stride]\n"
       "mov x21, %x[width]\n"
-      "cnth x20, ALL, MUL #2\n"
       "add %x[in], x24, %x[in_stride]\n"
+      "cnth x20, ALL, MUL #2\n"
+      "csel %x[in], %x[in], x24, GT\n"
       "csel x24, x24, %x[pad_row], GT\n"
       "cmp x21, x20\n"
       "mov x22, %x[out]\n"
-      "sub %x[height], %x[height], #0x2\n"
+      "sub x27, x27, #0x2\n"
       "blt 9f\n"
       "8:"  // Tail row loop: Unroll column loop
       "ld1h { z18.h }, p1/Z, [x26]\n"
@@ -157,7 +159,7 @@ void sme_transpose_interleave_1VL_2x2(uint16_t *out, const uint16_t *in, size_t 
       "whilelt p0.h, XZR, x21\n"
       "decw x21\n"
       "ld1h { z17.h }, p0/Z, [x26]\n"
-      "cmp x21, #0x0\n"
+      "cmp x21, #0\n"
       "incd x26, ALL, MUL #4\n"
       "ld1h { z16.h }, p0/Z, [x24]\n"
       "incd x24, ALL, MUL #4\n"
@@ -166,19 +168,20 @@ void sme_transpose_interleave_1VL_2x2(uint16_t *out, const uint16_t *in, size_t 
       "add x22, x22, %x[out_stride]\n"
       "bgt 10b\n"
       "11:"  // Tail row loop: Column loop skip
-      "cmp %x[height], #0x1\n"
+      "cmp x27, #0x1\n"
       "addvl %x[out], %x[out], #1\n"
       "bge 7b\n"
       "12:"  // Done
       ".inst 0xd503467f  // SMSTOP\n"
-      : [height] "+&r" (height), [in] "+&r" (in), [out] "+&r" (out)
-      : [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
-      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
+      : [in] "+&r" (in), [out] "+&r" (out)
+      : [height] "r" (height), [in_stride] "r" (in_stride), [out_stride] "r" (out_stride), [pad_row] "r" (pad_row), [width] "r" (width)
+      : "cc", "memory", "p0", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9", "p10", "p11", "p12", "p13", "p14", "p15", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "z0", "z1", "z2", "z3", "z4", "z5", "z6", "z7", "z8", "z9", "z10", "z11", "z12", "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31"
     );
 }
 
 } // anonymous namespace
 
+#if defined(ARM_COMPUTE_ENABLE_BF16) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
 template<>
 void Transform<1, 2, true, VLType::SME>(
     bfloat16 *out, const bfloat16 *in, int stride, int x0, int xmax, int k0, int kmax)
@@ -191,7 +194,9 @@ void Transform<1, 2, true, VLType::SME>(
         (kmax-k0)
     );
 }
+#endif // defined(ARM_COMPUTE_ENABLE_BF16) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
 
+#if (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
 template<>
 void Transform<1, 2, true, VLType::SME>(
     __fp16 *out, const __fp16 *in, int stride, int x0, int xmax, int k0, int kmax)
@@ -204,6 +209,7 @@ void Transform<1, 2, true, VLType::SME>(
         (kmax-k0)
     );
 }
+#endif // (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
 
+#endif // defined(__aarch64__) && (((defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && defined(ARM_COMPUTE_ENABLE_SME)) || ((defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && defined(ARM_COMPUTE_ENABLE_SME2)) || (defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_SME)) || (defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_SME2)))
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SME)

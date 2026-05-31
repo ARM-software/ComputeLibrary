@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ROI_ALIGN_LAYER_DATASET
-#define ARM_COMPUTE_TEST_ROI_ALIGN_LAYER_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_ROIDATASET_H
+#define ACL_TESTS_DATASETS_ROIDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -45,9 +45,9 @@ public:
         iterator(std::vector<TensorShape>::const_iterator         tensor_shape_it,
                  std::vector<ROIPoolingLayerInfo>::const_iterator infos_it,
                  std::vector<TensorShape>::const_iterator         rois_shape_it)
-            : _tensor_shape_it{ std::move(tensor_shape_it) },
-              _infos_it{ std::move(infos_it) },
-              _rois_shape_it{ std::move(rois_shape_it) }
+            : _tensor_shape_it{std::move(tensor_shape_it)},
+              _infos_it{std::move(infos_it)},
+              _rois_shape_it{std::move(rois_shape_it)}
         {
         }
 
@@ -140,4 +140,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ROI_ALIGN_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_ROIDATASET_H

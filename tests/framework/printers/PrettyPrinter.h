@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017,2021 Arm Limited.
+ * Copyright (c) 2017,2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PRETTYPRINTER
-#define ARM_COMPUTE_TEST_PRETTYPRINTER
+#ifndef ACL_TESTS_FRAMEWORK_PRINTERS_PRETTYPRINTER_H
+#define ACL_TESTS_FRAMEWORK_PRINTERS_PRETTYPRINTER_H
 
 #include "Printer.h"
 
@@ -54,6 +54,7 @@ public:
     void print_errors_header() override;
     void print_errors_footer() override;
     void print_error(const std::exception &error, bool expected) override;
+    void print_warning(const std::string &warning) override;
     void print_info(const std::string &info) override;
     void print_profiler_header(const std::string &header_data) override;
     void print_measurements(const Profiler::MeasurementsMap &measurements) override;
@@ -63,10 +64,10 @@ private:
     std::string begin_color(const std::string &color) const;
     std::string end_color() const;
 
-    bool _color_output{ true };
+    bool _color_output{true};
 };
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
 
-#endif /* ARM_COMPUTE_TEST_PRETTYPRINTER */
+#endif // ACL_TESTS_FRAMEWORK_PRINTERS_PRETTYPRINTER_H

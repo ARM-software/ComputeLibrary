@@ -1,8 +1,11 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
+// Do not flag up inline assembly blocks
+#pragma GCC diagnostic ignored "-Woverlength-strings"
 
 #if !defined(__aarch64__) || !defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC) || \
     !defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
@@ -11,6 +14,7 @@
 
 #include "kai_matmul_clamp_f16_f16_f16p16x1biasf16_6x16x8_neon_mla.h"
 
+#include <arm_neon.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -50,7 +54,7 @@ size_t kai_get_lhs_offset_matmul_clamp_f16_f16_f16p16x1biasf16_6x16x8_neon_mla(s
 size_t kai_get_rhs_packed_offset_matmul_clamp_f16_f16_f16p16x1biasf16_6x16x8_neon_mla(size_t n_idx, size_t k) {
     KAI_ASSUME(n_idx % kai_nr == 0);
 
-    return n_idx / kai_nr * (kai_nr * sizeof(__fp16) + kai_nr * k * sizeof(__fp16));
+    return n_idx / kai_nr * (kai_nr * sizeof(uint16_t) + kai_nr * k * sizeof(uint16_t));
 }
 
 size_t kai_get_dst_offset_matmul_clamp_f16_f16_f16p16x1biasf16_6x16x8_neon_mla(
@@ -58,11 +62,11 @@ size_t kai_get_dst_offset_matmul_clamp_f16_f16_f16p16x1biasf16_6x16x8_neon_mla(
     KAI_ASSUME(m_idx % kai_mr == 0);
     KAI_ASSUME(n_idx % kai_nr == 0);
 
-    return m_idx * stride + n_idx * sizeof(__fp16);
+    return m_idx * stride + n_idx * sizeof(uint16_t);
 }
 
 size_t kai_get_dst_size_matmul_clamp_f16_f16_f16p16x1biasf16_6x16x8_neon_mla(size_t m, size_t n) {
-    return m * n * sizeof(__fp16);
+    return m * n * sizeof(uint16_t);
 }
 
 void kai_run_matmul_clamp_f16_f16_f16p16x1biasf16_6x16x8_neon_mla(
@@ -70,12 +74,12 @@ void kai_run_matmul_clamp_f16_f16_f16p16x1biasf16_6x16x8_neon_mla(
     const void* lhs, size_t lhs_stride,                       //
     const void* rhs_packed,                                   //
     void* dst, size_t dst_stride_row, size_t dst_stride_col,  //
-    __fp16 clamp_min, __fp16 clamp_max) {
-    KAI_ASSERT(dst_stride_col == sizeof(__fp16));
+    float clamp_min, float clamp_max) {
+    KAI_ASSERT(dst_stride_col == sizeof(uint16_t));
 
     typedef struct {
-        __fp16 maxval;
-        __fp16 minval;
+        float16_t maxval;
+        float16_t minval;
         unsigned int num_strings;
         const unsigned int* string_lengths;
         size_t N;
@@ -100,17 +104,17 @@ void kai_run_matmul_clamp_f16_f16_f16p16x1biasf16_6x16x8_neon_mla(
 
     // Direct input.
     const void* input_ptr = lhs;
-    ka.input_offset = lhs_stride / sizeof(__fp16);
+    ka.input_offset = lhs_stride / sizeof(uint16_t);
     ka.input_initial_col = 0;
 
     // Direct output.
     ka.output_ptr = dst;
-    ka.output_offset = dst_stride_row / sizeof(__fp16);
+    ka.output_offset = dst_stride_row / sizeof(uint16_t);
 
     // Clamping output.
     flags |= 0x2;
-    ka.maxval = clamp_max;
-    ka.minval = clamp_min;
+    ka.maxval = (float16_t)clamp_max;
+    ka.minval = (float16_t)clamp_min;
 
     __asm__ __volatile__(
         "1:"  // Row loop

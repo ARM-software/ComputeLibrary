@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -214,8 +214,9 @@ void ClGemmConv2d::configure(const CLCompileContext &compile_context,
     _is_prepared  = weights_info.retain_internal_weights();
     _is_quantized = is_data_type_quantized_asymmetric(src->data_type());
     _skip_im2col  = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 &&
-                    conv2d_info.conv_info.stride().first == 1 && conv2d_info.conv_info.stride().second == 1);
-    _skip_col2im  = data_layout == DataLayout::NHWC;
+                    conv2d_info.conv_info.stride().first == 1 && conv2d_info.conv_info.stride().second == 1) &&
+                   !conv2d_info.conv_info.has_padding();
+    _skip_col2im = data_layout == DataLayout::NHWC;
 
     // Only for quantize there are few cases where we cannot fuse the activation function in GEMM
     _fuse_activation = true;
@@ -419,10 +420,12 @@ Status ClGemmConv2d::validate(const ITensorInfo *src,
     const ITensorInfo *gemm_output_to_use = dst;
     const ITensorInfo *weights_to_use     = weights;
     const bool         is_quantized       = is_data_type_quantized_asymmetric(data_type);
-    const bool         skip_im2col     = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 &&
-                              conv2d_info.conv_info.stride().first == 1 && conv2d_info.conv_info.stride().second == 1);
-    const bool         skip_col2im     = data_layout == DataLayout::NHWC;
-    bool               fuse_activation = true;
+    const bool         skip_im2col =
+        (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 &&
+         conv2d_info.conv_info.stride().first == 1 && conv2d_info.conv_info.stride().second == 1) &&
+        !conv2d_info.conv_info.has_padding();
+    const bool skip_col2im     = data_layout == DataLayout::NHWC;
+    bool       fuse_activation = true;
 
     ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(idx_channel) * conv2d_info.num_groups) !=
                                 src->dimension(idx_channel));

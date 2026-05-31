@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,10 +25,12 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/ICLTensor.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/utils/helpers/AdjustVecSize.h"
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/StringSupport.h"
@@ -51,6 +53,7 @@ Status validate_arguments(const ITensorInfo  &input1,
                           const ITensorInfo  &output,
                           ComparisonOperation operation)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&input1, &input2);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input1);
     ARM_COMPUTE_RETURN_ERROR_ON(input1.data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input1, &input2);
@@ -62,9 +65,15 @@ Status validate_arguments(const ITensorInfo  &input1,
     // Validate in case of configured output
     if (output.total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, ITensorInfo::one_channel, DataType::U8);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output.tensor_shape(), 0),
                                         "Wrong shape for output");
+    }
+    else
+    {
+        const auto output_info = TensorInfo(out_shape, ITensorInfo::one_channel, DataType::U8);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

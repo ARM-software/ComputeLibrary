@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,9 +25,11 @@
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/Log.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 
 #include <list>
@@ -43,6 +45,7 @@ Status validate_arguments(const ITensorInfo       *input_loc,
                           DetectionOutputLayerInfo info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input_loc, input_conf, input_priorbox, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input_loc, input_conf, input_priorbox);
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input_loc, input_conf, input_priorbox, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input_loc, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_loc, input_conf, input_priorbox);
@@ -61,13 +64,20 @@ Status validate_arguments(const ITensorInfo       *input_loc,
                                         input_conf->tensor_shape()[0],
                                     "Number of priors must match number of confidence predictions.");
 
+    const unsigned int max_size = info.keep_top_k() * (input_loc->num_dimensions() > 1 ? input_loc->dimension(1) : 1);
+    const TensorShape  output_shape(7U, max_size);
+
     // Validate configured output
     if (output->total_size() != 0)
     {
-        const unsigned int max_size =
-            info.keep_top_k() * (input_loc->num_dimensions() > 1 ? input_loc->dimension(1) : 1);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), TensorShape(7U, max_size));
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input_loc, output);
+    }
+    else
+    {
+        const TensorInfo output_info(output_shape, input_loc->num_channels(), input_loc->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     return Status{};

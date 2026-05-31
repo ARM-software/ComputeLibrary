@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, 2024 Arm Limited.
+ * Copyright (c) 2019-2022, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -101,6 +101,7 @@ Status validate_arguments(const ITensorInfo         *input,
                           const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, rois, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, rois);
     ARM_COMPUTE_RETURN_ERROR_ON(rois->dimension(0) != 5);
     ARM_COMPUTE_RETURN_ERROR_ON(rois->num_dimensions() > 2);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
@@ -109,12 +110,19 @@ Status validate_arguments(const ITensorInfo         *input,
     ARM_COMPUTE_RETURN_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
 
+    const TensorShape output_shape = compute_roi_align_shape(*input, *rois, pool_info);
+
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(compute_roi_align_shape(*input, *rois, pool_info),
-                                                           output->tensor_shape());
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output_shape, output->tensor_shape());
+    }
+    else
+    {
+        const TensorInfo output_info(output_shape, input->num_channels(), input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     if (input->data_type() == DataType::QASYMM8 || input->data_type() == DataType::QASYMM8_SIGNED)

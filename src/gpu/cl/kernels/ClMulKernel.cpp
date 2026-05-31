@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023 Arm Limited.
+ * Copyright (c) 2016-2021, 2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,7 @@
 #include "arm_compute/core/utils/StringUtils.h"
 
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "support/Cast.h"
@@ -59,6 +60,7 @@ Status validate_arguments(const ITensorInfo         *src1,
     ARM_COMPUTE_UNUSED(rounding_policy);
 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src1, src2, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src1, src2);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src1);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1, 1, DataType::U8, DataType::QASYMM8,
                                                          DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16,
@@ -80,6 +82,7 @@ Status validate_arguments(const ITensorInfo         *src1,
     // Validate in case of configured dst
     if (dst->total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::U8, DataType::QASYMM8,
                                                              DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16,
                                                              DataType::F16, DataType::S32, DataType::F32);
@@ -113,6 +116,11 @@ Status validate_arguments(const ITensorInfo         *src1,
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst->tensor_shape(), 0),
                                             "Wrong shape for dst");
         }
+    }
+    else
+    {
+        const TensorInfo dst_info(out_shape, src1->num_channels(), src1->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};
@@ -361,8 +369,10 @@ Status validate_arguments_complex(const ITensorInfo         *src1,
                                   const ITensorInfo         *dst,
                                   const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1, 2, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src2, 2, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src1, src2, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src1, src2);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src1, ITensorInfo::two_channels, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src2, ITensorInfo::two_channels, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src1, src2);
 
     const TensorShape &out_shape = TensorShape::broadcast_shape(src1->tensor_shape(), src2->tensor_shape());
@@ -373,10 +383,16 @@ Status validate_arguments_complex(const ITensorInfo         *src1,
     // Validate in case of configured dst
     if (dst->total_size() > 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 2, DataType::F16, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON(dst->num_channels() != ITensorInfo::two_channels);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src1, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst->tensor_shape(), 0),
                                         "Wrong shape for dst");
+    }
+    else
+    {
+        const TensorInfo dst_info(out_shape, src1->num_channels(), src1->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

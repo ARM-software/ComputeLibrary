@@ -1,8 +1,11 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
+
+// Do not flag up inline assembly blocks
+#pragma GCC diagnostic ignored "-Woverlength-strings"
 
 #if !defined(__aarch64__) || !defined(__ARM_FEATURE_BF16_VECTOR_ARITHMETIC) || \
     !defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
@@ -69,7 +72,7 @@ void kai_run_rhs_pack_kxn_bf16p12x4biasf16_f16_neon(
     const void* in = rhs;
     void* out = rhs_packed;
     const size_t in_stride = rhs_stride;
-    const uint16_t* pad_row = (uint16_t*)rhs;
+    const uint16_t* pad_row = rhs;
 
     // Fill zeros if bias is nullptr
     size_t bias_step = nr * sizeof(uint16_t);
@@ -80,7 +83,7 @@ void kai_run_rhs_pack_kxn_bf16p12x4biasf16_f16_neon(
         bias_step = 0;
     }
 
-    const void* bias_ptr = bias == NULL ? (void*)zero_bias : (void*)bias;
+    const void* bias_ptr = bias == NULL ? (const void*)zero_bias : bias;
 
     size_t out_stride = kai_get_rhs_packed_stride_rhs_pack_kxn_bf16p12x4biasf16_f16_neon(height);
 

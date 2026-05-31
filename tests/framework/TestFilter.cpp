@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,9 +23,9 @@
  */
 #include "TestFilter.h"
 
-#include "Framework.h"
 #include "support/StringSupport.h"
 
+#include "Framework.h"
 #include <sstream>
 #include <string>
 
@@ -36,37 +36,37 @@ namespace test
 namespace framework
 {
 TestFilter::TestFilter(DatasetMode mode, const std::string &name_filter, const std::string &id_filter)
-    : _dataset_mode{ mode }, _name_filter{ name_filter }, _id_filter{ parse_id_filter(id_filter) }
+    : _dataset_mode{mode}, _name_filter{name_filter}, _id_filter{parse_id_filter(id_filter)}
 {
 }
 
 bool TestFilter::is_selected(const TestInfo &info) const
 {
     const bool include_disabled = (info.mode == _dataset_mode) && (_dataset_mode == DatasetMode::DISABLED);
-    if((info.mode & _dataset_mode) == DatasetMode::DISABLED && !include_disabled)
+    if ((info.mode & _dataset_mode) == DatasetMode::DISABLED && !include_disabled)
     {
         return false;
     }
 
-    if(!std::regex_search(info.name, _name_filter))
+    if (!std::regex_search(info.name, _name_filter))
     {
         return false;
     }
 
-    if(!_id_filter.empty())
+    if (!_id_filter.empty())
     {
         bool found = false;
 
-        for(const auto &range : _id_filter)
+        for (const auto &range : _id_filter)
         {
-            if(range.first <= info.id && info.id <= range.second)
+            if (range.first <= info.id && info.id <= range.second)
             {
                 found = true;
                 break;
             }
         }
 
-        if(!found)
+        if (!found)
         {
             return false;
         }
@@ -89,12 +89,12 @@ TestFilter::Ranges TestFilter::parse_id_filter(const std::string &id_filter) con
     // Get first value
     std::getline(stream, str, ',');
 
-    if(stream.fail())
+    if (stream.fail())
     {
         return ranges;
     }
 
-    if(str.find("...") != std::string::npos)
+    if (str.find("...") != std::string::npos)
     {
         in_range = true;
     }
@@ -104,16 +104,16 @@ TestFilter::Ranges TestFilter::parse_id_filter(const std::string &id_filter) con
         end   = start;
     }
 
-    while(!stream.eof())
+    while (!stream.eof())
     {
         std::getline(stream, str, ',');
 
-        if(stream.fail())
+        if (stream.fail())
         {
             break;
         }
 
-        if(str.find("...") != std::string::npos)
+        if (str.find("...") != std::string::npos)
         {
             end      = std::numeric_limits<int>::max();
             in_range = true;
@@ -122,7 +122,7 @@ TestFilter::Ranges TestFilter::parse_id_filter(const std::string &id_filter) con
         {
             value = support::cpp11::stoi(str);
 
-            if(in_range || end == value - 1)
+            if (in_range || end == value - 1)
             {
                 end      = value;
                 in_range = false;

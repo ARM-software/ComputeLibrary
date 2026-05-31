@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #ifndef ACL_TESTS_VALIDATION_FIXTURES_SCALEFIXTURE_H
 #define ACL_TESTS_VALIDATION_FIXTURES_SCALEFIXTURE_H
 
@@ -39,10 +40,18 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ScaleValidationGenericFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy,
-               bool align_corners, bool mixed_layout, QuantizationInfo output_quantization_info)
+    void setup(TensorShape         shape,
+               DataType            data_type,
+               QuantizationInfo    quantization_info,
+               DataLayout          data_layout,
+               InterpolationPolicy policy,
+               BorderMode          border_mode,
+               SamplingPolicy      sampling_policy,
+               bool                align_corners,
+               bool                mixed_layout,
+               QuantizationInfo    output_quantization_info)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -86,13 +95,13 @@ protected:
 
     void generate_scale(const TensorShape &shape)
     {
-        static constexpr float _min_scale{ 0.25f };
-        static constexpr float _max_scale{ 3.f };
+        static constexpr float _min_scale{0.25f};
+        static constexpr float _max_scale{3.f};
 
-        constexpr float max_width{ 8192.0f };
-        constexpr float max_height{ 6384.0f };
-        const float     min_width{ 1.f };
-        const float     min_height{ 1.f };
+        constexpr float max_width{8192.0f};
+        constexpr float max_height{6384.0f};
+        const float     min_width{1.f};
+        const float     min_height{1.f};
 
         std::mt19937                          generator(library->seed());
         std::uniform_real_distribution<float> distribution_float(_min_scale, _max_scale);
@@ -100,7 +109,8 @@ protected:
         auto generate = [&](size_t input_size, float min_output, float max_output) -> float
         {
             const float generated_scale = distribution_float(generator);
-            const float output_size     = utility::clamp(static_cast<float>(input_size) * generated_scale, min_output, max_output);
+            const float output_size =
+                utility::clamp(static_cast<float>(input_size) * generated_scale, min_output, max_output);
             return output_size / input_size;
         };
 
@@ -115,17 +125,17 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(tensor.data_type() == DataType::F32)
+        if (tensor.data_type() == DataType::F32)
         {
             std::uniform_real_distribution<float> distribution(-5.0f, 5.0f);
             library->fill(tensor, distribution, 0);
         }
-        else if(tensor.data_type() == DataType::F16)
+        else if (tensor.data_type() == DataType::F16)
         {
-            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -5.0f, 5.0f };
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-5.0f, 5.0f};
             library->fill(tensor, distribution, 0);
         }
-        else if(is_data_type_quantized(tensor.data_type()))
+        else if (is_data_type_quantized(tensor.data_type()))
         {
             std::uniform_int_distribution<> distribution(0, 100);
             library->fill(tensor, distribution, 0);
@@ -139,7 +149,7 @@ protected:
     TensorType compute_target(TensorShape shape, DataLayout data_layout)
     {
         // Change shape in case of NHWC.
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(shape, PermutationVector(2U, 0U, 1U));
         }
@@ -151,19 +161,21 @@ protected:
         const int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
         TensorShape shape_scaled(shape);
-        shape_scaled.set(idx_width, shape[idx_width] * _scale_x, /* apply_dim_correction = */ false);
-        shape_scaled.set(idx_height, shape[idx_height] * _scale_y, /* apply_dim_correction = */ false);
+        shape_scaled.set(idx_width, shape[idx_width] * _scale_x, false /* apply_dim_correction = */);
+        shape_scaled.set(idx_height, shape[idx_height] * _scale_y, false /* apply_dim_correction = */);
         TensorType dst = create_tensor<TensorType>(shape_scaled, _data_type, 1, _output_quantization_info, data_layout);
 
         // Create and configure function
         FunctionType scale;
 
-        scale.configure(&src, &dst, ScaleKernelInfo{ _policy, _border_mode, _constant_border_value, _sampling_policy, /* use_padding */ false, _align_corners });
+        scale.configure(&src, &dst,
+                        ScaleKernelInfo{_policy, _border_mode, _constant_border_value, _sampling_policy,
+                                        false /* use_padding */, _align_corners});
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
 
-        add_padding_x({ &src, &dst }, data_layout);
+        add_padding_x({&src, &dst}, data_layout);
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -174,7 +186,7 @@ protected:
         // Fill tensors
         fill(AccessorType(src));
 
-        if(_mixed_layout)
+        if (_mixed_layout)
         {
             mix_layout(scale, src, dst);
         }
@@ -189,12 +201,14 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, _data_type, 1, _input_quantization_info };
+        SimpleTensor<T> src{shape, _data_type, 1, _input_quantization_info};
 
         // Fill reference
         fill(src);
 
-        return reference::scale<T>(src, _scale_x, _scale_y, _policy, _border_mode, _constant_border_value, _sampling_policy, /* ceil_policy_scale */ false, _align_corners, _output_quantization_info);
+        return reference::scale<T>(src, _scale_x, _scale_y, _policy, _border_mode, _constant_border_value,
+                                   _sampling_policy, false /* ceil_policy_scale */, _align_corners,
+                                   _output_quantization_info);
     }
 
     TensorType          _target{};
@@ -207,67 +221,65 @@ protected:
     DataType            _data_type{};
     QuantizationInfo    _input_quantization_info{};
     QuantizationInfo    _output_quantization_info{};
-    bool                _align_corners{ false };
-    bool                _mixed_layout{ false };
-    float               _scale_x{ 1.f };
-    float               _scale_y{ 1.f };
+    bool                _align_corners{false};
+    bool                _mixed_layout{false};
+    float               _scale_x{1.f};
+    float               _scale_y{1.f};
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class ScaleValidationQuantizedFixture : public ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy,
-               bool align_corners)
+    void setup(TensorShape         shape,
+               DataType            data_type,
+               QuantizationInfo    quantization_info,
+               DataLayout          data_layout,
+               InterpolationPolicy policy,
+               BorderMode          border_mode,
+               SamplingPolicy      sampling_policy,
+               bool                align_corners)
     {
-        ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
-                                                                                        data_type,
-                                                                                        quantization_info,
-                                                                                        data_layout,
-                                                                                        policy,
-                                                                                        border_mode,
-                                                                                        sampling_policy,
-                                                                                        align_corners,
-                                                                                        mixed_layout,
-                                                                                        quantization_info);
+        ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, data_type, quantization_info, data_layout, policy, border_mode, sampling_policy, align_corners,
+            mixed_layout, quantization_info);
     }
 };
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
-class ScaleValidationDifferentOutputQuantizedFixture : public ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class ScaleValidationDifferentOutputQuantizedFixture
+    : public ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, DataType data_type, QuantizationInfo input_quantization_info, QuantizationInfo output_quantization_info, DataLayout data_layout, InterpolationPolicy policy,
-               BorderMode border_mode, SamplingPolicy sampling_policy,
-               bool align_corners)
+    void setup(TensorShape         shape,
+               DataType            data_type,
+               QuantizationInfo    input_quantization_info,
+               QuantizationInfo    output_quantization_info,
+               DataLayout          data_layout,
+               InterpolationPolicy policy,
+               BorderMode          border_mode,
+               SamplingPolicy      sampling_policy,
+               bool                align_corners)
     {
-        ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
-                                                                                        data_type,
-                                                                                        input_quantization_info,
-                                                                                        data_layout,
-                                                                                        policy,
-                                                                                        border_mode,
-                                                                                        sampling_policy,
-                                                                                        align_corners,
-                                                                                        mixed_layout,
-                                                                                        output_quantization_info);
+        ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, data_type, input_quantization_info, data_layout, policy, border_mode, sampling_policy, align_corners,
+            mixed_layout, output_quantization_info);
     }
 };
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool mixed_layout = false>
 class ScaleValidationFixture : public ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, DataType data_type, DataLayout data_layout, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy, bool align_corners)
+    void setup(TensorShape         shape,
+               DataType            data_type,
+               DataLayout          data_layout,
+               InterpolationPolicy policy,
+               BorderMode          border_mode,
+               SamplingPolicy      sampling_policy,
+               bool                align_corners)
     {
-        ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
-                                                                                        data_type,
-                                                                                        QuantizationInfo(),
-                                                                                        data_layout,
-                                                                                        policy,
-                                                                                        border_mode,
-                                                                                        sampling_policy,
-                                                                                        align_corners,
-                                                                                        mixed_layout,
-                                                                                        QuantizationInfo());
+        ScaleValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, data_type, QuantizationInfo(), data_layout, policy, border_mode, sampling_policy, align_corners,
+            mixed_layout, QuantizationInfo());
     }
 };
 } // namespace validation

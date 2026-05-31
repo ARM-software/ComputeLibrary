@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arm Limited.
+# Copyright (c) 2023, 2025-2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -26,3 +26,6 @@
 
 # COMPMID-6576: Apply clang-format on repository
 afd38f0c617d6f89b2b4532c6c44f116617e2b6f
+
+# style: Apply clang-format for tests
+de306a3335172ddbb4796a317e86c2abc7c4d5b2

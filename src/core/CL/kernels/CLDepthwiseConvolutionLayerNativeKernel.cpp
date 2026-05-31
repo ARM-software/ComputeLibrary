@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,7 @@
 #include "src/core/CL/CLUtils.h"
 #include "src/core/CL/CLValidate.h"
 #include "src/core/CL/ICLKernel.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
@@ -62,11 +63,12 @@ Status validate_arguments(const ITensorInfo          *input,
         in_place = true;
         output   = input;
     }
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_LAYOUT_NOT_IN(input, DataLayout::NHWC);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
-                                                         DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, ITensorInfo::one_channel, DataType::QASYMM8,
+                                                         DataType::QASYMM8_SIGNED, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.pad_stride_info.stride().first > 1 && dwc_info.m0 != 1);
     ARM_COMPUTE_RETURN_ERROR_ON(conv_info.dilation.x() > 1 && dwc_info.m0 != 1);
     ARM_COMPUTE_RETURN_ERROR_ON((dwc_info.export_input_to_cl_image == true));
@@ -112,12 +114,13 @@ Status validate_arguments(const ITensorInfo          *input,
 
     if (biases != nullptr)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(biases);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != output_shape[idx_c]);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
 
         if (is_quantized)
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, ITensorInfo::one_channel, DataType::S32);
         }
         else
         {
@@ -128,14 +131,17 @@ Status validate_arguments(const ITensorInfo          *input,
     if (is_quantized)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output_multipliers, output_shifts);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_multipliers, 1, DataType::S32);
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_shifts, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output_multipliers, output_shifts);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_multipliers, ITensorInfo::one_channel,
+                                                             DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output_shifts, ITensorInfo::one_channel, DataType::S32);
         ARM_COMPUTE_RETURN_ERROR_ON(output_multipliers->num_dimensions() > 1);
         ARM_COMPUTE_RETURN_ERROR_ON(output_shifts->num_dimensions() > 1);
 
         if (is_data_type_quantized_per_channel(weights->data_type()))
         {
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QSYMM8_PER_CHANNEL);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, ITensorInfo::one_channel,
+                                                                 DataType::QSYMM8_PER_CHANNEL);
             ARM_COMPUTE_RETURN_ERROR_ON(output_shape[idx_c] != output_multipliers->dimension(0));
             ARM_COMPUTE_RETURN_ERROR_ON(output_shape[idx_c] != output_shifts->dimension(0));
         }
@@ -153,8 +159,14 @@ Status validate_arguments(const ITensorInfo          *input,
 
     if (output->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
+    else
+    {
+        const auto output_info = TensorInfo(output_shape, ITensorInfo::one_channel, input->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&output_info);
     }
 
     if (is_data_type_quantized(input->data_type()))

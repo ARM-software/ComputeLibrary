@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,19 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_WEIGHTS_RESHAPE_FIXTURE
-#define ARM_COMPUTE_TEST_WEIGHTS_RESHAPE_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_WEIGHTSRESHAPEFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_WEIGHTSRESHAPEFIXTURE_H
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/WeightsReshape.h"
 
 namespace arm_compute
@@ -50,7 +51,8 @@ class WeightsReshapeOpValidationFixture : public framework::Fixture
 public:
     void setup(TensorShape input_shape, DataType data_type, bool has_bias, unsigned int num_groups)
     {
-        const TensorShape output_shape = compute_weights_reshaped_shape(TensorInfo(input_shape, 1, data_type), has_bias, num_groups);
+        const TensorShape output_shape =
+            compute_weights_reshaped_shape(TensorInfo(input_shape, 1, data_type), has_bias, num_groups);
 
         _target    = compute_target(input_shape, output_shape, has_bias, num_groups, data_type);
         _reference = compute_reference(input_shape, output_shape, has_bias, num_groups, data_type);
@@ -63,7 +65,11 @@ protected:
         library->fill_tensor_uniform(tensor, seed);
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, const bool has_bias, const unsigned int num_groups, DataType data_type)
+    TensorType compute_target(const TensorShape &input_shape,
+                              const TensorShape &output_shape,
+                              const bool         has_bias,
+                              const unsigned int num_groups,
+                              DataType           data_type)
     {
         // Create tensors
         TensorType src  = create_tensor<TensorType>(input_shape, data_type);
@@ -87,7 +93,7 @@ protected:
         // Fill tensors
         fill(AccessorType(src), 0);
 
-        if(has_bias)
+        if (has_bias)
         {
             ARM_COMPUTE_ASSERT(bias.info()->is_resizable());
 
@@ -98,13 +104,10 @@ protected:
             fill(AccessorType(bias), 1);
         }
 
-        arm_compute::ITensorPack pack =
-        {
-            { arm_compute::TensorType::ACL_SRC, &src },
-            { arm_compute::TensorType::ACL_DST, &dst }
-        };
+        arm_compute::ITensorPack pack = {{arm_compute::TensorType::ACL_SRC, &src},
+                                         {arm_compute::TensorType::ACL_DST, &dst}};
 
-        if(has_bias)
+        if (has_bias)
         {
             pack.add_const_tensor(arm_compute::TensorType::ACL_BIAS, &bias);
         }
@@ -114,15 +117,19 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const bool has_bias, const unsigned int num_groups, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape,
+                                      const TensorShape &output_shape,
+                                      const bool         has_bias,
+                                      const unsigned int num_groups,
+                                      DataType           data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type };
-        SimpleTensor<T> bias{ TensorShape(has_bias ? input_shape[3] : 0), data_type };
+        SimpleTensor<T> src{input_shape, data_type};
+        SimpleTensor<T> bias{TensorShape(has_bias ? input_shape[3] : 0), data_type};
 
         // Fill reference
         fill(src, 0);
-        if(has_bias)
+        if (has_bias)
         {
             fill(bias, 1);
         }
@@ -136,4 +143,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_WEIGHTS_RESHAPE_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_WEIGHTSRESHAPEFIXTURE_H

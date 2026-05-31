@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022-2024 Arm Limited.
+ * Copyright (c) 2017-2020, 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "bfloat.hpp"
+#include "arm_common/bfloat.hpp"
+#include "arm_gemm/arm_gemm.hpp"
+#include "arm_gemm/gemm_common.hpp"
 #include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
 
+#ifdef __aarch64__
+#ifdef ARM_COMPUTE_ENABLE_BF16
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #include "kernels/a64_ffinterleaved_bf16fp32_mmla_8x12.hpp"
+#ifdef ARM_COMPUTE_ENABLE_SVE
 #include "kernels/sve_ffinterleaved_bf16fp32_mmla_8x3VL.hpp"
+#endif // ARM_COMPUTE_ENABLE_SVE
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
+#endif // ARM_COMPUTE_ENABLE_BF16
+#endif // __aarch64__
 
 namespace arm_gemm {
 
@@ -38,28 +46,25 @@ static const GemmImplementation<bfloat16, bfloat16, bfloat16> gemm_bf16bf16_meth
 #ifdef ARM_COMPUTE_ENABLE_BF16
 #ifdef ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 GemmImplementation<bfloat16, bfloat16, bfloat16>::with_estimate(
-    GemmMethod::GEMM_INTERLEAVED,
     "a64_ffinterleaved_bf16fp32_mmla_8x12",
     KernelWeightFormat::VL256_BL64,
     [](const GemmArgs &args) { return args._ci->has_bf16(); },
-    [](const GemmArgs &args) { return GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_mmla_8x12, bfloat16, bfloat16>::estimate_cycles<bfloat16>(args); },
-    [](const GemmArgs &args) { return new GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_mmla_8x12, bfloat16, bfloat16>(args); }
+    [](const GemmArgs &args) { return GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_mmla_8x12, bfloat16, bfloat16, bfloat16>::estimate_cycles<bfloat16>(args); },
+    [](const GemmArgs &args) { return new GemmInterleavedFixedFormat<cls_a64_ffinterleaved_bf16fp32_mmla_8x12, bfloat16, bfloat16, bfloat16>(args); }
 ),
 #ifdef ARM_COMPUTE_ENABLE_SVE
 GemmImplementation<bfloat16, bfloat16, bfloat16>::with_estimate(
-    GemmMethod::GEMM_INTERLEAVED,
     "sve_ffinterleaved_bf16fp32_mmla_8x3VL",
     KernelWeightFormat::VL2VL_BL64,
     [](const GemmArgs &args) { return args._ci->has_svebf16(); },
-    [](const GemmArgs &args) { return GemmInterleavedFixedFormat<cls_sve_ffinterleaved_bf16fp32_mmla_8x3VL, bfloat16, bfloat16>::estimate_cycles<bfloat16>(args); },
-    [](const GemmArgs &args) { return new GemmInterleavedFixedFormat<cls_sve_ffinterleaved_bf16fp32_mmla_8x3VL, bfloat16, bfloat16>(args); }
+    [](const GemmArgs &args) { return GemmInterleavedFixedFormat<cls_sve_ffinterleaved_bf16fp32_mmla_8x3VL, bfloat16, bfloat16, bfloat16>::estimate_cycles<bfloat16>(args); },
+    [](const GemmArgs &args) { return new GemmInterleavedFixedFormat<cls_sve_ffinterleaved_bf16fp32_mmla_8x3VL, bfloat16, bfloat16, bfloat16>(args); }
 ),
 #endif // ARM_COMPUTE_ENABLE_SVE
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 #endif // ARM_COMPUTE_ENABLE_BF16
 #endif // __aarch64__
 {
-    GemmMethod::DEFAULT,
     "",
     nullptr,
     nullptr,
@@ -72,10 +77,9 @@ const GemmImplementation<bfloat16, bfloat16, bfloat16> *gemm_implementation_list
     return gemm_bf16bf16_methods;
 }
 
-/* Explicitly instantiate the external functions for these types. */
-template UniqueGemmCommon<bfloat16, bfloat16, bfloat16> gemm<bfloat16, bfloat16, bfloat16, Nothing>(const GemmArgs &args, const Nothing &);
-template bool has_opt_gemm<bfloat16, bfloat16, bfloat16, Nothing>(WeightFormat &weight_format, const GemmArgs &args, const Nothing &);
-template KernelDescription get_gemm_method<bfloat16, bfloat16, bfloat16, Nothing>(const GemmArgs &args, const Nothing &);
-template std::vector<KernelDescription> get_compatible_kernels<bfloat16, bfloat16, bfloat16, Nothing>(const GemmArgs &args, const Nothing &);
+template UniqueGemmCommon<bfloat16, bfloat16, bfloat16> gemm<bfloat16, bfloat16, bfloat16, Nothing>(const GemmArgs &, const Nothing &);
+template bool has_opt_gemm<bfloat16, bfloat16, bfloat16, Nothing>(WeightFormat &, const GemmArgs &, const Nothing &);
+template std::vector<KernelDescription> get_compatible_kernels<bfloat16, bfloat16, bfloat16, Nothing>(const GemmArgs &, const Nothing &);
 
 } // namespace arm_gemm
+

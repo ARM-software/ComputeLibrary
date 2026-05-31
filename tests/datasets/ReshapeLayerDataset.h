@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2023 Arm Limited.
+ * Copyright (c) 2017-2018, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,9 +24,9 @@
 #ifndef ACL_TESTS_DATASETS_RESHAPELAYERDATASET_H
 #define ACL_TESTS_DATASETS_RESHAPELAYERDATASET_H
 
-#include "utils/TypePrinter.h"
-
 #include "arm_compute/core/TensorShape.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -43,7 +43,7 @@ public:
     struct iterator
     {
         iterator(std::vector<TensorShape>::const_iterator in_it, std::vector<TensorShape>::const_iterator out_it)
-            : _in_it{ std::move(in_it) }, _out_it{ std::move(out_it) }
+            : _in_it{std::move(in_it)}, _out_it{std::move(out_it)}
         {
         }
 

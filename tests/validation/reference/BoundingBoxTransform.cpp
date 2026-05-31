@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/misc/Utility.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -37,7 +38,9 @@ namespace validation
 namespace reference
 {
 template <typename T, typename TDeltas>
-SimpleTensor<T> bounding_box_transform(const SimpleTensor<T> &boxes, const SimpleTensor<TDeltas> &deltas, const BoundingBoxTransformInfo &info)
+SimpleTensor<T> bounding_box_transform(const SimpleTensor<T>          &boxes,
+                                       const SimpleTensor<TDeltas>    &deltas,
+                                       const BoundingBoxTransformInfo &info)
 {
     const DataType  boxes_data_type = boxes.data_type();
     SimpleTensor<T> pred_boxes(deltas.shape(), boxes_data_type);
@@ -58,9 +61,9 @@ SimpleTensor<T> bounding_box_transform(const SimpleTensor<T> &boxes, const Simpl
     const size_t box_fields   = 4;
     const size_t class_fields = 4;
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(size_t i = 0; i < num_boxes; ++i)
+    for (size_t i = 0; i < num_boxes; ++i)
     {
         // Extract ROI information
         const size_t start_box = box_fields * i;
@@ -69,7 +72,7 @@ SimpleTensor<T> bounding_box_transform(const SimpleTensor<T> &boxes, const Simpl
         const T      ctr_x     = (boxes[start_box] / scale_before) + T(0.5f) * width;
         const T      ctr_y     = (boxes[start_box + 1] / scale_before) + T(0.5f) * height;
 
-        for(size_t j = 0; j < num_classes; ++j)
+        for (size_t j = 0; j < num_classes; ++j)
         {
             // Extract deltas
             const size_t  start_delta = i * num_classes * class_fields + class_fields * j;
@@ -89,20 +92,30 @@ SimpleTensor<T> bounding_box_transform(const SimpleTensor<T> &boxes, const Simpl
             const T pred_h     = T(std::exp(dh)) * height;
 
             // Store the prediction into the output tensor
-            pred_boxes_ptr[start_delta]     = scale_after * utility::clamp<T>(pred_ctr_x - T(0.5f) * pred_w, T(0), T(img_w - 1));
-            pred_boxes_ptr[start_delta + 1] = scale_after * utility::clamp<T>(pred_ctr_y - T(0.5f) * pred_h, T(0), T(img_h - 1));
-            pred_boxes_ptr[start_delta + 2] = scale_after * utility::clamp<T>(pred_ctr_x + T(0.5f) * pred_w - offset, T(0), T(img_w - 1));
-            pred_boxes_ptr[start_delta + 3] = scale_after * utility::clamp<T>(pred_ctr_y + T(0.5f) * pred_h - offset, T(0), T(img_h - 1));
+            pred_boxes_ptr[start_delta] =
+                scale_after * utility::clamp<T>(pred_ctr_x - T(0.5f) * pred_w, T(0), T(img_w - 1));
+            pred_boxes_ptr[start_delta + 1] =
+                scale_after * utility::clamp<T>(pred_ctr_y - T(0.5f) * pred_h, T(0), T(img_h - 1));
+            pred_boxes_ptr[start_delta + 2] =
+                scale_after * utility::clamp<T>(pred_ctr_x + T(0.5f) * pred_w - offset, T(0), T(img_w - 1));
+            pred_boxes_ptr[start_delta + 3] =
+                scale_after * utility::clamp<T>(pred_ctr_y + T(0.5f) * pred_h - offset, T(0), T(img_h - 1));
         }
     }
     return pred_boxes;
 }
 
-template SimpleTensor<float> bounding_box_transform(const SimpleTensor<float> &boxes, const SimpleTensor<float> &deltas, const BoundingBoxTransformInfo &info);
-template SimpleTensor<half> bounding_box_transform(const SimpleTensor<half> &boxes, const SimpleTensor<half> &deltas, const BoundingBoxTransformInfo &info);
+template SimpleTensor<float> bounding_box_transform(const SimpleTensor<float>      &boxes,
+                                                    const SimpleTensor<float>      &deltas,
+                                                    const BoundingBoxTransformInfo &info);
+template SimpleTensor<half>  bounding_box_transform(const SimpleTensor<half>       &boxes,
+                                                    const SimpleTensor<half>       &deltas,
+                                                    const BoundingBoxTransformInfo &info);
 
 template <>
-SimpleTensor<uint16_t> bounding_box_transform(const SimpleTensor<uint16_t> &boxes, const SimpleTensor<uint8_t> &deltas, const BoundingBoxTransformInfo &info)
+SimpleTensor<uint16_t> bounding_box_transform(const SimpleTensor<uint16_t>   &boxes,
+                                              const SimpleTensor<uint8_t>    &deltas,
+                                              const BoundingBoxTransformInfo &info)
 {
     SimpleTensor<float>    boxes_tmp      = convert_from_asymmetric(boxes);
     SimpleTensor<float>    deltas_tmp     = convert_from_asymmetric(deltas);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/CL/functions/CLBitwiseAnd.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "tests/CL/CLAccessor.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/BitwiseAndFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -40,14 +41,17 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
 TEST_SUITE(CL)
 TEST_SUITE(BitwiseAnd)
 
 template <typename T>
 using CLBitwiseAndFixture = BitwiseAndValidationFixture<CLTensor, CLAccessor, CLBitwiseAnd, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLBitwiseAndFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), framework::dataset::make("DataType",
-                                                                                                    DataType::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLBitwiseAndFixture<uint8_t>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallShapes(), make("DataType", DataType::U8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

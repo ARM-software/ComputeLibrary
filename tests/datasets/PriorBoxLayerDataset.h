@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_PRIORBOX_LAYER_DATASET
-#define ARM_COMPUTE_TEST_PRIORBOX_LAYER_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_PRIORBOXLAYERDATASET_H
+#define ACL_TESTS_DATASETS_PRIORBOXLAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -44,8 +44,7 @@ public:
     {
         iterator(std::vector<TensorShape>::const_iterator       src_it,
                  std::vector<PriorBoxLayerInfo>::const_iterator infos_it)
-            : _src_it{ std::move(src_it) },
-              _infos_it{ std::move(infos_it) }
+            : _src_it{std::move(src_it)}, _infos_it{std::move(infos_it)}
         {
         }
 
@@ -105,12 +104,13 @@ class SmallPriorBoxLayerDataset final : public PriorBoxLayerDataset
 public:
     SmallPriorBoxLayerDataset()
     {
-        std::vector<float> min_val      = { 30.f };
-        std::vector<float> var          = { 0.1, 0.1, 0.2, 0.2 };
-        std::vector<float> max_val      = { 60.f };
-        std::vector<float> aspect_ratio = { 2.f };
-        std::array<float, 2> steps = { { 8.f, 8.f } };
-        add_config(TensorShape(4U, 4U), PriorBoxLayerInfo(min_val, var, 0.5f, true, false, max_val, aspect_ratio, Coordinates2D{ 8, 8 }, steps));
+        std::vector<float>   min_val      = {30.f};
+        std::vector<float>   var          = {0.1, 0.1, 0.2, 0.2};
+        std::vector<float>   max_val      = {60.f};
+        std::vector<float>   aspect_ratio = {2.f};
+        std::array<float, 2> steps        = {{8.f, 8.f}};
+        add_config(TensorShape(4U, 4U), PriorBoxLayerInfo(min_val, var, 0.5f, true, false, max_val, aspect_ratio,
+                                                          Coordinates2D{8, 8}, steps));
     }
 };
 
@@ -119,15 +119,16 @@ class LargePriorBoxLayerDataset final : public PriorBoxLayerDataset
 public:
     LargePriorBoxLayerDataset()
     {
-        std::vector<float> min_val      = { 30.f };
-        std::vector<float> var          = { 0.1, 0.1, 0.2, 0.2 };
-        std::vector<float> max_val      = { 60.f };
-        std::vector<float> aspect_ratio = { 2.f };
-        std::array<float, 2> steps = { { 8.f, 8.f } };
-        add_config(TensorShape(150U, 245U, 4U, 12U), PriorBoxLayerInfo(min_val, var, 0.5f, true, false, max_val, aspect_ratio, Coordinates2D{ 8, 8 }, steps));
+        std::vector<float>   min_val      = {30.f};
+        std::vector<float>   var          = {0.1, 0.1, 0.2, 0.2};
+        std::vector<float>   max_val      = {60.f};
+        std::vector<float>   aspect_ratio = {2.f};
+        std::array<float, 2> steps        = {{8.f, 8.f}};
+        add_config(TensorShape(150U, 245U, 4U, 12U), PriorBoxLayerInfo(min_val, var, 0.5f, true, false, max_val,
+                                                                       aspect_ratio, Coordinates2D{8, 8}, steps));
     }
 };
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_PRIORBOX_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_PRIORBOXLAYERDATASET_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CONVERT_FULLY_CONNECTED_WEIGHTS_H
-#define ARM_COMPUTE_TEST_CONVERT_FULLY_CONNECTED_WEIGHTS_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_CONVERTFULLYCONNECTEDWEIGHTS_H
+#define ACL_TESTS_VALIDATION_REFERENCE_CONVERTFULLYCONNECTEDWEIGHTS_H
 
 #include "tests/SimpleTensor.h"
 #include "tests/validation/Helpers.h"
@@ -36,9 +36,11 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> convert_fully_connected_weights(const SimpleTensor<T> &src, const TensorShape &original_input_shape, const DataLayout training_data_layout);
+SimpleTensor<T> convert_fully_connected_weights(const SimpleTensor<T> &src,
+                                                const TensorShape     &original_input_shape,
+                                                const DataLayout       training_data_layout);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CONVERT_FULLY_CONNECTED_WEIGHTS_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_CONVERTFULLYCONNECTEDWEIGHTS_H

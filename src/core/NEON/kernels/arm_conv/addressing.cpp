@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,7 +23,7 @@
  */
 
 #include "addressing.hpp"
-#include "utils.hpp"
+#include "arm_common/internal/utils.hpp"
 #include <algorithm>
 #include <cstring>
 

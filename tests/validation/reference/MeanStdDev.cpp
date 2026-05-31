@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,10 +40,8 @@ std::pair<float, float> mean_and_standard_deviation(const SimpleTensor<T> &in)
     float mean = std::accumulate(in.data(), in.data() + num_elements, 0.f) / num_elements;
 
     // Calculate standard deviation
-    float std_dev = std::accumulate(in.data(), in.data() + num_elements, 0.f, [&mean](float a, float b)
-    {
-        return a + (mean - b) * (mean - b);
-    });
+    float std_dev = std::accumulate(in.data(), in.data() + num_elements, 0.f,
+                                    [&mean](float a, float b) { return a + (mean - b) * (mean - b); });
 
     std_dev = std::sqrt(std_dev / num_elements);
 

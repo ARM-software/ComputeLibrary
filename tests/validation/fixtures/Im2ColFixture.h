@@ -29,11 +29,12 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Im2Col.h"
 
@@ -51,24 +52,30 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class Im2ColOpValidationGenericFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape input_shape, DataType data_type, const Size2D &kernel_dims, const PadStrideInfo &conv_info, const QuantizationInfo &quant_info, const DataLayout &data_layout,
-               unsigned int num_groups, unsigned int channel_pad_right)
+    void setup(TensorShape             input_shape,
+               DataType                data_type,
+               const Size2D           &kernel_dims,
+               const PadStrideInfo    &conv_info,
+               const QuantizationInfo &quant_info,
+               const DataLayout       &data_layout,
+               unsigned int            num_groups,
+               unsigned int            channel_pad_right)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             !cpu_supports_dtypes({data_type}))
         {
             return;
         }
 
-        _kernel_dims     = kernel_dims;
-        _conv_info       = conv_info;
-        _quant_info      = quant_info;
-        _data_layout     = data_layout;
-        _has_bias        = data_type != DataType::QASYMM8;
-        _num_groups      = num_groups;
+        _kernel_dims       = kernel_dims;
+        _conv_info         = conv_info;
+        _quant_info        = quant_info;
+        _data_layout       = data_layout;
+        _has_bias          = data_type != DataType::QASYMM8;
+        _num_groups        = num_groups;
         _channel_pad_right = channel_pad_right;
 
-        if(_data_layout == DataLayout::NHWC)
+        if (_data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
         }
@@ -76,10 +83,11 @@ public:
         TensorInfo input_info(input_shape, 1, data_type);
         input_info.set_data_layout(_data_layout);
 
-        const TensorShape output_shape = compute_im2col_conv_shape(&input_info, _kernel_dims, _conv_info,
-            _has_bias, Size2D(1U, 1U), batch_size_on_z && _num_groups == 1, _num_groups, _channel_pad_right);
+        const TensorShape output_shape =
+            compute_im2col_conv_shape(&input_info, _kernel_dims, _conv_info, _has_bias, Size2D(1U, 1U),
+                                      batch_size_on_z && _num_groups == 1, _num_groups, _channel_pad_right);
 
-        _target                        = compute_target(input_shape, output_shape, data_type);
+        _target = compute_target(input_shape, output_shape, data_type);
 
         compute_reference(input_shape, output_shape, data_type);
     }
@@ -99,7 +107,8 @@ protected:
 
         // Create and configure function
         FunctionType im2col_func;
-        configure_function<TensorType>(im2col_func, src.info(), dst.info(), _kernel_dims, _conv_info, _has_bias, Size2D(1U, 1U), _num_groups, _channel_pad_right);
+        configure_function<TensorType>(im2col_func, src.info(), dst.info(), _kernel_dims, _conv_info, _has_bias,
+                                       Size2D(1U, 1U), _num_groups, _channel_pad_right);
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
         ARM_COMPUTE_ASSERT(dst.info()->is_resizable());
@@ -114,14 +123,11 @@ protected:
         // Fill tensors
         fill(AccessorType(src));
 
-         // Garbage values should be replaced by 0 when testing channel padding
+        // Garbage values should be replaced by 0 when testing channel padding
         fill(AccessorType(dst));
 
-        arm_compute::ITensorPack pack =
-        {
-            { arm_compute::TensorType::ACL_SRC, &src },
-            { arm_compute::TensorType::ACL_DST, &dst }
-        };
+        arm_compute::ITensorPack pack = {{arm_compute::TensorType::ACL_SRC, &src},
+                                         {arm_compute::TensorType::ACL_DST, &dst}};
 
         // Compute function
         im2col_func.run(pack);
@@ -132,7 +138,7 @@ protected:
     void compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1, _quant_info, _data_layout };
+        SimpleTensor<T> src{input_shape, data_type, 1, _quant_info, _data_layout};
         _reference = SimpleTensor<T>(output_shape, data_type, 1, _quant_info, DataLayout::NCHW);
 
         // Fill reference
@@ -152,42 +158,40 @@ protected:
     int              _channel_pad_right{};
 
 private:
-    template<typename TensorT>
-    auto configure_function(FunctionType &func,
-                   ITensorInfo            *src,
-                   ITensorInfo            *dst,
-                   const Size2D           &kernel_dims,
-                   const PadStrideInfo    &conv_info,
-                   bool                    has_bias,
-                   const Size2D           &dilation,
-                   unsigned int            num_groups,
-                   unsigned int            channel_pad_right)
-        -> typename std::enable_if<
-            std::is_same<TensorT, Tensor>::value, // Cpu
-        void>::type
+    template <typename TensorT>
+    auto configure_function(FunctionType        &func,
+                            ITensorInfo         *src,
+                            ITensorInfo         *dst,
+                            const Size2D        &kernel_dims,
+                            const PadStrideInfo &conv_info,
+                            bool                 has_bias,
+                            const Size2D        &dilation,
+                            unsigned int         num_groups,
+                            unsigned int         channel_pad_right) ->
+        typename std::enable_if<std::is_same<TensorT, Tensor>::value, // Cpu
+                                void>::type
     {
         static_assert(std::is_same<TensorT, TensorType>::value,
-            "configure_function helper must be used with the class TensorType");
+                      "configure_function helper must be used with the class TensorType");
 
         func.configure(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups, channel_pad_right);
     }
 
-    template<typename TensorT>
-    auto configure_function(FunctionType &func,
-                   ITensorInfo            *src,
-                   ITensorInfo            *dst,
-                   const Size2D           &kernel_dims,
-                   const PadStrideInfo    &conv_info,
-                   bool                    has_bias,
-                   const Size2D           &dilation,
-                   unsigned int            num_groups,
-                   unsigned int            channel_pad_right)
-        -> typename std::enable_if<
-            !std::is_same<TensorT, Tensor>::value, // Gpu
-        void>::type
+    template <typename TensorT>
+    auto configure_function(FunctionType        &func,
+                            ITensorInfo         *src,
+                            ITensorInfo         *dst,
+                            const Size2D        &kernel_dims,
+                            const PadStrideInfo &conv_info,
+                            bool                 has_bias,
+                            const Size2D        &dilation,
+                            unsigned int         num_groups,
+                            unsigned int         channel_pad_right) ->
+        typename std::enable_if<!std::is_same<TensorT, Tensor>::value, // Gpu
+                                void>::type
     {
         static_assert(std::is_same<TensorT, TensorType>::value,
-            "configure_function helper must be used with the class TensorType");
+                      "configure_function helper must be used with the class TensorType");
 
         ARM_COMPUTE_UNUSED(channel_pad_right);
         func.configure(src, dst, kernel_dims, conv_info, has_bias, dilation, num_groups);
@@ -195,43 +199,41 @@ private:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool batch_size_on_z>
-class Im2ColOpValidationFixture : public Im2ColOpValidationGenericFixture<TensorType, AccessorType, FunctionType, T, batch_size_on_z>
+class Im2ColOpValidationFixture
+    : public Im2ColOpValidationGenericFixture<TensorType, AccessorType, FunctionType, T, batch_size_on_z>
 {
 public:
-    void setup(TensorShape input_shape, DataType data_type, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-        const QuantizationInfo &quant_info, const DataLayout &data_layout,
-               unsigned int num_groups)
+    void setup(TensorShape             input_shape,
+               DataType                data_type,
+               const Size2D           &kernel_dims,
+               const PadStrideInfo    &conv_info,
+               const QuantizationInfo &quant_info,
+               const DataLayout       &data_layout,
+               unsigned int            num_groups)
     {
         Im2ColOpValidationGenericFixture<TensorType, AccessorType, FunctionType, T, batch_size_on_z>::setup(
-            input_shape,
-            data_type,
-            kernel_dims,
-            conv_info,
-            quant_info,
-            data_layout,
-            num_groups,
+            input_shape, data_type, kernel_dims, conv_info, quant_info, data_layout, num_groups,
             0 /* channel_pad_right */
         );
     }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool batch_size_on_z>
-class Im2ColOpValidationWithChannelPadFixture : public Im2ColOpValidationGenericFixture<TensorType, AccessorType, FunctionType, T, batch_size_on_z>
+class Im2ColOpValidationWithChannelPadFixture
+    : public Im2ColOpValidationGenericFixture<TensorType, AccessorType, FunctionType, T, batch_size_on_z>
 {
 public:
-    void setup(TensorShape input_shape, DataType data_type, const Size2D &kernel_dims, const PadStrideInfo &conv_info, const QuantizationInfo &quant_info, const DataLayout &data_layout,
-               unsigned int num_groups, unsigned int channel_pad_right)
+    void setup(TensorShape             input_shape,
+               DataType                data_type,
+               const Size2D           &kernel_dims,
+               const PadStrideInfo    &conv_info,
+               const QuantizationInfo &quant_info,
+               const DataLayout       &data_layout,
+               unsigned int            num_groups,
+               unsigned int            channel_pad_right)
     {
         Im2ColOpValidationGenericFixture<TensorType, AccessorType, FunctionType, T, batch_size_on_z>::setup(
-            input_shape,
-            data_type,
-            kernel_dims,
-            conv_info,
-            quant_info,
-            data_layout,
-            num_groups,
-            channel_pad_right
-        );
+            input_shape, data_type, kernel_dims, conv_info, quant_info, data_layout, num_groups, channel_pad_right);
     }
 };
 

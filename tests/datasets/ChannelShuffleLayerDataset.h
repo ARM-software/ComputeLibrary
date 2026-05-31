@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, 2021 Arm Limited.
+ * Copyright (c) 2018, 2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CHANNEL_SHUFFLE_LAYER_DATASET
-#define ARM_COMPUTE_TEST_CHANNEL_SHUFFLE_LAYER_DATASET
-
-#include "utils/TypePrinter.h"
+#ifndef ACL_TESTS_DATASETS_CHANNELSHUFFLELAYERDATASET_H
+#define ACL_TESTS_DATASETS_CHANNELSHUFFLELAYERDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -42,10 +42,8 @@ public:
 
     struct iterator
     {
-        iterator(std::vector<TensorShape>::const_iterator tensor_it,
-                 std::vector<int>::const_iterator         num_groups_it)
-            : _tensor_it{ std::move(tensor_it) },
-              _num_groups_it{ std::move(num_groups_it) }
+        iterator(std::vector<TensorShape>::const_iterator tensor_it, std::vector<int>::const_iterator num_groups_it)
+            : _tensor_it{std::move(tensor_it)}, _num_groups_it{std::move(num_groups_it)}
         {
         }
 
@@ -126,4 +124,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CHANNEL_SHUFFLE_LAYER_DATASET */
+#endif // ACL_TESTS_DATASETS_CHANNELSHUFFLELAYERDATASET_H

@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -9,9 +9,9 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <vector>
 
 #include "kai/kai_common.h"
+#include "test/common/buffer.hpp"
 #include "test/common/data_format.hpp"
 #include "test/common/data_type.hpp"
 #include "test/common/int4.hpp"
@@ -30,13 +30,11 @@ T scalar_reduce(T curr_value, T new_value) {
 }
 
 template <const ReductionOperator op, typename Input, typename Output>
-std::vector<uint8_t> reduce_any_op_type(const void* src, size_t height, size_t width, size_t dimension) {
-    std::vector<uint8_t> dst;
-
+Buffer reduce_any_op_type(const void* src, size_t height, size_t width, size_t dimension) {
     switch (dimension) {
-        case 0:
-            dst.resize(height * size_in_bits<Output> / 8);
-            KAI_ASSUME(height * size_in_bits<Output> % 8 == 0);
+        case 0: {
+            Buffer dst(height * size_in_bits<Output> / 8);
+            KAI_ASSUME_ALWAYS(height * size_in_bits<Output> % 8 == 0);
 
             for (size_t y = 0; y < height; ++y) {
                 Output acc = read_array<Input>(src, y * width);
@@ -49,11 +47,12 @@ std::vector<uint8_t> reduce_any_op_type(const void* src, size_t height, size_t w
                 write_array<Output>(dst.data(), y, acc);
             }
 
-            break;
+            return dst;
+        }
 
-        case 1:
-            dst.resize(width * size_in_bits<Output> / 8);
-            KAI_ASSUME(width * size_in_bits<Output> % 8 == 0);
+        case 1: {
+            Buffer dst(width * size_in_bits<Output> / 8);
+            KAI_ASSUME_ALWAYS(width * size_in_bits<Output> % 8 == 0);
 
             for (size_t x = 0; x < width; ++x) {
                 Output acc = read_array<Input>(src, x);
@@ -66,24 +65,23 @@ std::vector<uint8_t> reduce_any_op_type(const void* src, size_t height, size_t w
                 write_array<Output>(dst.data(), x, acc);
             }
 
-            break;
+            return dst;
+        }
 
         default:
             KAI_ERROR("Only 2D data is supported!");
     }
-
-    return dst;
 }
 
 template <const ReductionOperator op>
-std::vector<uint8_t> reduce_any_op(
+Buffer reduce_any_op(
     const void* src, const DataFormat& src_format, size_t height, size_t width, const DataFormat& dst_format,
     size_t dimension) {
-    KAI_ASSUME(src_format.is_raw());
-    KAI_ASSUME(dst_format.is_raw());
-    KAI_ASSUME(dimension < 2);
-    KAI_ASSUME(height > 0);
-    KAI_ASSUME(width > 0);
+    KAI_ASSUME_ALWAYS(src_format.is_raw());
+    KAI_ASSUME_ALWAYS(dst_format.is_raw());
+    KAI_ASSUME_ALWAYS(dimension < 2);
+    KAI_ASSUME_ALWAYS(height > 0);
+    KAI_ASSUME_ALWAYS(width > 0);
 
     const auto src_dt = src_format.data_type();
     const auto dst_dt = dst_format.data_type();
@@ -106,15 +104,15 @@ std::vector<uint8_t> reduce_any_op(
 
 }  // namespace
 
-std::vector<uint8_t> reduce_add(
+Buffer reduce_add(
     const void* src, const DataFormat& src_format, size_t height, size_t width, const DataFormat& dst_format,
     size_t dimension) {
     return reduce_any_op<ReductionOperator::ADD>(src, src_format, height, width, dst_format, dimension);
 }
 
 template <typename Value, typename Accumulator>
-std::vector<uint8_t> reduce_add_x(const void* src, size_t height, size_t width) {
-    std::vector<uint8_t> dst(round_up_division(height * size_in_bits<Accumulator>, 8));
+Buffer reduce_add_x(const void* src, size_t height, size_t width) {
+    Buffer dst(round_up_division(height * size_in_bits<Accumulator>, 8));
 
     for (size_t y = 0; y < height; ++y) {
         Accumulator acc = 0;
@@ -129,11 +127,11 @@ std::vector<uint8_t> reduce_add_x(const void* src, size_t height, size_t width) 
     return dst;
 }
 
-template std::vector<uint8_t> reduce_add_x<int8_t, int32_t>(const void* src, size_t height, size_t width);
+template Buffer reduce_add_x<int8_t, int32_t>(const void* src, size_t height, size_t width);
 
 template <typename T>
 T reduce_min(const void* src, size_t len) {
-    KAI_ASSUME(len > 0);
+    KAI_ASSUME_ALWAYS(len > 0);
 
     T min = read_array<T>(src, 0);
 
@@ -148,7 +146,7 @@ template float reduce_min(const void* src, size_t len);
 
 template <typename T>
 T reduce_max(const void* src, size_t len) {
-    KAI_ASSUME(len > 0);
+    KAI_ASSUME_ALWAYS(len > 0);
 
     T max = read_array<T>(src, 0);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited.
+ * Copyright (c) 2018-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,24 +37,24 @@ namespace reference
 template <typename T>
 SimpleTensor<T> col2im(const SimpleTensor<T> &src, const TensorShape &dst_shape, unsigned int num_groups)
 {
-    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1 };
+    SimpleTensor<T> dst{dst_shape, src.data_type(), 1};
 
     // Compute reference
     const size_t batches    = dst_shape.total_size() / (dst_shape.x() * dst_shape.y() * dst_shape.z());
     const size_t src_width  = src.shape().x();
     const size_t src_height = src.shape().y();
 
-    if(num_groups == 1)
+    if (num_groups == 1)
     {
         // Batches are on the 3rd dimension of the input tensor
 #if defined(_OPENMP)
-        #pragma omp parallel for collapse(3)
+#pragma omp parallel for collapse(3)
 #endif /* _OPENMP */
-        for(size_t b = 0; b < batches; ++b)
+        for (size_t b = 0; b < batches; ++b)
         {
-            for(size_t x = 0; x < src_width; ++x)
+            for (size_t x = 0; x < src_width; ++x)
             {
-                for(size_t y = 0; y < src_height; ++y)
+                for (size_t y = 0; y < src_height; ++y)
                 {
                     const int dst_idx = y + x * src_height + b * src_height * src_width;
                     dst[dst_idx]      = src[coord2index(src.shape(), Coordinates(x, y, b))];
@@ -65,18 +65,19 @@ SimpleTensor<T> col2im(const SimpleTensor<T> &src, const TensorShape &dst_shape,
     else
     {
 #if defined(_OPENMP)
-        #pragma omp parallel for collapse(4)
+#pragma omp parallel for collapse(4)
 #endif /* _OPENMP */
-        for(size_t b = 0; b < batches; ++b)
+        for (size_t b = 0; b < batches; ++b)
         {
-            for(size_t g = 0; g < num_groups; ++g)
+            for (size_t g = 0; g < num_groups; ++g)
             {
-                for(size_t x = 0; x < src_width; ++x)
+                for (size_t x = 0; x < src_width; ++x)
                 {
-                    for(size_t y = 0; y < src_height; ++y)
+                    for (size_t y = 0; y < src_height; ++y)
                     {
-                        const int dst_idx = y + x * src_height + g * src_height * src_width + b * src_height * src_width * num_groups;
-                        dst[dst_idx]      = src[coord2index(src.shape(), Coordinates(x, y, g, b))];
+                        const int dst_idx =
+                            y + x * src_height + g * src_height * src_width + b * src_height * src_width * num_groups;
+                        dst[dst_idx] = src[coord2index(src.shape(), Coordinates(x, y, g, b))];
                     }
                 }
             }
@@ -85,9 +86,12 @@ SimpleTensor<T> col2im(const SimpleTensor<T> &src, const TensorShape &dst_shape,
     return dst;
 }
 
-template SimpleTensor<float> col2im(const SimpleTensor<float> &src, const TensorShape &dst_shape, unsigned int num_groups);
-template SimpleTensor<half> col2im(const SimpleTensor<half> &src, const TensorShape &dst_shape, unsigned int num_groups);
-template SimpleTensor<uint8_t> col2im(const SimpleTensor<uint8_t> &src, const TensorShape &dst_shape, unsigned int num_groups);
+template SimpleTensor<float>
+col2im(const SimpleTensor<float> &src, const TensorShape &dst_shape, unsigned int num_groups);
+template SimpleTensor<half>
+col2im(const SimpleTensor<half> &src, const TensorShape &dst_shape, unsigned int num_groups);
+template SimpleTensor<uint8_t>
+col2im(const SimpleTensor<uint8_t> &src, const TensorShape &dst_shape, unsigned int num_groups);
 } // namespace reference
 } // namespace validation
 } // namespace test

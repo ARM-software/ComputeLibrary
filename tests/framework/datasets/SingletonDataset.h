@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DATASET_SINGLETON
-#define ARM_COMPUTE_TEST_DATASET_SINGLETON
+#ifndef ACL_TESTS_FRAMEWORK_DATASETS_SINGLETONDATASET_H
+#define ACL_TESTS_FRAMEWORK_DATASETS_SINGLETONDATASET_H
+
+#include "support/StringSupport.h"
 
 #include "ContainerDataset.h"
 #include "Dataset.h"
-#include "support/StringSupport.h"
-
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -51,8 +51,7 @@ public:
      * @param[in] name  Description of the value.
      * @param[in] value Value for the dataset.
      */
-    SingletonDataset(std::string name, T &&value)
-        : NamedDataset{ std::move(name) }, _value{ std::forward<T>(value) }
+    SingletonDataset(std::string name, T &&value) : NamedDataset{std::move(name)}, _value{std::forward<T>(value)}
     {
     }
 
@@ -70,8 +69,7 @@ public:
          * @param[in] name  Name of the dataset.
          * @param[in] value The singleton value.
          */
-        iterator(std::string name, const T *value)
-            : _name{ name }, _value{ value }
+        iterator(std::string name, const T *value) : _name{name}, _value{value}
         {
         }
 
@@ -150,7 +148,7 @@ private:
  * @return A singleton dataset.
  */
 template <typename T>
-typename std::enable_if < !is_container<T>::value, SingletonDataset<T >>::type make(std::string name, T &&value)
+typename std::enable_if<!is_container<T>::value, SingletonDataset<T>>::type make(std::string name, T &&value)
 {
     return SingletonDataset<T>(std::move(name), std::forward<T>(value));
 }
@@ -158,4 +156,4 @@ typename std::enable_if < !is_container<T>::value, SingletonDataset<T >>::type m
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DATASET_SINGLETON */
+#endif // ACL_TESTS_FRAMEWORK_DATASETS_SINGLETONDATASET_H

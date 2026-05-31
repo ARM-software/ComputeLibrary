@@ -27,6 +27,7 @@
 #include "arm_compute/core/Types.h"
 
 #include "src/common/utils/profile/acl_profile.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -77,6 +78,7 @@ Status CpuConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src,
     ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU,
                             "CpuConvertFullyConnectedWeightsKernel::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON(src->num_dimensions() != 2);
     ARM_COMPUTE_RETURN_ERROR_ON(src->dimension(1) != original_input_shape.total_size_lower(3));
@@ -85,6 +87,7 @@ Status CpuConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *src,
     // Checks performed when dst is configured
     if ((dst != nullptr) && (dst->total_size() != 0))
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
     }

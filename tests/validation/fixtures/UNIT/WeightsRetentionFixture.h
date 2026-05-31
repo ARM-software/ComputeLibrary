@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_UNIT_WEIGHTS_RETENTION
-#define ARM_COMPUTE_TEST_UNIT_WEIGHTS_RETENTION
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_UNIT_WEIGHTSRETENTIONFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_UNIT_WEIGHTSRETENTIONFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/FullyConnectedLayer.h"
 
@@ -64,10 +65,13 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
-        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value,
+                      "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value,
+                                                           arm_compute::utils::uniform_real_distribution_16bit<T>,
+                                                           std::uniform_real_distribution<T>>::type;
 
-        DistributionType distribution{ T(0.5f), T(1.0f) };
+        DistributionType distribution{T(0.5f), T(1.0f)};
         library->fill(tensor, distribution, i);
     }
 
@@ -100,14 +104,24 @@ protected:
         fc_layer_1.run();
 
         // Update tensor shapes (2nd iteration)
-        auto src_padding     = src.allocator()->info().padding();
-        auto dst_padding     = dst.allocator()->info().padding();
-        int  diff            = _max_batches - _cur_batches;
-        auto new_src_padding = PaddingSize(src_padding.top, src_padding.right, src_padding.bottom + diff, src_padding.left);
-        auto new_dst_padding = PaddingSize(dst_padding.top, dst_padding.right, dst_padding.bottom + diff, dst_padding.left);
-        src.allocator()->info().set_tensor_shape(TensorShape(1U, 15U, 400U, _cur_batches)).set_is_resizable(true).extend_padding(new_src_padding);
+        auto src_padding = src.allocator()->info().padding();
+        auto dst_padding = dst.allocator()->info().padding();
+        int  diff        = _max_batches - _cur_batches;
+        auto new_src_padding =
+            PaddingSize(src_padding.top, src_padding.right, src_padding.bottom + diff, src_padding.left);
+        auto new_dst_padding =
+            PaddingSize(dst_padding.top, dst_padding.right, dst_padding.bottom + diff, dst_padding.left);
+        src.allocator()
+            ->info()
+            .set_tensor_shape(TensorShape(1U, 15U, 400U, _cur_batches))
+            .set_is_resizable(true)
+            .extend_padding(new_src_padding);
         src.allocator()->info().set_is_resizable(false);
-        dst.allocator()->info().set_tensor_shape(TensorShape(15U, _cur_batches)).set_is_resizable(true).extend_padding(new_dst_padding);
+        dst.allocator()
+            ->info()
+            .set_tensor_shape(TensorShape(15U, _cur_batches))
+            .set_is_resizable(true)
+            .extend_padding(new_dst_padding);
         dst.allocator()->info().set_is_resizable(false);
 
         // Configure FC info
@@ -129,9 +143,9 @@ protected:
     SimpleTensor<T> compute_reference()
     {
         // Create reference
-        SimpleTensor<T> w1{ TensorShape(6000U, 15U), DataType::F32 };
-        SimpleTensor<T> b1{ TensorShape(15U), DataType::F32 };
-        SimpleTensor<T> src{ TensorShape(1U, 15U, 400U, _cur_batches), DataType::F32 };
+        SimpleTensor<T> w1{TensorShape(6000U, 15U), DataType::F32};
+        SimpleTensor<T> b1{TensorShape(15U), DataType::F32};
+        SimpleTensor<T> src{TensorShape(1U, 15U, 400U, _cur_batches), DataType::F32};
 
         // Fill reference
         fill(src, 5);
@@ -150,4 +164,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_UNIT_WEIGHTS_RETENTION */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_UNIT_WEIGHTSRETENTIONFIXTURE_H

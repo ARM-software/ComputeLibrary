@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,11 +28,12 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ReductionOperation.h"
 #include "tests/validation/reference/ReshapeLayer.h"
@@ -47,35 +48,41 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ReduceMeanValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape, DataType data_type, Coordinates axis, bool keep_dims, QuantizationInfo quantization_info_input, QuantizationInfo quantization_info_output)
+    void setup(TensorShape      shape,
+               DataType         data_type,
+               Coordinates      axis,
+               bool             keep_dims,
+               QuantizationInfo quantization_info_input,
+               QuantizationInfo quantization_info_output)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
         }
 
-        _target    = compute_target(shape, data_type, axis, keep_dims, quantization_info_input, quantization_info_output);
-        _reference = compute_reference(shape, data_type, axis, keep_dims, quantization_info_input, quantization_info_output);
+        _target = compute_target(shape, data_type, axis, keep_dims, quantization_info_input, quantization_info_output);
+        _reference =
+            compute_reference(shape, data_type, axis, keep_dims, quantization_info_input, quantization_info_output);
     }
 
 protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(tensor.data_type() == DataType::F32)
+        if (tensor.data_type() == DataType::F32)
         {
             std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
             library->fill(tensor, distribution, 0);
         }
-        else if(tensor.data_type() == DataType::F16)
+        else if (tensor.data_type() == DataType::F16)
         {
-            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{ -1.0f, 1.0f };
+            arm_compute::utils::uniform_real_distribution_16bit<half> distribution{-1.0f, 1.0f};
             library->fill(tensor, distribution, 0);
         }
-        else if(is_data_type_quantized(tensor.data_type()))
+        else if (is_data_type_quantized(tensor.data_type()))
         {
-            std::pair<int, int> bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
+            std::pair<int, int>             bounds = get_quantized_bounds(tensor.quantization_info(), -1.0f, 1.0f);
             std::uniform_int_distribution<> distribution(bounds.first, bounds.second);
 
             library->fill(tensor, distribution, 0);
@@ -86,12 +93,18 @@ protected:
         }
     }
 
-    TensorType compute_target(TensorShape &src_shape, DataType data_type, Coordinates axis, bool keep_dims, QuantizationInfo quantization_info_input, QuantizationInfo quantization_info_output)
+    TensorType compute_target(TensorShape     &src_shape,
+                              DataType         data_type,
+                              Coordinates      axis,
+                              bool             keep_dims,
+                              QuantizationInfo quantization_info_input,
+                              QuantizationInfo quantization_info_output)
     {
         // Create tensors
-        TensorType  src       = create_tensor<TensorType>(src_shape, data_type, 1, quantization_info_input);
-        TensorShape dst_shape = arm_compute::misc::shape_calculator::calculate_reduce_mean_shape(src.info(), axis, keep_dims);
-        TensorType  dst       = create_tensor<TensorType>(dst_shape, data_type, 1, quantization_info_output);
+        TensorType  src = create_tensor<TensorType>(src_shape, data_type, 1, quantization_info_input);
+        TensorShape dst_shape =
+            arm_compute::misc::shape_calculator::calculate_reduce_mean_shape(src.info(), axis, keep_dims);
+        TensorType dst = create_tensor<TensorType>(dst_shape, data_type, 1, quantization_info_output);
 
         // Create and configure function
         FunctionType reduction_mean;
@@ -116,16 +129,21 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(TensorShape &src_shape, DataType data_type, Coordinates axis, bool keep_dims, QuantizationInfo quantization_info_input, QuantizationInfo quantization_info_output)
+    SimpleTensor<T> compute_reference(TensorShape     &src_shape,
+                                      DataType         data_type,
+                                      Coordinates      axis,
+                                      bool             keep_dims,
+                                      QuantizationInfo quantization_info_input,
+                                      QuantizationInfo quantization_info_output)
     {
         // Create reference
-        SimpleTensor<T> src{ src_shape, data_type, 1, quantization_info_input };
+        SimpleTensor<T> src{src_shape, data_type, 1, quantization_info_input};
 
         // Fill reference
         fill(src);
 
         SimpleTensor<T> out;
-        for(unsigned int i = 0; i < axis.num_dimensions(); ++i)
+        for (unsigned int i = 0; i < axis.num_dimensions(); ++i)
         {
             TensorShape output_shape = i == 0 ? src_shape : out.shape();
             output_shape.set(axis[i], 1);
@@ -134,15 +152,16 @@ protected:
 #ifdef ARM_COMPUTE_OPENCL_ENABLED
             is_opencl = std::is_same<CLTensor, TensorType>::value; // Round down to zero on opencl to match kernel
 #endif                                                             /* ARM_COMPUTE_OPENCL_ENABLED */
-            out = reference::reduction_operation<T, T>(i == 0 ? src : out, output_shape, axis[i], ReductionOperation::MEAN_SUM, data_type, quantization_info_output,
-                                                       is_opencl ? RoundingPolicy::TO_ZERO : RoundingPolicy::TO_NEAREST_UP);
+            out = reference::reduction_operation<T, T>(
+                i == 0 ? src : out, output_shape, axis[i], ReductionOperation::MEAN_SUM, data_type,
+                quantization_info_output, is_opencl ? RoundingPolicy::TO_ZERO : RoundingPolicy::TO_NEAREST_UP);
         }
 
-        if(!keep_dims)
+        if (!keep_dims)
         {
             TensorShape output_shape = src_shape;
             std::sort(axis.begin(), axis.begin() + axis.num_dimensions());
-            for(unsigned int i = 0; i < axis.num_dimensions(); ++i)
+            for (unsigned int i = 0; i < axis.num_dimensions(); ++i)
             {
                 output_shape.remove_dimension(axis[i] - i, false);
             }
@@ -160,9 +179,15 @@ template <typename TensorType, typename AccessorType, typename FunctionType, typ
 class ReduceMeanQuantizedFixture : public ReduceMeanValidationFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
-    void setup(TensorShape shape, DataType data_type, Coordinates axis, bool keep_dims, QuantizationInfo quantization_info_input, QuantizationInfo quantization_info_output)
+    void setup(TensorShape      shape,
+               DataType         data_type,
+               Coordinates      axis,
+               bool             keep_dims,
+               QuantizationInfo quantization_info_input,
+               QuantizationInfo quantization_info_output)
     {
-        ReduceMeanValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, axis, keep_dims, quantization_info_input, quantization_info_output);
+        ReduceMeanValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, data_type, axis, keep_dims, quantization_info_input, quantization_info_output);
     }
 };
 
@@ -172,7 +197,8 @@ class ReduceMeanFixture : public ReduceMeanValidationFixture<TensorType, Accesso
 public:
     void setup(TensorShape shape, DataType data_type, Coordinates axis, bool keep_dims)
     {
-        ReduceMeanValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type, axis, keep_dims, QuantizationInfo(), QuantizationInfo());
+        ReduceMeanValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, data_type, axis, keep_dims, QuantizationInfo(), QuantizationInfo());
     }
 };
 } // namespace validation

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_BATCH_NORMALIZATION_LAYER_FUSION_FIXTURE
-#define ARM_COMPUTE_TEST_BATCH_NORMALIZATION_LAYER_FUSION_FIXTURE
+#ifndef ACL_TESTS_VALIDATION_FIXTURES_BATCHNORMALIZATIONLAYERFUSIONFIXTURE_H
+#define ACL_TESTS_VALIDATION_FIXTURES_BATCHNORMALIZATIONLAYERFUSIONFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/BatchNormalizationLayer.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
@@ -41,12 +42,26 @@ namespace test
 {
 namespace validation
 {
-template <typename TensorType, typename AccessorType, typename ConvolutionFunctionType, typename FusionFunctionType, typename T>
+template <typename TensorType,
+          typename AccessorType,
+          typename ConvolutionFunctionType,
+          typename FusionFunctionType,
+          typename T>
 class BatchNormalizationLayerFusionValidationFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape src_shape, TensorShape w_shape, TensorShape b_shape, TensorShape dst_shape, PadStrideInfo info, Size2D dilation,
-               bool use_conv_b, bool use_beta, bool use_gamma, float epsilon, DataType dt, DataLayout data_layout)
+    void setup(TensorShape   src_shape,
+               TensorShape   w_shape,
+               TensorShape   b_shape,
+               TensorShape   dst_shape,
+               PadStrideInfo info,
+               Size2D        dilation,
+               bool          use_conv_b,
+               bool          use_beta,
+               bool          use_gamma,
+               float         epsilon,
+               DataType      dt,
+               DataLayout    data_layout)
     {
         ARM_COMPUTE_UNUSED(dilation);
 
@@ -64,11 +79,14 @@ protected:
     template <typename U>
     void fill(U &&src, U &&w_tensor, U &&b_tensor, U &&mean_tensor, U &&var_tensor, U &&beta_tensor, U &&gamma_tensor)
     {
-        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value, "Only floating point data types supported.");
-        using DistributionType = typename std::conditional<std::is_same<T, half>::value, arm_compute::utils::uniform_real_distribution_16bit<T>, std::uniform_real_distribution<T>>::type;
+        static_assert(std::is_floating_point<T>::value || std::is_same<T, half>::value,
+                      "Only floating point data types supported.");
+        using DistributionType = typename std::conditional<std::is_same<T, half>::value,
+                                                           arm_compute::utils::uniform_real_distribution_16bit<T>,
+                                                           std::uniform_real_distribution<T>>::type;
 
-        DistributionType distribution{ T(-1.f), T(1.f) };
-        DistributionType distribution_gz{ T(0.f), T(1.f) };
+        DistributionType distribution{T(-1.f), T(1.f)};
+        DistributionType distribution_gz{T(0.f), T(1.f)};
 
         library->fill(src, distribution, 0);
         library->fill(w_tensor, distribution, 1);
@@ -79,9 +97,14 @@ protected:
         _use_gamma ? library->fill(gamma_tensor, distribution, 6) : library->fill_tensor_value(gamma_tensor, T(1.f));
     }
 
-    TensorType compute_target(TensorShape src_shape, TensorShape w_shape, TensorShape b_shape, TensorShape dst_shape, PadStrideInfo info, float epsilon)
+    TensorType compute_target(TensorShape   src_shape,
+                              TensorShape   w_shape,
+                              TensorShape   b_shape,
+                              TensorShape   dst_shape,
+                              PadStrideInfo info,
+                              float         epsilon)
     {
-        if(_data_layout == DataLayout::NHWC)
+        if (_data_layout == DataLayout::NHWC)
         {
             permute(src_shape, PermutationVector(2U, 0U, 1U));
             permute(w_shape, PermutationVector(2U, 0U, 1U));
@@ -144,9 +167,8 @@ protected:
         ARM_COMPUTE_ASSERT(!dst.info()->is_resizable());
 
         // Fill tensors
-        fill(AccessorType(src),
-             AccessorType(conv_w), AccessorType(conv_b),
-             AccessorType(bn_mean), AccessorType(bn_var), AccessorType(bn_beta), AccessorType(bn_gamma));
+        fill(AccessorType(src), AccessorType(conv_w), AccessorType(conv_b), AccessorType(bn_mean), AccessorType(bn_var),
+             AccessorType(bn_beta), AccessorType(bn_gamma));
 
         // Compute function
         fuse_fn.run();
@@ -155,23 +177,29 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(TensorShape src_shape, TensorShape w_shape, TensorShape b_shape, TensorShape dst_shape, PadStrideInfo info, float epsilon)
+    SimpleTensor<T> compute_reference(TensorShape   src_shape,
+                                      TensorShape   w_shape,
+                                      TensorShape   b_shape,
+                                      TensorShape   dst_shape,
+                                      PadStrideInfo info,
+                                      float         epsilon)
     {
         // Create reference
-        SimpleTensor<T> src{ src_shape, _data_type, 1 };
-        SimpleTensor<T> conv_w{ w_shape, _data_type, 1 };
-        SimpleTensor<T> conv_b{ b_shape, _data_type, 1 };
-        SimpleTensor<T> bn_var{ b_shape, _data_type, 1 };
-        SimpleTensor<T> bn_mean{ b_shape, _data_type, 1 };
-        SimpleTensor<T> bn_beta{ b_shape, _data_type, 1 };
-        SimpleTensor<T> bn_gamma{ b_shape, _data_type, 1 };
+        SimpleTensor<T> src{src_shape, _data_type, 1};
+        SimpleTensor<T> conv_w{w_shape, _data_type, 1};
+        SimpleTensor<T> conv_b{b_shape, _data_type, 1};
+        SimpleTensor<T> bn_var{b_shape, _data_type, 1};
+        SimpleTensor<T> bn_mean{b_shape, _data_type, 1};
+        SimpleTensor<T> bn_beta{b_shape, _data_type, 1};
+        SimpleTensor<T> bn_gamma{b_shape, _data_type, 1};
 
         // Fill reference
         fill(src, conv_w, conv_b, bn_mean, bn_var, bn_beta, bn_gamma);
 
         // Calculate Conv + BN
         auto conv_res = reference::convolution_layer(src, conv_w, conv_b, dst_shape, info);
-        return reference::batch_normalization_layer(conv_res, bn_mean, bn_var, bn_beta, bn_gamma, epsilon, ActivationLayerInfo());
+        return reference::batch_normalization_layer(conv_res, bn_mean, bn_var, bn_beta, bn_gamma, epsilon,
+                                                    ActivationLayerInfo());
     }
 
     TensorType      _target{};
@@ -185,4 +213,4 @@ protected:
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_BATCH_NORMALIZATION_LAYER_FUSION_FIXTURE */
+#endif // ACL_TESTS_VALIDATION_FIXTURES_BATCHNORMALIZATIONLAYERFUSIONFIXTURE_H

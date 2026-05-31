@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,11 +26,12 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Range.h"
 
@@ -49,7 +50,7 @@ size_t num_of_elements_in_range(float start, float end, float step)
     ARM_COMPUTE_ERROR_ON(step == 0);
     return size_t(std::ceil((end - start) / step));
 }
-}
+} // namespace
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class RangeFixture : public framework::Fixture
@@ -57,7 +58,7 @@ class RangeFixture : public framework::Fixture
 public:
     void setup(const DataType data_type0, float start, float step, const QuantizationInfo qinfo0 = QuantizationInfo())
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type0 == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -73,7 +74,7 @@ protected:
         std::uniform_real_distribution<float> distribution(1, 100);
         std::mt19937                          gen(library->seed());
         float                                 end = start;
-        switch(output_data_type)
+        switch (output_data_type)
         {
             case DataType::U8:
                 end += std::max((uint8_t)1, static_cast<uint8_t>(distribution(gen))) * step;
@@ -100,15 +101,16 @@ protected:
                 end += std::max(half(1.0f), static_cast<half>(distribution(gen))) * step;
                 return utility::clamp<float, half>(end);
             case DataType::QASYMM8:
-                return utility::clamp<float, uint8_t>(end + (float)distribution(gen) * step,
-                                                      dequantize_qasymm8(0, qinfo_out.uniform()),
-                                                      dequantize_qasymm8(std::numeric_limits<uint8_t>::max(), qinfo_out.uniform()));
+                return utility::clamp<float, uint8_t>(
+                    end + (float)distribution(gen) * step, dequantize_qasymm8(0, qinfo_out.uniform()),
+                    dequantize_qasymm8(std::numeric_limits<uint8_t>::max(), qinfo_out.uniform()));
             default:
                 return 0;
         }
     }
 
-    TensorType compute_target(const DataType output_data_type, const QuantizationInfo qinfo_out, float start, float step)
+    TensorType
+    compute_target(const DataType output_data_type, const QuantizationInfo qinfo_out, float start, float step)
     {
         float  end             = get_random_end(output_data_type, qinfo_out, start, step);
         size_t num_of_elements = num_of_elements_in_range(start, end, step);
@@ -129,12 +131,13 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const DataType output_data_type, const QuantizationInfo qinfo_out, float start, float step)
+    SimpleTensor<T>
+    compute_reference(const DataType output_data_type, const QuantizationInfo qinfo_out, float start, float step)
     {
         // Create tensor
         const float     end             = get_random_end(output_data_type, qinfo_out, start, step);
         size_t          num_of_elements = num_of_elements_in_range(start, end, step);
-        SimpleTensor<T> ref_dst{ TensorShape(num_of_elements ? num_of_elements : 1), output_data_type, 1, qinfo_out };
+        SimpleTensor<T> ref_dst{TensorShape(num_of_elements ? num_of_elements : 1), output_data_type, 1, qinfo_out};
         return reference::range<T>(ref_dst, start, num_of_elements, step);
     }
 

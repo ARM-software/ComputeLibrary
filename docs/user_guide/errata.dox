@@ -1,5 +1,5 @@
 ///
-/// Copyright (c) 2019-2024 Arm Limited.
+/// Copyright (c) 2019-2025 Arm Limited.
 ///
 /// SPDX-License-Identifier: MIT
 ///
@@ -29,6 +29,15 @@ namespace arm_compute
 @tableofcontents
 
 @section S7_1_errata Errata
+
+- (COMPMID-8727) The FP16 MMUL Reshaped RHS kernel can be incorrectly configured with block sizes that cause wrong results for part of the tensor.
+    - Versions Affected: >= v52.5.0 && < v52.8.0
+    - Conditions:
+        - Oses: issue is not OS-based
+        - Compile with opencl=1
+        - Heuristics should use ClGemmMatrixMultiplyReshapedOnlyRhsMMULKernel.h
+        - The device should have the Fp16 mmul instructions available
+        - The kernel needs to be selected through its heuristic function (e.g. through the ClGemm Operator class' configure() call stack) and the size of the N at the kernel level is less than 32
 
 - (COMPMID-7536) NEDepthwiseConvolutionLayer and NEPoolingLayer may produce wrong results with OpenMP® scheduler
     - Versions: >= v24.05 && < v24.08

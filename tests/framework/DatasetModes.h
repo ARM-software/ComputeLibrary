@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited.
+ * Copyright (c) 2017-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_DATASET_MODES
-#define ARM_COMPUTE_TEST_DATASET_MODES
+#ifndef ACL_TESTS_FRAMEWORK_DATASETMODES_H
+#define ACL_TESTS_FRAMEWORK_DATASETMODES_H
 
 #include <istream>
 #include <ostream>
@@ -76,7 +76,7 @@ inline ::std::istream &operator>>(::std::istream &stream, DatasetMode &mode)
 
 inline ::std::ostream &operator<<(::std::ostream &stream, DatasetMode mode)
 {
-    switch(mode)
+    switch (mode)
     {
         case DatasetMode::DISABLED:
             stream << "DISABLED";
@@ -106,4 +106,4 @@ inline std::string to_string(DatasetMode mode)
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_DATASET_MODES */
+#endif // ACL_TESTS_FRAMEWORK_DATASETMODES_H

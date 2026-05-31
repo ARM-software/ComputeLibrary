@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,13 +38,16 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> stack_layer(const std::vector<SimpleTensor<T>> &in, const TensorShape &output_shape, DataType data_type, unsigned int axis)
+SimpleTensor<T> stack_layer(const std::vector<SimpleTensor<T>> &in,
+                            const TensorShape                  &output_shape,
+                            DataType                            data_type,
+                            unsigned int                        axis)
 {
     ARM_COMPUTE_ERROR_ON(output_shape.num_dimensions() > 5);
     ARM_COMPUTE_ERROR_ON(in.size() < 2);
     ARM_COMPUTE_ERROR_ON(axis > in[0].shape().num_dimensions());
 
-    SimpleTensor<T> out{ output_shape, data_type };
+    SimpleTensor<T> out{output_shape, data_type};
 
     const int width       = in[0].shape()[0];
     const int height      = in[0].shape()[1];
@@ -56,11 +59,12 @@ SimpleTensor<T> stack_layer(const std::vector<SimpleTensor<T>> &in, const Tensor
     // i_coordinates[0] = xi, i_coordinates[1] = yi, i_coordinates[2] = zi
     // i_coordinates[3] = bi, i_coordinates[4] = i, i_coordinates[5] = 0
     // i_coordinates[5] will be always zero and used for not incrementing the output when the input has less than 4 dimensions
-    std::array<int, 6> i_coordinates{ 0 };
+    std::array<int, 6> i_coordinates{0};
 
     // Array of pointers used to map the output coordinates to the input ones accordingly with the axis
     // This array is initialized with &i_coordinates[5] since this will be always zero
-    std::array<int *, 5> o_coordinates = { &i_coordinates[5], &i_coordinates[5], &i_coordinates[5], &i_coordinates[5], &i_coordinates[5] };
+    std::array<int *, 5> o_coordinates = {&i_coordinates[5], &i_coordinates[5], &i_coordinates[5], &i_coordinates[5],
+                                          &i_coordinates[5]};
 
     // Set the axis coordinate
     o_coordinates[axis] = &i_coordinates[4];
@@ -68,9 +72,9 @@ SimpleTensor<T> stack_layer(const std::vector<SimpleTensor<T>> &in, const Tensor
     unsigned int k_shift = 0;
 
     // Map the output coordinates
-    for(unsigned int k = 0; k < in[0].shape().num_dimensions(); ++k)
+    for (unsigned int k = 0; k < in[0].shape().num_dimensions(); ++k)
     {
-        if(k == axis)
+        if (k == axis)
         {
             k_shift++;
         }
@@ -93,21 +97,22 @@ SimpleTensor<T> stack_layer(const std::vector<SimpleTensor<T>> &in, const Tensor
     int &wo = *(o_coordinates[4]);
 
     // Stack tensors
-    for(; i < num_tensors; ++(i))
+    for (; i < num_tensors; ++(i))
     {
         bi = 0;
-        for(; bi < batch_size; ++(bi))
+        for (; bi < batch_size; ++(bi))
         {
             zi = 0;
-            for(; zi < depth; ++(zi))
+            for (; zi < depth; ++(zi))
             {
                 yi = 0;
-                for(; yi < height; ++(yi))
+                for (; yi < height; ++(yi))
                 {
                     xi = 0;
-                    for(; xi < width; ++(xi))
+                    for (; xi < width; ++(xi))
                     {
-                        *(reinterpret_cast<T *>(out(Coordinates(xo, yo, zo, bo, wo)))) = *(reinterpret_cast<const T *>(in[i](Coordinates(xi, yi, zi, bi))));
+                        *(reinterpret_cast<T *>(out(Coordinates(xo, yo, zo, bo, wo)))) =
+                            *(reinterpret_cast<const T *>(in[i](Coordinates(xi, yi, zi, bi))));
                     }
                 }
             }
@@ -116,9 +121,18 @@ SimpleTensor<T> stack_layer(const std::vector<SimpleTensor<T>> &in, const Tensor
 
     return out;
 }
-template SimpleTensor<int> stack_layer(const std::vector<SimpleTensor<int>> &in, const TensorShape &output_shape, DataType data_type, unsigned int axis);
-template SimpleTensor<short> stack_layer(const std::vector<SimpleTensor<short>> &in, const TensorShape &output_shape, DataType data_type, unsigned int axis);
-template SimpleTensor<char> stack_layer(const std::vector<SimpleTensor<char>> &in, const TensorShape &output_shape, DataType data_type, unsigned int axis);
+template SimpleTensor<int>   stack_layer(const std::vector<SimpleTensor<int>> &in,
+                                         const TensorShape                    &output_shape,
+                                         DataType                              data_type,
+                                         unsigned int                          axis);
+template SimpleTensor<short> stack_layer(const std::vector<SimpleTensor<short>> &in,
+                                         const TensorShape                      &output_shape,
+                                         DataType                                data_type,
+                                         unsigned int                            axis);
+template SimpleTensor<char>  stack_layer(const std::vector<SimpleTensor<char>> &in,
+                                         const TensorShape                     &output_shape,
+                                         DataType                               data_type,
+                                         unsigned int                           axis);
 } // namespace reference
 } // namespace validation
 } // namespace test

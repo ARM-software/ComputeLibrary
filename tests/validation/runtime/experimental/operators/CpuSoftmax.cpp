@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2022-2025 Arm Limited.
+ * Copyright (c) 2017-2020, 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,19 +23,20 @@
  */
 
 #include "arm_compute/runtime/experimental/operators/CpuSoftmax.h"
-#include "arm_compute/core/Types.h"
 
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+
 #include "src/common/cpuinfo/CpuIsaInfo.h"
 #include "src/core/helpers/MemoryHelpers.h"
-#include "tests/NEON/Accessor.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/CpuSoftmaxFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -193,8 +194,8 @@ FIXTURE_DATA_TEST_CASE(SmokeTest, CpuOpSoftmaxFixture<half>, framework::DatasetM
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() //FP16
@@ -239,8 +240,8 @@ FIXTURE_DATA_TEST_CASE(ConfigureOnceUseFromDifferentThreads, CpuSoftmaxThreadSaf
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() //F16

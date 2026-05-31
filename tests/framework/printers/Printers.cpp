@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #include "Printers.h"
 
 #include "../Utils.h"
-
 #include <map>
 #include <stdexcept>
 
@@ -36,18 +35,17 @@ namespace framework
 {
 LogFormat log_format_from_name(const std::string &name)
 {
-    static const std::map<std::string, LogFormat> formats =
-    {
-        { "pretty", LogFormat::PRETTY },
-        { "none", LogFormat::NONE },
-        { "json", LogFormat::JSON },
+    static const std::map<std::string, LogFormat> formats = {
+        {"pretty", LogFormat::PRETTY},
+        {"none", LogFormat::NONE},
+        {"json", LogFormat::JSON},
     };
 
     try
     {
         return formats.at(tolower(name));
     }
-    catch(const std::out_of_range &)
+    catch (const std::out_of_range &)
     {
         throw std::invalid_argument(name);
     }

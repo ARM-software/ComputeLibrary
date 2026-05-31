@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Arm Limited.
+ * Copyright (c) 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 #pragma once
-#ifdef ARM_COMPUTE_ENABLE_SVE
 
+#if defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(__aarch64__)
 template<>
 void MergeResults<3, 8, true>(
     bfloat16 *out_ptr,
@@ -77,12 +77,11 @@ void MergeResults<3, 8, true>(
       "beq 10f\n"
       "cmp %x[rows], #0x1\n"
       "bgt 6f\n"
-      "2:"  // Initial: Height 1
       "mov x11, %x[cols]\n"
       "mov x10, %x[out_ptr]\n"
       "mov x9, %x[bias]\n"
       "3:"  // Initial: Height 1: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -91,9 +90,9 @@ void MergeResults<3, 8, true>(
       "whilelt p0.s, x21, x11\n"
       "incw x21\n"
       "cbnz %x[bias], 4f\n"
-      "mov z21.b, #0x0\n"
-      "mov z20.b, #0x0\n"
-      "mov z19.b, #0x0\n"
+      "mov z21.b, #0\n"
+      "mov z20.b, #0\n"
+      "mov z19.b, #0\n"
       "b 5f\n"
       "4:"  // Initial: Height 1: Width 3: bias
       "ld1h { z18.s }, p2/Z, [x9]\n"
@@ -134,7 +133,7 @@ void MergeResults<3, 8, true>(
       "mov x9, %x[bias]\n"
       "add x28, x10, %x[ldout], LSL #1\n"
       "7:"  // Initial: Height 2: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -143,9 +142,9 @@ void MergeResults<3, 8, true>(
       "whilelt p0.s, x21, x11\n"
       "incw x21\n"
       "cbnz %x[bias], 8f\n"
-      "mov z24.b, #0x0\n"
-      "mov z23.b, #0x0\n"
-      "mov z22.b, #0x0\n"
+      "mov z24.b, #0\n"
+      "mov z23.b, #0\n"
+      "mov z22.b, #0\n"
       "b 9f\n"
       "8:"  // Initial: Height 2: Width 3: bias
       "ld1h { z18.s }, p2/Z, [x9]\n"
@@ -206,7 +205,7 @@ void MergeResults<3, 8, true>(
       "add x28, x10, %x[ldout], LSL #1\n"
       "add x27, x28, %x[ldout], LSL #1\n"
       "11:"  // Initial: Height 3: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -215,9 +214,9 @@ void MergeResults<3, 8, true>(
       "whilelt p0.s, x21, x11\n"
       "incw x21\n"
       "cbnz %x[bias], 12f\n"
-      "mov z27.b, #0x0\n"
-      "mov z26.b, #0x0\n"
-      "mov z25.b, #0x0\n"
+      "mov z27.b, #0\n"
+      "mov z26.b, #0\n"
+      "mov z25.b, #0\n"
       "b 13f\n"
       "12:"  // Initial: Height 3: Width 3: bias
       "ld1h { z18.s }, p2/Z, [x9]\n"
@@ -298,7 +297,7 @@ void MergeResults<3, 8, true>(
       "add x27, x28, %x[ldout], LSL #1\n"
       "add x26, x27, %x[ldout], LSL #1\n"
       "15:"  // Initial: Height 4: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -307,9 +306,9 @@ void MergeResults<3, 8, true>(
       "whilelt p0.s, x21, x11\n"
       "incw x21\n"
       "cbnz %x[bias], 16f\n"
-      "mov z30.b, #0x0\n"
-      "mov z29.b, #0x0\n"
-      "mov z28.b, #0x0\n"
+      "mov z30.b, #0\n"
+      "mov z29.b, #0\n"
+      "mov z28.b, #0\n"
       "b 17f\n"
       "16:"  // Initial: Height 4: Width 3: bias
       "ld1h { z18.s }, p2/Z, [x9]\n"
@@ -410,7 +409,7 @@ void MergeResults<3, 8, true>(
       "add x26, x27, %x[ldout], LSL #1\n"
       "add x25, x26, %x[ldout], LSL #1\n"
       "19:"  // Initial: Height 5: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -419,9 +418,9 @@ void MergeResults<3, 8, true>(
       "whilelt p0.s, x21, x11\n"
       "incw x21\n"
       "cbnz %x[bias], 20f\n"
-      "mov z1.b, #0x0\n"
-      "mov z0.b, #0x0\n"
-      "mov z31.b, #0x0\n"
+      "mov z1.b, #0\n"
+      "mov z0.b, #0\n"
+      "mov z31.b, #0\n"
       "b 21f\n"
       "20:"  // Initial: Height 5: Width 3: bias
       "ld1h { z18.s }, p2/Z, [x9]\n"
@@ -542,7 +541,7 @@ void MergeResults<3, 8, true>(
       "add x25, x26, %x[ldout], LSL #1\n"
       "add x24, x25, %x[ldout], LSL #1\n"
       "23:"  // Initial: Height 6: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -551,9 +550,9 @@ void MergeResults<3, 8, true>(
       "whilelt p0.s, x21, x11\n"
       "incw x21\n"
       "cbnz %x[bias], 24f\n"
-      "mov z4.b, #0x0\n"
-      "mov z3.b, #0x0\n"
-      "mov z2.b, #0x0\n"
+      "mov z4.b, #0\n"
+      "mov z3.b, #0\n"
+      "mov z2.b, #0\n"
       "b 25f\n"
       "24:"  // Initial: Height 6: Width 3: bias
       "ld1h { z18.s }, p2/Z, [x9]\n"
@@ -694,7 +693,7 @@ void MergeResults<3, 8, true>(
       "add x24, x25, %x[ldout], LSL #1\n"
       "add x23, x24, %x[ldout], LSL #1\n"
       "27:"  // Initial: Height 7: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -703,9 +702,9 @@ void MergeResults<3, 8, true>(
       "whilelt p0.s, x21, x11\n"
       "incw x21\n"
       "cbnz %x[bias], 28f\n"
-      "mov z7.b, #0x0\n"
-      "mov z6.b, #0x0\n"
-      "mov z5.b, #0x0\n"
+      "mov z7.b, #0\n"
+      "mov z6.b, #0\n"
+      "mov z5.b, #0\n"
       "b 29f\n"
       "28:"  // Initial: Height 7: Width 3: bias
       "ld1h { z18.s }, p2/Z, [x9]\n"
@@ -866,7 +865,7 @@ void MergeResults<3, 8, true>(
       "add x23, x24, %x[ldout], LSL #1\n"
       "add x22, x23, %x[ldout], LSL #1\n"
       "31:"  // Initial: Height 8: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -875,9 +874,9 @@ void MergeResults<3, 8, true>(
       "whilelt p0.s, x21, x11\n"
       "incw x21\n"
       "cbnz %x[bias], 32f\n"
-      "mov z10.b, #0x0\n"
-      "mov z9.b, #0x0\n"
-      "mov z8.b, #0x0\n"
+      "mov z10.b, #0\n"
+      "mov z9.b, #0\n"
+      "mov z8.b, #0\n"
       "b 33f\n"
       "32:"  // Initial: Height 8: Width 3: bias
       "ld1h { z18.s }, p2/Z, [x9]\n"
@@ -1061,11 +1060,10 @@ void MergeResults<3, 8, true>(
       "beq 40f\n"
       "cmp %x[rows], #0x1\n"
       "bgt 38f\n"
-      "36:"  // Accumulate: Height 1
       "mov x11, %x[cols]\n"
       "mov x10, %x[out_ptr]\n"
       "37:"  // Accumulate: Height 1: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -1108,7 +1106,7 @@ void MergeResults<3, 8, true>(
       "mov x11, %x[cols]\n"
       "add x28, x10, %x[ldout], LSL #1\n"
       "39:"  // Accumulate: Height 2: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -1177,7 +1175,7 @@ void MergeResults<3, 8, true>(
       "add x28, x10, %x[ldout], LSL #1\n"
       "add x27, x28, %x[ldout], LSL #1\n"
       "41:"  // Accumulate: Height 3: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -1272,7 +1270,7 @@ void MergeResults<3, 8, true>(
       "add x27, x28, %x[ldout], LSL #1\n"
       "add x26, x27, %x[ldout], LSL #1\n"
       "43:"  // Accumulate: Height 4: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -1393,7 +1391,7 @@ void MergeResults<3, 8, true>(
       "add x26, x27, %x[ldout], LSL #1\n"
       "add x25, x26, %x[ldout], LSL #1\n"
       "45:"  // Accumulate: Height 5: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -1540,7 +1538,7 @@ void MergeResults<3, 8, true>(
       "add x25, x26, %x[ldout], LSL #1\n"
       "add x24, x25, %x[ldout], LSL #1\n"
       "47:"  // Accumulate: Height 6: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -1713,7 +1711,7 @@ void MergeResults<3, 8, true>(
       "add x24, x25, %x[ldout], LSL #1\n"
       "add x23, x24, %x[ldout], LSL #1\n"
       "49:"  // Accumulate: Height 7: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -1912,7 +1910,7 @@ void MergeResults<3, 8, true>(
       "add x23, x24, %x[ldout], LSL #1\n"
       "add x22, x23, %x[ldout], LSL #1\n"
       "51:"  // Accumulate: Height 8: Block loop
-      "mov x21, #0x0\n"
+      "mov x21, #0\n"
       "addvl x20, %x[in_ptr], #16\n"
       "whilelt p2.s, x21, x11\n"
       "incw x21\n"
@@ -2134,4 +2132,5 @@ void MergeResults<3, 8, true>(
     );
 }
 
-#endif // ARM_COMPUTE_ENABLE_SVE
+#endif // defined(ARM_COMPUTE_ENABLE_BF16) && defined(ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS) && defined(ARM_COMPUTE_ENABLE_SVE) && defined(__aarch64__)
+

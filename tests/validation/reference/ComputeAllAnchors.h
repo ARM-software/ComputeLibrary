@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited.
+ * Copyright (c) 2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_COMPUTEALLANCHORS_H
-#define ARM_COMPUTE_TEST_COMPUTEALLANCHORS_H
+#ifndef ACL_TESTS_VALIDATION_REFERENCE_COMPUTEALLANCHORS_H
+#define ACL_TESTS_VALIDATION_REFERENCE_COMPUTEALLANCHORS_H
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -42,4 +43,4 @@ SimpleTensor<T> compute_all_anchors(const SimpleTensor<T> &anchors, const Comput
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_COMPUTEALLANCHORS_H */
+#endif // ACL_TESTS_VALIDATION_REFERENCE_COMPUTEALLANCHORS_H

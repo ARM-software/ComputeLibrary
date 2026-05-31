@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@
 
 #include "src/core/CL/CLUtils.h"
 #include "src/core/CL/CLValidate.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 #include "src/gpu/cl/kernels/gemm/ClGemmHelpers.h"
@@ -57,6 +58,8 @@ Status validate_arguments(const ITensorInfo                 *src,
                           const DirectConvComputeKernelInfo &desc)
 {
     ARM_COMPUTE_UNUSED(act_info);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, weights, indirect_buffer, dst);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src, weights, indirect_buffer);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(indirect_buffer, 1, DataType::S32);
@@ -93,6 +96,7 @@ Status validate_arguments(const ITensorInfo                 *src,
 
     if (biases != nullptr)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(biases);
         if (is_data_type_quantized_asymmetric(src->data_type()))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
@@ -106,12 +110,19 @@ Status validate_arguments(const ITensorInfo                 *src,
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(biases->num_dimensions() > 1, "Biases should be one dimensional");
     }
 
+    const TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info);
+
     // Checks performed when dst is configured
     if (dst->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(
-            dst->tensor_shape(), misc::shape_calculator::compute_deep_convolution_shape(*src, *weights, conv_info));
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+    }
+    else
+    {
+        const TensorInfo dst_info(output_shape, src->num_channels(), src->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

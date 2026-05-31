@@ -32,6 +32,7 @@
 #include "arm_compute/core/Validate.h"
 
 #include "src/common/utils/profile/acl_profile.h"
+#include "src/core/CPP/Validate.h"
 #include "src/core/helpers/AutoConfiguration.h"
 #include "src/core/helpers/WindowHelpers.h"
 
@@ -769,19 +770,25 @@ Status CpuTransposeKernel::validate(const ITensorInfo *src, const ITensorInfo *d
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src);
     //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use CPU FP16 instructions.
     ARM_COMPUTE_RETURN_ERROR_ON(src->data_type() == DataType::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
 
     // Error if input is not 8 bit, 16bit or 32bit
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(src->element_size() != 1 && src->element_size() != 2 && src->element_size() != 4,
                                     "Element size not supported");
 
     // Validate configured destination
+    const TensorShape dst_shape = misc::shape_calculator::compute_transposed_shape(*src);
     if (dst->total_size() != 0)
     {
-        const TensorShape dst_shape = misc::shape_calculator::compute_transposed_shape(*src);
-
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(dst->tensor_shape(), dst_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
+    }
+    else
+    {
+        const auto dst_info = TensorInfo(dst_shape, 1, src->data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     return Status{};

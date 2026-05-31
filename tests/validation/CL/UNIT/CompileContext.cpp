@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited.
+ * Copyright (c) 2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,11 +22,12 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/CL/CLCompileContext.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
+#include "tests/Globals.h"
+#include "tests/Utils.h"
 #include "tests/validation/Validation.h"
 
 namespace arm_compute
@@ -48,22 +49,24 @@ TEST_CASE(CompileContextCache, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(compile_context.get_built_programs().size() == 0, framework::LogLevel::ERRORS);
 
     // Create a kernel using the compile context
-    const std::string kernel_name  = "floor_layer";
-    const std::string program_name = CLKernelLibrary::get().get_program_name(kernel_name);
-    std::pair<std::string, bool> kernel_src = CLKernelLibrary::get().get_program(program_name);
-    const std::string kernel_path = CLKernelLibrary::get().get_kernel_path();
+    const std::string            kernel_name  = "floor_layer";
+    const std::string            program_name = CLKernelLibrary::get().get_program_name(kernel_name);
+    std::pair<std::string, bool> kernel_src   = CLKernelLibrary::get().get_program(program_name);
+    const std::string            kernel_path  = CLKernelLibrary::get().get_kernel_path();
 
     std::set<std::string> build_opts;
     build_opts.emplace("-DDATA_TYPE=float");
     build_opts.emplace("-DVEC_SIZE=16");
     build_opts.emplace("-DVEC_SIZE_LEFTOVER=0");
-    compile_context.create_kernel(kernel_name, program_name, kernel_src.first, kernel_path, build_opts, kernel_src.second);
+    compile_context.create_kernel(kernel_name, program_name, kernel_src.first, kernel_path, build_opts,
+                                  kernel_src.second);
 
     // Check if the program is stored in the cache
     ARM_COMPUTE_EXPECT(compile_context.get_built_programs().size() == 1, framework::LogLevel::ERRORS);
 
     // Try to build the same program and check if the program cache stayed the same
-    compile_context.create_kernel(kernel_name, program_name, kernel_src.first, kernel_path, build_opts, kernel_src.second);
+    compile_context.create_kernel(kernel_name, program_name, kernel_src.first, kernel_path, build_opts,
+                                  kernel_src.second);
     ARM_COMPUTE_EXPECT(compile_context.get_built_programs().size() == 1, framework::LogLevel::ERRORS);
 }
 

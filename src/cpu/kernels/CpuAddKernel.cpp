@@ -117,6 +117,8 @@ validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITens
 {
     ARM_COMPUTE_UNUSED(policy);
 
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&src0, &src1);
+
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&src0);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&src0, 1, DataType::U8, DataType::QASYMM8,
                                                          DataType::QASYMM8_SIGNED, DataType::S16, DataType::QSYMM16,
@@ -135,9 +137,15 @@ validate_arguments(const ITensorInfo &src0, const ITensorInfo &src1, const ITens
     // Validate in case of configured dst
     if (dst.total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src0, &dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, dst.tensor_shape(), 0),
                                         "Wrong shape for dst");
+    }
+    else
+    {
+        const auto dst_info = TensorInfo(out_shape, 1, src0.data_type());
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst_info);
     }
 
     const auto can_use_fixedpoint = add_q8_neon_fixedpoint_possible(&src0, &src1, &dst);

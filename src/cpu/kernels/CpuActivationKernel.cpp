@@ -67,6 +67,7 @@ static const std::array<ActivationLayerInfo::ActivationFunction, 4> qsymm16_acti
 
 Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const ActivationLayerInfo &activation_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(src);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8_SIGNED, DataType::QASYMM8,
                                                          DataType::QSYMM16, DataType::F16, DataType::F32);
@@ -119,6 +120,7 @@ Status validate_arguments(const ITensorInfo *src, const ITensorInfo *dst, const 
     // Checks performed when dst is configured
     if ((dst != nullptr) && (dst->total_size() != 0))
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     }
@@ -201,17 +203,19 @@ void init_lut(ActivationLayerInfo::ActivationFunction act_func,
 void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, ActivationLayerInfo activation_info)
 {
     ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuActivationKernel::configure");
-    ARM_COMPUTE_UNUSED(dst);
     ARM_COMPUTE_ERROR_ON_NULLPTR(src);
     ARM_COMPUTE_ERROR_THROW_ON(CpuActivationKernel::validate(src, dst, activation_info));
 
     heuristics::CpuActivationKernelHeuristics heuristics(src, dst, activation_info);
     _heuristics = std::move(heuristics);
 
-    if (dst != nullptr)
+    _src_padding = src->padding();
+    _inplace     = (dst == nullptr);
+    if (!_inplace)
     {
         // dst auto inizialitation if not yet initialized
         auto_init_if_empty(*dst, *src->clone());
+        _dst_padding = dst->padding();
     }
 
     const auto *uk = _heuristics.kernel();
@@ -234,6 +238,7 @@ void CpuActivationKernel::configure(const ITensorInfo *src, ITensorInfo *dst, Ac
         activation_info.setLookupTable256(tmp_lut);
     }
 
+    // Kernel specific logic should be mirrored in prepare()
     if (std::string(uk->name) == "sve_fp16_activation_lut")
     {
         // Create info using init list.
@@ -262,6 +267,50 @@ size_t CpuActivationKernel::get_mws(const CPUInfo &platform, size_t thread_count
     ARM_COMPUTE_UNUSED(platform);
 
     return _heuristics.mws();
+}
+
+void CpuActivationKernel::prepare(ITensorPack &tensors)
+{
+    const ITensor *src = tensors.get_const_tensor(TensorType::ACL_SRC);
+    ITensor       *dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    const ITensorInfo *src_info = src->info();
+    const ITensorInfo *dst_info = dst->info();
+
+    const bool src_padding_changed = (src_info->padding() != _src_padding);
+    const bool dst_padding_changed = (!_inplace && dst_info->padding() != _dst_padding);
+
+    if (src_padding_changed || dst_padding_changed)
+    {
+        // If padding has changed after configuration, recalculate the heuristics
+        const auto                                kernel_before_padding_change = _heuristics.kernel();
+        heuristics::CpuActivationKernelHeuristics heuristics(src_info, dst_info, _act_info);
+        _heuristics                            = std::move(heuristics);
+        const auto kernel_after_padding_change = _heuristics.kernel();
+
+        if (kernel_before_padding_change != kernel_after_padding_change)
+        {
+            // Kernel specific logic in configure must be repeated
+            const auto *uk = _heuristics.kernel();
+            ARM_COMPUTE_ERROR_ON_NULLPTR(uk);
+
+            _name = std::string("CpuActivationKernel").append("/").append(uk->name);
+
+#ifdef __aarch64__
+            if (std::string(uk->name) == "sve_fp16_activation_lut")
+            {
+                // Create info using init list.
+                LUTManager   &lut_manager = LUTManager::get_instance();
+                const LUTInfo info = {_act_info.activation(), _act_info.a(), _act_info.b(), src_info->data_type(),
+                                      src_info->quantization_info().uniform()};
+                _act_info.setLookupTable65536((lut_manager.get_lut_table<LookupTable65536>(info)));
+            }
+#endif // __aarch64__
+        }
+
+        // Re-register the window
+        ICPPKernel::configure(_heuristics.window());
+    }
 }
 
 void CpuActivationKernel::run_op(ITensorPack &tensors, const Window &window, const ThreadInfo &info)

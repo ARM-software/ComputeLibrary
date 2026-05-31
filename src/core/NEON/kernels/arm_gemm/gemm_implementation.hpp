@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, 2022-2024 Arm Limited.
+ * Copyright (c) 2018-2020, 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "arm_gemm.hpp"
+#include "arm_gemm/arm_gemm.hpp"
 
 #include "kernel_weight_format.hpp"
 
@@ -37,7 +37,6 @@ namespace arm_gemm {
  */
 template<typename Tlop, typename Trop, typename Tret, class OutputStage = Nothing>
 struct GemmImplementation {
-    const GemmMethod                                                               method;
     const char *                                                                   name;
     const KernelWeightFormat                                                       kernel_weight_format = KernelWeightFormat::NON_FIXED;
     std::function<bool(const GemmArgs &, const OutputStage &)>                     is_supported = {};
@@ -84,10 +83,10 @@ struct GemmImplementation {
         return instantiate(args, os);
     }
 
-    static GemmImplementation with_estimate(GemmMethod m, const char *n,
+    static GemmImplementation with_estimate(const char *n,
                        std::function<bool(const GemmArgs &, const OutputStage &)> is_supported, std::function<uint64_t(const GemmArgs &, const OutputStage &)> cycle_estimate,
                        std::function<GemmCommon<Tlop, Trop, Tret> *(const GemmArgs &, const OutputStage &)> instantiate) {
-        GemmImplementation impl(m,n);
+        GemmImplementation impl(n);
 
         impl.is_supported=is_supported;
         impl.cycle_estimate=cycle_estimate;
@@ -99,19 +98,19 @@ struct GemmImplementation {
     GemmImplementation(const GemmImplementation &) = default;
     GemmImplementation & operator= (const GemmImplementation &) = default;
 
-    GemmImplementation(GemmMethod m, const char * n) : method(m), name(n) {}
+    GemmImplementation(const char * n) : name(n) {}
 
-    GemmImplementation(GemmMethod m, const char *n,
+    GemmImplementation(const char *n,
                        std::function<bool(const GemmArgs &, const OutputStage &)> is_supported, std::function<bool(const GemmArgs &, const OutputStage &)> is_recommended,
                        std::function<GemmCommon<Tlop, Trop, Tret> *(const GemmArgs &, const OutputStage &)> instantiate) :
-                       method(m), name(n), is_supported(is_supported),
+                       name(n), is_supported(is_supported),
                        cycle_estimate( [is_recommended](const GemmArgs &args, const OutputStage &os) { return (is_recommended == nullptr) ? 0 : (is_recommended(args, os) ? 0 : UINT64_MAX); } ),
                        instantiate(instantiate) {   }
 
-    GemmImplementation(GemmMethod m, const char *n, KernelWeightFormat kwf,
+    GemmImplementation(const char *n, KernelWeightFormat kwf,
                        std::function<bool(const GemmArgs &, const OutputStage &)> is_supported, std::function<bool(const GemmArgs &, const OutputStage &)> is_recommended,
                        std::function<GemmCommon<Tlop, Trop, Tret> *(const GemmArgs &, const OutputStage &)> instantiate) :
-                       method(m), name(n), kernel_weight_format(kwf), is_supported(is_supported),
+                       name(n), kernel_weight_format(kwf), is_supported(is_supported),
                        cycle_estimate( [is_recommended](const GemmArgs &args, const OutputStage &os) { return (is_recommended == nullptr) ? 0 : (is_recommended(args, os) ? 0 : UINT64_MAX); } ),
                        instantiate(instantiate) {   }
 };
@@ -121,7 +120,6 @@ struct GemmImplementation {
  * unnecessary second argument.  */
 template<typename Tlop, typename Trop, typename Tret>
 struct GemmImplementation<Tlop, Trop, Tret, Nothing> {
-    const GemmMethod                                          method;
     const char *                                              name;
     const KernelWeightFormat                                  kernel_weight_format = KernelWeightFormat::NON_FIXED;
     std::function<bool(const GemmArgs &)>                     is_supported = {};
@@ -168,10 +166,10 @@ struct GemmImplementation<Tlop, Trop, Tret, Nothing> {
         return instantiate(args);
     }
 
-    static GemmImplementation with_estimate(GemmMethod m, const char *n,
+    static GemmImplementation with_estimate(const char *n,
                        std::function<bool(const GemmArgs &)> is_supported, std::function<uint64_t(const GemmArgs &)> cycle_estimate,
                        std::function<GemmCommon<Tlop, Trop, Tret> *(const GemmArgs &)> instantiate) {
-        GemmImplementation impl(m,n);
+        GemmImplementation impl(n);
 
         impl.is_supported=is_supported;
         impl.cycle_estimate=cycle_estimate;
@@ -180,10 +178,10 @@ struct GemmImplementation<Tlop, Trop, Tret, Nothing> {
         return impl;
     }
 
-    static GemmImplementation with_estimate(GemmMethod m, const char *n, KernelWeightFormat f,
+    static GemmImplementation with_estimate(const char *n, KernelWeightFormat f,
                        std::function<bool(const GemmArgs &)> is_supported, std::function<uint64_t(const GemmArgs &)> cycle_estimate,
                        std::function<GemmCommon<Tlop, Trop, Tret> *(const GemmArgs &)> instantiate) {
-        GemmImplementation impl(m,n,f);
+        GemmImplementation impl(n,f);
 
         impl.is_supported=is_supported;
         impl.cycle_estimate=cycle_estimate;
@@ -195,19 +193,19 @@ struct GemmImplementation<Tlop, Trop, Tret, Nothing> {
     GemmImplementation(const GemmImplementation &) = default;
     GemmImplementation & operator= (const GemmImplementation &) = default;
 
-    GemmImplementation(GemmMethod m, const char *n, KernelWeightFormat f=KernelWeightFormat::NON_FIXED) : method(m), name(n), kernel_weight_format(f) {}
+    GemmImplementation(const char *n, KernelWeightFormat f=KernelWeightFormat::NON_FIXED) : name(n), kernel_weight_format(f) {}
 
-    GemmImplementation(GemmMethod m, const char *n,
+    GemmImplementation(const char *n,
                        std::function<bool(const GemmArgs &)> is_supported, std::function<bool(const GemmArgs &)> is_recommended,
                        std::function<GemmCommon<Tlop, Trop, Tret> *(const GemmArgs &)> instantiate) :
-                       method(m), name(n), is_supported(is_supported),
+                       name(n), is_supported(is_supported),
                        cycle_estimate( [is_recommended](const GemmArgs &args) -> uint64_t { return (is_recommended == nullptr) ? 0 : (is_recommended(args) ? 0 : UINT64_MAX); } ),
                        instantiate(instantiate) {   }
 
-    GemmImplementation(GemmMethod m, const char *n, KernelWeightFormat kwf,
+    GemmImplementation(const char *n, KernelWeightFormat kwf,
                        std::function<bool(const GemmArgs &)> is_supported, std::function<bool(const GemmArgs &)> is_recommended,
                        std::function<GemmCommon<Tlop, Trop, Tret> *(const GemmArgs &)> instantiate) :
-                       method(m), name(n), kernel_weight_format(kwf), is_supported(is_supported),
+                       name(n), kernel_weight_format(kwf), is_supported(is_supported),
                        cycle_estimate( [is_recommended](const GemmArgs &args) -> uint64_t { return (is_recommended == nullptr) ? 0 : (is_recommended(args) ? 0 : UINT64_MAX); } ),
                        instantiate(instantiate) {   }
 };
@@ -215,24 +213,24 @@ struct GemmImplementation<Tlop, Trop, Tret, Nothing> {
 /* Provides the list of implementation descriptors which is processed by the
  * other functions.
  *
- * A specialised version is provided for each supported combination of types.
- * The end of the list is indicated by a sentinel descriptor with
- * method==GemmMethod::DEFAULT.  */
+ * A specialised version is provided for each supported combination of
+ * types.  The end of the list is indicated by a sentinel descriptor with an
+ * empty name.  */
 template<typename Tlop, typename Trop, typename Tret, class OutputStage = Nothing>
 const GemmImplementation<Tlop, Trop, Tret, OutputStage> *gemm_implementation_list();
 
 /*
  * Select a GEMM implementation for the given arguments.
  *
- * The logic here returns the method on the list which supports the
- * requested problem parameters, matches the provided filters (method and/or
- * name string match) and offers the lowest cycle estimate.  A cycle
- * estimate of '0' is treated as a special value, causing the corresponding
- * method to be selected immediately.
+ * The logic here returns the implementation on the list which supports the
+ * requested problem parameters, matches the provided filters (name string
+ * match) and offers the lowest cycle estimate.  A cycle estimate of '0' is
+ * treated as a special value, causing the corresponding implementation to
+ * be selected immediately.
  *
- * If no method supports the requested parameters and passes the filters,
- * this function returns false and doesn't touch the provided pointer
- * reference.
+ * If no implementation supports the requested parameters and passes the
+ * filters, this function returns false and doesn't touch the provided
+ * pointer reference.
  */
 template<typename Tlop, typename Trop, typename Tret, class OutputStage>
 bool find_implementation(const GemmArgs &args, const OutputStage &os, const GemmImplementation<Tlop, Trop, Tret, OutputStage> * &impl) {
@@ -242,14 +240,9 @@ bool find_implementation(const GemmArgs &args, const OutputStage &os, const Gemm
     const GemmImplementation<Tlop, Trop, Tret, OutputStage> *saved_impl = nullptr;
     uint64_t best_estimate = 0;
 
-    for (const GemmImplementation<Tlop, Trop, Tret, OutputStage> *i = gemms; i->method != GemmMethod::DEFAULT; i++) {
+    for (const GemmImplementation<Tlop, Trop, Tret, OutputStage> *i = gemms; i->name[0] != '\0'; i++) {
         /* Skip if this implementation doesn't support these args. */
         if (!i->do_is_supported(args, os)) {
-            continue;
-        }
-
-        /* Skip if a specific method is requested and this is a different one. */
-        if (cfg && cfg->method != GemmMethod::DEFAULT && i->method != cfg->method) {
             continue;
         }
 
@@ -275,7 +268,7 @@ bool find_implementation(const GemmArgs &args, const OutputStage &os, const Gemm
         }
     }
 
-    /* Return whichever method gave the best estimate. */
+    /* Return whichever implementation gave the best estimate. */
     if (saved_impl != nullptr) {
         impl = saved_impl;
         return true;
@@ -294,14 +287,14 @@ std::vector<KernelDescription> get_compatible_kernels(const GemmArgs &args, cons
 
     auto gemms = gemm_implementation_list<Tlop, Trop, Tret, OutputStage>();
 
-    for (const GemmImplementation<Tlop, Trop, Tret, OutputStage> *i = gemms; i->method != GemmMethod::DEFAULT; i++) {
+    for (const GemmImplementation<Tlop, Trop, Tret, OutputStage> *i = gemms; i->name[0] != '\0'; i++) {
         /* Check that this implementation supports the presented problem. */
 
         if (!i->do_is_supported(args, os)) {
             continue;
         }
 
-        res.push_back(KernelDescription(i->method, i->name, i==default_impl, i->do_cycle_estimate(args, os)));
+        res.push_back(KernelDescription(i->name, i==default_impl, i->do_cycle_estimate(args, os)));
     }
 
     return res;
@@ -310,9 +303,10 @@ std::vector<KernelDescription> get_compatible_kernels(const GemmArgs &args, cons
 template<typename Tlop, typename Trop, typename Tret, class OutputStage>
 bool has_opt_gemm(WeightFormat &wf, const GemmArgs &args, const OutputStage &os) {
     const GemmImplementation<Tlop, Trop, Tret, OutputStage> *impl;
-    const bool success =  find_implementation<Tlop, Trop, Tret, OutputStage>(args, os, impl);
-    if (success)
-      wf = UniqueGemmCommon<Tlop, Trop, Tret>(impl->do_instantiate(args, os))->get_config().weight_format;
+    const bool success = find_implementation<Tlop, Trop, Tret, OutputStage>(args, os, impl);
+    if (success) {
+        wf = UniqueGemmCommon<Tlop, Trop, Tret>(impl->do_instantiate(args, os))->get_config().weight_format;
+    }
     return success;
 }
 
@@ -327,17 +321,5 @@ UniqueGemmCommon<Tlop, Trop, Tret> gemm(const GemmArgs &args, const OutputStage 
     return UniqueGemmCommon<Tlop, Trop, Tret>(nullptr);
 }
 
-template<typename Tlop, typename Trop, typename Tret, class OutputStage>
-KernelDescription get_gemm_method(const GemmArgs &args, const OutputStage &os) {
-    const GemmImplementation<Tlop, Trop, Tret, OutputStage> *impl;
-
-    if (find_implementation<Tlop, Trop, Tret>(args, os, impl)) {
-        return KernelDescription(impl->method, impl->name);
-    }
-
-    /* This shouldn't happen - there should always be at least one valid implementation. */
-    return KernelDescription();
-}
-
-
 } // namespace arm_gemm
+

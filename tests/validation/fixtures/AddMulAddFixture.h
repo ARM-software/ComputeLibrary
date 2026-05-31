@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,12 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/ArithmeticOperations.h"
@@ -58,7 +59,7 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i, DataType data_type)
     {
-        switch(data_type)
+        switch (data_type)
         {
             case DataType::F32:
                 library->fill_tensor_uniform(tensor, i, -10.f, 10.f);
@@ -86,12 +87,12 @@ protected:
 
         // Create and configure function
         FunctionType add_mul_add;
-        ARM_COMPUTE_ERROR_THROW_ON(add_mul_add.validate(input1.info(), input2.info(), bn_mul.info(),
-                                                        bn_add.info(), interm_out ? add_output.info() : nullptr, final_output.info(),
+        ARM_COMPUTE_ERROR_THROW_ON(add_mul_add.validate(input1.info(), input2.info(), bn_mul.info(), bn_add.info(),
+                                                        interm_out ? add_output.info() : nullptr, final_output.info(),
                                                         ConvertPolicy::SATURATE, act_info));
 
-        add_mul_add.configure(&input1, &input2, &bn_mul, &bn_add, interm_out ? &add_output : nullptr,
-                              &final_output, ConvertPolicy::SATURATE, act_info);
+        add_mul_add.configure(&input1, &input2, &bn_mul, &bn_add, interm_out ? &add_output : nullptr, &final_output,
+                              ConvertPolicy::SATURATE, act_info);
 
         // Allocate tensors
         input1.allocator()->allocate();
@@ -99,7 +100,7 @@ protected:
         bn_mul.allocator()->allocate();
         bn_add.allocator()->allocate();
 
-        if(interm_out)
+        if (interm_out)
         {
             add_output.allocator()->allocate();
         }
@@ -117,7 +118,7 @@ protected:
 
         _target = std::move(final_output);
 
-        if(interm_out)
+        if (interm_out)
         {
             _interm_target = std::move(add_output);
         }
@@ -144,11 +145,11 @@ public:
 
     void setup(const TensorShape &shape, DataType data_type, ActivationLayerInfo act_info)
     {
-        const bool is_not_cpu = !std::is_same<TensorType, Tensor>::value;
-        const bool is_not_fp16 = data_type != DataType::F16;
+        const bool is_not_cpu      = !std::is_same<TensorType, Tensor>::value;
+        const bool is_not_fp16     = data_type != DataType::F16;
         const bool device_has_fp16 = CPUInfo::get().has_fp16();
 
-        if(is_not_cpu || is_not_fp16 || device_has_fp16)
+        if (is_not_cpu || is_not_fp16 || device_has_fp16)
         {
             Parent::setup(shape, data_type, act_info, interm_out);
             compute_reference(shape, data_type, act_info);
@@ -164,14 +165,14 @@ public:
         TensorShape b_shape(shape.x());
 
         // Create reference
-        SimpleTensor<T> input1{ shape, data_type };
-        SimpleTensor<T> input2{ shape, data_type };
-        SimpleTensor<T> bn_mul{ b_shape, data_type };
-        SimpleTensor<T> bn_add{ b_shape, data_type };
-        SimpleTensor<T> add_output{ shape, data_type, 1 };
+        SimpleTensor<T> input1{shape, data_type};
+        SimpleTensor<T> input2{shape, data_type};
+        SimpleTensor<T> bn_mul{b_shape, data_type};
+        SimpleTensor<T> bn_add{b_shape, data_type};
+        SimpleTensor<T> add_output{shape, data_type, 1};
 
-        SimpleTensor<T> bn_mul_out{ shape, data_type };
-        SimpleTensor<T> bn_add_out{ shape, data_type };
+        SimpleTensor<T> bn_mul_out{shape, data_type};
+        SimpleTensor<T> bn_add_out{shape, data_type};
 
         // Fill reference
         Parent::fill(input1, 0, data_type);
@@ -179,16 +180,19 @@ public:
         Parent::fill(bn_mul, 2, data_type);
         Parent::fill(bn_add, 3, data_type);
 
-        reference::arithmetic_operation<T>(reference::ArithmeticOperation::ADD, input1, input2, add_output, ConvertPolicy::SATURATE);
-        bn_mul_out = reference::pixel_wise_multiplication<T, T, T>(add_output, bn_mul, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_UP, data_type);
-        reference::arithmetic_operation<T>(reference::ArithmeticOperation::ADD, bn_mul_out, bn_add, bn_add_out, ConvertPolicy::SATURATE);
+        reference::arithmetic_operation<T>(reference::ArithmeticOperation::ADD, input1, input2, add_output,
+                                           ConvertPolicy::SATURATE);
+        bn_mul_out = reference::pixel_wise_multiplication<T, T, T>(add_output, bn_mul, 1.f, ConvertPolicy::SATURATE,
+                                                                   RoundingPolicy::TO_NEAREST_UP, data_type);
+        reference::arithmetic_operation<T>(reference::ArithmeticOperation::ADD, bn_mul_out, bn_add, bn_add_out,
+                                           ConvertPolicy::SATURATE);
 
-        if(interm_out)
+        if (interm_out)
         {
             Parent::_interm_reference = std::move(add_output);
         }
 
-        if(act_info.enabled() && act_info.activation() != ActivationLayerInfo::ActivationFunction::IDENTITY)
+        if (act_info.enabled() && act_info.activation() != ActivationLayerInfo::ActivationFunction::IDENTITY)
         {
             Parent::_reference = reference::activation_layer(bn_add_out, act_info);
         }
@@ -205,11 +209,17 @@ class AddMulAddQuantizedValidationFixture : public AddMulAddGenericFixture<Tenso
 public:
     using Parent = AddMulAddGenericFixture<TensorType, AccessorType, FunctionType, T>;
 
-    void setup(const TensorShape &shape, DataType data_type, ActivationLayerInfo act_info,
-               QuantizationInfo input1_qinfo, QuantizationInfo input2_qinfo, QuantizationInfo bn_mul_qinfo,
-               QuantizationInfo bn_add_qinfo, QuantizationInfo add_output_qinfo, QuantizationInfo final_output_qinfo)
+    void setup(const TensorShape  &shape,
+               DataType            data_type,
+               ActivationLayerInfo act_info,
+               QuantizationInfo    input1_qinfo,
+               QuantizationInfo    input2_qinfo,
+               QuantizationInfo    bn_mul_qinfo,
+               QuantizationInfo    bn_add_qinfo,
+               QuantizationInfo    add_output_qinfo,
+               QuantizationInfo    final_output_qinfo)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -236,10 +246,10 @@ public:
         TensorShape b_shape(shape.x());
 
         // Create reference
-        SimpleTensor<T> input1{ shape, data_type, 1, Parent::_input1_qinfo };
-        SimpleTensor<T> input2{ shape, data_type, 1, Parent::_input2_qinfo };
-        SimpleTensor<T> bn_mul{ b_shape, data_type, 1, Parent::_bn_mul_qinfo };
-        SimpleTensor<T> bn_add{ b_shape, data_type, 1, Parent::_bn_add_qinfo };
+        SimpleTensor<T> input1{shape, data_type, 1, Parent::_input1_qinfo};
+        SimpleTensor<T> input2{shape, data_type, 1, Parent::_input2_qinfo};
+        SimpleTensor<T> bn_mul{b_shape, data_type, 1, Parent::_bn_mul_qinfo};
+        SimpleTensor<T> bn_add{b_shape, data_type, 1, Parent::_bn_add_qinfo};
 
         // Fill input tensors
         Parent::fill(input1, 0, data_type);
@@ -252,27 +262,33 @@ public:
         SimpleTensor<float> bn_mul_dequantized = reference::dequantization_layer<float>(bn_mul);
         SimpleTensor<float> bn_add_dequantized = reference::dequantization_layer<float>(bn_add);
 
-        SimpleTensor<float> add_output_dequantized{ shape, DataType::F32 };
-        SimpleTensor<float> bn_add_out_dequantized{ shape, DataType::F32 };
+        SimpleTensor<float> add_output_dequantized{shape, DataType::F32};
+        SimpleTensor<float> bn_add_out_dequantized{shape, DataType::F32};
 
-        reference::arithmetic_operation<float>(reference::ArithmeticOperation::ADD, input1_dequantized, input2_dequantized, add_output_dequantized, ConvertPolicy::SATURATE);
-        SimpleTensor<float> bn_mul_out_dequantized = reference::pixel_wise_multiplication<float, float, float>(add_output_dequantized, bn_mul_dequantized, 1.f, ConvertPolicy::SATURATE,
-                                                                                                               RoundingPolicy::TO_NEAREST_UP, DataType::F32);
-        reference::arithmetic_operation<float>(reference::ArithmeticOperation::ADD, bn_mul_out_dequantized, bn_add_dequantized, bn_add_out_dequantized, ConvertPolicy::SATURATE);
+        reference::arithmetic_operation<float>(reference::ArithmeticOperation::ADD, input1_dequantized,
+                                               input2_dequantized, add_output_dequantized, ConvertPolicy::SATURATE);
+        SimpleTensor<float> bn_mul_out_dequantized = reference::pixel_wise_multiplication<float, float, float>(
+            add_output_dequantized, bn_mul_dequantized, 1.f, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_UP,
+            DataType::F32);
+        reference::arithmetic_operation<float>(reference::ArithmeticOperation::ADD, bn_mul_out_dequantized,
+                                               bn_add_dequantized, bn_add_out_dequantized, ConvertPolicy::SATURATE);
 
-        if(interm_out)
+        if (interm_out)
         {
-            Parent::_interm_reference = reference::quantization_layer<float, T>(add_output_dequantized, data_type, Parent::_add_output_qinfo);
+            Parent::_interm_reference =
+                reference::quantization_layer<float, T>(add_output_dequantized, data_type, Parent::_add_output_qinfo);
         }
 
-        if(act_info.enabled() && act_info.activation() != ActivationLayerInfo::ActivationFunction::IDENTITY)
+        if (act_info.enabled() && act_info.activation() != ActivationLayerInfo::ActivationFunction::IDENTITY)
         {
-            SimpleTensor<T> ref = reference::quantization_layer<float, T>(bn_add_out_dequantized, data_type, Parent::_final_output_qinfo);
-            Parent::_reference  = reference::activation_layer(ref, act_info);
+            SimpleTensor<T> ref =
+                reference::quantization_layer<float, T>(bn_add_out_dequantized, data_type, Parent::_final_output_qinfo);
+            Parent::_reference = reference::activation_layer(ref, act_info);
         }
         else
         {
-            Parent::_reference = reference::quantization_layer<float, T>(bn_add_out_dequantized, data_type, Parent::_final_output_qinfo);
+            Parent::_reference =
+                reference::quantization_layer<float, T>(bn_add_out_dequantized, data_type, Parent::_final_output_qinfo);
         }
     }
 };

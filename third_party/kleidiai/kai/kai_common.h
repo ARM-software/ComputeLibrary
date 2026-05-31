@@ -1,9 +1,13 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
 #pragma once
+
+#if defined(__ARM_NEON)
+#include <arm_neon.h>
+#endif  // defined(__ARM_NEON)
 
 #include <stddef.h>
 #include <stdint.h>
@@ -20,35 +24,109 @@ extern "C" {
 //   * cppcoreguidelines-avoid-do-while: do-while is necessary for macros.
 //   * cppcoreguidelines-pro-type-vararg: use of variadic arguments in fprintf is expected.
 //   * cert-err33-c: checking the output of fflush and fprintf is not necessary for error reporting.
-#define KAI_ERROR(msg)                                        \
-    do {                                                      \
-        fflush(stdout);                                       \
-        fprintf(stderr, "%s:%d %s", __FILE__, __LINE__, msg); \
-        exit(EXIT_FAILURE);                                   \
+
+#ifndef KLEIDIAI_ERROR_TRAP
+#define KLEIDIAI_ERROR_TRAP 0
+#endif
+
+#ifndef KLEIDIAI_HAS_BUILTIN_UNREACHABLE
+#define KLEIDIAI_HAS_BUILTIN_UNREACHABLE 0
+#endif
+
+#ifndef KLEIDIAI_HAS_BUILTIN_ASSUME0
+#define KLEIDIAI_HAS_BUILTIN_ASSUME0 0
+#endif
+
+#if KLEIDIAI_ERROR_TRAP
+#define KAI_ABORT() __builtin_trap()
+#else
+#define KAI_ABORT() abort()
+#endif
+
+#if KLEIDIAI_HAS_BUILTIN_UNREACHABLE
+#define KAI_UNREACHABLE() __builtin_unreachable()
+#elif KLEIDIAI_HAS_BUILTIN_ASSUME0
+#define KAI_UNREACHABLE() __assume(0);
+#else
+#define KAI_UNREACHABLE()
+#endif
+
+#ifdef NDEBUG
+#define KAI_ERROR(msg)   \
+    do {                 \
+        KAI_UNUSED(msg); \
+        KAI_ABORT();     \
     } while (0)
 
 #define KAI_ASSERT_MSG(cond, msg) \
     do {                          \
+        KAI_UNUSED(msg);          \
         if (!(cond)) {            \
-            KAI_ERROR(msg);       \
+            KAI_UNREACHABLE();    \
         }                         \
+    } while (0)
+#else
+#define KAI_ERROR(msg)                                        \
+    do {                                                      \
+        fflush(stdout);                                       \
+        fprintf(stderr, "%s:%d %s", __FILE__, __LINE__, msg); \
+        KAI_ABORT();                                          \
+    } while (0)
+
+#define KAI_ASSERT_MSG(cond, msg) KAI_ASSERT_ALWAYS_MSG(cond, msg)
+#endif  // NDEBUG
+
+#define KAI_ASSERT_ALWAYS_MSG(cond, msg) \
+    do {                                 \
+        if (!(cond)) {                   \
+            KAI_ERROR(msg);              \
+        }                                \
     } while (0)
 
 // NOLINTEND(cppcoreguidelines-avoid-do-while,cppcoreguidelines-pro-type-vararg,cert-err33-c)
 
+/// KAI_ASSERT* is used for logic sanity checking in the program
+/// flow. Checks are optimized away in release builds same as
+/// `assert`
 #define KAI_ASSERT(cond) KAI_ASSERT_MSG(cond, #cond)
-
 #define KAI_ASSERT_IF_MSG(precond, cond, msg) KAI_ASSERT_MSG(!(precond) || (cond), msg)
 #define KAI_ASSERT_IF(precond, cond) KAI_ASSERT_IF_MSG(precond, cond, #precond " |-> " #cond)
 
+/// `KAI_ASSERT_ALWAYS*` is same as `KAI_ASSERT*`, but doesn't get removed by `NDEBUG`
+#define KAI_ASSERT_ALWAYS(cond) KAI_ASSERT_ALWAYS_MSG(cond, #cond)
+#define KAI_ASSERT_ALWAYS_IF_MSG(precond, cond, msg) KAI_ASSERT_ALWAYS_MSG(!(precond) || (cond), msg)
+#define KAI_ASSERT_ALWAYS_IF(precond, cond) KAI_ASSERT_ALWAYS_IF_MSG(precond, cond, #precond " |-> " #cond)
+
+/// KAI_ASSUME* is used for function pre-condition checking, similar to `[[assume]]` in C++23.
+/// So KAI_ASSUME should be used directly on the function parameters, rather than inside
+/// function logic.
 #define KAI_ASSUME_MSG KAI_ASSERT_MSG
 #define KAI_ASSUME KAI_ASSERT
 #define KAI_ASSUME_IF_MSG KAI_ASSERT_IF_MSG
 #define KAI_ASSUME_IF KAI_ASSERT_IF
 
+/// `KAI_ASSUME_ALWAYS*` is same as `KAI_ASSUME*`, but doesn't get removed by `NDEBUG`
+#define KAI_ASSUME_ALWAYS_MSG KAI_ASSERT_ALWAYS_MSG
+#define KAI_ASSUME_ALWAYS KAI_ASSERT_ALWAYS
+#define KAI_ASSUME_ALWAYS_IF_MSG KAI_ASSERT_ALWAYS_IF_MSG
+#define KAI_ASSUME_ALWAYS_IF KAI_ASSERT_ALWAYS_IF
+
+/// Indicate that result of `x` is unused
 #define KAI_UNUSED(x) (void)(x)
+
+/// Return minimum or maximum of `a` and `b`
 #define KAI_MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define KAI_MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+/// Largest supported SME vector length in bytes
+#define KAI_SME_VEC_LENGTH_MAX_BYTES 256  // NOLINT(cppcoreguidelines-macro-to-enum,modernize-macro-to-enum)
+
+/// Gets the version of the project in the Major.Minor.Patch semantic versioning format.
+///
+/// @return Project version as a string literal.
+inline const char* kai_get_version(void) {
+    return "1.19.0";
+}
 
 /// KleidiAI data types
 /// Format: <byte 3>(reserved)|<byte 2>(num-bytes)|<byte 1>(type)|<byte 0>(variant-type)
@@ -80,7 +158,7 @@ inline static size_t kai_get_datatype_size_in_bytes(enum kai_datatype dt) {
 /// @return the f32 value
 #if defined(__ARM_NEON)
 inline static float kai_cast_f32_f16(uint16_t f16) {
-    __fp16 f32 = 0;
+    float16_t f32 = 0;
     memcpy(&f32, &f16, sizeof(uint16_t));
     return (float)f32;
 }
@@ -119,7 +197,7 @@ inline static uint16_t kai_cast_bf16_f32(float f32) {
 #if defined(__ARM_NEON)
 inline static uint16_t kai_cast_f16_f32(float f32) {
     uint16_t f16 = 0;
-    __fp16 tmp = (__fp16)f32;
+    float16_t tmp = (float16_t)f32;
     memcpy(&f16, &tmp, sizeof(uint16_t));
     return f16;
 }
@@ -129,18 +207,9 @@ inline static size_t kai_roundup(size_t a, size_t b) {
     return ((a + b - 1) / b) * b;
 }
 
-#ifdef __ARM_FEATURE_SVE2
+#if defined(__ARM_FEATURE_SVE2) || defined(_M_ARM64)
 /// Gets the SME vector length for 8-bit elements.
-inline static uint64_t kai_get_sme_vector_length_u8(void) {
-    uint64_t res = 0;
-    __asm__ __volatile__(
-        ".inst 0x04bf5827 // rdsvl x7, #1\n"
-        "mov %0, x7\n"
-        : "=r"(res)
-        : /* no inputs */
-        : "x7");
-    return res;
-}
+uint64_t kai_get_sme_vector_length_u8(void);
 
 /// Gets the SME vector length for 16-bit elements.
 inline static uint64_t kai_get_sme_vector_length_u16(void) {
@@ -151,7 +220,23 @@ inline static uint64_t kai_get_sme_vector_length_u16(void) {
 inline static uint64_t kai_get_sme_vector_length_u32(void) {
     return kai_get_sme_vector_length_u8() / 4;
 }
-#endif  // __ARM_FEATURE_SVE2
+
+/// Commit ZA to lazy save buffer
+void kai_commit_za(void);
+#endif  // defined(__ARM_FEATURE_SVE2) || defined(_M_ARM64)
+
+/// Gets the SVE vector length for 8-bit elements.
+uint64_t kai_get_sve_vector_length_u8(void);
+
+/// Gets the SVE vector length for 16-bit elements.
+inline static uint64_t kai_get_sve_vector_length_u16(void) {
+    return kai_get_sve_vector_length_u8() / 2;
+}
+
+/// Gets the SVE vector length for 32-bit elements.
+inline static uint64_t kai_get_sve_vector_length_u32(void) {
+    return kai_get_sve_vector_length_u8() / 4;
+}
 
 /// Extends the sign bit of int 4-bit value (stored in int8_t variable)
 /// @param[in] value The 4-bit int value
@@ -168,6 +253,21 @@ inline static int8_t kai_ext_sign_i8_i4(int8_t value) {
 struct kai_rhs_pack_qsi8cx_params {
     int32_t lhs_zero_point;  ///< LHS Matrix quantization zero-point
     float scale_multiplier;  ///< Product of input (refers to lhs and rhs) and output quantization scales.
+};
+
+/// Parameter struct for RHS matrix packing (Quantized Symmetric Integer 4-bit with per-block quantizatio and s1s0
+/// nibble ordering)
+struct kai_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0_params {
+    int8_t lhs_zero_point;
+    uint8_t rhs_zero_point;
+    enum kai_datatype scale_dt;
+};
+
+/// Parameter struct for RHS matrix packing (KxN variant for int4 qsi4c32p_qsu4c32s1s0)
+struct kai_rhs_pack_kxn_qsi4c32p_qsu4c32s1s0_params {
+    int8_t lhs_zero_point;
+    uint8_t rhs_zero_point;
+    enum kai_datatype scale_dt;
 };
 
 /// Parameter struct for RHS matrix packing

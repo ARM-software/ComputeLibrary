@@ -801,6 +801,7 @@ INPUT                  = ./docs/user_guide/introduction.dox \
                          ./docs/user_guide/conv2d_heuristic.dox \
                          ./docs/user_guide/operator_list.dox \
                          ./docs/user_guide/tests.dox \
+                         ./docs/user_guide/profiling.dox \
                          ./docs/user_guide/advanced.dox \
                          ./docs/user_guide/release_version_and_change_log.dox \
                          ./docs/user_guide/errata.dox \

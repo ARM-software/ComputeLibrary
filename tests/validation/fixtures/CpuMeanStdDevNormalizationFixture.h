@@ -70,7 +70,7 @@ public:
         _in_place                 = in_place;
         _data_type                = data_type;
         _test_type                = test_type;
-        _num_parallel_runs  = (_test_type == TestType::ConfigureOnceRunMultiThreaded ? NUM_THREADS : 1);
+        _num_parallel_runs        = (_test_type == TestType::ConfigureOnceRunMultiThreaded ? NUM_THREADS : 1);
         _output_quantization_info = QuantizationInfo(0.025f, 110);
         _input_quantization_info  = in_place ? _output_quantization_info : quantization_info;
 
@@ -82,9 +82,9 @@ protected:
     template <typename U>
     void fill(U &&tensor, int seed_offset)
     {
-        if(is_data_type_float(_data_type))
+        if (is_data_type_float(_data_type))
         {
-            std::uniform_real_distribution<> distribution{ -1.0f, 1.0f };
+            std::uniform_real_distribution<> distribution{-1.0f, 1.0f};
             if (_test_type == TestType::ConfigureOnceRunMultiThreaded)
             {
                 library->fill(tensor, distribution, seed_offset);
@@ -96,7 +96,7 @@ protected:
         }
         else
         {
-            std::uniform_int_distribution<> distribution{ 0, 255 };
+            std::uniform_int_distribution<> distribution{0, 255};
             library->fill(tensor, distribution, 0);
         }
     }
@@ -205,7 +205,8 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class CpuMeanStdDevNormalizationValidationFixture : public CpuMeanStdDevNormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class CpuMeanStdDevNormalizationValidationFixture
+    : public CpuMeanStdDevNormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(TensorShape shape, bool in_place, float epsilon, DataType data_type)
@@ -216,7 +217,8 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class CpuMeanStdDevNormalizationFloatThreadSafeValidationFixture : public CpuMeanStdDevNormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class CpuMeanStdDevNormalizationFloatThreadSafeValidationFixture
+    : public CpuMeanStdDevNormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(TensorShape shape, bool in_place, float epsilon, DataType data_type)
@@ -227,7 +229,8 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class CpuMeanStdDevNormalizationQuantizedThreadSafeValidationFixture : public CpuMeanStdDevNormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+class CpuMeanStdDevNormalizationQuantizedThreadSafeValidationFixture
+    : public CpuMeanStdDevNormalizationValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     void setup(TensorShape shape, bool in_place, float epsilon, DataType data_type, QuantizationInfo qinfo)

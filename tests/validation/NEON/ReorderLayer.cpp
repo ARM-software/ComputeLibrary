@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Arm Limited.
+ * Copyright (c) 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,8 @@
 #include "arm_compute/runtime/NEON/functions/NEReorderLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
-#include "src/core/NEON/kernels/arm_gemm/utils.hpp"
 #include "src/core/NEON/kernels/NEReorderKernel.h"
+#include "src/cpu/kernels/assembly/arm_common/internal/utils.hpp"
 #include "tests/datasets/ReorderLayerDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -65,8 +65,8 @@ DATA_TEST_CASE(ValidateReorderOHWIo8,
 {
     arm_compute::NEReorderLayer reorder_layer;
     bool                        expected_bool_status = true;
-    TensorInfo input_tensor_info(input_shape, 1, DataType::F32);
-    TensorInfo output_tensor_info(output_shape, 1, DataType::F32);
+    TensorInfo                  input_tensor_info(input_shape, 1, DataType::F32);
+    TensorInfo                  output_tensor_info(output_shape, 1, DataType::F32);
 
     Status status =
         reorder_layer.validate(&input_tensor_info, &output_tensor_info, input_wf, output_wf, true /* transpose */);
@@ -114,15 +114,15 @@ FIXTURE_DATA_TEST_CASE(RunInterleave4Block4,
                                make("OutputDataType", DataType::BFLOAT16),
                                make("Transpose", {true, false})))
 {
-    if(CPUInfo::get().has_bf16())
+    if (CPUInfo::get().has_bf16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support bf16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support bf16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 
@@ -136,21 +136,21 @@ FIXTURE_DATA_TEST_CASE(RunInterleave8Block4,
                                make("OutputDataType", DataType::BFLOAT16),
                                make("Transpose", {true, false})))
 {
-    if(CPUInfo::get().has_bf16())
+    if (CPUInfo::get().has_bf16())
     {
         // Validate output
         validate(Accessor(_target), _reference);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support bf16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support bf16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 #endif // ARM_COMPUTE_ENABLE_SVE
 
 TEST_SUITE_END() // BF16
-#endif // ARM_COMPUTE_ENABLE_BF16
+#endif           // ARM_COMPUTE_ENABLE_BF16
 
 TEST_SUITE_END() // ReorderLayer
 TEST_SUITE_END() // NEON

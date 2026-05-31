@@ -1,0 +1,8 @@
+#
+# SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Version 7 LTS used as the most common in the field while still compatible with 6.5.0
+USE_BAZEL_VERSION=7.x

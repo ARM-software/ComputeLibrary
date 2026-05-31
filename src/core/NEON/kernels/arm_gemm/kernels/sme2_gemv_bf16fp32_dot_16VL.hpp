@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023,2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,9 +22,8 @@
  * SOFTWARE.
  */
 #pragma once
-#if defined(ARM_COMPUTE_ENABLE_SME2)
 #include "../std_transforms_sme.hpp"
-#include "../bfloat.hpp"
+#include "arm_common/bfloat.hpp"
 
 #define ARGLIST  \
     const bfloat16 *, const bfloat16 *, \
@@ -83,4 +82,3 @@ public:
 
 #undef ARGLIST
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SME2)

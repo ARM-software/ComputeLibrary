@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Arm Limited.
+ * Copyright (c) 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,17 +22,17 @@
  * SOFTWARE.
  */
 
-#if defined(ARM_COMPUTE_ENABLE_SME)
+#if (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && defined(__aarch64__) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
 
 template <>
 void interleave_block<4, 2, VLType::SME, false>(
   __fp16 * &out, const __fp16 * const *in,
-  size_t width, size_t height, size_t row_offset, bool
+  size_t width, size_t height, size_t row_offset, bool, int32_t
 )
 {
   __asm__ __volatile__(
       ".inst 0xd503477f  // SMSTART ZA\n"
-      "mov x17, #0x0\n"
+      "mov x17, #0\n"
       "mov x16, %x[row_offset]\n"
       "cntw x15\n"
       "cntw x14\n"
@@ -45,7 +45,7 @@ void interleave_block<4, 2, VLType::SME, false>(
       "whilelt p10.h, x14, %x[height]\n"
       "whilelt p9.h, x11, %x[height]\n"
       "whilelt p8.h, x10, %x[height]\n"
-      "ptrue p13.s\n"
+      "ptrue p13.b\n"
       "sub x15, x15, #0x1\n"
       "zip1 p12.h, p11.h, p9.h\n"
       "zip1 p11.h, p10.h, p8.h\n"
@@ -59,7 +59,7 @@ void interleave_block<4, 2, VLType::SME, false>(
       "add x25, %x[in], x11, LSL #3\n"
       "add x20, %x[in], x10, LSL #3\n"
       "ldr x24, [x27], #0x8\n"
-      "mov x13, #0x0\n"
+      "mov x13, #0\n"
       "ldr x23, [x26], #0x8\n"
       "ldr x22, [x25], #0x8\n"
       "ldr x21, [x20], #0x8\n"
@@ -86,7 +86,7 @@ void interleave_block<4, 2, VLType::SME, false>(
       "sub x20, %x[width], x17\n"
       ".inst 0x25396581  // psel p1.h, p9.h/Z, p12.h[w13, #1]\n"
       "cmp x20, x9\n"
-      "mov x12, #0x0\n"
+      "mov x12, #0\n"
       ".inst 0xe0502300  // ld1h { za0h.h[x13] }, p0/Z, [x24, x16, LSL #1]\n"
       ".inst 0x25396160  // psel p0.h, p8.h/Z, p11.h[w13, #1]\n"
       "csel x20, x20, x9, LT\n"
@@ -113,7 +113,7 @@ void interleave_block<4, 2, VLType::SME, false>(
       "whilelt p10.h, x17, %x[width]\n"
       "whilelt p9.h, x17, %x[width]\n"
       "whilelt p8.h, x17, %x[width]\n"
-      "b.any 1b\n"
+      "b.ne 1b\n"
       "mov %x[out], x28\n"
       ".inst 0xd503467f  // SMSTOP\n"
       : [out] "+&r" (out)
@@ -122,4 +122,5 @@ void interleave_block<4, 2, VLType::SME, false>(
     );
 }
 
-#endif  // defined(ARM_COMPUTE_ENABLE_SME)
+#endif // (defined(ENABLE_FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC)) && defined(__aarch64__) && (defined(ARM_COMPUTE_ENABLE_SME) || defined(ARM_COMPUTE_ENABLE_SME2))
+

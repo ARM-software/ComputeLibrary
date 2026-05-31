@@ -158,6 +158,7 @@ Status validate_arguments(const ITensorInfo      *src,
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(src, dst);
     ARM_COMPUTE_RETURN_ERROR_ON(pool_size.x() == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(pool_size.y() == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(src, indices);
 
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;
@@ -201,6 +202,7 @@ Status validate_arguments(const ITensorInfo      *src,
 
     if (dst->total_size() != 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(src, dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(dst, &out_info);
@@ -213,6 +215,10 @@ Status validate_arguments(const ITensorInfo      *src,
                                             "Pooling kernel indices only supported for NHWC");
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(indices, &out_info);
         }
+    }
+    else
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&out_info);
     }
 
     const auto *uk = CpuPool2dKernel::get_implementation(PoolDataTypeISASelectorData{

@@ -31,8 +31,6 @@ CMakeUserPresets.json
 *cscope*
 
 # Text files
-*.txt
-!CMakeLists.txt
 *.xml
 *.embed
 *.diff

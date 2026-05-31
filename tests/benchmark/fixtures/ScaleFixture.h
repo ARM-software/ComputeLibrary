@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, 2023 Arm Limited.
+ * Copyright (c) 2017-2020, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,14 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SCALE_FIXTURE
-#define ARM_COMPUTE_TEST_SCALE_FIXTURE
+#ifndef ACL_TESTS_BENCHMARK_FIXTURES_SCALEFIXTURE_H
+#define ACL_TESTS_BENCHMARK_FIXTURES_SCALEFIXTURE_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "tests/framework/Fixture.h"
 #include "tests/Globals.h"
 #include "tests/Utils.h"
-#include "tests/framework/Fixture.h"
 
 namespace arm_compute
 {
@@ -40,13 +41,18 @@ template <typename TensorType, typename Function, typename Accessor>
 class ScaleFixture : public framework::Fixture
 {
 public:
-    void setup(TensorShape shape, DataType data_type, DataLayout data_layout, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy)
+    void setup(TensorShape         shape,
+               DataType            data_type,
+               DataLayout          data_layout,
+               InterpolationPolicy policy,
+               BorderMode          border_mode,
+               SamplingPolicy      sampling_policy)
     {
         constexpr float max_width  = 8192.0f;
         constexpr float max_height = 6384.0f;
 
         // Change shape in case of NHWC.
-        if(data_layout == DataLayout::NHWC)
+        if (data_layout == DataLayout::NHWC)
         {
             permute(shape, PermutationVector(2U, 0U, 1U));
         }
@@ -74,7 +80,8 @@ public:
         dst = create_tensor<TensorType>(shape_scaled, data_type);
 
         // Create and configure function
-        scale_func.configure(&src, &dst, ScaleKernelInfo{ policy, border_mode, constant_border_value, sampling_policy, false });
+        scale_func.configure(&src, &dst,
+                             ScaleKernelInfo{policy, border_mode, constant_border_value, sampling_policy, false});
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -106,4 +113,4 @@ private:
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SCALE_FIXTURE */
+#endif // ACL_TESTS_BENCHMARK_FIXTURES_SCALEFIXTURE_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, 2024 Arm Limited.
+ * Copyright (c) 2019-2021, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,15 @@
 #include "arm_compute/runtime/NEON/functions/NEInstanceNormalizationLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
-#include "tests/PaddingCalculator.h"
+
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/NEON/Accessor.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/InstanceNormalizationLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {
@@ -40,6 +41,8 @@ namespace test
 {
 namespace validation
 {
+using framework::dataset::make;
+
 namespace
 {
 /** Tolerance for float operations */
@@ -58,8 +61,8 @@ TEST_SUITE(InstanceNormalizationLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-    framework::dataset::make("InputInfo",  { TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32), // Mismatching data type input/output
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
+    make("InputInfo",  { TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32), // Mismatching data type input/output
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32), // Mismatching shape input/output
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 2, DataType::F32), // Number of Input channels != 1
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::S16), // DataType != F32
@@ -70,7 +73,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32)
                                            }),
-    framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F16),
+    make("OutputInfo", { TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F16),
                                              TensorInfo(TensorShape(256U, 64U, 32U, 4U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::S16),
@@ -80,8 +83,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32),
                                              TensorInfo(TensorShape(128U, 64U, 32U, 4U), 1, DataType::F32)
-                                           })),
-    framework::dataset::make("Expected",   { false, false, false, false, true, true, true, true, true, true })),
+                                           }),
+    make("Expected",   { false, false, false, false, true, true, true, true, true, true })
+    ),
     input_info, output_info, expected)
 {
     bool is_valid = bool(NEInstanceNormalizationLayer::validate(&input_info.clone()->set_is_resizable(false),
@@ -93,14 +97,17 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 // *INDENT-ON*
 
 template <typename T>
-using NEInstanceNormalizationLayerFixture = InstanceNormalizationLayerValidationFixture<Tensor, Accessor, NEInstanceNormalizationLayer, T>;
+using NEInstanceNormalizationLayerFixture =
+    InstanceNormalizationLayerValidationFixture<Tensor, Accessor, NEInstanceNormalizationLayer, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEInstanceNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::Small4DShapes(),
-                                               framework::dataset::make("DataType", DataType::F32)),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                               framework::dataset::make("InPlace", { false, true })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEInstanceNormalizationLayerFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::Small4DShapes(),
+                               make("DataType", DataType::F32),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("InPlace", {false, true})))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -110,21 +117,23 @@ TEST_SUITE_END() // FP32
 
 #ifdef ARM_COMPUTE_ENABLE_FP16
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEInstanceNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::SmallShapes(),
-                                               framework::dataset::make("DataType", DataType::F16)),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
-                               framework::dataset::make("InPlace", { false, true })))
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEInstanceNormalizationLayerFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(datasets::SmallShapes(),
+                               make("DataType", DataType::F16),
+                               make("DataLayout", {DataLayout::NCHW, DataLayout::NHWC}),
+                               make("InPlace", {false, true})))
 {
-    if(CPUInfo::get().has_fp16())
+    if (CPUInfo::get().has_fp16())
     {
         // Validate output
         validate(Accessor(_target), _reference, tolerance_f16);
     }
     else
     {
-        ARM_COMPUTE_TEST_INFO("Device does not support fp16 vector operations. Test SKIPPED.");
-        framework::ARM_COMPUTE_PRINT_INFO();
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
 TEST_SUITE_END() // FP16

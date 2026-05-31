@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, 2024 Arm Limited.
+ * Copyright (c) 2017, 2018, 2024, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,12 +27,12 @@
 
 #include <arm_neon.h>
 
-#include "../asmlib.hpp"
+#include "asmlib.hpp"
 
 template<>
 void interleave_block<6, 1, VLType::None, false>(
     float * &outptr, const float * const * in, size_t width, size_t height,
-    size_t row_offset, bool
+    size_t row_offset, bool, int32_t
 )
 {
     const float *inptr0 = in[0] + row_offset;
@@ -148,4 +148,5 @@ void interleave_block<6, 1, VLType::None, false>(
     }
 }
 
-#endif  // __arm__
+#endif // __arm__
+

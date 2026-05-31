@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023, 2025 Arm Limited.
+ * Copyright (c) 2018-2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 
@@ -214,6 +215,11 @@ void CpuElementwiseUnaryKernel::configure(ElementWiseUnary op, const ITensorInfo
 Status CpuElementwiseUnaryKernel::validate(ElementWiseUnary op, const ITensorInfo &src, const ITensorInfo &dst)
 {
     ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuElementwiseUnaryKernel::validate");
+    if (!src.is_dynamic())
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&src);
+        ARM_COMPUTE_RETURN_ERROR_ON(dst.is_dynamic());
+    }
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&src);
 
     const auto *uk = CpuElementwiseUnaryKernel::get_implementation(
@@ -239,10 +245,19 @@ Status CpuElementwiseUnaryKernel::validate(ElementWiseUnary op, const ITensorInf
         default:
             ARM_COMPUTE_ERROR("ElementWiseUnary operation not supported");
     }
+
     // Validate in case of configured dst
     if (dst.total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_SIZE_UNSUPPORTED(&dst);
+        ARM_COMPUTE_RETURN_ERROR_ON(src.is_dynamic());
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&src, &dst);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&src, &dst);
+    }
+    else
+    {
+        // No configured output, or it's dynamic. Since `dst` is expected to
+        // match `src, there's nothing extra to check in this case.
     }
 
     return Status{};
@@ -255,6 +270,12 @@ void CpuElementwiseUnaryKernel::run_op(ITensorPack &tensors, const Window &windo
 
     auto src = tensors.get_const_tensor(TensorType::ACL_SRC);
     auto dst = tensors.get_tensor(TensorType::ACL_DST);
+
+    if (src->info()->is_dynamic())
+    {
+        ARM_COMPUTE_ERROR_ON_SIZE_UNSUPPORTED(src->info(), dst->info());
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(src, dst);
+    }
 
     _run_method(src, dst, window, _op, _lut.get());
 }

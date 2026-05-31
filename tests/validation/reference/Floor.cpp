@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,13 +39,13 @@ template <typename T>
 SimpleTensor<T> floor_layer(const SimpleTensor<T> &src)
 {
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type() };
+    SimpleTensor<T> dst{src.shape(), src.data_type()};
 
     // Compute reference
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(int i = 0; i < src.num_elements(); ++i)
+    for (int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = std::floor(src[i]);
     }
@@ -53,7 +53,7 @@ SimpleTensor<T> floor_layer(const SimpleTensor<T> &src)
     return dst;
 }
 
-template SimpleTensor<half> floor_layer(const SimpleTensor<half> &src);
+template SimpleTensor<half>  floor_layer(const SimpleTensor<half> &src);
 template SimpleTensor<float> floor_layer(const SimpleTensor<float> &src);
 } // namespace reference
 } // namespace validation

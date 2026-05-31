@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited.
+ * Copyright (c) 2018-2019, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,10 @@ namespace reference
 {
 // Space to Batch
 template <typename T>
-SimpleTensor<T> space_to_batch(const SimpleTensor<T> &src, const SimpleTensor<int32_t> &block_shape, const SimpleTensor<int32_t> &paddings, const TensorShape &dst_shape)
+SimpleTensor<T> space_to_batch(const SimpleTensor<T>       &src,
+                               const SimpleTensor<int32_t> &block_shape,
+                               const SimpleTensor<int32_t> &paddings,
+                               const TensorShape           &dst_shape)
 {
     SimpleTensor<T> result(dst_shape, src.data_type(), 1, src.quantization_info());
 
@@ -59,23 +62,27 @@ SimpleTensor<T> space_to_batch(const SimpleTensor<T> &src, const SimpleTensor<in
     const auto pad_value = is_data_type_quantized(src.data_type()) ? src.quantization_info().uniform().offset : 0;
 
     int out_pos = 0;
-    for(int outB = 0; outB < batch_out; ++outB)
+    for (int outB = 0; outB < batch_out; ++outB)
     {
         unsigned int inB = outB % batch_in;
 
         int shift_w = (outB / batch_in) % block_width;
         int shift_h = (outB / batch_in) / block_width;
 
-        for(int c = 0; c < channel; ++c)
+        for (int c = 0; c < channel; ++c)
         {
-            for(int outH = 0; outH < height_out; ++outH)
+            for (int outH = 0; outH < height_out; ++outH)
             {
-                for(int outW = 0; outW < width_out; ++outW)
+                for (int outW = 0; outW < width_out; ++outW)
                 {
-                    const auto in_pos = ((inB * channel + c) * height_in + ((outH * block_height + shift_h) - padding_top)) * width_in + (outW * block_width + shift_w) - padding_left;
+                    const auto in_pos =
+                        ((inB * channel + c) * height_in + ((outH * block_height + shift_h) - padding_top)) * width_in +
+                        (outW * block_width + shift_w) - padding_left;
 
-                    if(outH * block_height + shift_h < padding_top || outH * block_height + shift_h >= padding_top + height_in || outW * block_width + shift_w < padding_left
-                       || outW * block_width + shift_w >= padding_left + width_in)
+                    if (outH * block_height + shift_h < padding_top ||
+                        outH * block_height + shift_h >= padding_top + height_in ||
+                        outW * block_width + shift_w < padding_left ||
+                        outW * block_width + shift_w >= padding_left + width_in)
                     {
                         result[out_pos] = pad_value;
                     }
@@ -91,9 +98,18 @@ SimpleTensor<T> space_to_batch(const SimpleTensor<T> &src, const SimpleTensor<in
     return result;
 }
 
-template SimpleTensor<float> space_to_batch(const SimpleTensor<float> &src, const SimpleTensor<int32_t> &block_shape, const SimpleTensor<int32_t> &paddings, const TensorShape &dst_shape);
-template SimpleTensor<half> space_to_batch(const SimpleTensor<half> &src, const SimpleTensor<int32_t> &block_shape, const SimpleTensor<int32_t> &paddings, const TensorShape &dst_shape);
-template SimpleTensor<uint8_t> space_to_batch(const SimpleTensor<uint8_t> &src, const SimpleTensor<int32_t> &block_shape, const SimpleTensor<int32_t> &paddings, const TensorShape &dst_shape);
+template SimpleTensor<float>   space_to_batch(const SimpleTensor<float>   &src,
+                                              const SimpleTensor<int32_t> &block_shape,
+                                              const SimpleTensor<int32_t> &paddings,
+                                              const TensorShape           &dst_shape);
+template SimpleTensor<half>    space_to_batch(const SimpleTensor<half>    &src,
+                                              const SimpleTensor<int32_t> &block_shape,
+                                              const SimpleTensor<int32_t> &paddings,
+                                              const TensorShape           &dst_shape);
+template SimpleTensor<uint8_t> space_to_batch(const SimpleTensor<uint8_t> &src,
+                                              const SimpleTensor<int32_t> &block_shape,
+                                              const SimpleTensor<int32_t> &paddings,
+                                              const TensorShape           &dst_shape);
 } // namespace reference
 } // namespace validation
 } // namespace test

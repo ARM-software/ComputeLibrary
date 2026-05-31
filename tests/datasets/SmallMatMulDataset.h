@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,11 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_TESTS_DATASETS_SMALLMATMULDATASET
-#define ACL_TESTS_DATASETS_SMALLMATMULDATASET
+#ifndef ACL_TESTS_DATASETS_SMALLMATMULDATASET_H
+#define ACL_TESTS_DATASETS_SMALLMATMULDATASET_H
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/datasets/MatMulDataset.h"
 
 namespace arm_compute
@@ -76,7 +77,8 @@ public:
     //  See (2), (3), and (4) in SmallMatMulDatasetRhsExportToCLImageRhsNT
     SmallMatMulDatasetRhsExportToCLImageRhsT()
     {
-        add_config(TensorShape(8U /*K*/, 3U /*M*/, 2U, 1U, 2U), TensorShape(20U /*N*/, 8U /*K*/, 2U, 1U, 2U), TensorShape(20U /*N*/, 3U /*M*/, 2U, 1U, 2U));
+        add_config(TensorShape(8U /*K*/, 3U /*M*/, 2U, 1U, 2U), TensorShape(20U /*N*/, 8U /*K*/, 2U, 1U, 2U),
+                   TensorShape(20U /*N*/, 3U /*M*/, 2U, 1U, 2U));
     }
 };
 
@@ -99,4 +101,4 @@ public:
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute
-#endif /* ACL_TESTS_DATASETS_SMALLMATMULDATASET */
+#endif // ACL_TESTS_DATASETS_SMALLMATMULDATASET_H

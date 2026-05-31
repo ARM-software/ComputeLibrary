@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023 Arm Limited.
+ * Copyright (c) 2018-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,9 +27,9 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
+
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/Helper.h"
-#include "tests/PaddingCalculator.h"
 #include "tests/datasets/ActivationFunctionsDataset.h"
 #include "tests/datasets/LargeConvolutionLayerDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
@@ -37,10 +37,11 @@
 #include "tests/datasets/WinogradInputTransformDataset.h"
 #include "tests/datasets/WinogradOutputTransformDataset.h"
 #include "tests/framework/Asserts.h"
-#include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/Validation.h"
+#include "tests/framework/Macros.h"
+#include "tests/PaddingCalculator.h"
 #include "tests/validation/fixtures/WinogradConvolutionLayerFixture.h"
+#include "tests/validation/Validation.h"
 
 namespace arm_compute
 {

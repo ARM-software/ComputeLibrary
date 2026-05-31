@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2024 Arm Limited.
+ * Copyright (c) 2017-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -318,8 +318,6 @@ CpuActivationKernelHeuristics::CpuActivationKernelHeuristics(const ITensorInfo  
                                                              const ITensorInfo         *dst,
                                                              const ActivationLayerInfo &activation_info)
 {
-    ARM_COMPUTE_UNUSED(dst);
-
     // Set kernel
     const DataType                    dtype = src->data_type();
     ActivationDataTypeISASelectorData selector{dtype, CPUInfo::get().get_cpu_model(), CPUInfo::get().get_isa(),
@@ -329,7 +327,8 @@ CpuActivationKernelHeuristics::CpuActivationKernelHeuristics(const ITensorInfo  
 
     // Set window and scheduling hint
     int split_dim;
-    std::tie(_window, split_dim) = calculate_squashed_or_max_window(*src);
+    std::tie(_window, split_dim) =
+        dst == nullptr ? calculate_squashed_or_max_window(*src) : calculate_squashed_or_max_window(*src, *dst);
 
     // Collapse window with SME kernels in Y-Dim
     if (std::string(_kernel->name) == "sme2_fp32_logistic")

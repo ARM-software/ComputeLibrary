@@ -24,10 +24,10 @@
 #ifndef ACL_TESTS_DATASETS_FULLYCONNECTEDLAYERDATASET_H
 #define ACL_TESTS_DATASETS_FULLYCONNECTEDLAYERDATASET_H
 
-#include "utils/TypePrinter.h"
-
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
+#include "utils/TypePrinter.h"
 
 namespace arm_compute
 {
@@ -46,10 +46,10 @@ public:
                  std::vector<TensorShape>::const_iterator weights_it,
                  std::vector<TensorShape>::const_iterator biases_it,
                  std::vector<TensorShape>::const_iterator dst_it)
-            : _src_it{ std::move(src_it) },
-              _weights_it{ std::move(weights_it) },
-              _biases_it{ std::move(biases_it) },
-              _dst_it{ std::move(dst_it) }
+            : _src_it{std::move(src_it)},
+              _weights_it{std::move(weights_it)},
+              _biases_it{std::move(biases_it)},
+              _dst_it{std::move(dst_it)}
         {
         }
 
@@ -92,7 +92,8 @@ public:
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_weight_shapes.size(), std::min(_bias_shapes.size(), _dst_shapes.size())));
+        return std::min(_src_shapes.size(),
+                        std::min(_weight_shapes.size(), std::min(_bias_shapes.size(), _dst_shapes.size())));
     }
 
     void add_config(TensorShape src, TensorShape weights, TensorShape biases, TensorShape dst)
@@ -163,7 +164,8 @@ public:
         // FC -> FC (batched)
         add_config(TensorShape(201U, 3U), TensorShape(201U, 529U), TensorShape(529U), TensorShape(529U, 3U));
 
-        add_config(TensorShape(9U, 5U, 7U, 3U, 2U), TensorShape(315U, 271U), TensorShape(271U), TensorShape(271U, 3U, 2U));
+        add_config(TensorShape(9U, 5U, 7U, 3U, 2U), TensorShape(315U, 271U), TensorShape(271U),
+                   TensorShape(271U, 3U, 2U));
     }
 };
 
@@ -189,11 +191,13 @@ public:
     LargeFullyConnectedLayerDataset()
     {
         add_config(TensorShape(9U, 5U, 257U), TensorShape(11565U, 2123U), TensorShape(2123U), TensorShape(2123U));
-        add_config(TensorShape(9U, 5U, 257U, 2U), TensorShape(11565U, 2123U), TensorShape(2123U), TensorShape(2123U, 2U));
+        add_config(TensorShape(9U, 5U, 257U, 2U), TensorShape(11565U, 2123U), TensorShape(2123U),
+                   TensorShape(2123U, 2U));
         add_config(TensorShape(3127U), TensorShape(3127U, 989U), TensorShape(989U), TensorShape(989U));
         add_config(TensorShape(3127U, 2U), TensorShape(3127U, 989U), TensorShape(989U), TensorShape(989U, 2U));
 
-        add_config(TensorShape(9U, 5U, 257U, 2U, 3U), TensorShape(11565U, 2123U), TensorShape(2123U), TensorShape(2123U, 2U, 3U));
+        add_config(TensorShape(9U, 5U, 257U, 2U, 3U), TensorShape(11565U, 2123U), TensorShape(2123U),
+                   TensorShape(2123U, 2U, 3U));
     }
 };
 

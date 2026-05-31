@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2020, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "FuseBatchNormalization.h"
+
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -33,8 +34,15 @@ namespace validation
 namespace reference
 {
 template <typename T>
-void fuse_batch_normalization_dwc_layer(const SimpleTensor<T> &w, const SimpleTensor<T> &mean, const SimpleTensor<T> &var, SimpleTensor<T> &w_fused, SimpleTensor<T> &b_fused, const SimpleTensor<T> &b,
-                                        const SimpleTensor<T> &beta, const SimpleTensor<T> &gamma, float epsilon)
+void fuse_batch_normalization_dwc_layer(const SimpleTensor<T> &w,
+                                        const SimpleTensor<T> &mean,
+                                        const SimpleTensor<T> &var,
+                                        SimpleTensor<T>       &w_fused,
+                                        SimpleTensor<T>       &b_fused,
+                                        const SimpleTensor<T> &b,
+                                        const SimpleTensor<T> &beta,
+                                        const SimpleTensor<T> &gamma,
+                                        float                  epsilon)
 {
     const auto *w_data = w.data();
     const auto *b_data = b.data();
@@ -47,16 +55,16 @@ void fuse_batch_normalization_dwc_layer(const SimpleTensor<T> &w, const SimpleTe
     const unsigned int dim2   = w.shape()[2];
 
 #if defined(_OPENMP)
-    #pragma omp parallel for
+#pragma omp parallel for
 #endif /* _OPENMP */
-    for(unsigned int b = 0; b < dim2; ++b)
+    for (unsigned int b = 0; b < dim2; ++b)
     {
         const auto mean_val  = mean.data()[b];
         const auto var_val   = var.data()[b];
         const auto beta_val  = beta.data()[b];
         const auto gamma_val = gamma.data()[b];
 
-        for(unsigned int i = 0; i < width * height; ++i)
+        for (unsigned int i = 0; i < width * height; ++i)
         {
             unsigned int index = i + b * width * height;
 
@@ -68,9 +76,15 @@ void fuse_batch_normalization_dwc_layer(const SimpleTensor<T> &w, const SimpleTe
 }
 
 template <typename T>
-void fuse_batch_normalization_conv_layer(const SimpleTensor<T> &w, const SimpleTensor<T> &mean, const SimpleTensor<T> &var, SimpleTensor<T> &w_fused, SimpleTensor<T> &b_fused,
+void fuse_batch_normalization_conv_layer(const SimpleTensor<T> &w,
+                                         const SimpleTensor<T> &mean,
+                                         const SimpleTensor<T> &var,
+                                         SimpleTensor<T>       &w_fused,
+                                         SimpleTensor<T>       &b_fused,
                                          const SimpleTensor<T> &b,
-                                         const SimpleTensor<T> &beta, const SimpleTensor<T> &gamma, float epsilon)
+                                         const SimpleTensor<T> &beta,
+                                         const SimpleTensor<T> &gamma,
+                                         float                  epsilon)
 {
     const auto *w_data = w.data();
     const auto *b_data = b.data();
@@ -83,14 +97,14 @@ void fuse_batch_normalization_conv_layer(const SimpleTensor<T> &w, const SimpleT
     const unsigned int dim2   = w.shape()[2];
     const unsigned int dim3   = w.shape()[3];
 
-    for(unsigned int b = 0; b < dim3; ++b)
+    for (unsigned int b = 0; b < dim3; ++b)
     {
         const auto mean_val  = mean.data()[b];
         const auto var_val   = var.data()[b];
         const auto beta_val  = beta.data()[b];
         const auto gamma_val = gamma.data()[b];
 
-        for(unsigned int i = 0; i < width * height * dim2; ++i)
+        for (unsigned int i = 0; i < width * height * dim2; ++i)
         {
             unsigned int index = i + b * width * height * dim2;
 
@@ -101,14 +115,42 @@ void fuse_batch_normalization_conv_layer(const SimpleTensor<T> &w, const SimpleT
     }
 }
 
-template void fuse_batch_normalization_dwc_layer(const SimpleTensor<float> &w, const SimpleTensor<float> &mean, const SimpleTensor<float> &var, SimpleTensor<float> &w_fused,
-                                                 SimpleTensor<float> &b_fused, const SimpleTensor<float> &b, const SimpleTensor<float> &beta, const SimpleTensor<float> &gamma, float epsilon);
-template void fuse_batch_normalization_dwc_layer(const SimpleTensor<half> &w, const SimpleTensor<half> &mean, const SimpleTensor<half> &var, SimpleTensor<half> &w_fused, SimpleTensor<half> &b_fused,
-                                                 const SimpleTensor<half> &b, const SimpleTensor<half> &beta, const SimpleTensor<half> &gamma, float epsilon);
-template void fuse_batch_normalization_conv_layer(const SimpleTensor<float> &w, const SimpleTensor<float> &mean, const SimpleTensor<float> &var, SimpleTensor<float> &w_fused,
-                                                  SimpleTensor<float> &b_fused, const SimpleTensor<float> &b, const SimpleTensor<float> &beta, const SimpleTensor<float> &gamma, float epsilon);
-template void fuse_batch_normalization_conv_layer(const SimpleTensor<half> &w, const SimpleTensor<half> &mean, const SimpleTensor<half> &var, SimpleTensor<half> &w_fused, SimpleTensor<half> &b_fused,
-                                                  const SimpleTensor<half> &b, const SimpleTensor<half> &beta, const SimpleTensor<half> &gamma, float epsilon);
+template void fuse_batch_normalization_dwc_layer(const SimpleTensor<float> &w,
+                                                 const SimpleTensor<float> &mean,
+                                                 const SimpleTensor<float> &var,
+                                                 SimpleTensor<float>       &w_fused,
+                                                 SimpleTensor<float>       &b_fused,
+                                                 const SimpleTensor<float> &b,
+                                                 const SimpleTensor<float> &beta,
+                                                 const SimpleTensor<float> &gamma,
+                                                 float                      epsilon);
+template void fuse_batch_normalization_dwc_layer(const SimpleTensor<half> &w,
+                                                 const SimpleTensor<half> &mean,
+                                                 const SimpleTensor<half> &var,
+                                                 SimpleTensor<half>       &w_fused,
+                                                 SimpleTensor<half>       &b_fused,
+                                                 const SimpleTensor<half> &b,
+                                                 const SimpleTensor<half> &beta,
+                                                 const SimpleTensor<half> &gamma,
+                                                 float                     epsilon);
+template void fuse_batch_normalization_conv_layer(const SimpleTensor<float> &w,
+                                                  const SimpleTensor<float> &mean,
+                                                  const SimpleTensor<float> &var,
+                                                  SimpleTensor<float>       &w_fused,
+                                                  SimpleTensor<float>       &b_fused,
+                                                  const SimpleTensor<float> &b,
+                                                  const SimpleTensor<float> &beta,
+                                                  const SimpleTensor<float> &gamma,
+                                                  float                      epsilon);
+template void fuse_batch_normalization_conv_layer(const SimpleTensor<half> &w,
+                                                  const SimpleTensor<half> &mean,
+                                                  const SimpleTensor<half> &var,
+                                                  SimpleTensor<half>       &w_fused,
+                                                  SimpleTensor<half>       &b_fused,
+                                                  const SimpleTensor<half> &b,
+                                                  const SimpleTensor<half> &beta,
+                                                  const SimpleTensor<half> &gamma,
+                                                  float                     epsilon);
 } // namespace reference
 } // namespace validation
 } // namespace test

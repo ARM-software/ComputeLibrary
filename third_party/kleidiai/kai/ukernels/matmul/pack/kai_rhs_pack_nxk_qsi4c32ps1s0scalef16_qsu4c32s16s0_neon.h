@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: Copyright 2024 Arm Limited and/or its affiliates <open-source-office@arm.com>
+// SPDX-FileCopyrightText: Copyright 2024-2025 Arm Limited and/or its affiliates <open-source-office@arm.com>
 //
 // SPDX-License-Identifier: Apache-2.0
 //
@@ -48,6 +48,22 @@ size_t kai_get_rhs_packed_offset_rhs_pack_nxk_qsi4c32ps1s0scalef16_qsu4c32s16s0_
     size_t nr,     //
     size_t kr,     //
     size_t bl);    //
+
+/// Get the row stride in bytes to the packed RHS matrix
+///
+/// @param[in] k        The number of columns in the RHS matrix (not packed).
+/// @param[in] nr       The number of columns written by the matmul micro-kernel.
+/// @param[in] kr       The number of columns loaded in the single inner most loop of the matmul micro-kernel.
+/// @param[in] sr       The number of kr splits. It can be 1 (no splits) up to kr.
+/// @param[in] bl       The block length, which defines the number of K values stored in a single block. It must be a
+/// multiple of 32.
+///
+/// @return the stride in bytes to the packed RHS matrix
+size_t kai_get_rhs_packed_stride_rhs_pack_nxk_qsi4c32ps1s0scalef16_qsu4c32s16s0_neon(
+    size_t k,   //
+    size_t nr,  //
+    size_t kr,  //
+    size_t bl);
 
 /// Gets the size in bytes for the quantized and packed RHS matrix.
 ///

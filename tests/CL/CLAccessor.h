@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2021, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CLACCESSOR_H
-#define ARM_COMPUTE_TEST_CLACCESSOR_H
+#ifndef ACL_TESTS_CL_CLACCESSOR_H
+#define ACL_TESTS_CL_CLACCESSOR_H
 
 #include "arm_compute/runtime/CL/CLTensor.h"
-#include "tests/IAccessor.h"
+
 #include "tests/framework/Framework.h"
+#include "tests/IAccessor.h"
 
 namespace arm_compute
 {
@@ -77,17 +78,16 @@ public:
     int              num_elements() const override;
     PaddingSize      padding() const override;
     QuantizationInfo quantization_info() const override;
-    const void *operator()(const Coordinates &coord) const override;
-    void *operator()(const Coordinates &coord) override;
+    const void      *operator()(const Coordinates &coord) const override;
+    void            *operator()(const Coordinates &coord) override;
 
 private:
     CLTensor &_tensor;
 };
 
-inline CLAccessor::CLAccessor(CLTensor &tensor)
-    : _tensor{ tensor }
+inline CLAccessor::CLAccessor(CLTensor &tensor) : _tensor{tensor}
 {
-    if(!framework::Framework::get().configure_only() || !framework::Framework::get().new_fixture_call())
+    if (!framework::Framework::get().configure_only() || !framework::Framework::get().new_fixture_call())
     {
         _tensor.map();
     }
@@ -95,7 +95,7 @@ inline CLAccessor::CLAccessor(CLTensor &tensor)
 
 inline CLAccessor::~CLAccessor()
 {
-    if(!framework::Framework::get().configure_only() || !framework::Framework::get().new_fixture_call())
+    if (!framework::Framework::get().configure_only() || !framework::Framework::get().new_fixture_call())
     {
         _tensor.unmap();
     }
@@ -172,4 +172,4 @@ inline void *CLAccessor::operator()(const Coordinates &coord)
 }
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CLACCESSOR_H */
+#endif // ACL_TESTS_CL_CLACCESSOR_H

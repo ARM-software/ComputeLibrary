@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,12 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/Tensor.h"
+
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/reference/Permute.h"
 
 namespace arm_compute
@@ -60,7 +61,7 @@ protected:
     TensorType compute_target(const TensorShape &shape, DataType data_type)
     {
         // Make rows the columns of the original shape
-        TensorShape output_shape{ shape[1], shape[0] };
+        TensorShape output_shape{shape[1], shape[0]};
 
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, data_type);
@@ -92,7 +93,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type };
+        SimpleTensor<T> src{shape, data_type};
 
         // Fill reference
         fill(src);

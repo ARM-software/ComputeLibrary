@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Arm Limited.
+ * Copyright (c) 2017-2018, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ SimpleTensor<T> flatten_layer(const SimpleTensor<T> &src, const TensorShape &sha
 }
 
 template SimpleTensor<float> flatten_layer(const SimpleTensor<float> &src, const TensorShape &shape_flatten);
-template SimpleTensor<half> flatten_layer(const SimpleTensor<half> &src, const TensorShape &shape_flatten);
+template SimpleTensor<half>  flatten_layer(const SimpleTensor<half> &src, const TensorShape &shape_flatten);
 } // namespace reference
 } // namespace validation
 } // namespace test

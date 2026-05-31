@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited.
+ * Copyright (c) 2023, 2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+
 #include "tests/datasets/MatMulDataset.h"
 
 namespace arm_compute
@@ -86,7 +87,8 @@ class HighDimensionalMatMulLowpMMULDataset final : public MatMulDataset
 public:
     HighDimensionalMatMulLowpMMULDataset()
     {
-        add_config(TensorShape(16U, 5U, 2U, 2U, 2U, 2U), TensorShape(5U, 16U, 2U, 2U, 2U, 2U), TensorShape(5U, 5U, 2U, 2U, 2U, 2U)); // 6D tensor
+        add_config(TensorShape(16U, 5U, 2U, 2U, 2U, 2U), TensorShape(5U, 16U, 2U, 2U, 2U, 2U),
+                   TensorShape(5U, 5U, 2U, 2U, 2U, 2U)); // 6D tensor
     }
 };
 

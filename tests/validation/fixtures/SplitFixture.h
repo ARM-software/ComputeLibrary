@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, 2023-2024 Arm Limited.
+ * Copyright (c) 2018-2021, 2023-2025 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,10 +28,10 @@
 #include "arm_compute/core/Types.h"
 
 #include "tests/AssetsLibrary.h"
-#include "tests/Globals.h"
-#include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
+#include "tests/Globals.h"
+#include "tests/IAccessor.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/SliceOperations.h"
 
@@ -49,7 +49,7 @@ class SplitFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, unsigned int axis, unsigned int splits, DataType data_type)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -66,13 +66,14 @@ protected:
         library->fill_tensor_uniform(tensor, i);
     }
 
-    std::vector<TensorType> compute_target(const TensorShape &shape, unsigned int axis, unsigned int splits, DataType data_type)
+    std::vector<TensorType>
+    compute_target(const TensorShape &shape, unsigned int axis, unsigned int splits, DataType data_type)
     {
         // Create tensors
         TensorType                 src = create_tensor<TensorType>(shape, data_type);
         std::vector<TensorType>    dsts(splits);
         std::vector<ITensorType *> dsts_ptr;
-        for(auto &dst : dsts)
+        for (auto &dst : dsts)
         {
             dsts_ptr.emplace_back(&dst);
         }
@@ -82,25 +83,21 @@ protected:
         split.configure(&src, dsts_ptr, axis);
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
-        ARM_COMPUTE_EXPECT(std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType & t)
-        {
-            return t.info()->is_resizable();
-        }),
-        framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(
+            std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType &t) { return t.info()->is_resizable(); }),
+            framework::LogLevel::ERRORS);
 
         // Allocate tensors
         src.allocator()->allocate();
-        for(unsigned int i = 0; i < splits; ++i)
+        for (unsigned int i = 0; i < splits; ++i)
         {
             dsts[i].allocator()->allocate();
         }
 
         ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
-        ARM_COMPUTE_EXPECT(std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType & t)
-        {
-            return !t.info()->is_resizable();
-        }),
-        framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(
+            std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType &t) { return !t.info()->is_resizable(); }),
+            framework::LogLevel::ERRORS);
 
         // Fill tensors
         fill(AccessorType(src), 0);
@@ -111,10 +108,11 @@ protected:
         return dsts;
     }
 
-    std::vector<SimpleTensor<T>> compute_reference(const TensorShape &shape, unsigned int axis, unsigned int splits, DataType data_type)
+    std::vector<SimpleTensor<T>>
+    compute_reference(const TensorShape &shape, unsigned int axis, unsigned int splits, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T>              src{ shape, data_type };
+        SimpleTensor<T>              src{shape, data_type};
         std::vector<SimpleTensor<T>> dsts;
 
         // Fill reference
@@ -127,12 +125,12 @@ protected:
         // Start/End coordinates
         Coordinates start_coords;
         Coordinates end_coords;
-        for(unsigned int d = 0; d < shape.num_dimensions(); ++d)
+        for (unsigned int d = 0; d < shape.num_dimensions(); ++d)
         {
             end_coords.set(d, -1);
         }
 
-        for(unsigned int i = 0; i < splits; ++i)
+        for (unsigned int i = 0; i < splits; ++i)
         {
             // Update coordinate on axis
             start_coords.set(axis, axis_offset);
@@ -156,7 +154,7 @@ class SplitShapesFixture : public framework::Fixture
 public:
     void setup(TensorShape shape, unsigned int axis, std::vector<TensorShape> split_shapes, DataType data_type)
     {
-        if(std::is_same<TensorType, Tensor>::value &&  // Cpu
+        if (std::is_same<TensorType, Tensor>::value && // Cpu
             data_type == DataType::F16 && !CPUInfo::get().has_fp16())
         {
             return;
@@ -173,20 +171,21 @@ protected:
         library->fill_tensor_uniform(tensor, i);
     }
 
-    std::vector<TensorType> compute_target(TensorShape shape, unsigned int axis, std::vector<TensorShape> split_shapes, DataType data_type)
+    std::vector<TensorType>
+    compute_target(TensorShape shape, unsigned int axis, std::vector<TensorShape> split_shapes, DataType data_type)
     {
         // Create tensors
         TensorType                 src = create_tensor<TensorType>(shape, data_type);
         std::vector<TensorType>    dsts{};
         std::vector<ITensorType *> dsts_ptr;
 
-        for(const auto &split_shape : split_shapes)
+        for (const auto &split_shape : split_shapes)
         {
             TensorType dst = create_tensor<TensorType>(split_shape, data_type);
             dsts.push_back(std::move(dst));
         }
 
-        for(auto &dst : dsts)
+        for (auto &dst : dsts)
         {
             dsts_ptr.emplace_back(&dst);
         }
@@ -196,25 +195,21 @@ protected:
         split.configure(&src, dsts_ptr, axis);
 
         ARM_COMPUTE_ASSERT(src.info()->is_resizable());
-        ARM_COMPUTE_EXPECT(std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType & t)
-        {
-            return t.info()->is_resizable();
-        }),
-        framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(
+            std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType &t) { return t.info()->is_resizable(); }),
+            framework::LogLevel::ERRORS);
 
         // Allocate tensors
         src.allocator()->allocate();
-        for(unsigned int i = 0; i < dsts.size(); ++i)
+        for (unsigned int i = 0; i < dsts.size(); ++i)
         {
             dsts[i].allocator()->allocate();
         }
 
         ARM_COMPUTE_ASSERT(!src.info()->is_resizable());
-        ARM_COMPUTE_EXPECT(std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType & t)
-        {
-            return !t.info()->is_resizable();
-        }),
-        framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(
+            std::all_of(dsts.cbegin(), dsts.cend(), [](const TensorType &t) { return !t.info()->is_resizable(); }),
+            framework::LogLevel::ERRORS);
 
         // Fill tensors
         fill(AccessorType(src), 0);
@@ -225,17 +220,18 @@ protected:
         return dsts;
     }
 
-    std::vector<SimpleTensor<T>> compute_reference(TensorShape shape, unsigned int axis, std::vector<TensorShape> split_shapes, DataType data_type)
+    std::vector<SimpleTensor<T>>
+    compute_reference(TensorShape shape, unsigned int axis, std::vector<TensorShape> split_shapes, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T>              src{ shape, data_type };
+        SimpleTensor<T>              src{shape, data_type};
         std::vector<SimpleTensor<T>> dsts;
 
         // Fill reference
         fill(src, 0);
 
-        unsigned int axis_offset{ 0 };
-        for(const auto &split_shape : split_shapes)
+        unsigned int axis_offset{0};
+        for (const auto &split_shape : split_shapes)
         {
             // Calculate splice for each split
             const size_t axis_split_step = split_shape[axis];
@@ -243,7 +239,7 @@ protected:
             // Start/End coordinates
             Coordinates start_coords;
             Coordinates end_coords;
-            for(unsigned int d = 0; d < shape.num_dimensions(); ++d)
+            for (unsigned int d = 0; d < shape.num_dimensions(); ++d)
             {
                 end_coords.set(d, -1);
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Arm Limited.
+ * Copyright (c) 2017, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #include "Exceptions.h"
 
 #include "Utils.h"
-
 #include <map>
 #include <sstream>
 
@@ -36,22 +35,22 @@ namespace framework
 {
 LogLevel log_level_from_name(const std::string &name)
 {
-    static const std::map<std::string, LogLevel> levels =
-    {
-        { "none", LogLevel::NONE },
-        { "config", LogLevel::CONFIG },
-        { "tests", LogLevel::TESTS },
-        { "errors", LogLevel::ERRORS },
-        { "debug", LogLevel::DEBUG },
-        { "measurements", LogLevel::MEASUREMENTS },
-        { "all", LogLevel::ALL },
+    static const std::map<std::string, LogLevel> levels = {
+        {"none", LogLevel::NONE},
+        {"config", LogLevel::CONFIG},
+        {"tests", LogLevel::TESTS},
+        {"errors", LogLevel::ERRORS},
+        {"warnings", LogLevel::WARNINGS},
+        {"debug", LogLevel::DEBUG},
+        {"measurements", LogLevel::MEASUREMENTS},
+        {"all", LogLevel::ALL},
     };
 
     try
     {
         return levels.at(tolower(name));
     }
-    catch(const std::out_of_range &)
+    catch (const std::out_of_range &)
     {
         throw std::invalid_argument(name);
     }
@@ -67,7 +66,7 @@ LogLevel log_level_from_name(const std::string &name)
 
 ::std::ostream &operator<<(::std::ostream &stream, LogLevel level)
 {
-    switch(level)
+    switch (level)
     {
         case LogLevel::NONE:
             stream << "NONE";
@@ -80,6 +79,9 @@ LogLevel log_level_from_name(const std::string &name)
             break;
         case LogLevel::ERRORS:
             stream << "ERRORS";
+            break;
+        case LogLevel::WARNINGS:
+            stream << "WARNINGS";
             break;
         case LogLevel::DEBUG:
             stream << "DEBUG";
@@ -104,15 +106,14 @@ std::string to_string(LogLevel level)
     return stream.str();
 }
 
-FileNotFound::FileNotFound(const std::string &msg)
-    : std::runtime_error{ msg }
+FileNotFound::FileNotFound(const std::string &msg) : std::runtime_error{msg}
 {
 }
 
 TestError::TestError(const std::string &msg, LogLevel level, std::string context)
-    : std::runtime_error{ msg }, _level{ level }, _msg{ msg }, _context{ std::move(context) }, _combined{ "ERROR: " + msg }
+    : std::runtime_error{msg}, _level{level}, _msg{msg}, _context{std::move(context)}, _combined{"ERROR: " + msg}
 {
-    if(!_context.empty())
+    if (!_context.empty())
     {
         _combined += "\nCONTEXT:\n" + _context;
     }
