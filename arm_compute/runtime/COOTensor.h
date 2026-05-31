@@ -44,9 +44,9 @@ public:
     *
     * @param[in] os the output stream; std::cout set as default.
     *
-    * @note It prints (on os stream) the vector of the indices with the format
-    *       index: [idx_0, idx_1, ...], and the corresponding values with the format
-    *       value: [val_0, val_1, ...].
+    * @note Only available when ARM_COMPUTE_ASSERTS_ENABLED is defined.
+    * @note It prints (on os stream) one line per non-zero element with the format
+    *       index: [dim_0, dim_1, ...]  values: [val_0, val_1, ...]
     * @note This print function should overlap the one defined for ITensor.
     */
     void print(std::ostream &os = std::cout) const;

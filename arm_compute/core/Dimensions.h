@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <array>
+#include <vector>
 #include <functional>
 #include <limits>
 #include <numeric>

@@ -77,7 +77,7 @@ bool tensors_are_equal(const test::Accessor &a, const test::Accessor &b)
         const uint8_t *a_value = static_cast<const uint8_t *>(a(id));
         const uint8_t *b_value = static_cast<const uint8_t *>(b(id));
 
-        equal = are_values_equal(a_value, b_value, a.data_type(), element_size);
+        equal &= are_values_equal(a_value, b_value, a.data_type(), element_size);
     });
 
     return equal;
@@ -191,7 +191,7 @@ DATA_TEST_CASE(ConvertCSRTensorToDense, framework::DatasetMode::ALL, combine(
     ARM_COMPUTE_EXPECT(st->is_hybrid() == is_hybrid, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(tensors_are_equal(Accessor(t), Accessor(*td)), framework::LogLevel::ERRORS);
     
-    auto st_zero = t_zero.to_coo_sparse(sparse_dim);
+    auto st_zero = t_zero.to_csr_sparse();
     auto td_zero = st_zero->to_dense();
     ARM_COMPUTE_EXPECT(tensors_are_equal(Accessor(t_zero), Accessor(*td_zero)), framework::LogLevel::ERRORS);
 }

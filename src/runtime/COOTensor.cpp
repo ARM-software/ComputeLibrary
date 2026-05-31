@@ -52,7 +52,7 @@ COOTensor::COOTensor(const ITensor *tensor, size_t sparse_dim) : SparseTensor(te
                                  "argument must be in [1,%zu] range. %zu is given",
                                  dim(), sparse_dim);
 
-    const uint8_t     *data = tensor->buffer();
+    const uint8_t     *data = tensor->buffer() + info->offset_first_element_in_bytes();
     const size_t dense_dims = dense_dim();
     const auto   is_nonzero = make_is_nonzero_predicate(info->data_type());
 
@@ -75,18 +75,18 @@ COOTensor::COOTensor(const ITensor *tensor, size_t sparse_dim) : SparseTensor(te
     const size_t   slice_size = step * element_size;
 
     size_t value_byte_size = 0;
-    size_t indices_bytes = 0;
     for(size_t i = 0; i < max_iter; i++)
     {
         const size_t offset = i * slice_size;
         if(has_non_zero_elements(const_cast<uint8_t *>(data + offset), slice_size, element_size, is_nonzero))
         {
             value_byte_size += slice_size;
-            indices_bytes += dim() * sizeof(int32_t);
         }
     }
 
-    _allocator.init(coo_tensor_info(info), value_byte_size, indices_bytes);
+    // Indices are stored in _indices (host vector); no index data is written into
+    // the allocator buffer yet, so pass 0 for indices_bytes.
+    _allocator.init(coo_tensor_info(info), value_byte_size, 0);
     _allocator.allocate();
 
     for(size_t i = 0; i < max_iter; i++)
@@ -181,7 +181,7 @@ std::unique_ptr<ITensor> COOTensor::to_dense()
         for(size_t j = 0; j < dense_vol; ++j)
         {
             const void *value_ptr = block_ptr + j * element_size;
-            uint8_t     *base_ptr = tensor->buffer() + final_offset + j * element_size;
+            uint8_t     *base_ptr = tensor->buffer() + first_elem_offset + final_offset + j * element_size;
 
             std::memcpy(base_ptr, value_ptr, element_size);
         }
@@ -211,13 +211,14 @@ const uint8_t *COOTensor::get_value(Coordinates coords) const
     for(size_t i = 0; i < _indices.size(); ++i)
     {
         const Coordinates &c = _indices[i];
-        bool           match = false;
+        bool           match = true;
 
         for(size_t d = 0; d < coords.num_dimensions(); ++d)
         {
-            if(c[d] == coords[d])
+            if(c[d] != coords[d])
             {
-                match = true;
+                match = false;
+                break;
             }
         }
         if(match)

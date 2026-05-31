@@ -44,8 +44,9 @@ public:
     *
     * @param[in] os the output stream; std::cout set as default.
     *
-    * @note It prints (on os stream) the two vectors of the indices with the format
-    *       [row_idx_0, row_idx_1, ...] and [col_idx_0, col_idx_1, ...]
+    * @note Only available when ARM_COMPUTE_ASSERTS_ENABLED is defined.
+    * @note It prints (on os stream) the row offsets, column indices, and values with the format
+    *       r_offsets: [row_offset_0, row_offset_1, ...] cols: [col_idx_0, col_idx_1, ...] values: [val_0, val_1, ...]
     * @note This print function should overlap the one defined for ITensor.
     */
     void print(std::ostream &os = std::cout) const;
@@ -64,10 +65,13 @@ private:
     /** The size of each index element */
     static constexpr size_t index_size = sizeof(int32_t);
 
-    /** Convert a dense tensor to sparse tensor with specified sparse dimensions using COO format.
+    /** Convert a dense tensor to a CSR sparse tensor.
      *
-     *  @param[in] tensor
-     *  @param[in] sparse_dim  It should belong to [1, tensor->info->num_dimensions()]
+     *  @note Only 2D tensors with NCHW layout are supported. @p sparse_dim is
+     *        ignored; CSR always uses sparse_dim = 2.
+     *
+     *  @param[in] tensor     Source dense tensor. Must be 2D.
+     *  @param[in] sparse_dim Unused. Reserved for future use; must be 2.
      */
     CSRTensor(const ITensor *tensor, size_t sparse_dim);
     /** Convert a dense tensor to a *fully* sparse tensor.

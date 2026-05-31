@@ -33,6 +33,7 @@
 
 #include <algorithm>
 #include <array>
+#include <vector>
 #include <cstddef>
 
 namespace arm_compute
@@ -55,7 +56,7 @@ public:
      * @param[in] coords Vector containing the values to initialize the dimensions.
      */
     template <typename T>
-    constexpr Coordinates(std::vector<T> coords) : Dimensions(coords)
+    constexpr Coordinates(const std::vector<T>& coords) : Dimensions(coords)
     {
     }
 

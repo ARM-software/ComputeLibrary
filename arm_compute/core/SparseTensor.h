@@ -29,12 +29,13 @@
 #include "arm_compute/core/Types.h"
 
 #include <functional>
+#include <memory>
 #include <stdexcept>
-
-typedef std::function<bool(const void *)> predicate_t;
 
 namespace arm_compute
 {
+using predicate_t = std::function<bool(const void *)>;
+
 /** Common base class for all sparse tensors */
 class SparseTensor : public ITensor
 {
@@ -63,7 +64,7 @@ public:
     /** Returns the ratio of non-zero elements to the total number of elements */
     float density() const;
     /** Returns the dense volume */
-    uint32_t dense_volume(size_t sparse_dim) const;
+    size_t dense_volume(size_t sparse_dim) const;
     /** Returns the number of non zero elements */
     virtual size_t nnz() const = 0;
     /** Converts the sparse tensor to a dense tensor */

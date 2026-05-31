@@ -27,6 +27,8 @@
 
 #include "arm_compute/core/SparseTensor.h"
 
+#include <memory>
+
 namespace arm_compute
 {
 /** Forward declaration of COOTensor and CSRTensor class */

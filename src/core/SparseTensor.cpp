@@ -25,6 +25,8 @@
 
 #include "arm_compute/core/Error.h"
 
+#include <numeric>
+
 namespace arm_compute
 {
 SparseTensor::SparseTensor(size_t dim, size_t sparse_dim) : _total_dim(dim), _sparse_dim(sparse_dim)
@@ -48,7 +50,7 @@ float SparseTensor::sparsity() const
 
 float SparseTensor::density() const
 {
-    return static_cast<float>(nnz()) / static_cast<float>(info()->total_size());
+    return static_cast<float>(nnz()) / static_cast<float>(info()->tensor_shape().total_size());
 }
 
 size_t SparseTensor::dim() const
@@ -61,10 +63,10 @@ bool SparseTensor::is_hybrid() const
     return dense_dim() > 0;
 }
 
-uint32_t SparseTensor::dense_volume(size_t sparse_dim) const
+size_t SparseTensor::dense_volume(size_t sparse_dim) const
 {
     const auto &ts = info()->tensor_shape();
-    return std::accumulate(ts.begin() + sparse_dim, ts.end(), 1, std::multiplies<int>());
+    return std::accumulate(ts.begin() + sparse_dim, ts.end(), size_t{1}, std::multiplies<size_t>());
 }
 
 bool SparseTensor::has_non_zero_elements(uint8_t *arr, size_t len, size_t element_size, predicate_t is_non_zero) const

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/COOTensor.h"
+#include "arm_compute/runtime/CSRTensor.h"
 
 #include "arm_compute/core/CoreTypes.h"
 #include "arm_compute/core/Error.h"
@@ -75,7 +75,7 @@ CSRTensor::CSRTensor(const ITensor *tensor, size_t sparse_dim) : SparseTensor(te
             if(is_nonzero(data + element_offset))
             {
                 _col_bytes += index_size;
-                value_byte_size += element_size * dense_volume(sparse_dim);
+                value_byte_size += element_size * dense_volume(this->sparse_dim());
             }
         }
     }

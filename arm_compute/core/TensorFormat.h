@@ -21,8 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ACL_ARM_COMPUTE_RUNTIME_TENSOR_FORMAT_H
-#define ACL_ARM_COMPUTE_RUNTIME_TENSOR_FORMAT_H
+#ifndef ACL_ARM_COMPUTE_CORE_TENSOR_FORMAT_H
+#define ACL_ARM_COMPUTE_CORE_TENSOR_FORMAT_H
+
+namespace arm_compute
+{
 
 enum class TensorFormat
 {
@@ -31,4 +34,6 @@ enum class TensorFormat
     CSR   = 2,
 };
 
-#endif // ACL_ARM_COMPUTE_RUNTIME_TENSOR_FORMAT_H
+} //namespace arm_compute
+
+#endif // ACL_ARM_COMPUTE_CORE_TENSOR_FORMAT_H

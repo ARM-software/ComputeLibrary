@@ -70,11 +70,11 @@ SparseTensorAllocator &SparseTensorAllocator::operator=(SparseTensorAllocator &&
         _memory   = std::move(o._memory);
         o._memory = Memory();
 
-        _values_bytes = o._values_bytes;
-        _values_bytes = 0;
+        _values_bytes   = o._values_bytes;
+        o._values_bytes = 0;
 
-        _indices_bytes = o._indices_bytes;
-        _indices_bytes = 0;
+        _indices_bytes   = o._indices_bytes;
+        o._indices_bytes = 0;
 
         ITensorAllocator::operator=(std::move(o));
     }
@@ -145,7 +145,7 @@ Status SparseTensorAllocator::import_memory(void *memory)
     ARM_COMPUTE_RETURN_ERROR_ON(_associated_memory_group != nullptr);
     ARM_COMPUTE_RETURN_ERROR_ON(alignment() != 0 && !arm_compute::utility::check_aligned(memory, alignment()));
 
-    _memory.set_owned_region(std::make_unique<MemoryRegion>(memory, info().total_size()));
+    _memory.set_owned_region(std::make_unique<MemoryRegion>(memory, size_bytes()));
     info().set_is_resizable(false);
 
     return Status{};
