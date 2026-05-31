@@ -34,6 +34,9 @@
 #include "tests/NEON/Accessor.h"
 #include "tests/NEON/Helper.h"
 
+#include <cmath>
+#include <cstring>
+#include <sstream>
 #include <vector>
 
 namespace arm_compute
@@ -81,6 +84,16 @@ bool tensors_are_equal(const test::Accessor &a, const test::Accessor &b)
     });
 
     return equal;
+}
+
+/** Fills every element of @p t with the raw byte @p value.
+ *  Works for any element type; for multi-byte types every byte is set to @p value.
+ */
+void fill_tensor_uniform(Tensor &t, uint8_t value)
+{
+    std::memset(t.buffer() + t.info()->offset_first_element_in_bytes(),
+                value,
+                t.info()->tensor_shape().total_size() * t.info()->element_size());
 }
 } // namespace
 
@@ -197,6 +210,271 @@ DATA_TEST_CASE(ConvertCSRTensorToDense, framework::DatasetMode::ALL, combine(
 }
 // clang-format on
 // *INDENT-ON*
+
+TEST_SUITE(COO)
+
+TEST_CASE(NNZAllZero, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 0U);
+
+    auto st = t.to_coo_sparse(shape.num_dimensions());
+    ARM_COMPUTE_EXPECT(st->nnz() == 0U, framework::LogLevel::ERRORS);
+}
+
+TEST_CASE(NNZAllNonZero, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 1U);
+
+    auto st = t.to_coo_sparse(shape.num_dimensions());
+    ARM_COMPUTE_EXPECT(st->nnz() == shape.total_size(), framework::LogLevel::ERRORS);
+}
+
+/** get_coordinates(i) must return a coordinate at which get_value is non-null. */
+TEST_CASE(GetCoordinatesConsistency, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 1U);  // all non-zero
+
+    auto st = t.to_coo_sparse(shape.num_dimensions());
+    for(size_t i = 0; i < st->nnz(); ++i)
+    {
+        const Coordinates c  = st->get_coordinates(i);
+        const uint8_t    *vp = st->get_value(c);
+        ARM_COMPUTE_EXPECT(vp != nullptr, framework::LogLevel::ERRORS);
+    }
+}
+
+/** get_value at a known non-zero coordinate returns the correct value. */
+TEST_CASE(GetValueKnownNonZero, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 7U);
+
+    auto st = t.to_coo_sparse(shape.num_dimensions());
+    // (0,0) is guaranteed non-zero; value must equal 7
+    const uint8_t *v = st->get_value(Coordinates{ 0, 0 });
+    ARM_COMPUTE_EXPECT(v != nullptr, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(*v == 7U, framework::LogLevel::ERRORS);
+}
+
+/** get_value returns nullptr for every coordinate on an all-zero tensor. */
+TEST_CASE(GetValueAllZero, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 0U);
+
+    auto st = t.to_coo_sparse(shape.num_dimensions());
+    ARM_COMPUTE_EXPECT(st->get_value(Coordinates{ 0, 0 }) == nullptr, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(st->get_value(Coordinates{ 3, 3 }) == nullptr, framework::LogLevel::ERRORS);
+}
+
+/** density() + sparsity() must equal 1 and both must be in [0, 1]. */
+TEST_CASE(DensitySparsityComplement, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    library->fill_tensor_sparse_random(Accessor(t), 0.5);
+
+    auto st = t.to_coo_sparse(shape.num_dimensions());
+    ARM_COMPUTE_EXPECT(std::fabs(st->density() + st->sparsity() - 1.0f) < 1e-5f, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(st->density() >= 0.0f && st->density() <= 1.0f, framework::LogLevel::ERRORS);
+}
+
+/** All-zero tensor: density == 0, sparsity == 1. */
+TEST_CASE(DensityBoundaryAllZero, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 0U);
+
+    auto st = t.to_coo_sparse(shape.num_dimensions());
+    ARM_COMPUTE_EXPECT(st->density()  == 0.0f, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(st->sparsity() == 1.0f, framework::LogLevel::ERRORS);
+}
+
+/** All-nonzero tensor: density == 1, sparsity == 0. */
+TEST_CASE(DensityBoundaryAllNonZero, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 1U);
+
+    auto st = t.to_coo_sparse(shape.num_dimensions());
+    ARM_COMPUTE_EXPECT(std::fabs(st->density()  - 1.0f) < 1e-5f, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(st->sparsity() == 0.0f, framework::LogLevel::ERRORS);
+}
+
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
+/** print() on empty COOTensor must produce the empty-marker string. */
+TEST_CASE(PrintEmpty, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(3U, 3U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::F32, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 0U);
+
+    auto st = t.to_coo_sparse(shape.num_dimensions());
+    std::ostringstream oss;
+    st->print(oss);
+    ARM_COMPUTE_EXPECT(oss.str().find("[]") != std::string::npos, framework::LogLevel::ERRORS);
+}
+
+/** print() on a non-empty COOTensor must not crash and produce non-empty output. */
+TEST_CASE(PrintNonEmpty, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(3U, 3U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::F32, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 1U);
+
+    auto st = t.to_coo_sparse(shape.num_dimensions());
+    std::ostringstream oss;
+    st->print(oss);
+    ARM_COMPUTE_EXPECT(!oss.str().empty(), framework::LogLevel::ERRORS);
+}
+#endif // ARM_COMPUTE_ASSERTS_ENABLED
+
+TEST_SUITE_END() // COO
+
+TEST_SUITE(CSR)
+
+TEST_CASE(NNZAllZero, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 0U);
+
+    auto st = t.to_csr_sparse();
+    ARM_COMPUTE_EXPECT(st->nnz() == 0U, framework::LogLevel::ERRORS);
+}
+
+TEST_CASE(NNZAllNonZero, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 1U);
+
+    auto st = t.to_csr_sparse();
+    ARM_COMPUTE_EXPECT(st->nnz() == shape.total_size(), framework::LogLevel::ERRORS);
+}
+
+/** get_coordinates(i) must return a coordinate at which get_value is non-null. */
+TEST_CASE(GetCoordinatesConsistency, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 1U);
+
+    auto st = t.to_csr_sparse();
+    for(size_t i = 0; i < st->nnz(); ++i)
+    {
+        const Coordinates c  = st->get_coordinates(i);
+        const uint8_t    *vp = st->get_value(c);
+        ARM_COMPUTE_EXPECT(vp != nullptr, framework::LogLevel::ERRORS);
+    }
+}
+
+/** get_value at a known non-zero coordinate returns the correct value. */
+TEST_CASE(GetValueKnownNonZero, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 5U);
+
+    auto st = t.to_csr_sparse();
+    const uint8_t *v = st->get_value(Coordinates{ 0, 0 });
+    ARM_COMPUTE_EXPECT(v != nullptr, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(*v == 5U, framework::LogLevel::ERRORS);
+}
+
+/** get_value returns nullptr for every coordinate on an all-zero tensor. */
+TEST_CASE(GetValueAllZero, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 0U);
+
+    auto st = t.to_csr_sparse();
+    ARM_COMPUTE_EXPECT(st->get_value(Coordinates{ 0, 0 }) == nullptr, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(st->get_value(Coordinates{ 3, 3 }) == nullptr, framework::LogLevel::ERRORS);
+}
+
+/** density() + sparsity() must equal 1 and both must be in [0, 1]. */
+TEST_CASE(DensitySparsityComplement, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    library->fill_tensor_sparse_random(Accessor(t), 0.5);
+
+    auto st = t.to_csr_sparse();
+    ARM_COMPUTE_EXPECT(std::fabs(st->density() + st->sparsity() - 1.0f) < 1e-5f, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(st->density() >= 0.0f && st->density() <= 1.0f, framework::LogLevel::ERRORS);
+}
+
+/** All-zero tensor: density == 0, sparsity == 1. */
+TEST_CASE(DensityBoundaryAllZero, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 0U);
+
+    auto st = t.to_csr_sparse();
+    ARM_COMPUTE_EXPECT(st->density()  == 0.0f, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(st->sparsity() == 1.0f, framework::LogLevel::ERRORS);
+}
+
+/** All-nonzero tensor: density == 1, sparsity == 0. */
+TEST_CASE(DensityBoundaryAllNonZero, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 1U);
+
+    auto st = t.to_csr_sparse();
+    ARM_COMPUTE_EXPECT(std::fabs(st->density()  - 1.0f) < 1e-5f, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(st->sparsity() == 0.0f, framework::LogLevel::ERRORS);
+}
+
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
+/** print() must not crash and must produce non-empty output. */
+TEST_CASE(Print, framework::DatasetMode::ALL)
+{
+    const TensorShape shape(4U, 4U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::F32, DataLayout::NCHW));
+    t.allocator()->allocate();
+    fill_tensor_uniform(t, 1U);
+
+    auto st = t.to_csr_sparse();
+    std::ostringstream oss;
+    st->print(oss);
+    ARM_COMPUTE_EXPECT(!oss.str().empty(), framework::LogLevel::ERRORS);
+}
+#endif // ARM_COMPUTE_ASSERTS_ENABLED
+
+TEST_SUITE_END() // CSR
 
 TEST_SUITE_END() // SparseTensor
 TEST_SUITE_END() // UNIT
