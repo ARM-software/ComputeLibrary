@@ -164,8 +164,12 @@ DATA_TEST_CASE(ConvertCSRTensorToDense, framework::DatasetMode::ALL, combine(
                 DataType::U32,
                 DataType::S32,
                 DataType::F16,
-                DataType::F32})
-            ), shape, type)
+                DataType::F32}),
+                framework::dataset::make("TensorLayout", {
+                DataLayout::NCHW,
+                DataLayout::NHWC
+                })
+            ), shape, type, layout)
 {
     // CSRTensor only supports 2D tensors
     if(shape.num_dimensions() < 2)
@@ -174,7 +178,7 @@ DATA_TEST_CASE(ConvertCSRTensorToDense, framework::DatasetMode::ALL, combine(
     }
     const TensorShape tensor_shape(shape[0], shape[1]);
 
-    const auto t_info = TensorInfo(tensor_shape, 1, type, DataLayout::NCHW);
+    const auto t_info = TensorInfo(tensor_shape, 1, type, layout);
     auto            t = create_tensor<Tensor>(t_info);
     auto       t_zero = create_tensor<Tensor>(t_info);
 
@@ -360,10 +364,12 @@ TEST_SUITE_END() // COO
 
 TEST_SUITE(CSR)
 
-TEST_CASE(NNZAllZero, framework::DatasetMode::ALL)
+DATA_TEST_CASE(NNZAllZero, framework::DatasetMode::ALL,
+    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+    layout)
 {
     const TensorShape shape(4U, 4U);
-    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, layout));
     t.allocator()->allocate();
     library->fill_tensor_value(Accessor(t), static_cast<uint8_t>(0));
 
@@ -371,10 +377,12 @@ TEST_CASE(NNZAllZero, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(st->nnz() == 0U, framework::LogLevel::ERRORS);
 }
 
-TEST_CASE(NNZAllNonZero, framework::DatasetMode::ALL)
+DATA_TEST_CASE(NNZAllNonZero, framework::DatasetMode::ALL,
+    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+    layout)
 {
     const TensorShape shape(4U, 4U);
-    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, layout));
     t.allocator()->allocate();
     library->fill_tensor_value(Accessor(t), static_cast<uint8_t>(1));
 
@@ -383,10 +391,12 @@ TEST_CASE(NNZAllNonZero, framework::DatasetMode::ALL)
 }
 
 /** get_coordinates(i) must return a coordinate at which get_value is non-null. */
-TEST_CASE(GetCoordinatesConsistency, framework::DatasetMode::ALL)
+DATA_TEST_CASE(GetCoordinatesConsistency, framework::DatasetMode::ALL,
+    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+    layout)
 {
     const TensorShape shape(4U, 4U);
-    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, layout));
     t.allocator()->allocate();
     library->fill_tensor_value(Accessor(t), static_cast<uint8_t>(1));
 
@@ -400,10 +410,12 @@ TEST_CASE(GetCoordinatesConsistency, framework::DatasetMode::ALL)
 }
 
 /** get_value at a known non-zero coordinate returns the correct value. */
-TEST_CASE(GetValueKnownNonZero, framework::DatasetMode::ALL)
+DATA_TEST_CASE(GetValueKnownNonZero, framework::DatasetMode::ALL,
+    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+    layout)
 {
     const TensorShape shape(4U, 4U);
-    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, layout));
     t.allocator()->allocate();
     library->fill_tensor_value(Accessor(t), static_cast<uint8_t>(5));
 
@@ -414,10 +426,12 @@ TEST_CASE(GetValueKnownNonZero, framework::DatasetMode::ALL)
 }
 
 /** get_value returns nullptr for every coordinate on an all-zero tensor. */
-TEST_CASE(GetValueAllZero, framework::DatasetMode::ALL)
+DATA_TEST_CASE(GetValueAllZero, framework::DatasetMode::ALL,
+    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+    layout)
 {
     const TensorShape shape(4U, 4U);
-    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, layout));
     t.allocator()->allocate();
     library->fill_tensor_value(Accessor(t), static_cast<uint8_t>(0));
 
@@ -427,10 +441,12 @@ TEST_CASE(GetValueAllZero, framework::DatasetMode::ALL)
 }
 
 /** density() + sparsity() must equal 1 and both must be in [0, 1]. */
-TEST_CASE(DensitySparsityComplement, framework::DatasetMode::ALL)
+DATA_TEST_CASE(DensitySparsityComplement, framework::DatasetMode::ALL,
+    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+    layout)
 {
     const TensorShape shape(4U, 4U);
-    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, layout));
     t.allocator()->allocate();
     library->fill_tensor_sparse_random(Accessor(t), 0.5);
 
@@ -440,10 +456,12 @@ TEST_CASE(DensitySparsityComplement, framework::DatasetMode::ALL)
 }
 
 /** All-zero tensor: density == 0, sparsity == 1. */
-TEST_CASE(DensityBoundaryAllZero, framework::DatasetMode::ALL)
+DATA_TEST_CASE(DensityBoundaryAllZero, framework::DatasetMode::ALL,
+    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+    layout)
 {
     const TensorShape shape(4U, 4U);
-    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, layout));
     t.allocator()->allocate();
     library->fill_tensor_value(Accessor(t), static_cast<uint8_t>(0));
 
@@ -453,10 +471,12 @@ TEST_CASE(DensityBoundaryAllZero, framework::DatasetMode::ALL)
 }
 
 /** All-nonzero tensor: density == 1, sparsity == 0. */
-TEST_CASE(DensityBoundaryAllNonZero, framework::DatasetMode::ALL)
+DATA_TEST_CASE(DensityBoundaryAllNonZero, framework::DatasetMode::ALL,
+    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+    layout)
 {
     const TensorShape shape(4U, 4U);
-    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, DataLayout::NCHW));
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, layout));
     t.allocator()->allocate();
     library->fill_tensor_value(Accessor(t), static_cast<uint8_t>(1));
 
@@ -467,10 +487,12 @@ TEST_CASE(DensityBoundaryAllNonZero, framework::DatasetMode::ALL)
 
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
 /** print() must produce non-empty output. */
-TEST_CASE(Print, framework::DatasetMode::ALL)
+DATA_TEST_CASE(Print, framework::DatasetMode::ALL,
+    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+    layout)
 {
     const TensorShape shape(4U, 4U);
-    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::F32, DataLayout::NCHW));
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::F32, layout));
     t.allocator()->allocate();
     library->fill_tensor_value(Accessor(t), 1.0f);
 
@@ -480,6 +502,44 @@ TEST_CASE(Print, framework::DatasetMode::ALL)
     ARM_COMPUTE_EXPECT(!oss.str().empty(), framework::LogLevel::ERRORS);
 }
 #endif // ARM_COMPUTE_ASSERTS_ENABLED
+
+/** Full round-trip on a non-square 2D tensor: to_dense() must equal the original.
+ *  Using 3×5 ensures the stride-based offset logic is exercised for both layouts. */
+DATA_TEST_CASE(RoundTrip2D, framework::DatasetMode::ALL,
+    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+    layout)
+{
+    const TensorShape shape(3U, 5U);
+    auto t      = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, layout));
+    auto t_zero = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::U8, layout));
+    t.allocator()->allocate();
+    t_zero.allocator()->allocate();
+    library->fill_tensor_sparse_random(Accessor(t), 0.3);
+    library->fill_tensor_value(Accessor(t_zero), static_cast<uint8_t>(0));
+
+    auto st      = t.to_csr_sparse();
+    auto td      = st->to_dense();
+    ARM_COMPUTE_EXPECT(tensors_are_equal(Accessor(t), Accessor(*td)), framework::LogLevel::ERRORS);
+
+    auto st_zero = t_zero.to_csr_sparse();
+    auto td_zero = st_zero->to_dense();
+    ARM_COMPUTE_EXPECT(tensors_are_equal(Accessor(t_zero), Accessor(*td_zero)), framework::LogLevel::ERRORS);
+}
+
+/** Round-trip with ~80 % zeros: to_csr_sparse() → to_dense() must equal the original. */
+DATA_TEST_CASE(RoundTripSparse, framework::DatasetMode::ALL,
+    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }),
+    layout)
+{
+    const TensorShape shape(8U, 6U);
+    auto t = create_tensor<Tensor>(TensorInfo(shape, 1, DataType::F32, layout));
+    t.allocator()->allocate();
+    library->fill_tensor_sparse_random(Accessor(t), 0.2); // ~20 % non-zero  →  ~80 % zeros
+
+    auto st = t.to_csr_sparse();
+    auto td = st->to_dense();
+    ARM_COMPUTE_EXPECT(tensors_are_equal(Accessor(t), Accessor(*td)), framework::LogLevel::ERRORS);
+}
 
 TEST_SUITE_END() // CSR
 

@@ -67,7 +67,7 @@ private:
 
     /** Convert a dense tensor to a CSR sparse tensor.
      *
-     *  @note Only 2D tensors with NCHW layout are supported. @p sparse_dim is
+     *  @note Only 2D tensors are supported. @p sparse_dim is
      *        ignored; CSR always uses sparse_dim = 2.
      *
      *  @param[in] tensor     Source dense tensor. Must be 2D.

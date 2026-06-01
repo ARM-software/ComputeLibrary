@@ -49,29 +49,27 @@ CSRTensor::CSRTensor(const ITensor *tensor, size_t sparse_dim) : SparseTensor(te
     ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
     const auto *info = tensor->info();
 
-    // As of now, CSRTensor only supports 2D tensors with NCHW layout.
-    ARM_COMPUTE_ERROR_ON_MSG(info->data_layout() != DataLayout::NCHW, "CSRTensor only supports NCHW layout at the moment");
     ARM_COMPUTE_ERROR_ON_MSG(info->is_sparse(), "cannot create a CSRTensor from a sparse tensor");
     ARM_COMPUTE_ERROR_ON_MSG(dim() != 2, "CSRTensor only supports 2D tensors at the moment");
 
-    const int32_t           rows = info->dimension(0);
-    const int32_t           cols = info->dimension(1);
-    const int32_t   element_size = info->element_size();
-    const int32_t row_size_bytes = cols * element_size;
-    const auto        is_nonzero = make_is_nonzero_predicate(info->data_type());
-    const uint8_t          *data = tensor->buffer() + info->offset_first_element_in_bytes();
-    size_t       value_byte_size = 0;
+    const int32_t            rows = info->dimension(0);
+    const int32_t            cols = info->dimension(1);
+    const size_t       row_stride = info->strides_in_bytes()[0];
+    const size_t       col_stride = info->strides_in_bytes()[1];
+    const int32_t    element_size = info->element_size();
+    const auto         is_nonzero = make_is_nonzero_predicate(info->data_type());
+    const uint8_t           *data = tensor->buffer() + info->offset_first_element_in_bytes();
+    size_t        value_byte_size = 0;
 
     _crow_bytes = index_size;  // The first row index is always a 0
     _col_bytes = 0;
 
     for(int32_t row = 0; row < rows; ++row)
     {
-        const int32_t row_offset = row * row_size_bytes;
         _crow_bytes += index_size;
         for(int32_t col = 0; col < cols; ++col)
         {
-            const int32_t element_offset =  row_offset + col * element_size;
+            const size_t element_offset = static_cast<size_t>(row) * row_stride + static_cast<size_t>(col) * col_stride;
             if(is_nonzero(data + element_offset))
             {
                 _col_bytes += index_size;
@@ -94,11 +92,10 @@ CSRTensor::CSRTensor(const ITensor *tensor, size_t sparse_dim) : SparseTensor(te
 
     for(int32_t row = 0; row < rows; ++row)
     {
-        const int32_t row_offset = row * row_size_bytes;
         int32_t non_zero_row_elements = 0;
         for(int32_t col = 0; col < cols; ++col)
         {
-            const size_t element_offset =  row_offset + col * element_size;
+            const size_t element_offset = static_cast<size_t>(row) * row_stride + static_cast<size_t>(col) * col_stride;
             if(is_nonzero(data + element_offset))
             {
                 std::memcpy(_col_indices + col_index * index_size, &col, index_size);
@@ -194,8 +191,6 @@ const uint8_t *CSRTensor::get_value(Coordinates coords) const
 
 std::unique_ptr<ITensor> CSRTensor::to_dense()
 {
-    ARM_COMPUTE_ERROR_ON_MSG(info()->data_layout() != DataLayout::NCHW, "CSRTensor only supports NCHW layout at the moment");
-
     auto tensor = std::make_unique<Tensor>();
     tensor->allocator()->init(info()->clone()->set_tensor_format(TensorFormat::Dense));
     tensor->allocator()->allocate();
@@ -226,7 +221,7 @@ std::unique_ptr<ITensor> CSRTensor::to_dense()
             const size_t col = *reinterpret_cast<const int32_t *>(col_indices + (current * index_size));
             const uint8_t *value_ptr = values + (element * element_size);
 
-            std::memcpy(data + (row * info()->dimension(1) + col) * element_size, value_ptr, element_size);
+            std::memcpy(data + static_cast<size_t>(row) * info()->strides_in_bytes()[0] + static_cast<size_t>(col) * info()->strides_in_bytes()[1], value_ptr, element_size);
             element++;
         }
     }
