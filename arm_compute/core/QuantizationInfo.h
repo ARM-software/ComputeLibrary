@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2025 Arm Limited.
+ * Copyright (c) 2019-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -203,6 +203,17 @@ private:
  */
 inline bool operator==(const QuantizationInfo &lhs, const QuantizationInfo &rhs)
 {
+    const bool lhs_is_uniform = lhs.scale().size() < 2 && lhs.offset().size() < 2;
+    const bool rhs_is_uniform = rhs.scale().size() < 2 && rhs.offset().size() < 2;
+
+    if (lhs_is_uniform && rhs_is_uniform)
+    {
+        const auto lhs_qinfo = lhs.uniform();
+        const auto rhs_qinfo = rhs.uniform();
+
+        return (lhs_qinfo.scale == rhs_qinfo.scale) && (lhs_qinfo.offset == rhs_qinfo.offset);
+    }
+
     return (lhs.scale() == rhs.scale()) && (lhs.offset() == rhs.offset());
 }
 
