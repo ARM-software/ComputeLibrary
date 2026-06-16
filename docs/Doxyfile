@@ -261,7 +261,8 @@ TAB_SIZE               = 4
 # newlines.
 
 ALIASES                = \
-    "publicapi=\xrefitem semver \"\" \"\""
+    "publicapi=\xrefitem semver \"\" \"\"" \
+    "experimental=@par Experimental:\n"
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding "class=itcl::class"
