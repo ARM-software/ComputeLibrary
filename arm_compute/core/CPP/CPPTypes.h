@@ -168,6 +168,21 @@ public:
      * @return true if the cpu supports sme_b16f32, false otherwise
      */
     bool has_sme_b16f32() const;
+    /** Sets whether SVE and SVE2 implementations are allowed to be selected at runtime.
+     *
+     * @param[in] is_allowed True to expose detected SVE/SVE2 support, false to hide SVE/SVE2 from runtime selectors.
+     */
+    void set_sve_allowed(bool is_allowed);
+    /** Sets whether SME and SME2 implementations are allowed to be selected at runtime.
+     *
+     * @param[in] is_allowed True to expose detected SME/SME2 support, false to hide SME/SME2 from runtime selectors.
+     */
+    void set_sme_allowed(bool is_allowed);
+    /** Returns whether SME and SME2 implementations are allowed to be selected at runtime.
+     *
+     * @return true if detected SME/SME2 support is exposed to runtime selectors, false otherwise.
+     */
+    bool is_sme_allowed() const;
     /** Gets the cpu model for a given cpuid.
      *
      * @param[in] cpuid the id of the cpu core to be retrieved,
