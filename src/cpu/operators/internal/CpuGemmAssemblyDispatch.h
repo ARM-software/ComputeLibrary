@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2025 Arm Limited.
+ * Copyright (c) 2018-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,9 @@ struct AsmGemmInfo
      * @note This flag will be silently ignored (assumed to be false) when the weight_format is a fixed format. Because
      *       fixed format kernels do not accept weights (B) with any prior transformations
      */
-    bool transpose_b{false};
+    bool    transpose_b{false};
+    int32_t dequant_a_offset{0}; // input zero-point for DequantizeFloat path (handled in kernel)
+    int32_t dequant_b_offset{0}; // weight zero-point for DequantizeFloat path (handled in kernel)
 };
 
 /** Assembly kernel glue */
