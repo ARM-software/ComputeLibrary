@@ -156,7 +156,7 @@ const auto QuantizationData = make("QuantizationInfo",
 TEST_SUITE(NEON)
 TEST_SUITE(ConvolutionLayer)
 
-#ifdef __aarch64_
+#ifdef __aarch64__
 DATA_TEST_CASE(
     DequantFP32_SupportedTypes,
     framework::DatasetMode::ALL,
@@ -195,7 +195,7 @@ DATA_TEST_CASE(
 
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
-#endif // __aarch64_
+#endif // __aarch64__
 
 DATA_TEST_CASE(SupportedTypes,
                framework::DatasetMode::ALL,
