@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2023 Arm Limited.
+ * Copyright (c) 2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,7 @@ public:
      * |:--------------|:--------------|:--------------|:--------------|
      * |QASYMM8        |QASYMM8        |S32            |QASYMM8        |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED |S32            |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |F32            |F32            |
      * |F16            |F16            |F16            |F16            |
      * |F32            |F32            |F32            |F32            |
      * |BFLOAT16       |BFLOAT16       |BFLOAT16       |BFLOAT16       |

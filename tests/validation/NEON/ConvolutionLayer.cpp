@@ -311,6 +311,445 @@ TEST_SUITE_END() // QASYMM8_SIGNED
 
 // clang-format on
 // *INDENT-ON*
+
+#ifdef __aarch64__
+// *INDENT-OFF*
+// clang-format off
+TEST_SUITE(DirectI8S8F32)
+
+/** Validate accepts QASYMM8_SIGNED→F32 with both zero and non-zero offsets.
+ *  Shapes are in NHWC format: [C, W, H] for input/output, [Cin, Kw, Kh, Cout] for weights. */
+DATA_TEST_CASE(
+    Validate,
+    framework::DatasetMode::ALL,
+    zip(make("SrcInfo",   { TensorInfo(TensorShape(16U, 8U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                            TensorInfo(TensorShape(32U, 4U, 4U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                            TensorInfo(TensorShape(16U, 8U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                            TensorInfo(TensorShape(16U, 8U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC) }),
+        make("WgtInfo",   { TensorInfo(TensorShape(16U, 3U, 3U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                            TensorInfo(TensorShape(32U, 1U, 1U, 16U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                            TensorInfo(TensorShape(16U, 3U, 3U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                            TensorInfo(TensorShape(16U, 3U, 3U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC) }),
+        make("BiasInfo",  { TensorInfo(TensorShape(8U), 1, DataType::F32),
+                            TensorInfo(TensorShape(16U), 1, DataType::F32),
+                            TensorInfo(TensorShape(8U), 1, DataType::F32),
+                            TensorInfo(TensorShape(8U), 1, DataType::F32) }),
+        make("DstInfo",   { TensorInfo(TensorShape(8U, 6U, 6U), 1, DataType::F32, DataLayout::NHWC),
+                            TensorInfo(TensorShape(16U, 4U, 4U), 1, DataType::F32, DataLayout::NHWC),
+                            TensorInfo(TensorShape(8U, 6U, 6U), 1, DataType::F32, DataLayout::NHWC),
+                            TensorInfo(TensorShape(8U, 6U, 6U), 1, DataType::F32, DataLayout::NHWC) }),
+        make("SrcOffset", { 0,  0,  5, -10 }),
+        make("WgtOffset", { 0,  0,  0,   3 }),
+        make("Expected",  { true, true, true, true })),
+    src_info_const, wgt_info_const, bias_info_const, dst_info_const,
+    src_offset, wgt_offset, expected)
+{
+    TensorInfo src_info  = src_info_const;
+    TensorInfo wgt_info  = wgt_info_const;
+    TensorInfo bias_info = bias_info_const;
+    TensorInfo dst_info  = dst_info_const;
+    src_info.set_quantization_info(QuantizationInfo(0.25f, src_offset));
+    wgt_info.set_quantization_info(QuantizationInfo(0.125f, wgt_offset));
+
+    const Status s = NEConvolutionLayer::validate(&src_info, &wgt_info, &bias_info, &dst_info,
+                                                  PadStrideInfo(1, 1, 0, 0),
+                                                  WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(),
+                                                  false /*fast_math*/, 1 /*num_groups*/);
+    ARM_COMPUTE_EXPECT(bool(s) == expected, framework::LogLevel::ERRORS);
+}
+
+/** Verify GEMM_CONV2D is returned automatically for NHWC QASYMM8_SIGNED→F32. */
+TEST_CASE(GetConvMethodDirectI8F32, framework::DatasetMode::ALL)
+{
+    const QuantizationInfo qi(0.25f, 0);
+    TensorInfo src_info(TensorShape(16U, 8U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC);
+    TensorInfo wgt_info(TensorShape(16U, 3U, 3U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC);
+    TensorInfo dst_info(TensorShape(8U, 6U, 6U), 1, DataType::F32, DataLayout::NHWC);
+    src_info.set_quantization_info(qi);
+    wgt_info.set_quantization_info(qi);
+
+    const ConvolutionMethod m = NEConvolutionLayer::get_convolution_method(
+        &src_info.clone()->set_is_resizable(true),
+        &wgt_info.clone()->set_is_resizable(true),
+        &dst_info.clone()->set_is_resizable(true),
+        PadStrideInfo(1, 1, 0, 0),
+        WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(),
+        false /*fast_math*/);
+    ARM_COMPUTE_EXPECT(m == ConvolutionMethod::GEMM_CONV2D, framework::LogLevel::ERRORS);
+}
+
+using NEDirectI8S8F32ConvolutionFixture = DirectI8S8F32ConvolutionFixture<Tensor, Accessor, NEConvolutionLayer>;
+
+/** Small dataset: verify direct i8->f32 path produces correct output vs CPU reference.
+ *  Shapes are in NCHW format [W, H, C] for input/output, [Kw, Kh, Cin, Cout] for weights.
+ *  InputShape/WeightsShape/BiasShape/OutputShape are zipped — each row is one consistent config. */
+FIXTURE_DATA_TEST_CASE(
+    RunSmall,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("InputShape",   { TensorShape(8U, 8U, 16U), TensorShape(16U, 16U, 32U) }),
+            make("WeightsShape", { TensorShape(3U, 3U, 16U, 8U), TensorShape(3U, 3U, 32U, 16U) }),
+            make("BiasShape",    { TensorShape(8U), TensorShape(16U) }),
+            make("OutputShape",  { TensorShape(6U, 6U, 8U), TensorShape(14U, 14U, 16U) })
+        ),
+        make("ConvInfo",     { PadStrideInfo(1, 1, 0, 0) }),
+        make("Dilation",     { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",   { DataLayout::NHWC }),
+        ActivationFunctionsDataset,
+        make("InputQI",      { QuantizationInfo(0.25f, 0) }),
+        make("WeightsQI",    { QuantizationInfo(0.125f, 0) })
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** Stride-2 3x3 convolution. */
+FIXTURE_DATA_TEST_CASE(
+    RunStride2,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        make("InputShape",   { TensorShape(14U, 14U, 32U) }),
+        make("WeightsShape", { TensorShape(3U, 3U, 32U, 16U) }),
+        make("BiasShape",    { TensorShape(16U) }),
+        make("OutputShape",  { TensorShape(6U, 6U, 16U) }),
+        make("ConvInfo",     { PadStrideInfo(2, 2, 0, 0) }),
+        make("Dilation",     { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",   { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo(),
+                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) }),
+        make("InputQI",      { QuantizationInfo(0.25f, 0) }),
+        make("WeightsQI",    { QuantizationInfo(0.125f, 0) })
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** 1x1 convolution. */
+FIXTURE_DATA_TEST_CASE(
+    Run1x1,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        make("InputShape",   { TensorShape(8U, 8U, 32U) }),
+        make("WeightsShape", { TensorShape(1U, 1U, 32U, 16U) }),
+        make("BiasShape",    { TensorShape(16U) }),
+        make("OutputShape",  { TensorShape(8U, 8U, 16U) }),
+        make("ConvInfo",     { PadStrideInfo(1, 1, 0, 0) }),
+        make("Dilation",     { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",   { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo() }),
+        make("InputQI",      { QuantizationInfo(0.25f, 0) }),
+        make("WeightsQI",    { QuantizationInfo(0.125f, 0) })
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** Padded convolution. */
+FIXTURE_DATA_TEST_CASE(
+    RunPadded,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        make("InputShape",   { TensorShape(8U, 8U, 32U) }),
+        make("WeightsShape", { TensorShape(3U, 3U, 32U, 16U) }),
+        make("BiasShape",    { TensorShape(16U) }),
+        make("OutputShape",  { TensorShape(8U, 8U, 16U) }),
+        make("ConvInfo",     { PadStrideInfo(1, 1, 1, 1) }),
+        make("Dilation",     { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",   { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo(),
+                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.0f) }),
+        make("InputQI",      { QuantizationInfo(0.25f, 0) }),
+        make("WeightsQI",    { QuantizationInfo(0.125f, 0) })
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** Non-zero offsets: input offset only.
+ *  Uses the same fixture with QuantizationInfo passed explicitly.
+ *  Shapes in NCHW: [W,H,C] / [Kw,Kh,Cin,Cout]. */
+FIXTURE_DATA_TEST_CASE(
+    RunWithInputOffset,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("InputShape",   { TensorShape(8U, 8U, 16U), TensorShape(8U, 8U, 16U) }),
+            make("WeightsShape", { TensorShape(3U, 3U, 16U, 8U), TensorShape(1U, 1U, 16U, 8U) }),
+            make("BiasShape",    { TensorShape(8U), TensorShape(8U) }),
+            make("OutputShape",  { TensorShape(6U, 6U, 8U), TensorShape(8U, 8U, 8U) })
+        ),
+        make("ConvInfo",     { PadStrideInfo(1, 1, 0, 0) }),
+        make("Dilation",     { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",   { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo() }),
+        make("InputQI",      { QuantizationInfo(0.25f, -10) }),   // non-zero input offset
+        make("WeightsQI",    { QuantizationInfo(0.125f, 0) })     // zero weight offset
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** Non-zero offsets: weight offset only. */
+FIXTURE_DATA_TEST_CASE(
+    RunWithWeightOffset,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("InputShape",   { TensorShape(8U, 8U, 16U), TensorShape(8U, 8U, 16U) }),
+            make("WeightsShape", { TensorShape(3U, 3U, 16U, 8U), TensorShape(1U, 1U, 16U, 8U) }),
+            make("BiasShape",    { TensorShape(8U), TensorShape(8U) }),
+            make("OutputShape",  { TensorShape(6U, 6U, 8U), TensorShape(8U, 8U, 8U) })
+        ),
+        make("ConvInfo",     { PadStrideInfo(1, 1, 0, 0) }),
+        make("Dilation",     { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",   { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo() }),
+        make("InputQI",      { QuantizationInfo(0.25f, 0) }),     // zero input offset
+        make("WeightsQI",    { QuantizationInfo(0.125f, 5) })     // non-zero weight offset
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** Non-zero offsets on both tensors, with padding and activation. */
+FIXTURE_DATA_TEST_CASE(
+    RunWithBothOffsets,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("InputShape",   { TensorShape(8U, 8U, 16U), TensorShape(8U, 8U, 32U) }),
+            make("WeightsShape", { TensorShape(3U, 3U, 16U, 8U), TensorShape(3U, 3U, 32U, 16U) }),
+            make("BiasShape",    { TensorShape(8U), TensorShape(16U) }),
+            make("OutputShape",  { TensorShape(8U, 8U, 8U), TensorShape(8U, 8U, 16U) })
+        ),
+        make("ConvInfo",     { PadStrideInfo(1, 1, 1, 1) }),  // same-size output via padding
+        make("Dilation",     { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",   { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo(),
+                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) }),
+        make("InputQI",      { QuantizationInfo(0.25f, -20) }),   // non-zero input offset
+        make("WeightsQI",    { QuantizationInfo(0.125f, 10) })    // non-zero weight offset
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** BOUNDED_RELU activation with non-zero input offset.
+ *  Exercises that the activation clips the post-correction float value correctly. */
+FIXTURE_DATA_TEST_CASE(
+    RunWithInputOffsetAndBoundedRelu,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("InputShape",   { TensorShape(8U, 8U, 16U), TensorShape(8U, 8U, 16U) }),
+            make("WeightsShape", { TensorShape(3U, 3U, 16U, 8U), TensorShape(1U, 1U, 16U, 8U) }),
+            make("BiasShape",    { TensorShape(8U), TensorShape(8U) }),
+            make("OutputShape",  { TensorShape(6U, 6U, 8U), TensorShape(8U, 8U, 8U) })
+        ),
+        make("ConvInfo",       { PadStrideInfo(1, 1, 0, 0) }),
+        make("Dilation",       { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",     { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.0f),
+                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.0f, -6.0f) }),
+        make("InputQI",        { QuantizationInfo(0.25f, -10) }),
+        make("WeightsQI",      { QuantizationInfo(0.125f, 0) })
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** BOUNDED_RELU activation with non-zero weight offset. */
+FIXTURE_DATA_TEST_CASE(
+    RunWithWeightOffsetAndActivation,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("InputShape",   { TensorShape(8U, 8U, 16U), TensorShape(8U, 8U, 32U) }),
+            make("WeightsShape", { TensorShape(3U, 3U, 16U, 8U), TensorShape(3U, 3U, 32U, 16U) }),
+            make("BiasShape",    { TensorShape(8U), TensorShape(16U) }),
+            make("OutputShape",  { TensorShape(6U, 6U, 8U), TensorShape(6U, 6U, 16U) })
+        ),
+        make("ConvInfo",       { PadStrideInfo(1, 1, 0, 0) }),
+        make("Dilation",       { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",     { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 4.0f) }),
+        make("InputQI",        { QuantizationInfo(0.25f, 0) }),
+        make("WeightsQI",      { QuantizationInfo(0.125f, 5) })
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** Stride-2 convolution with non-zero offsets.
+ *  Stride changes which input patches contribute to each output position, exercising the
+ *  per-output row-sum computation path with stride != 1. */
+FIXTURE_DATA_TEST_CASE(
+    RunStride2WithOffsets,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("InputShape",   { TensorShape(14U, 14U, 16U), TensorShape(14U, 14U, 32U) }),
+            make("WeightsShape", { TensorShape(3U, 3U, 16U, 8U), TensorShape(3U, 3U, 32U, 16U) }),
+            make("BiasShape",    { TensorShape(8U), TensorShape(16U) }),
+            make("OutputShape",  { TensorShape(6U, 6U, 8U), TensorShape(6U, 6U, 16U) })
+        ),
+        make("ConvInfo",       { PadStrideInfo(2, 2, 0, 0) }),
+        make("Dilation",       { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",     { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo(),
+                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) }),
+        make("InputQI",        { QuantizationInfo(0.25f, -15) }),
+        make("WeightsQI",      { QuantizationInfo(0.125f, 8) })
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** 1×1 kernel with both non-zero offsets.
+ *  K = Cin only (no spatial footprint), ensuring the K-total used in the cross-term is correct. */
+FIXTURE_DATA_TEST_CASE(
+    Run1x1WithBothOffsets,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("InputShape",   { TensorShape(8U, 8U, 16U), TensorShape(8U, 8U, 32U) }),
+            make("WeightsShape", { TensorShape(1U, 1U, 16U, 8U), TensorShape(1U, 1U, 32U, 16U) }),
+            make("BiasShape",    { TensorShape(8U), TensorShape(16U) }),
+            make("OutputShape",  { TensorShape(8U, 8U, 8U), TensorShape(8U, 8U, 16U) })
+        ),
+        make("ConvInfo",       { PadStrideInfo(1, 1, 0, 0) }),
+        make("Dilation",       { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",     { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo(),
+                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) }),
+        make("InputQI",        { QuantizationInfo(0.25f, -20) }),
+        make("WeightsQI",      { QuantizationInfo(0.125f, 10) })
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** Positive input offset + stride-2 + padding: exercises the row-sum computation
+ *  for a strided conv where each output position sees a distinct input patch.
+ *  Also covers a positive (not negative) input offset sign. */
+FIXTURE_DATA_TEST_CASE(
+    RunStride2PaddedWithInputOffset,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("InputShape",   { TensorShape(14U, 14U, 16U), TensorShape(14U, 14U, 32U) }),
+            make("WeightsShape", { TensorShape(3U, 3U, 16U, 8U), TensorShape(3U, 3U, 32U, 16U) }),
+            make("BiasShape",    { TensorShape(8U), TensorShape(16U) }),
+            make("OutputShape",  { TensorShape(7U, 7U, 8U), TensorShape(7U, 7U, 16U) })
+        ),
+        make("ConvInfo",       { PadStrideInfo(2, 2, 1, 1) }),
+        make("Dilation",       { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",     { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo(),
+                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) }),
+        make("InputQI",        { QuantizationInfo(0.25f, 12) }),  // positive input offset
+        make("WeightsQI",      { QuantizationInfo(0.125f, 0) })
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** Negative weight offset — exercises the sign of the b_offset correction term. */
+FIXTURE_DATA_TEST_CASE(
+    RunWithNegativeWeightOffset,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("InputShape",   { TensorShape(8U, 8U, 16U), TensorShape(8U, 8U, 32U) }),
+            make("WeightsShape", { TensorShape(3U, 3U, 16U, 8U), TensorShape(3U, 3U, 32U, 16U) }),
+            make("BiasShape",    { TensorShape(8U), TensorShape(16U) }),
+            make("OutputShape",  { TensorShape(6U, 6U, 8U), TensorShape(6U, 6U, 16U) })
+        ),
+        make("ConvInfo",       { PadStrideInfo(1, 1, 0, 0) }),
+        make("Dilation",       { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",     { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo(),
+                                 ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU) }),
+        make("InputQI",        { QuantizationInfo(0.25f, 0) }),
+        make("WeightsQI",      { QuantizationInfo(0.125f, -8) })
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+/** Large offsets (both near ±127) — stress-tests the cross-term magnitude.
+ *  Large a_offset * b_offset * K can be a large fraction of the raw accumulator;
+ *  any sign or magnitude error is highly visible. */
+FIXTURE_DATA_TEST_CASE(
+    RunWithLargeOffsets,
+    NEDirectI8S8F32ConvolutionFixture,
+    framework::DatasetMode::ALL,
+    combine(
+        zip(
+            make("InputShape",   { TensorShape(8U, 8U, 16U), TensorShape(8U, 8U, 32U) }),
+            make("WeightsShape", { TensorShape(3U, 3U, 16U, 8U), TensorShape(3U, 3U, 32U, 16U) }),
+            make("BiasShape",    { TensorShape(8U), TensorShape(16U) }),
+            make("OutputShape",  { TensorShape(6U, 6U, 8U), TensorShape(6U, 6U, 16U) })
+        ),
+        make("ConvInfo",       { PadStrideInfo(1, 1, 0, 0) }),
+        make("Dilation",       { Size2D(1U, 1U) }),
+        make("ReshapeWeights", { true }),
+        make("DataLayout",     { DataLayout::NHWC }),
+        make("ActivationInfo", { ActivationLayerInfo() }),
+        make("InputQI",        { QuantizationInfo(0.01f, 100) }),   // large positive input offset
+        make("WeightsQI",      { QuantizationInfo(0.01f, -100) })   // large negative weight offset
+    )
+)
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+TEST_SUITE_END() // DirectI8S8F32
+// clang-format on
+// *INDENT-ON*
+#endif // #ifdef __aarch64__
+
 TEST_SUITE_END() // ConvolutionLayer
 
 /*

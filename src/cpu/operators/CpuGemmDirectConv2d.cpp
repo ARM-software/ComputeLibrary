@@ -44,6 +44,11 @@ using namespace arm_compute::utils::cast;
 
 namespace
 {
+inline bool is_direct_i8_s8_f32_path(const ITensorInfo *src, const ITensorInfo *dst)
+{
+    return src->data_type() == DataType::QASYMM8_SIGNED && dst->data_type() == DataType::F32;
+}
+
 GEMMLowpOutputStageInfo calculate_output_stage_metadata(const ITensorInfo         *src,
                                                         const ITensorInfo         *weights,
                                                         const ITensorInfo         *dst,
@@ -130,7 +135,15 @@ void CpuGemmDirectConv2d::configure(const ITensorInfo *src,
 
     // Configure assembly dispatch
     cpu::AsmGemmInfo asm_info = init_assembly_metadata(info, false);
-    if (is_data_type_quantized(src->data_type()))
+    if (is_direct_i8_s8_f32_path(src, dst))
+    {
+        // Provide the quantization zero-points via AsmGemmInfo so that create_arm_gemm_dequant
+        // can bake them into the DequantizeFloat output stage.  The assembly kernel then handles
+        // all offset corrections (col sums, row sums, cross-term) natively.
+        asm_info.dequant_a_offset = src->quantization_info().uniform().offset;
+        asm_info.dequant_b_offset = weights->quantization_info().uniform().offset;
+    }
+    else if (is_data_type_quantized(src->data_type()))
     {
         asm_info.output_stage = calculate_output_stage_metadata(src, weights, dst, info.act_info);
     }
@@ -189,6 +202,17 @@ Status CpuGemmDirectConv2d::validate(const ITensorInfo *src,
     ARM_COMPUTE_RETURN_ERROR_ON(info.dilation != Size2D(1U, 1U));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
 
+    const bool direct_i8_f32 = is_direct_i8_s8_f32_path(src, dst);
+
+    if (direct_i8_f32)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(src, 1, DataType::QASYMM8_SIGNED);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8_SIGNED);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dst, 1, DataType::F32);
+        // Offset correction (a_offset, b_offset) is handled inside the assembly kernel via the
+        // extended DequantizeFloat output stage — no separate operator-level validation needed.
+    }
+
     // Validate Permute
     TensorInfo perm_weights;
     ARM_COMPUTE_RETURN_ON_ERROR(CpuPermute::validate(weights, &perm_weights, PermutationVector{3, 0, 1, 2}));
@@ -204,7 +228,11 @@ Status CpuGemmDirectConv2d::validate(const ITensorInfo *src,
     // Validate biases
     if (biases != nullptr)
     {
-        if (is_data_type_quantized_asymmetric(data_type))
+        if (direct_i8_f32)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::F32);
+        }
+        else if (is_data_type_quantized_asymmetric(data_type))
         {
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
         }
@@ -216,7 +244,10 @@ Status CpuGemmDirectConv2d::validate(const ITensorInfo *src,
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+    if (!direct_i8_f32)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
+    }
 
     cpu::AsmGemmInfo asm_info = init_assembly_metadata(info, false);
     ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuGemmAssemblyDispatch::validate(src, weights, biases, dst, asm_info));

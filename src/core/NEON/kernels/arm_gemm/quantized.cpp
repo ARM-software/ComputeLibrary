@@ -973,10 +973,28 @@ void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int h
 template void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int height, const int8_t *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int multi, unsigned int first_col);
 template void compute_col_sums(const Requantize32 &qp, unsigned int width, unsigned int height, const uint8_t *input, unsigned int in_stride, int32_t *col_bias, unsigned int depth, unsigned int multi, unsigned int first_col);
 
+template<typename T>
+void compute_raw_col_sums(unsigned int width, unsigned int height,
+                          const T *input, unsigned int in_stride, int32_t *col_sums)
+{
+    memset(reinterpret_cast<void *>(col_sums), 0, width * sizeof(int32_t));
+    for (unsigned int row = 0; row < height; ++row)
+    {
+        for (unsigned int col = 0; col < width; ++col)
+        {
+            col_sums[col] += static_cast<int32_t>(input[row * in_stride + col]);
+        }
+    }
+}
+
+template void compute_raw_col_sums(unsigned int width, unsigned int height, const int8_t *input, unsigned int in_stride, int32_t *col_sums);
+template void compute_raw_col_sums(unsigned int width, unsigned int height, const uint8_t *input, unsigned int in_stride, int32_t *col_sums);
+
 template<>
 void dequantize_block_32<float>(const DequantizeFloat &qp, unsigned int width, unsigned int height,
                          const int32_t* in_ptr, unsigned int in_stride, float *out_ptr, unsigned int out_stride,
-                         const float* bias_ptr, bool accumulate, const Activation &act)
+                         const float* bias_ptr, bool accumulate, const Activation &act,
+                         const int32_t *col_bias, const int32_t *row_sum, int32_t k_total)
 {
     const float32x4_t vscale = vdupq_n_f32(qp.scale);
     float maxval = std::numeric_limits<float>::infinity();
@@ -1000,14 +1018,38 @@ void dequantize_block_32<float>(const DequantizeFloat &qp, unsigned int width, u
     for(unsigned int row=0; row<height; row++) {
         auto row_in_ptr = in_ptr + (row * in_stride);
         auto row_out_ptr = out_ptr + (row * out_stride);
+
+        // Per-row addend from b_offset correction: -b_offset * sum_a_row[m] * scale
+        // row_sum values are packed with multiplier=1, so entry is plain sum(a_row[k]).
+        // Also add the cross-term: +a_offset * b_offset * K * scale (constant per tile).
+        float row_offset = 0.0f;
+        if (row_sum != nullptr) {
+            row_offset += static_cast<float>(-qp.b_offset * row_sum[row]) * qp.scale;
+        }
+        if (col_bias != nullptr && row_sum != nullptr && k_total != 0) {
+            // Cross-term: +a_offset * b_offset * K * scale
+            row_offset += static_cast<float>(qp.a_offset) * static_cast<float>(qp.b_offset)
+                          * static_cast<float>(k_total) * qp.scale;
+        }
+        const float32x4_t vrow_offset = vdupq_n_f32(row_offset);
+
         unsigned int col=0;
         if (width >= 4) {
             for(; col <= (width - 4); col+= 4) {
                 const int32x4_t vin = vld1q_s32(row_in_ptr + col);
                 float32x4_t vdeq = vmulq_f32(vcvtq_f32_s32(vin), vscale);
                 if(bias_ptr) {
-                    const float32x4_t bin = vld1q_f32(bias_ptr + col);
-                    vdeq = vaddq_f32(vdeq, bin);
+                    vdeq = vaddq_f32(vdeq, vld1q_f32(bias_ptr + col));
+                }
+                if(col_bias) {
+                    // a_offset correction: -a_offset * sum_b_col[n] * scale
+                    const float32x4_t vcol_corr = vmulq_f32(
+                        vcvtq_f32_s32(vld1q_s32(col_bias + col)),
+                        vdupq_n_f32(static_cast<float>(-qp.a_offset) * qp.scale));
+                    vdeq = vaddq_f32(vdeq, vcol_corr);
+                }
+                if(row_sum) {
+                    vdeq = vaddq_f32(vdeq, vrow_offset);
                 }
                 if(accumulate) {
                     vdeq = vaddq_f32(vdeq, vld1q_f32(row_out_ptr + col));
@@ -1019,9 +1061,15 @@ void dequantize_block_32<float>(const DequantizeFloat &qp, unsigned int width, u
         // left-over elements
         for(; col < width; ++col) {
             const int32_t val = *(row_in_ptr + col);
-            float res = static_cast<float>(val * qp.scale);
+            float res = static_cast<float>(val) * qp.scale;
             if(bias_ptr) {
                 res += static_cast<float>(*(bias_ptr + col));
+            }
+            if(col_bias) {
+                res += static_cast<float>(-qp.a_offset * col_bias[col]) * qp.scale;
+            }
+            if(row_sum) {
+                res += row_offset;
             }
             if(accumulate) {
                 res += *(row_out_ptr + col);
