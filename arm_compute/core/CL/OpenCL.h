@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023, 2025 Arm Limited.
+ * Copyright (c) 2016-2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,11 @@
 #ifndef ARM_COMPUTE_NO_EXCEPTIONS
 #define CL_HPP_ENABLE_EXCEPTIONS
 #endif // ARM_COMPUTE_NO_EXCEPTIONS
-#define CL_TARGET_OPENCL_VERSION      300
+#define CL_TARGET_OPENCL_VERSION 300
+// Keep provisional command-buffer declarations visible in newer Khronos headers.
+#ifndef CL_ENABLE_BETA_EXTENSIONS
+#define CL_ENABLE_BETA_EXTENSIONS
+#endif // CL_ENABLE_BETA_EXTENSIONS
 #define CL_HPP_TARGET_OPENCL_VERSION  110
 #define CL_HPP_MINIMUM_OPENCL_VERSION 110
 #pragma GCC diagnostic push
