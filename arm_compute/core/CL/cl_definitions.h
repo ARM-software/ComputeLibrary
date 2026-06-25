@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Arm Limited.
+ * Copyright (c) 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,7 +25,7 @@
 #ifndef ACL_ARM_COMPUTE_CORE_CL_CL_DEFINITIONS_H
 #define ACL_ARM_COMPUTE_CORE_CL_CL_DEFINITIONS_H
 
-#include "include/CL/opencl.hpp"
+#include <CL/opencl.hpp>
 
 #define CL_DEVICE_MATRIX_MULTIPLY_FP16_WITH_FP16_ACCUMULATORS_ARM (1ULL << 0)
 #define CL_DEVICE_MATRIX_MULTIPLY_CAPABILITIES_ARM                0x41F4
