@@ -170,21 +170,24 @@ public:
     bool has_sme_b16f32() const;
     /** Sets whether SVE and SVE2 implementations are allowed to be selected at runtime.
      *
-     * @experimental This API is under development and may change or be removed without notice in future releases.
+     * @experimental
+     * This API is under development and may change or be removed without notice in future releases.
      *
      * @param[in] is_allowed True to expose detected SVE/SVE2 support, false to hide SVE/SVE2 from runtime selectors.
      */
     void set_sve_allowed(bool is_allowed);
     /** Sets whether SME and SME2 implementations are allowed to be selected at runtime.
      *
-     * @experimental This API is under development and may change or be removed without notice in future releases.
+     * @experimental
+     * This API is under development and may change or be removed without notice in future releases.
      *
      * @param[in] is_allowed True to expose detected SME/SME2 support, false to hide SME/SME2 from runtime selectors.
      */
     void set_sme_allowed(bool is_allowed);
     /** Returns whether SME and SME2 implementations are allowed to be selected at runtime.
      *
-     * @experimental This API is under development and may change or be removed without notice in future releases.
+     * @experimental
+     * This API is under development and may change or be removed without notice in future releases.
      *
      * @return true if detected SME/SME2 support is exposed to runtime selectors, false otherwise.
      */
