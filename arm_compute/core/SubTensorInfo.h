@@ -34,6 +34,7 @@
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
+#include "arm_compute/core/TensorFormat.h"
 
 #include <cstddef>
 #include <memory>
@@ -199,6 +200,17 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->is_resizable();
+    }
+    bool is_sparse() const override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        return _parent->is_sparse();
+    }
+    ITensorInfo &set_tensor_format(TensorFormat tf) override;
+    TensorFormat tensor_format() const override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        return _parent->tensor_format();
     }
     ITensorInfo &set_dynamic(bool dynamic) override;
     bool         is_dynamic() const override

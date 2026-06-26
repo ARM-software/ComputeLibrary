@@ -29,7 +29,10 @@
  */
 
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/runtime/COOTensor.h"
+#include "arm_compute/runtime/CSRTensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
+#include "arm_compute/core/IReducibleTensor.h"
 
 #include <cstdint>
 
@@ -38,7 +41,7 @@ namespace arm_compute
 class ITensorInfo;
 class IRuntimeContext;
 /** Basic implementation of the tensor interface */
-class Tensor : public ITensor, public IMemoryManageable
+class Tensor : public ITensor, public IMemoryManageable, public IReducibleTensor
 {
 public:
     /** Constructor
@@ -60,10 +63,15 @@ public:
     TensorAllocator *allocator();
 
     // Inherited methods overridden:
-    ITensorInfo *info() const override;
-    ITensorInfo *info() override;
-    uint8_t     *buffer() const override;
-    void         associate_memory_group(IMemoryGroup *memory_group) override;
+    ITensorInfo                   *info() const override;
+    ITensorInfo                   *info() override;
+    uint8_t                       *buffer() const override;
+    void                          associate_memory_group(IMemoryGroup *memory_group) override;
+    std::unique_ptr<SparseTensor> to_sparse(size_t dim) const override;
+    std::unique_ptr<COOTensor>    to_coo_sparse(size_t dim) const override;
+    std::unique_ptr<COOTensor>    to_coo_sparse() const override;
+    std::unique_ptr<CSRTensor>    to_csr_sparse(size_t dim) const override;
+    std::unique_ptr<CSRTensor>    to_csr_sparse() const override;
 
 private:
     mutable TensorAllocator _allocator; /**< Instance of the basic CPU allocator.*/

@@ -1,0 +1,355 @@
+/*
+ * Copyright (c) 2025 Arm Limited.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+#include "arm_compute/runtime/COOTensor.h"
+
+#include "arm_compute/core/CoreTypes.h"
+#include "arm_compute/core/Error.h"
+#include "arm_compute/core/TensorFormat.h"
+#include "arm_compute/runtime/Tensor.h"
+
+#include "src/core/helpers/Utils.h"
+
+#include <cstring>
+#include <numeric>
+#include <vector>
+
+
+namespace arm_compute
+{
+namespace
+{
+TensorInfo coo_tensor_info(const ITensorInfo *src_info)
+{
+    return src_info->clone()->set_tensor_format(TensorFormat::COO);
+}
+
+// For each linearised dense-block index di in [0, vol), compute the byte
+// offset of that element within the block, given the per-dimension sizes
+// and strides
+std::vector<size_t> compute_dense_offsets(const std::vector<size_t> &shape, const std::vector<size_t> &strides)
+{
+    // Both vectors must have the same length
+    ARM_COMPUTE_ERROR_ON_MSG(shape.size() != strides.size(), "shape and strides must have the same number of dimensions");
+
+    const size_t vol = std::accumulate(shape.begin(), shape.end(), size_t(1), std::multiplies<size_t>());
+    std::vector<size_t> offsets(vol, 0);
+
+    for(size_t di = 0; di < vol; di++)
+    {
+        size_t div = vol;
+        for(size_t d = 0; d < shape.size(); d++)
+        {
+            div         /= shape[d];
+            offsets[di] += ((di / div) % shape[d]) * strides[d];
+        }
+    }
+
+    return offsets;
+}
+} // namespace
+
+COOTensor::COOTensor(const ITensor *tensor, size_t sparse_dim)
+    : SparseTensor(tensor->info()->num_dimensions(), sparse_dim), _indices_bytes(0), _allocator(this)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(tensor);
+    const ITensorInfo *info = tensor->info();
+
+    ARM_COMPUTE_ERROR_ON_MSG(info->is_sparse(), "cannot create a COOTensor from a sparse tensor");
+    ARM_COMPUTE_ERROR_ON_MSG_VAR(sparse_dim < 1 || sparse_dim > dim(),
+                                 "argument must be in [1,%zu] range. %zu is given",
+                                 dim(), sparse_dim);
+
+    const uint8_t     *data = tensor->buffer() + info->offset_first_element_in_bytes();
+    const size_t dense_dims = dense_dim();
+    const auto   is_nonzero = make_is_nonzero_predicate(info->data_type());
+
+    std::vector<size_t> sparse_shape(sparse_dim);
+    std::vector<size_t> dense_shape(dense_dims);
+    for(size_t i = 0; i < sparse_dim; i++)
+    {
+        sparse_shape[i] = info->dimension(i);
+    }
+    for(size_t i = 0; i < dense_dims; i++)
+    {
+        dense_shape[i] = info->dimension(sparse_dim + i);
+    }
+
+    const size_t         step = std::accumulate(dense_shape.begin(), dense_shape.end(), size_t(1), std::multiplies<size_t>());
+    const size_t     max_iter = std::accumulate(sparse_shape.begin(), sparse_shape.end(), size_t(1), std::multiplies<size_t>());
+    const size_t element_size = info->element_size();
+    const size_t   slice_size = step * element_size;
+
+    std::vector<size_t> sparse_strides(sparse_dim);
+    std::vector<size_t> dense_strides(dense_dims);
+
+    for(size_t i = 0; i < sparse_dim; i++)
+    {
+        sparse_strides[i] = info->strides_in_bytes()[i];
+    }
+    for(size_t i = 0; i < dense_dims; i++)
+    {
+        dense_strides[i] = info->strides_in_bytes()[sparse_dim + i];
+    }
+
+    // Precompute the byte offset of each dense element within its block.
+    const auto dense_offsets = compute_dense_offsets(dense_shape, dense_strides);
+
+    auto block_has_nonzero = [&](size_t sparse_offset) -> bool
+    {
+        for(size_t di = 0; di < step; di++)
+        {
+            if(is_nonzero(data + sparse_offset + dense_offsets[di]))
+            {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // We need to calculate the allocation size before
+    size_t nnz_count = 0;
+    for(size_t i = 0; i < max_iter; i++)
+    {
+        size_t sparse_offset = 0;
+        size_t          div  = max_iter;
+
+        for(size_t sd = 0; sd < sparse_dim; sd++)
+        {
+            div            /= sparse_shape[sd];
+            sparse_offset  += ((i / div) % sparse_shape[sd]) * sparse_strides[sd];
+        }
+        if(block_has_nonzero(sparse_offset))
+        {
+            nnz_count++;
+        }
+    }
+
+    // Buffer layout: [ indices section | values section ]
+    //   indices: nnz * sparse_dim * index_size bytes
+    //   values:  nnz * slice_size bytes  (dense elements in C-order within each block)
+    _indices_bytes = nnz_count * sparse_dim * index_size;
+    const size_t value_byte_size = nnz_count * slice_size;
+
+    _allocator.init(coo_tensor_info(info), value_byte_size, _indices_bytes);
+    _allocator.allocate();
+
+    uint8_t *indices_ptr = _allocator.data();
+    uint8_t  *values_ptr = _allocator.data() + _indices_bytes;
+    size_t         entry = 0;
+
+    for(size_t i = 0; i < max_iter; i++)
+    {
+        std::vector<int32_t> multi_index(sparse_dim, int32_t{ 0 });
+        size_t sparse_offset = 0;
+        size_t           div = max_iter;
+        for(size_t sd = 0; sd < sparse_dim; sd++)
+        {
+            div              /= sparse_shape[sd];
+            multi_index[sd]   = static_cast<int32_t>((i / div) % sparse_shape[sd]);
+            sparse_offset    += static_cast<size_t>(multi_index[sd]) * sparse_strides[sd];
+        }
+
+        if(!block_has_nonzero(sparse_offset))
+        {
+            continue;
+        }
+
+        std::memcpy(indices_ptr + entry * sparse_dim * index_size, multi_index.data(), sparse_dim * index_size);
+
+        // Copy non-zero elements individually
+        for(size_t di = 0; di < step; di++)
+        {
+            std::memcpy(
+                values_ptr + entry * slice_size + di * element_size,
+                data + sparse_offset + dense_offsets[di],
+                element_size);
+        }
+        entry++;
+    }
+}
+
+COOTensor::COOTensor(const ITensor *tensor) : COOTensor(tensor, tensor->info()->num_dimensions())
+{
+}
+
+size_t COOTensor::nnz() const
+{
+    return (sparse_dim() > 0) ? (_indices_bytes / (sparse_dim() * index_size)) : 0;
+}
+
+ITensorInfo *COOTensor::info() const
+{
+    return &_allocator.info();
+}
+
+ITensorInfo *COOTensor::info()
+{
+    return &_allocator.info();
+}
+
+uint8_t *COOTensor::buffer() const
+{
+    return _allocator.data();
+}
+
+std::unique_ptr<ITensor> COOTensor::to_dense()
+{
+    std::unique_ptr<Tensor> tensor = std::make_unique<Tensor>();
+    tensor->allocator()->init(info()->clone()->set_tensor_format(TensorFormat::Dense));
+    tensor->allocator()->allocate();
+
+    const size_t      element_size = info()->element_size();
+    const size_t        total_size = info()->total_size();
+    const size_t         dense_vol = dense_volume(sparse_dim());
+    const size_t first_elem_offset = info()->offset_first_element_in_bytes();
+
+    std::memset(tensor->buffer() + first_elem_offset, 0, total_size);
+
+    if(nnz() == 0)
+    {
+        return tensor;
+    }
+
+    const size_t       sdim = sparse_dim();
+    const size_t       ddim = dense_dim();
+    const uint8_t *idx_base = _allocator.data();
+    const uint8_t *val_base = _allocator.data() + _indices_bytes;
+
+    std::vector<size_t> dense_shape(ddim);
+    std::vector<size_t> dense_strides(ddim);
+    for(size_t i = 0; i < ddim; i++)
+    {
+        dense_shape[i]   = info()->dimension(sdim + i);
+        dense_strides[i] = info()->strides_in_bytes()[sdim + i];
+    }
+
+    // Precompute the byte offset of each dense element within its block
+    const auto dense_offsets = compute_dense_offsets(dense_shape, dense_strides);
+
+    for(size_t i = 0; i < nnz(); i++)
+    {
+        const int32_t    *stored = reinterpret_cast<const int32_t *>(idx_base + i * sdim * index_size);
+        const uint8_t *block_ptr = val_base + i * dense_vol * element_size;
+
+        size_t sparse_offset = 0;
+        for(size_t d = 0; d < sdim; d++)
+        {
+            sparse_offset += static_cast<size_t>(stored[d]) * info()->strides_in_bytes()[d];
+        }
+
+        for(size_t di = 0; di < dense_vol; di++)
+        {
+            std::memcpy(
+                tensor->buffer() + first_elem_offset + sparse_offset + dense_offsets[di],
+                block_ptr + di * element_size,
+                element_size);
+        }
+    }
+
+    return tensor;
+}
+
+Coordinates COOTensor::get_coordinates(size_t nth) const
+{
+    ARM_COMPUTE_ERROR_ON_MSG(nth >= nnz(), "Invalid index");
+
+    const size_t        sdim = sparse_dim();
+    const int32_t *index_ptr = reinterpret_cast<const int32_t *>(_allocator.data() + nth * sdim * index_size);
+    std::vector<int32_t>  coords_data(index_ptr, index_ptr + sdim);
+
+    return Coordinates(coords_data);
+}
+
+const uint8_t *COOTensor::get_value(Coordinates coords) const
+{
+    ARM_COMPUTE_ERROR_ON_MSG(coords.num_dimensions() != info()->num_dimensions(), "Invalid coordinate dimension");
+    for(size_t i = 0; i < coords.num_dimensions(); ++i)
+    {
+        ARM_COMPUTE_ERROR_ON_MSG(static_cast<size_t>(coords[i]) >= info()->tensor_shape()[i], "Invalid coordinates shape");
+    }
+
+    const size_t          n = nnz();
+    const size_t       sdim = sparse_dim();
+    const size_t  dense_vol = dense_volume(sdim);
+    const size_t  elem_size = info()->element_size();
+    const uint8_t *idx_base = _allocator.data();
+    const uint8_t *val_base = _allocator.data() + _indices_bytes;
+
+    for(size_t i = 0; i < n; i++)
+    {
+        const int32_t *stored = reinterpret_cast<const int32_t *>(idx_base + i * sdim * index_size);
+        bool            match = true;
+
+        for(size_t d = 0; d < sdim; d++)
+        {
+            if(stored[d] != coords[d])
+            {
+                match = false;
+                break;
+            }
+        }
+        if(match)
+        {
+            return val_base + i * dense_vol * elem_size;
+        }
+    }
+
+    // This coordinates point to a zero value
+    return nullptr;
+}
+
+void COOTensor::associate_memory_group(IMemoryGroup *memory_group)
+{
+    _allocator.set_associated_memory_group(memory_group);
+}
+
+#ifdef ARM_COMPUTE_ASSERTS_ENABLED
+void COOTensor::print(std::ostream &os) const
+{
+    if(nnz() == 0)
+    {
+        os << "index: [] values: []" << std::endl;
+        return;
+    }
+
+    const size_t       sdim = sparse_dim();
+    const uint8_t *idx_base = _allocator.data();
+    const uint8_t *val_base = _allocator.data() + _indices_bytes;
+
+    for(size_t i = 0; i < nnz(); i++)
+    {
+        const int32_t *stored = reinterpret_cast<const int32_t *>(idx_base + i * sdim * index_size);
+        os << "index: [";
+        for(size_t d = 0; d < sdim; d++)
+        {
+            os << stored[d];
+            if(d < sdim - 1) os << ", ";
+        }
+        os << "]  values: ";
+        print_values(os, val_base, i, dense_volume(sparse_dim()));
+    }
+}
+#endif // ARM_COMPUTE_ASSERTS_ENABLED
+
+} // namespace arm_compute

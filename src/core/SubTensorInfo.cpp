@@ -133,6 +133,12 @@ ITensorInfo &SubTensorInfo::set_tensor_dims_state(const TensorDimsState &state)
     return *this;
 }
 
+ITensorInfo &SubTensorInfo::set_tensor_format(TensorFormat tf)
+{
+    ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+    return _parent->set_tensor_format(tf);
+}
+
 ITensorInfo &SubTensorInfo::set_dynamic(bool dynamic)
 {
     if (dynamic)

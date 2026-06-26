@@ -34,6 +34,7 @@
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/TensorFormat.h"
 
 #include "ITensorInfo.h"
 #include <cstddef>
@@ -278,6 +279,19 @@ public:
     {
         return _is_resizable;
     }
+    bool is_sparse() const override
+    {
+        return _tensor_format != TensorFormat::Dense;
+    }
+    TensorFormat tensor_format() const override
+    {
+        return _tensor_format;
+    }
+    ITensorInfo &set_tensor_format(TensorFormat tf) override
+    {
+        _tensor_format = tf;
+        return *this;
+    }
     ITensorInfo &set_dynamic(bool dynamic) override
     {
         std::fill(std::begin(_dims_state), std::end(_dims_state),
@@ -362,6 +376,7 @@ private:
     bool             _are_values_constant;
     ITensorInfo::Id  _id;
     bool             _lock_paddings;
+    TensorFormat     _tensor_format;
 };
 
 /** Check whether two tensor info are equal.
