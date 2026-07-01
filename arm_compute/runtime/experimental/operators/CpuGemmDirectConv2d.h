@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Arm Limited.
+ * Copyright (c) 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,6 +71,8 @@ public:
      * |:--------------|:--------------|:--------------|:--------------|
      * |QASYMM8        |QASYMM8        |S32            |QASYMM8        |
      * |QASYMM8_SIGNED |QASYMM8_SIGNED |S32            |QASYMM8_SIGNED |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |F32            |F32            |
+     * |QASYMM8_SIGNED |QASYMM8_SIGNED |F16            |F16            |
      * |F16            |F16            |F16            |F16            |
      * |F32            |F32            |F32            |F32            |
      * |BFLOAT16       |BFLOAT16       |BFLOAT16       |BFLOAT16       |
@@ -82,8 +84,10 @@ public:
      *                    Data type supported: QASYMM8/QASYMM8_SIGNED/QSYMM8_PER_CHANNEL/BFLOAT16/F16/F32.
      * @param[in] biases  Biases tensor info. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                    Data type supported: Should match @p input data type, except for input of QASYMM8/QASYMM8_SIGNED type where biases should be of S32 type.
+     *                    For floating-point dequantization the bias must match @p dst.
      * @param[in] dst     Destination tensor info. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
-     *                    Data types supported: Same as @p input.
+     *                    Data types supported: Same as @p input, except for the QASYMM8_SIGNED to floating-point output path
+     *                    listed above.
      * @param[in] info    Contains padding and stride information described in @ref PadStrideInfo.
      */
     void configure(const ITensorInfo *src,

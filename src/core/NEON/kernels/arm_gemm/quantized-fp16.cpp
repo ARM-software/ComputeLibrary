@@ -35,7 +35,8 @@ namespace arm_gemm {
 template<>
 void dequantize_block_32<__fp16>(const DequantizeFloat &qp, unsigned int width, unsigned int height,
                                  const int32_t * in_ptr, unsigned int in_stride, __fp16 *out_ptr, unsigned int out_stride,
-                                 const __fp16 * bias_ptr, bool not_first_pass, const Activation &act)
+                                 const __fp16 * bias_ptr, bool not_first_pass, const Activation &act,
+                                 const int32_t * col_bias, const int32_t * row_sum, int32_t k_total)
 {
     const float32x4_t vscale = vdupq_n_f32(qp.scale);
     float maxval = std::numeric_limits<float>::infinity();
@@ -57,11 +58,25 @@ void dequantize_block_32<__fp16>(const DequantizeFloat &qp, unsigned int width, 
     const float16x8_t vmax = vdupq_n_f16(static_cast<__fp16>(maxval));
 
     for(unsigned int row=0; row<height; row++) {
+        auto row_in_ptr = in_ptr + (row * in_stride);
+        auto row_out_ptr = out_ptr + (row * out_stride);
+
+        float row_offset = 0.0f;
+        if (row_sum != nullptr) {
+            row_offset += static_cast<float>(-qp.b_offset * row_sum[row]) * qp.scale;
+        }
+        const int32_t effective_k_total = (qp.depth != 0) ? qp.depth : k_total;
+        if (col_bias != nullptr && row_sum != nullptr && effective_k_total != 0) {
+            row_offset += static_cast<float>(qp.a_offset) * static_cast<float>(qp.b_offset)
+                          * static_cast<float>(effective_k_total) * qp.scale;
+        }
+        const float32x4_t vrow_offset = vdupq_n_f32(row_offset);
+
         unsigned int col=0;
         if (width >= 8) {
             for(; col <= (width-8); col+=8) {
-                const int32x4_t vin0 = vld1q_s32(in_ptr + col + (row * in_stride));
-                const int32x4_t vin1 = vld1q_s32(in_ptr + col + 4 + (row * in_stride));
+                const int32x4_t vin0 = vld1q_s32(row_in_ptr + col);
+                const int32x4_t vin1 = vld1q_s32(row_in_ptr + col + 4);
 
                 float32x4_t vdeq0 = vmulq_f32(vcvtq_f32_s32(vin0), vscale);
                 float32x4_t vdeq1 = vmulq_f32(vcvtq_f32_s32(vin1), vscale);
@@ -75,8 +90,24 @@ void dequantize_block_32<__fp16>(const DequantizeFloat &qp, unsigned int width, 
                     vdeq1 = vaddq_f32(vdeq1, bin1);
                 }
 
+                if(col_bias) {
+                    const float32x4_t vcol_corr0 = vmulq_f32(
+                        vcvtq_f32_s32(vld1q_s32(col_bias + col)),
+                        vdupq_n_f32(static_cast<float>(-qp.a_offset) * qp.scale));
+                    const float32x4_t vcol_corr1 = vmulq_f32(
+                        vcvtq_f32_s32(vld1q_s32(col_bias + col + 4)),
+                        vdupq_n_f32(static_cast<float>(-qp.a_offset) * qp.scale));
+                    vdeq0 = vaddq_f32(vdeq0, vcol_corr0);
+                    vdeq1 = vaddq_f32(vdeq1, vcol_corr1);
+                }
+
+                if(row_sum) {
+                    vdeq0 = vaddq_f32(vdeq0, vrow_offset);
+                    vdeq1 = vaddq_f32(vdeq1, vrow_offset);
+                }
+
                 if(not_first_pass) {
-                    const float16x8_t in = vld1q_f16(out_ptr + col + (row * out_stride));
+                    const float16x8_t in = vld1q_f16(row_out_ptr + col);
                     const float32x4_t in0 = vcvt_f32_f16(vget_low_f16(in));
                     const float32x4_t in1 = vcvt_f32_f16(vget_high_f16(in));
 
@@ -87,21 +118,27 @@ void dequantize_block_32<__fp16>(const DequantizeFloat &qp, unsigned int width, 
                 float16x8_t vdeq16 = vcombine_f16(vcvt_f16_f32(vdeq0), vcvt_f16_f32(vdeq1));
 
                 vdeq16 = vminq_f16(vmaxq_f16(vdeq16, vmin), vmax);
-                vst1q_f16(out_ptr + col + (row * out_stride), vdeq16);
+                vst1q_f16(row_out_ptr + col, vdeq16);
             }
         }
         // left-over elements
         for(; col < width; ++col) {
-            const int32_t val = *(in_ptr + (row * in_stride) + col);
-            float res = static_cast<float>(val * qp.scale);
+            const int32_t val = *(row_in_ptr + col);
+            float res = static_cast<float>(val) * qp.scale;
             if(bias_ptr) {
                 res += static_cast<float>(*(bias_ptr + col));
             }
+            if(col_bias) {
+                res += static_cast<float>(-qp.a_offset * col_bias[col]) * qp.scale;
+            }
+            if(row_sum) {
+                res += row_offset;
+            }
             if(not_first_pass) {
-                res += *(out_ptr + (row * out_stride) + col);
+                res += *(row_out_ptr + col);
             }
             res = std::min(std::max(res, minval), maxval);
-            *(out_ptr + (row * out_stride) + col) = static_cast<__fp16>(res);
+            *(row_out_ptr + col) = static_cast<__fp16>(res);
         }
     }
 }

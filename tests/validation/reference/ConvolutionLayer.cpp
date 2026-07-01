@@ -127,11 +127,16 @@ SimpleTensor<TO> convolution_layer(const SimpleTensor<TI> &src,
     DataType         dst_dt    = src.data_type();
     QuantizationInfo dst_qinfo = out_quant_info;
 
-    // For float output we override both
+    // For floating-point output we override both
     if (std::is_same<TO, float>::value)
     {
         dst_dt    = DataType::F32;
         dst_qinfo = QuantizationInfo(); // no quantization for F32
+    }
+    else if (std::is_same<TO, half>::value)
+    {
+        dst_dt    = DataType::F16;
+        dst_qinfo = QuantizationInfo(); // no quantization for F16
     }
 
     SimpleTensor<TO> dst{output_shape, dst_dt, 1, dst_qinfo};
@@ -148,6 +153,15 @@ template SimpleTensor<float> convolution_layer<int8_t, int8_t, float, float>(con
                                                                              const Size2D               &dilation,
                                                                              unsigned int                num_groups,
                                                                              QuantizationInfo out_quant_info);
+// Dequantize i8+i8->F16
+template SimpleTensor<half> convolution_layer<int8_t, int8_t, half, half>(const SimpleTensor<int8_t> &src,
+                                                                          const SimpleTensor<int8_t> &weights,
+                                                                          const SimpleTensor<half>   &bias,
+                                                                          const TensorShape          &output_shape,
+                                                                          const PadStrideInfo        &info,
+                                                                          const Size2D               &dilation,
+                                                                          unsigned int                num_groups,
+                                                                          QuantizationInfo            out_quant_info);
 // Dequantize u8+u8->F32
 template SimpleTensor<float> convolution_layer<uint8_t, uint8_t, float, float>(const SimpleTensor<uint8_t> &src,
                                                                                const SimpleTensor<uint8_t> &weights,

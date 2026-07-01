@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023, 2025 Arm Limited.
+ * Copyright (c) 2017-2021, 2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -212,7 +212,7 @@ inline void convolution3d(const SimpleTensor<TI> &in,
         }
     }
 
-    if (std::is_same<TO, float>::value)
+    if (validation::is_floating_point<TO>::value)
     {
         const float scale = input_scale * weights_scale;
 
@@ -223,8 +223,8 @@ inline void convolution3d(const SimpleTensor<TI> &in,
             b = static_cast<float>(*b_ptr) * scale;
         }
         else
-        { // TB == float
-            // New path: bias already in float units
+        {
+            // Bias already uses the floating-point output units.
             b = static_cast<float>(*b_ptr);
         }
 

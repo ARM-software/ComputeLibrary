@@ -541,26 +541,50 @@ DATA_TEST_CASE(
                             1,
                             DataType::QASYMM8_SIGNED,
                             QuantizationInfo(1.f / 255, 10)), // Invalid types
+                 TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f / 255, 10)),
+                 TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8, QuantizationInfo(1.f / 255, 10)),
              }),
         make("InputBInfo",
              {
                  TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f / 256, 10)),
                  TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f / 256, 10)),
                  TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8, QuantizationInfo(1.f / 256, 10)),
+                 TensorInfo(TensorShape(64U, 16U),
+                            1,
+                            DataType::QASYMM8_SIGNED,
+                            QuantizationInfo({1.f / 256, 2.f / 256}, {10, 10})),
+                 TensorInfo(TensorShape(64U, 16U),
+                            1,
+                            DataType::QASYMM8_SIGNED,
+                            QuantizationInfo({1.f / 256, 2.f / 256}, {10, 10})),
              }),
         make("OutputInfo",
              {
                  TensorInfo(TensorShape(64U, 32U), 1, DataType::F32),
                  TensorInfo(TensorShape(64U, 32U), 1, DataType::F32),
                  TensorInfo(TensorShape(64U, 32U), 1, DataType::F32),
+                 TensorInfo(TensorShape(64U, 32U), 1, DataType::F32),
+                 TensorInfo(TensorShape(64U, 32U), 1, DataType::F32),
              }),
-        make("Expected", {true, true, false})),
+        make("Expected", {true, true, false, false, false})),
     a_info,
     b_info,
     output_info,
     expected)
 {
     // Lock tensors
+    Status status = NEGEMMLowpMatrixMultiplyCore::validate(&a_info.clone()->set_is_resizable(false),
+                                                           &b_info.clone()->set_is_resizable(false), nullptr,
+                                                           &output_info.clone()->set_is_resizable(false));
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+
+DATA_TEST_CASE(ValidateMixedSignF16Unsupported, framework::DatasetMode::ALL, make("Expected", {false}), expected)
+{
+    TensorInfo a_info(TensorShape(16U, 32U), 1, DataType::QASYMM8, QuantizationInfo(1.f / 255, 10));
+    TensorInfo b_info(TensorShape(64U, 16U), 1, DataType::QASYMM8_SIGNED, QuantizationInfo(1.f / 256, 10));
+    TensorInfo output_info(TensorShape(64U, 32U), 1, DataType::F16);
+
     Status status = NEGEMMLowpMatrixMultiplyCore::validate(&a_info.clone()->set_is_resizable(false),
                                                            &b_info.clone()->set_is_resizable(false), nullptr,
                                                            &output_info.clone()->set_is_resizable(false));
@@ -576,6 +600,23 @@ FIXTURE_DATA_TEST_CASE(RunSmall,
                                make("DataTypeB", DataType::QASYMM8_SIGNED),
                                make("DataTypeB", DataType::F32),
                                make("accumulate", {true, false})))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_dequantized);
+}
+
+FIXTURE_DATA_TEST_CASE(RunMixedSignNonZeroOffsets,
+                       NEGEMMLowpDequantizedF32MatrixMultiplyValidationFixture,
+                       framework::DatasetMode::ALL,
+                       combine(make("A", TensorShape(31U, 27U)),
+                               make("B", TensorShape(23U, 31U)),
+                               make("C", TensorShape(23U, 27U)),
+                               make("a_offset", 5),
+                               make("b_offset", 13),
+                               make("DataTypeA", DataType::QASYMM8),
+                               make("DataTypeB", DataType::QASYMM8_SIGNED),
+                               make("OutputDataType", DataType::F32),
+                               make("accumulate", false)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_dequantized);

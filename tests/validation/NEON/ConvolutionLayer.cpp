@@ -42,6 +42,7 @@
 #include "tests/NEON/Accessor.h"
 #include "tests/validation/fixtures/ConvolutionLayerFixture.h"
 #include "tests/validation/fixtures/WinogradConvolutionLayerFixture.h"
+#include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
 
 namespace arm_compute
@@ -306,11 +307,168 @@ FIXTURE_DATA_TEST_CASE(
 {
     validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
 }
-TEST_SUITE_END() // QASYMM8_SIGNED
-#endif // #ifdef __aarch64__
 
 // clang-format on
 // *INDENT-ON*
+
+TEST_SUITE(DequantizeFloat)
+
+const auto DequantizeFloatOffsetsDataset =
+    zip(make("InputQI",
+             {QuantizationInfo(0.25f, 0), QuantizationInfo(0.25f, -10), QuantizationInfo(0.25f, 12),
+              QuantizationInfo(0.25f, 0), QuantizationInfo(0.25f, 0), QuantizationInfo(0.25f, -20),
+              QuantizationInfo(0.01f, 100)}),
+        make("WeightsQI",
+             {QuantizationInfo(0.125f, 0), QuantizationInfo(0.125f, 0), QuantizationInfo(0.125f, 0),
+              QuantizationInfo(0.125f, 5), QuantizationInfo(0.125f, -8), QuantizationInfo(0.125f, 10),
+              QuantizationInfo(0.01f, -100)}));
+
+const auto DequantizeFloatBasicActivationDataset =
+    make("ActivationInfo", {ActivationLayerInfo(), ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)});
+
+/** Validate accepts QASYMM8_SIGNED to floating-point dequantized convolutions with zero and non-zero offsets, and rejects
+ *  mixed-sign input/weight configurations.
+ *  Shapes use NHWC: [C, W, H] for input/output, [Cin, Kw, Kh, Cout] for weights. */
+DATA_TEST_CASE(Validate,
+               framework::DatasetMode::ALL,
+               zip(make("SrcInfo",
+                        {TensorInfo(TensorShape(16U, 8U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                         TensorInfo(TensorShape(32U, 4U, 4U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                         TensorInfo(TensorShape(16U, 8U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                         TensorInfo(TensorShape(16U, 8U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                         TensorInfo(TensorShape(16U, 8U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                         TensorInfo(TensorShape(16U, 8U, 8U), 1, DataType::QASYMM8, DataLayout::NHWC)}),
+                   make("WgtInfo",
+                        {TensorInfo(TensorShape(16U, 3U, 3U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                         TensorInfo(TensorShape(32U, 1U, 1U, 16U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                         TensorInfo(TensorShape(16U, 3U, 3U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                         TensorInfo(TensorShape(16U, 3U, 3U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                         TensorInfo(TensorShape(16U, 3U, 3U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC),
+                         TensorInfo(TensorShape(16U, 3U, 3U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC)}),
+                   make("BiasInfo",
+                        {TensorInfo(TensorShape(8U), 1, DataType::F32), TensorInfo(TensorShape(16U), 1, DataType::F32),
+                         TensorInfo(TensorShape(8U), 1, DataType::F32), TensorInfo(TensorShape(8U), 1, DataType::F32),
+                         TensorInfo(TensorShape(8U), 1, DataType::F16), TensorInfo(TensorShape(8U), 1, DataType::F32)}),
+                   make("DstInfo",
+                        {TensorInfo(TensorShape(8U, 6U, 6U), 1, DataType::F32, DataLayout::NHWC),
+                         TensorInfo(TensorShape(16U, 4U, 4U), 1, DataType::F32, DataLayout::NHWC),
+                         TensorInfo(TensorShape(8U, 6U, 6U), 1, DataType::F32, DataLayout::NHWC),
+                         TensorInfo(TensorShape(8U, 6U, 6U), 1, DataType::F32, DataLayout::NHWC),
+                         TensorInfo(TensorShape(8U, 6U, 6U), 1, DataType::F16, DataLayout::NHWC),
+                         TensorInfo(TensorShape(8U, 6U, 6U), 1, DataType::F32, DataLayout::NHWC)}),
+                   make("SrcOffset", {0, 0, 5, -10, 0, 0}),
+                   make("WgtOffset", {0, 0, 0, 3, 0, 0}),
+                   make("Expected", {true, true, true, true, true, false})),
+               src_info_const,
+               wgt_info_const,
+               bias_info_const,
+               dst_info_const,
+               src_offset,
+               wgt_offset,
+               expected)
+{
+    TensorInfo src_info  = src_info_const;
+    TensorInfo wgt_info  = wgt_info_const;
+    TensorInfo bias_info = bias_info_const;
+    TensorInfo dst_info  = dst_info_const;
+    src_info.set_quantization_info(QuantizationInfo(0.25f, src_offset));
+    wgt_info.set_quantization_info(QuantizationInfo(0.125f, wgt_offset));
+
+    const Status s               = NEConvolutionLayer::validate(&src_info, &wgt_info, &bias_info, &dst_info,
+                                                                PadStrideInfo(1, 1, 0, 0), WeightsInfo(), Size2D(1U, 1U),
+                                                                ActivationLayerInfo(), false /*fast_math*/, 1 /*num_groups*/);
+    const bool   expected_result = expected && cpu_supports_dtypes({src_info.data_type(), wgt_info.data_type(),
+                                                                    bias_info.data_type(), dst_info.data_type()});
+    ARM_COMPUTE_EXPECT(bool(s) == expected_result, framework::LogLevel::ERRORS);
+}
+
+/** Verify method selection for NHWC QASYMM8_SIGNED to floating-point dequantized convolution. */
+TEST_CASE(GetConvMethod, framework::DatasetMode::ALL)
+{
+    const QuantizationInfo qi(0.25f, 0);
+    for (const DataType data_type : {DataType::F32, DataType::F16})
+    {
+        TensorInfo src_info(TensorShape(16U, 8U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC);
+        TensorInfo wgt_info(TensorShape(16U, 3U, 3U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC);
+        TensorInfo dst_info(TensorShape(8U, 6U, 6U), 1, data_type, DataLayout::NHWC);
+        src_info.set_quantization_info(qi);
+        wgt_info.set_quantization_info(qi);
+
+        const ConvolutionMethod m = NEConvolutionLayer::get_convolution_method(
+            &src_info.clone()->set_is_resizable(true), &wgt_info.clone()->set_is_resizable(true),
+            &dst_info.clone()->set_is_resizable(true), PadStrideInfo(1, 1, 0, 0), WeightsInfo(), Size2D(1U, 1U),
+            ActivationLayerInfo(), false /*fast_math*/);
+        const bool expected_direct_conv = cpu_supports_dtypes({src_info.data_type(), wgt_info.data_type(), data_type});
+        ARM_COMPUTE_EXPECT((m == ConvolutionMethod::GEMM_CONV2D) == expected_direct_conv, framework::LogLevel::ERRORS);
+    }
+}
+
+TEST_CASE(ValidateRejectsPerChannelWeightScales, framework::DatasetMode::ALL)
+{
+    const QuantizationInfo src_qinfo(0.25f, 0);
+    const QuantizationInfo weights_qinfo({0.125f, 0.25f, 0.5f, 1.f, 2.f, 4.f, 8.f, 16.f}, {0, 0, 0, 0, 0, 0, 0, 0});
+
+    TensorInfo src_info(TensorShape(16U, 8U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC);
+    TensorInfo wgt_info(TensorShape(16U, 3U, 3U, 8U), 1, DataType::QASYMM8_SIGNED, DataLayout::NHWC);
+    TensorInfo bias_info(TensorShape(8U), 1, DataType::F32);
+    TensorInfo dst_info(TensorShape(8U, 6U, 6U), 1, DataType::F32, DataLayout::NHWC);
+
+    src_info.set_quantization_info(src_qinfo);
+    wgt_info.set_quantization_info(weights_qinfo);
+
+    const Status status = NEConvolutionLayer::validate(&src_info, &wgt_info, &bias_info, &dst_info,
+                                                       PadStrideInfo(1, 1, 0, 0), WeightsInfo(), Size2D(1U, 1U),
+                                                       ActivationLayerInfo(), false /*fast_math*/, 1 /*num_groups*/);
+    ARM_COMPUTE_EXPECT(!bool(status), framework::LogLevel::ERRORS);
+}
+
+using NEDequantizeFloatConvolutionFixture = DequantizeFloatConvolutionFixture<Tensor, Accessor, NEConvolutionLayer>;
+#if defined(ARM_COMPUTE_ENABLE_FP16)
+using NEDequantizeFloatF16ConvolutionFixture =
+    DequantizeFloatConvolutionFixture<Tensor, Accessor, NEConvolutionLayer, half>;
+#endif // ARM_COMPUTE_ENABLE_FP16
+
+/** SmallConvolutionLayerDataset covers 1x1, 2x2, 3x3, 4x4, 5x5 and 5x7 convolutions, including stride,
+ *  padding, asymmetric padding and batch cases. */
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       NEDequantizeFloatConvolutionFixture,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataLayout", {DataLayout::NHWC}),
+                               DequantizeFloatBasicActivationDataset,
+                               DequantizeFloatOffsetsDataset))
+{
+    validate(Accessor(_target), _reference, rel_tolerance_f32, tolerance_num_dequantize_f32, float(abs_tolerance_f32));
+}
+
+#if defined(ARM_COMPUTE_ENABLE_FP16)
+FIXTURE_DATA_TEST_CASE(RunF16NonZeroOffsets,
+                       NEDequantizeFloatF16ConvolutionFixture,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallConvolutionLayerDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataLayout", {DataLayout::NHWC}),
+                               make("ActivationInfo", {ActivationLayerInfo()}),
+                               zip(make("InputQI", {QuantizationInfo(0.25f, -10)}),
+                                   make("WeightsQI", {QuantizationInfo(0.125f, 5)}))))
+{
+    if (CPUInfo::get().has_fp16())
+    {
+        validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, half(abs_tolerance_f16));
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
+    }
+}
+#endif // ARM_COMPUTE_ENABLE_FP16
+
+TEST_SUITE_END() // DequantizeFloat
+TEST_SUITE_END() // QASYMM8_SIGNED
+#endif           // #ifdef __aarch64__
+
 TEST_SUITE_END() // ConvolutionLayer
 
 /*
