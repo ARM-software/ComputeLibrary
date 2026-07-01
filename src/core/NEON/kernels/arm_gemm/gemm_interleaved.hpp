@@ -1263,12 +1263,30 @@ public:
             const DequantizeFloat *dq = reinterpret_cast<const DequantizeFloat *>(&_os);
             if (dq->a_offset != 0) {
                 // Compute raw column sums of B (weight matrix) for use in a_offset correction.
-                // dequantize_block_32 applies: -a_offset * col_sums[n] * scale per output channel.
+                // dequantize_block_32 applies: -a_offset * col_bias[n] * scale per output channel.
+                //
+                // Fold the a_offset*b_offset*K cross-term into col_bias here by subtracting
+                // b_offset * K from each raw column sum, where K is the *real* (unpadded) number of
+                // accumulation terms per output = _Ksize * _Ksections.  With that,
+                //   -a_offset * col_bias[n] * scale
+                //     = -a_offset * (sum_b[n] - b_offset*K) * scale
+                //     = -a_offset*sum_b[n]*scale + a_offset*b_offset*K*scale
+                // captures both the a_offset correction and the cross-term using the real K, so the
+                // merge kernel does not need to reconstruct K (which it only knows as the *padded*
+                // kern_k = _Ksections * roundup(_Ksize, k_unroll) and would over-count the cross-term
+                // for kernels whose per-section K is rounded up, e.g. 1x1-channel convolutions).
+                const int32_t k_real = static_cast<int32_t>(_Ksize) * static_cast<int32_t>(_Ksections);
                 col_bias = reinterpret_cast<int32_t *>(in_buffer);
                 for (unsigned int i = 0; i < _nmulti; ++i) {
                     compute_raw_col_sums(_Nsize, _Ksize * _Ksections,
                                          B + (i * B_multi_stride), ldb,
                                          col_bias + (i * _Nsize));
+                    if (dq->b_offset != 0) {
+                        int32_t *col_bias_multi = col_bias + (i * _Nsize);
+                        for (unsigned int n = 0; n < _Nsize; ++n) {
+                            col_bias_multi[n] -= dq->b_offset * k_real;
+                        }
+                    }
                 }
             }
         }

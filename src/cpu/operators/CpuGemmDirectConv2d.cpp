@@ -101,6 +101,30 @@ cpu::AsmGemmInfo init_assembly_metadata(const Conv2dInfo &info, bool is_indirect
     asm_info.use_fp32_acc            = info.use_fp32_acc;
     return asm_info;
 }
+
+// Build the assembly metadata shared by configure() and validate() so that both paths derive an
+// identical AsmGemmInfo.  Keeping this in one place prevents the two code paths from drifting (e.g.
+// validate() checking the dispatch without the dequant offsets that configure() actually uses).
+cpu::AsmGemmInfo build_asm_metadata(const ITensorInfo *src,
+                                    const ITensorInfo *weights,
+                                    const ITensorInfo *dst,
+                                    const Conv2dInfo  &info)
+{
+    cpu::AsmGemmInfo asm_info = init_assembly_metadata(info, false);
+    if (is_direct_i8_s8_f32_path(src, dst))
+    {
+        // Provide the quantization zero-points via AsmGemmInfo so that create_arm_gemm_dequant
+        // can bake them into the DequantizeFloat output stage.  The assembly kernel then handles
+        // all offset corrections (col sums, row sums, cross-term) natively.
+        asm_info.dequant_a_offset = src->quantization_info().uniform().offset;
+        asm_info.dequant_b_offset = weights->quantization_info().uniform().offset;
+    }
+    else if (is_data_type_quantized(src->data_type()))
+    {
+        asm_info.output_stage = calculate_output_stage_metadata(src, weights, dst, info.act_info);
+    }
+    return asm_info;
+}
 } // namespace
 
 CpuGemmDirectConv2d::CpuGemmDirectConv2d()
@@ -133,20 +157,8 @@ void CpuGemmDirectConv2d::configure(const ITensorInfo *src,
 
     _weights_permute_func->configure(weights, &_perm_weights, PermutationVector{3, 0, 1, 2});
 
-    // Configure assembly dispatch
-    cpu::AsmGemmInfo asm_info = init_assembly_metadata(info, false);
-    if (is_direct_i8_s8_f32_path(src, dst))
-    {
-        // Provide the quantization zero-points via AsmGemmInfo so that create_arm_gemm_dequant
-        // can bake them into the DequantizeFloat output stage.  The assembly kernel then handles
-        // all offset corrections (col sums, row sums, cross-term) natively.
-        asm_info.dequant_a_offset = src->quantization_info().uniform().offset;
-        asm_info.dequant_b_offset = weights->quantization_info().uniform().offset;
-    }
-    else if (is_data_type_quantized(src->data_type()))
-    {
-        asm_info.output_stage = calculate_output_stage_metadata(src, weights, dst, info.act_info);
-    }
+    // Configure assembly dispatch (validate() derives the same metadata via build_asm_metadata)
+    cpu::AsmGemmInfo asm_info = build_asm_metadata(src, weights, dst, info);
     _gemm_asm_func->configure(src, &_perm_weights, biases, dst, asm_info);
 
     // Configure activation
@@ -249,7 +261,10 @@ Status CpuGemmDirectConv2d::validate(const ITensorInfo *src,
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(src, dst);
     }
 
-    cpu::AsmGemmInfo asm_info = init_assembly_metadata(info, false);
+    // Build the same AsmGemmInfo that configure() uses (including dequant_a_offset/dequant_b_offset
+    // for the QASYMM8_SIGNED->F32 direct path) so that validation and execution use equivalent
+    // metadata.
+    cpu::AsmGemmInfo asm_info = build_asm_metadata(src, weights, dst, info);
     ARM_COMPUTE_RETURN_ON_ERROR(cpu::CpuGemmAssemblyDispatch::validate(src, weights, biases, dst, asm_info));
     return Status{};
 }

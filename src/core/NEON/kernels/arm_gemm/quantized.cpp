@@ -994,7 +994,7 @@ template<>
 void dequantize_block_32<float>(const DequantizeFloat &qp, unsigned int width, unsigned int height,
                          const int32_t* in_ptr, unsigned int in_stride, float *out_ptr, unsigned int out_stride,
                          const float* bias_ptr, bool accumulate, const Activation &act,
-                         const int32_t *col_bias, const int32_t *row_sum, int32_t k_total)
+                         const int32_t *col_bias, const int32_t *row_sum, int32_t /*k_total*/)
 {
     const float32x4_t vscale = vdupq_n_f32(qp.scale);
     float maxval = std::numeric_limits<float>::infinity();
@@ -1019,17 +1019,13 @@ void dequantize_block_32<float>(const DequantizeFloat &qp, unsigned int width, u
         auto row_in_ptr = in_ptr + (row * in_stride);
         auto row_out_ptr = out_ptr + (row * out_stride);
 
-        // Per-row addend from b_offset correction: -b_offset * sum_a_row[m] * scale
+        // Per-row addend from b_offset correction: -b_offset * sum_a_row[m] * scale.
         // row_sum values are packed with multiplier=1, so entry is plain sum(a_row[k]).
-        // Also add the cross-term: +a_offset * b_offset * K * scale (constant per tile).
+        // The a_offset*b_offset*K cross-term is folded into col_bias by the caller
+        // (see GemmInterleaved::requantize_bias) so it does not need K here.
         float row_offset = 0.0f;
         if (row_sum != nullptr) {
             row_offset += static_cast<float>(-qp.b_offset * row_sum[row]) * qp.scale;
-        }
-        if (col_bias != nullptr && row_sum != nullptr && k_total != 0) {
-            // Cross-term: +a_offset * b_offset * K * scale
-            row_offset += static_cast<float>(qp.a_offset) * static_cast<float>(qp.b_offset)
-                          * static_cast<float>(k_total) * qp.scale;
         }
         const float32x4_t vrow_offset = vdupq_n_f32(row_offset);
 
