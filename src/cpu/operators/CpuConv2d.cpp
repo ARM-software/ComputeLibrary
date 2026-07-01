@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,7 @@ void CpuConv2d::configure(ITensorInfo               *input,
     ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, weights_info, dilation, act_info,
                            enable_fast_math, num_groups);
 
-    const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
+    const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups, weights_info);
     switch (CpuConv2d::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info,
                                               enable_fast_math))
     {
@@ -119,7 +119,8 @@ Status CpuConv2d::validate(const ITensorInfo         *input,
     ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "CpuConv2d::validate");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1), "Grouping (num_groups != 1) is not supported on Neon");
 
-    const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
+    const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups, weights_info);
+
     switch (CpuConv2d::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info,
                                               enable_fast_math))
     {
@@ -155,7 +156,17 @@ ConvolutionMethod CpuConv2d::get_convolution_method(const ITensorInfo         *i
                                                     bool                       enable_fast_math)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, weights);
-    ARM_COMPUTE_UNUSED(weights_info);
+
+    // For QASYMM8_SIGNED→F32 with NHWC and no dilation, automatically select the single-kernel
+    // CpuGemmDirectConv2d path when it validates successfully.
+    if (input->data_type() == DataType::QASYMM8_SIGNED && output->data_type() == DataType::F32)
+    {
+        const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, 1, weights_info);
+        if (bool(CpuGemmDirectConv2d::validate(input, weights, nullptr, output, info)))
+        {
+            return ConvolutionMethod::GEMM_CONV2D;
+        }
+    }
 
     const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);

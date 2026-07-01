@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Arm Limited.
+ * Copyright (c) 2021-2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -211,6 +211,7 @@ private:
      *
      * @param[in] src           Input tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32.
      * @param[in] weights       Weights tensor info. Data types supported: QASYMM8/QASYMM8_SIGNED/BFLOAT16/F16/F32.
+     * @param[in] dst           Output tensor info.
      * @param[in] act_info      Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      * @param[in] gemm_3d_depth Depth of GEMM 3D
      * @param[in] skip_im2col   Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout
@@ -219,6 +220,7 @@ private:
      */
     static Status validate_gemm3d(const ITensorInfo         *src,
                                   const ITensorInfo         *weights,
+                                  const ITensorInfo         *dst,
                                   const ActivationLayerInfo &act_info,
                                   int                        gemm_3d_depth,
                                   bool                       skip_im2col);
@@ -233,6 +235,7 @@ private:
      *
      * @param[in] src       Input tensor info.
      * @param[in] weights   Weights tensor info.
+     * @param[in] dst       Output tensor info.
      * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] dilation  Dilation, in elements, across x and y.
      * @param[in] act_info  Activation layer information in case of a fused activation.
@@ -241,6 +244,7 @@ private:
      */
     static SkipInfo skip_im_col_info(const ITensorInfo         *src,
                                      const ITensorInfo         *weights,
+                                     const ITensorInfo         *dst,
                                      const PadStrideInfo       &conv_info,
                                      const Size2D              &dilation,
                                      const ActivationLayerInfo &act_info);

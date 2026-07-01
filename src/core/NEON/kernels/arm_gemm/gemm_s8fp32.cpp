@@ -49,26 +49,46 @@
 
 namespace arm_gemm {
 
+#if defined(ARM_COMPUTE_ENABLE_SME2) || defined(ARM_COMPUTE_ENABLE_SME)
+namespace {
+
+bool supports_symmetric_dequant_no_merge(const GemmArgs &args, const DequantizeFloat &dq)
+{
+    return !args._accumulate && dq.a_offset == 0 && dq.b_offset == 0;
+}
+
+} // namespace
+#endif // defined(ARM_COMPUTE_ENABLE_SME2) || defined(ARM_COMPUTE_ENABLE_SME)
+
 static const GemmImplementation<int8_t, int8_t, float, DequantizeFloat> gemm_s8fp32_methods[] =
 {
 #ifdef ARM_COMPUTE_ENABLE_SME2
 {
     "sme2_interleaved_nomerge_s8qfp32_mopa_1VLx4VL",
-    [](const GemmArgs &args, const DequantizeFloat &) { return args._ci->has_sme2() && args._ci->has_sme_i8i32() && !args._accumulate; },
+    [](const GemmArgs &args, const DequantizeFloat &dq) {
+        return args._ci->has_sme2() && args._ci->has_sme_i8i32() &&
+               supports_symmetric_dequant_no_merge(args, dq);
+    },
     [](const GemmArgs &args, const DequantizeFloat &) { const auto VL = sme::get_vector_length<float>();
                                                         return args._Msize <= VL || (2*VL < args._Msize && args._Msize <= 3*VL); },
     [](const GemmArgs &args, const DequantizeFloat &dq) { return new GemmInterleavedNoMergeDequantized<cls_sme2_interleaved_nomerge_s8qfp32_mopa_1VLx4VL, int8_t, int8_t, float>(args, dq); }
 },
 {
     "sme2_interleaved_nomerge_s8qfp32_mopa_4VLx1VL",
-    [](const GemmArgs &args, const DequantizeFloat &) { return args._ci->has_sme2() && args._ci->has_sme_i8i32() && !args._accumulate; },
+    [](const GemmArgs &args, const DequantizeFloat &dq) {
+        return args._ci->has_sme2() && args._ci->has_sme_i8i32() &&
+               supports_symmetric_dequant_no_merge(args, dq);
+    },
     [](const GemmArgs &args, const DequantizeFloat &) { const auto VL = sme::get_vector_length<float>();
                                                         return args._Nsize <= VL || (2*VL < args._Nsize && args._Nsize <= 3*VL); },
     [](const GemmArgs &args, const DequantizeFloat &dq) { return new GemmInterleavedNoMergeDequantized<cls_sme2_interleaved_nomerge_s8qfp32_mopa_4VLx1VL, int8_t, int8_t, float>(args, dq); }
 },
 {
     "sme2_interleaved_nomerge_s8qfp32_mopa_2VLx2VL",
-    [](const GemmArgs &args, const DequantizeFloat &) { return args._ci->has_sme2() && args._ci->has_sme_i8i32() && !args._accumulate; },
+    [](const GemmArgs &args, const DequantizeFloat &dq) {
+        return args._ci->has_sme2() && args._ci->has_sme_i8i32() &&
+               supports_symmetric_dequant_no_merge(args, dq);
+    },
     nullptr,
     [](const GemmArgs &args, const DequantizeFloat &dq) { return new GemmInterleavedNoMergeDequantized<cls_sme2_interleaved_nomerge_s8qfp32_mopa_2VLx2VL, int8_t, int8_t, float>(args, dq); }
 },
@@ -76,21 +96,30 @@ static const GemmImplementation<int8_t, int8_t, float, DequantizeFloat> gemm_s8f
 #ifdef ARM_COMPUTE_ENABLE_SME
 {
     "sme_interleaved_nomerge_s8qfp32_mopa_1VLx4VL",
-    [](const GemmArgs &args, const DequantizeFloat &) { return args._ci->has_sme() && args._ci->has_sme_i8i32() && !args._accumulate; },
+    [](const GemmArgs &args, const DequantizeFloat &dq) {
+        return args._ci->has_sme() && args._ci->has_sme_i8i32() &&
+               supports_symmetric_dequant_no_merge(args, dq);
+    },
     [](const GemmArgs &args, const DequantizeFloat &) { const auto VL = sme::get_vector_length<float>();
                                                         return args._Msize <= VL || (2*VL < args._Msize && args._Msize <= 3*VL); },
     [](const GemmArgs &args, const DequantizeFloat &dq) { return new GemmInterleavedNoMergeDequantized<cls_sme_interleaved_nomerge_s8qfp32_mopa_1VLx4VL, int8_t, int8_t, float>(args, dq); }
 },
 {
     "sme_interleaved_nomerge_s8qfp32_mopa_4VLx1VL",
-    [](const GemmArgs &args, const DequantizeFloat &) { return args._ci->has_sme() && args._ci->has_sme_i8i32() && !args._accumulate; },
+    [](const GemmArgs &args, const DequantizeFloat &dq) {
+        return args._ci->has_sme() && args._ci->has_sme_i8i32() &&
+               supports_symmetric_dequant_no_merge(args, dq);
+    },
     [](const GemmArgs &args, const DequantizeFloat &) { const auto VL = sme::get_vector_length<float>();
                                                         return args._Nsize <= VL || (2*VL < args._Nsize && args._Nsize <= 3*VL); },
     [](const GemmArgs &args, const DequantizeFloat &dq) { return new GemmInterleavedNoMergeDequantized<cls_sme_interleaved_nomerge_s8qfp32_mopa_4VLx1VL, int8_t, int8_t, float>(args, dq); }
 },
 {
     "sme_interleaved_nomerge_s8qfp32_mopa_2VLx2VL",
-    [](const GemmArgs &args, const DequantizeFloat &) { return args._ci->has_sme() && args._ci->has_sme_i8i32() && !args._accumulate; },
+    [](const GemmArgs &args, const DequantizeFloat &dq) {
+        return args._ci->has_sme() && args._ci->has_sme_i8i32() &&
+               supports_symmetric_dequant_no_merge(args, dq);
+    },
     nullptr,
     [](const GemmArgs &args, const DequantizeFloat &dq) { return new GemmInterleavedNoMergeDequantized<cls_sme_interleaved_nomerge_s8qfp32_mopa_2VLx2VL, int8_t, int8_t, float>(args, dq); }
 },
@@ -153,4 +182,3 @@ template std::vector<KernelDescription> get_compatible_kernels<int8_t, int8_t, f
 } // namespace arm_gemm
 
 #endif // __aarch64__
-
