@@ -1320,6 +1320,144 @@ protected:
 };
 #endif // ARM_COMPUTE_ENABLE_FIXED_FORMAT_KERNELS
 
+/** Fixture for testing the single-kernel i8->fp32 direct convolution path.
+ *
+ *  Supports NHWC, no dilation, arbitrary quantization offsets.
+ *  Compares target (direct single-kernel) against CPU float reference.
+ */
+template <typename TensorType, typename AccessorType, typename FunctionType>
+class DirectI8S8F32ConvolutionFixture : public framework::Fixture
+{
+public:
+    void setup(TensorShape         input_shape_nchw,
+               TensorShape         weights_shape_nchw,
+               TensorShape         bias_shape,
+               TensorShape         output_shape_nchw,
+               PadStrideInfo       conv_info,
+               Size2D              dilation,
+               bool                reshape_weights,
+               DataLayout          data_layout,
+               ActivationLayerInfo act_info,
+               QuantizationInfo    input_qi   = QuantizationInfo(0.25f, 0),
+               QuantizationInfo    weights_qi = QuantizationInfo(0.125f, 0))
+    {
+        ARM_COMPUTE_EXPECT_EQUAL(data_layout, DataLayout::NHWC, framework::LogLevel::ERRORS);
+        _data_layout = data_layout;
+        _input_qi    = input_qi;
+        _weights_qi  = weights_qi;
+
+        _hash = static_cast<int32_t>(input_shape_nchw[0] + input_shape_nchw[1] + input_shape_nchw[2] +
+                                     weights_shape_nchw[0] + weights_shape_nchw[1] +
+                                     static_cast<int32_t>(input_qi.uniform().offset) +
+                                     static_cast<int32_t>(weights_qi.uniform().offset));
+
+        _target    = compute_target(input_shape_nchw, weights_shape_nchw, bias_shape, output_shape_nchw, conv_info,
+                                    reshape_weights, dilation, act_info);
+        _reference = compute_reference(input_shape_nchw, weights_shape_nchw, bias_shape, output_shape_nchw, conv_info,
+                                       dilation, act_info);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i)
+    {
+        switch (tensor.data_type())
+        {
+            case DataType::QASYMM8_SIGNED:
+            {
+                std::uniform_int_distribution<int32_t> dist(-127, 127);
+                library->fill(tensor, dist, i);
+                break;
+            }
+            case DataType::F32:
+            {
+                std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
+                library->fill(tensor, dist, i);
+                break;
+            }
+            default:
+                library->fill_tensor_uniform(tensor, i);
+        }
+    }
+
+    TensorType compute_target(TensorShape               input_shape,
+                              TensorShape               weights_shape,
+                              const TensorShape        &bias_shape,
+                              TensorShape               output_shape,
+                              const PadStrideInfo      &conv_info,
+                              bool                      reshape_weights,
+                              const Size2D             &dilation,
+                              const ActivationLayerInfo act_info)
+    {
+        // Convert NCHW→NHWC
+        permute(input_shape, PermutationVector(2U, 0U, 1U));
+        permute(weights_shape, PermutationVector(2U, 0U, 1U));
+        permute(output_shape, PermutationVector(2U, 0U, 1U));
+
+        const int idx_w = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+        const int idx_h = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+
+        WeightsInfo weights_info(!reshape_weights, weights_shape[idx_w], weights_shape[idx_h], weights_shape[3]);
+
+        TensorType src = create_tensor<TensorType>(input_shape, DataType::QASYMM8_SIGNED, 1, _input_qi, _data_layout);
+        TensorType wgt = create_tensor<TensorType>(weights_shape, DataType::QASYMM8_SIGNED, 1, _weights_qi,
+                                                   _data_layout);
+        TensorType bias = create_tensor<TensorType>(bias_shape, DataType::F32, 1, QuantizationInfo(), _data_layout);
+        TensorType dst  = create_tensor<TensorType>(output_shape, DataType::F32, 1, QuantizationInfo(), _data_layout);
+
+        FunctionType conv;
+        conv.configure(&src, &wgt, &bias, &dst, conv_info, weights_info, dilation, act_info,
+                       false /*enable_fast_math*/, 1 /*num_groups*/);
+
+        ARM_COMPUTE_ASSERT(src.info()->is_resizable());
+        src.allocator()->allocate();
+        wgt.allocator()->allocate();
+        bias.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        fill(AccessorType(src), 0 + _hash);
+        fill(AccessorType(wgt), 1 + _hash);
+        fill(AccessorType(bias), 2 + _hash);
+
+        conv.run();
+        return dst;
+    }
+
+    SimpleTensor<float> compute_reference(TensorShape               input_shape,
+                                          TensorShape               weights_shape,
+                                          const TensorShape        &bias_shape,
+                                          TensorShape               output_shape,
+                                          const PadStrideInfo      &conv_info,
+                                          const Size2D             &dilation,
+                                          const ActivationLayerInfo act_info)
+    {
+        // Reference runs in NCHW with float input (dequantized) to match what the kernel should produce.
+        SimpleTensor<int8_t> src_q{input_shape, DataType::QASYMM8_SIGNED, 1, _input_qi};
+        SimpleTensor<int8_t> wgt_q{weights_shape, DataType::QASYMM8_SIGNED, 1, _weights_qi};
+        SimpleTensor<float>  bias_f{bias_shape, DataType::F32};
+
+        fill(src_q, 0 + _hash);
+        fill(wgt_q, 1 + _hash);
+        fill(bias_f, 2 + _hash);
+
+        auto conv = reference::convolution_layer<int8_t, int8_t, float, float>(src_q, wgt_q, bias_f, output_shape,
+                                                                                conv_info, dilation, 1 /*num_groups*/,
+                                                                                QuantizationInfo());
+        if (act_info.enabled())
+        {
+            return reference::activation_layer<float>(conv, act_info);
+        }
+        return conv;
+    }
+
+    TensorType          _target{};
+    SimpleTensor<float> _reference{};
+    DataLayout          _data_layout{DataLayout::NHWC};
+    QuantizationInfo    _input_qi{};
+    QuantizationInfo    _weights_qi{};
+    int32_t             _hash{0};
+};
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

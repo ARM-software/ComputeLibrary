@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, 2023-2025 Arm Limited.
+ * Copyright (c) 2017-2021, 2023-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,7 +83,6 @@ void NEConvolutionLayer::configure(ITensor                   *input,
     ARM_COMPUTE_LOG_PARAMS(input, weights, biases, output, conv_info, weights_info, dilation, act_info,
                            enable_fast_math, num_groups);
 
-    const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
     switch (cpu::CpuConv2d::get_convolution_method(input->info(), weights->info(), output->info(), conv_info,
                                                    weights_info, dilation, act_info, enable_fast_math))
     {
@@ -134,7 +133,6 @@ Status NEConvolutionLayer::validate(const ITensorInfo         *input,
                                     unsigned int               num_groups)
 {
     ARM_COMPUTE_TRACE_EVENT(ARM_COMPUTE_PROF_CAT_CPU, ARM_COMPUTE_PROF_LVL_CPU, "NEConvolutionLayer::validate");
-    const Conv2dInfo info(conv_info, dilation, act_info, enable_fast_math, num_groups);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!weights->are_values_constant(), "Dynamic weights are not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_DYNAMIC_SHAPE(input, weights, biases, output);

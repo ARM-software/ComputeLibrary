@@ -281,6 +281,14 @@ void kernel_and_merge<false, false, DequantizeFloat>::run(
         offset_bias = bias + n_0;
     }
 
+    // When b_offset != 0, row sums of A are packed at the end of the A panel
+    // (appended by the quantized PrepareA transform with multiplier=1).  Read them
+    // to pass to dequantize_block_32 for per-row offset correction.
+    const int32_t *row_sum = nullptr;
+    if (dq.b_offset != 0) {
+        row_sum = reinterpret_cast<const int32_t *>(a_ptr + strategy::out_height() * kern_k);
+    }
+
     strat.kernel(// A and B pointers are just the packed panels.
                  a_ptr, b_panel,
                  // Provide relevant part of output array and row stride.
@@ -288,7 +296,7 @@ void kernel_and_merge<false, false, DequantizeFloat>::run(
                  // M, N, K sizes
                  m_max-m_0, n_max - n_0, kern_k,
                  // Bias, activation, accumulation.  Need to offset the bias as needed.
-                 offset_col_bias, dq, offset_bias, act, accumulate, acc_buff);
+                 offset_col_bias, dq, offset_bias, act, accumulate, acc_buff, row_sum, kern_k);
 }
 
 template<>
@@ -300,7 +308,7 @@ void kernel_and_merge<true, false, DequantizeFloat>::run(
         strategy &strat, const Tlo *a_ptr, const Tro *b_panel, size_t, Tri *c_panel,
         Tr *c_ptr, int ldc, int kern_k, unsigned int m_0,
         unsigned int m_max, unsigned int n_0, unsigned int n_max, const Tr *bias,
-        const Activation &act, bool not_first_pass, const DequantizeFloat &qp, const int32_t *,
+        const Activation &act, bool not_first_pass, const DequantizeFloat &qp, const int32_t *col_bias,
         Tab *)
 {
     const int bblocks = iceildiv(n_max - n_0, strategy::out_width());
@@ -317,6 +325,11 @@ void kernel_and_merge<true, false, DequantizeFloat>::run(
 #ifdef CYCLE_PROFILING
         auto p=prof.ScopedProfiler(PROFILE_QUANTIZE, ((m_max-m_0) * bblocks * strategy::out_width() * sizeof(Tr)));
 #endif
+        // When b_offset != 0, row sums are packed after the A panel data
+        const int32_t *row_sum = (qp.b_offset != 0)
+            ? reinterpret_cast<const int32_t *>(a_ptr + strategy::out_height() * kern_k)
+            : nullptr;
+
         for (int i=0; i<bblocks; i++) {
             unsigned int n_start = n_0 + (strategy::out_width() * i);
             unsigned int n_end = std::min(n_start + strategy::out_width(), n_max);
@@ -324,7 +337,8 @@ void kernel_and_merge<true, false, DequantizeFloat>::run(
             dequantize_block_32(qp, (n_end - n_start), (m_max - m_0),
                             c_panel + (i * strategy::out_width() * strategy::out_height()), strategy::out_width(),
                             c_ptr + m_0 * ldc + n_start, ldc,
-                            bias != nullptr ? bias + n_start : nullptr, not_first_pass, act);
+                            bias != nullptr ? bias + n_start : nullptr, not_first_pass, act,
+                            col_bias != nullptr ? col_bias + n_start : nullptr, row_sum, kern_k);
 
         }
     }
@@ -475,6 +489,13 @@ class GemmInterleaved : public GemmCommon<Tlo, Tro, Tr> {
             return _Nsize * _nmulti * sizeof(int32_t);
         }
 
+        if (std::is_same<OutputStage, DequantizeFloat>::value) {
+            const DequantizeFloat *dq = reinterpret_cast<const DequantizeFloat *>(&_os);
+            if (dq->a_offset != 0) {
+                return _Nsize * _nmulti * sizeof(int32_t);
+            }
+        }
+
         return 0;
     }
 
@@ -554,6 +575,12 @@ class GemmInterleaved : public GemmCommon<Tlo, Tro, Tr> {
         unsigned int k_depth = _k_block;
 
         if (std::is_same<OutputStage, Requantize32>::value) {
+            k_depth += sizeof(int32_t) / sizeof(Tloi);
+        }
+
+        if (std::is_same<OutputStage, DequantizeFloat>::value && MergeStep) {
+            // transforms_quantized always packs row sum slots (zeros when multiplier=0, actual
+            // sums when b_offset != 0).  Reserve space unconditionally when MergeStep is enabled.
             k_depth += sizeof(int32_t) / sizeof(Tloi);
         }
 
@@ -647,6 +674,13 @@ class GemmInterleaved : public GemmCommon<Tlo, Tro, Tr> {
             return -qp->b_offset;
         }
 
+        if (std::is_same<OutputStage, DequantizeFloat>::value) {
+            const DequantizeFloat *dq = reinterpret_cast<const DequantizeFloat *>(&_os);
+            // Pack row sums into the A panel when b_offset is non-zero so that the
+            // merge step can apply the b_offset correction per output position.
+            return (dq->b_offset != 0) ? 1 : 0;
+        }
+
         return 0;
     }
 
@@ -690,6 +724,14 @@ class GemmInterleaved : public GemmCommon<Tlo, Tro, Tr> {
         // K blocking not supported if we are requantizing with the merging
         // kernels.
         if (std::is_same<OutputStage, Requantize32>::value && MergeStep) {
+            return get_ktotal(args);
+        }
+
+        // K blocking is not supported for DequantizeFloat with MergeStep when b_offset != 0,
+        // because row sums of A must cover the full K depth.  We cannot check b_offset here
+        // (static function), so we conservatively disable K-blocking for all DequantizeFloat
+        // MergeStep cases.  The working-memory cost is minimal and correctness is guaranteed.
+        if (std::is_same<OutputStage, DequantizeFloat>::value && MergeStep) {
             return get_ktotal(args);
         }
 
@@ -937,7 +979,7 @@ public:
 #endif
                             // See comment above on transform_type<> class: this extracts either 'transforms' or
                             // 'transforms_quantized' as appropriate.
-                            typename transform_type<strategy, MergeStep && std::is_same<OutputStage, Requantize32>::value>::type transforms;
+                            typename transform_type<strategy, MergeStep && (std::is_same<OutputStage, Requantize32>::value || std::is_same<OutputStage, DequantizeFloat>::value)>::type transforms;
 
                             if (_indirect_buf != nullptr) {
                                 transforms.PrepareA_indirect(a_panel,
@@ -1027,7 +1069,7 @@ public:
 #endif
                     // See comment above on transform_type<> class: this extracts either 'transforms' or
                     // 'transforms_quantized' as appropriate.
-                    typename transform_type<strategy, MergeStep && std::is_same<OutputStage, Requantize32>::value>::type transforms;
+                    typename transform_type<strategy, MergeStep && (std::is_same<OutputStage, Requantize32>::value || std::is_same<OutputStage, DequantizeFloat>::value)>::type transforms;
 
                     for (unsigned int batch = batch_0; batch <= batch_end; batch++) {
                         unsigned int first_m = (batch == batch_0)   ? m_0   : 0;
@@ -1059,6 +1101,10 @@ public:
                     // larger than the (rounded) K value.
 
                     if(std::is_same<OutputStage, Requantize32>::value) {
+                        a_panel_stride = kern_k + (sizeof(int32_t) / sizeof(Tloi));
+                    } else if (std::is_same<OutputStage, DequantizeFloat>::value) {
+                        // transforms_quantized always packs row-sum slots (zeros when b_offset=0,
+                        // actual sums when b_offset != 0), so the stride must include the slot.
                         a_panel_stride = kern_k + (sizeof(int32_t) / sizeof(Tloi));
                     } else {
                         a_panel_stride = kern_k;
@@ -1210,6 +1256,38 @@ public:
             for (unsigned int i=0; i<_nmulti; i++) {
                 // The input is assumed not to have any padding between sections, so straightforward Ksize * Ksections computation gets the total size.
                 compute_col_sums(*qp_ptr, _Nsize, _Ksize * _Ksections, B + (i * B_multi_stride), ldb, col_bias + (i * _Nsize), _Ksize * _Ksections, i, 0);
+            }
+        }
+
+        if (std::is_same<OutputStage, DequantizeFloat>::value) {
+            const DequantizeFloat *dq = reinterpret_cast<const DequantizeFloat *>(&_os);
+            if (dq->a_offset != 0) {
+                // Compute raw column sums of B (weight matrix) for use in a_offset correction.
+                // dequantize_block_32 applies: -a_offset * col_bias[n] * scale per output channel.
+                //
+                // Fold the a_offset*b_offset*K cross-term into col_bias here by subtracting
+                // b_offset * K from each raw column sum, where K is the *real* (unpadded) number of
+                // accumulation terms per output = _Ksize * _Ksections.  With that,
+                //   -a_offset * col_bias[n] * scale
+                //     = -a_offset * (sum_b[n] - b_offset*K) * scale
+                //     = -a_offset*sum_b[n]*scale + a_offset*b_offset*K*scale
+                // captures both the a_offset correction and the cross-term using the real K, so the
+                // merge kernel does not need to reconstruct K (which it only knows as the *padded*
+                // kern_k = _Ksections * roundup(_Ksize, k_unroll) and would over-count the cross-term
+                // for kernels whose per-section K is rounded up, e.g. 1x1-channel convolutions).
+                const int32_t k_real = static_cast<int32_t>(_Ksize) * static_cast<int32_t>(_Ksections);
+                col_bias = reinterpret_cast<int32_t *>(in_buffer);
+                for (unsigned int i = 0; i < _nmulti; ++i) {
+                    compute_raw_col_sums(_Nsize, _Ksize * _Ksections,
+                                         B + (i * B_multi_stride), ldb,
+                                         col_bias + (i * _Nsize));
+                    if (dq->b_offset != 0) {
+                        int32_t *col_bias_multi = col_bias + (i * _Nsize);
+                        for (unsigned int n = 0; n < _Nsize; ++n) {
+                            col_bias_multi[n] -= dq->b_offset * k_real;
+                        }
+                    }
+                }
             }
         }
     }
