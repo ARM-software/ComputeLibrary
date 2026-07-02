@@ -172,6 +172,7 @@ CpuGemmConv2d::WeightTransformMethod CpuGemmConv2d::get_wt_method(const ITensorI
 
 CpuGemmConv2d::SkipInfo CpuGemmConv2d::skip_im_col_info(const ITensorInfo         *src,
                                                         const ITensorInfo         *weights,
+                                                        const ITensorInfo         *dst,
                                                         const PadStrideInfo       &conv_info,
                                                         const Size2D              &dilation,
                                                         const ActivationLayerInfo &act_info)
@@ -194,7 +195,7 @@ CpuGemmConv2d::SkipInfo CpuGemmConv2d::skip_im_col_info(const ITensorInfo       
     {
         const bool skip_col2im =
             (data_layout == DataLayout::NHWC &&
-             (bool(CpuGemmConv2d::validate_gemm3d(src, weights, act_info, conv_h, /*skip_im2col*/ true))));
+             (bool(CpuGemmConv2d::validate_gemm3d(src, weights, dst, act_info, conv_h, /*skip_im2col*/ true))));
         if (skip_col2im)
         {
             return {true, true};
@@ -204,7 +205,7 @@ CpuGemmConv2d::SkipInfo CpuGemmConv2d::skip_im_col_info(const ITensorInfo       
     {
         const bool skip_col2im =
             (data_layout == DataLayout::NHWC &&
-             (bool(CpuGemmConv2d::validate_gemm3d(src, weights, act_info, conv_h, /*skip_im2col*/ false))));
+             (bool(CpuGemmConv2d::validate_gemm3d(src, weights, dst, act_info, conv_h, /*skip_im2col*/ false))));
         if (skip_col2im)
         {
             return {false, true};
@@ -439,20 +440,23 @@ Status CpuGemmConv2d::validate_mm(const ITensorInfo         *src,
 
 Status CpuGemmConv2d::validate_gemm3d(const ITensorInfo         *input_info,
                                       const ITensorInfo         *weights_info,
+                                      const ITensorInfo         *output_info,
                                       const ActivationLayerInfo &act_info,
                                       int                        gemm_3d_depth,
                                       bool                       skip_im2col)
 {
-    const DataType     data_type = input_info->data_type();
-    const unsigned int mult_y    = skip_im2col ? 1U : gemm_3d_depth;
-    const unsigned int mult_z    = skip_im2col ? gemm_3d_depth : 1U;
+    const DataType     input_data_type   = input_info->data_type();
+    const DataType     weights_data_type = weights_info->data_type();
+    const DataType     output_data_type  = output_info->data_type();
+    const unsigned int mult_y            = skip_im2col ? 1U : gemm_3d_depth;
+    const unsigned int mult_z            = skip_im2col ? gemm_3d_depth : 1U;
 
     // Set dummy tensor shapes for the validation
-    const TensorInfo dummy_input_info(TensorShape(4U, 4U * mult_y, 1U * mult_z), 1, data_type,
+    const TensorInfo dummy_input_info(TensorShape(4U, 4U * mult_y, 1U * mult_z), 1, input_data_type,
                                       input_info->quantization_info());
-    const TensorInfo dummy_weights_info(TensorShape(4U, 4U), 1, data_type, weights_info->quantization_info());
-    const TensorInfo dummy_output_info(TensorShape(4U, 4U, gemm_3d_depth), 1, data_type,
-                                       input_info->quantization_info());
+    const TensorInfo dummy_weights_info(TensorShape(4U, 4U), 1, weights_data_type, weights_info->quantization_info());
+    const TensorInfo dummy_output_info(TensorShape(4U, 4U, gemm_3d_depth), 1, output_data_type,
+                                       output_info->quantization_info());
 
     return validate_mm(&dummy_input_info, &dummy_weights_info, nullptr, &dummy_output_info, act_info, false,
                        gemm_3d_depth, skip_im2col);
@@ -507,7 +511,7 @@ void CpuGemmConv2d::configure(const ITensorInfo         *src,
 
     // Check if GEMM3D is supported
     const CpuGemmConv2d::SkipInfo skip_info =
-        CpuGemmConv2d::skip_im_col_info(src, weights, conv_info, dilation, act_info);
+        CpuGemmConv2d::skip_im_col_info(src, weights, dst, conv_info, dilation, act_info);
     _skip_im2col = skip_info.skip_im2col;
     _skip_col2im = skip_info.skip_col2im;
 
@@ -672,7 +676,7 @@ Status CpuGemmConv2d::has_opt_impl(arm_compute::WeightFormat &expected_weight_fo
                                                  kernel_height, conv_info, dilation);
 
     const CpuGemmConv2d::SkipInfo skip_info =
-        CpuGemmConv2d::skip_im_col_info(src, weights, conv_info, dilation, act_info);
+        CpuGemmConv2d::skip_im_col_info(src, weights, dst, conv_info, dilation, act_info);
 
     const bool         skip_im2col   = skip_info.skip_im2col;
     const bool         skip_col2im   = skip_info.skip_col2im;
@@ -752,7 +756,7 @@ Status CpuGemmConv2d::validate(const ITensorInfo         *src,
 
     // Check if GEMM3D is supported
     const CpuGemmConv2d::SkipInfo skip_info =
-        CpuGemmConv2d::skip_im_col_info(src, weights, conv_info, dilation, act_info);
+        CpuGemmConv2d::skip_im_col_info(src, weights, dst, conv_info, dilation, act_info);
     const bool skip_im2col = skip_info.skip_im2col, skip_col2im = skip_info.skip_col2im;
 
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_channel) != src->dimension(idx_channel));

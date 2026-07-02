@@ -148,6 +148,14 @@ Params extract_parameters(const ITensorInfo *a, const ITensorInfo *b, const ITen
     return p;
 }
 
+#ifdef __aarch64__
+bool is_quantized_int8_rhs(DataType data_type)
+{
+    return data_type == DataType::S8 || data_type == DataType::QASYMM8_SIGNED ||
+           data_type == DataType::QSYMM8_PER_CHANNEL;
+}
+#endif // __aarch64__
+
 /** Fallback in case ACL doesn't have a function */
 template <typename TypeInput, typename TypeWeight, typename TypeOutput, class OutputStage = arm_gemm::Nothing>
 class Fallback : public CpuGemmAssemblyDispatch::IFallback
@@ -889,11 +897,11 @@ void create_arm_gemm_dequant(std::unique_ptr<CpuGemmAssemblyDispatch::IFallback>
     // Create arm_gemm fallback
     auto fallback = std::make_unique<Fallback<TypeInput, TypeWeight, TypeOutput, arm_gemm::DequantizeFloat>>();
 
-    // Configure requantization info
-    const GEMMLowpOutputStageInfo os_info = info.output_stage;
-
     arm_gemm::DequantizeFloat gemm_dequant_info{};
-    gemm_dequant_info = arm_gemm::DequantizeFloat(d->quantization_info().uniform().scale);
+    gemm_dequant_info.scale    = a->quantization_info().uniform().scale * b->quantization_info().uniform().scale;
+    gemm_dequant_info.a_offset = info.dequant_a_offset;
+    gemm_dequant_info.b_offset = info.dequant_b_offset;
+    gemm_dequant_info.depth    = p.K * p.sections;
 
     fallback->configure(a, b, c, d, args, info, gemm_dequant_info);
     arm_gemm = std::move(fallback);
@@ -996,12 +1004,22 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
                                                                                             {})),
                     "We could not find an optimized kernel for U8/QASYMM8 input and U32 output");
             }
-            else if (b->data_type() == DataType::QASYMM8_SIGNED)
+            else if (is_quantized_int8_rhs(b->data_type()))
             {
-                ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-                    !(arm_gemm::has_opt_gemm<uint8_t, int8_t, uint8_t, arm_gemm::Requantize32>(arm_gemm_expected_wf,
-                                                                                               args, {})),
-                    "We could not find an optimized kernel for U8 input with S8 weights and U8 output");
+                if (d->data_type() == DataType::F32)
+                {
+                    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+                        !(arm_gemm::has_opt_gemm<uint8_t, int8_t, float, arm_gemm::DequantizeFloat>(
+                            arm_gemm_expected_wf, args, {})),
+                        "We could not find an optimized kernel for U8 input with S8 weights and F32 output");
+                }
+                else
+                {
+                    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+                        !(arm_gemm::has_opt_gemm<uint8_t, int8_t, uint8_t, arm_gemm::Requantize32>(arm_gemm_expected_wf,
+                                                                                                   args, {})),
+                        "We could not find an optimized kernel for U8 input with S8 weights and U8 output");
+                }
             }
             else
             {
@@ -1020,6 +1038,22 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
                                                                                          {})),
                     "We could not find an optimized kernel for S8/QASYMM8_SIGNED input and S32 output");
             }
+            else if (d->data_type() == DataType::F32)
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+                    !(arm_gemm::has_opt_gemm<int8_t, int8_t, float, arm_gemm::DequantizeFloat>(arm_gemm_expected_wf,
+                                                                                               args, {})),
+                    "We could not find an optimized kernel for S8/QASYMM8_SIGNED input and F32 output");
+            }
+#if defined(ENABLE_FP16_KERNELS)
+            else if (d->data_type() == DataType::F16)
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(
+                    !(arm_gemm::has_opt_gemm<int8_t, int8_t, float16_t, arm_gemm::DequantizeFloat>(arm_gemm_expected_wf,
+                                                                                                   args, {})),
+                    "We could not find an optimized kernel for S8/QASYMM8_SIGNED input and F16 output");
+            }
+#endif /* defined(ENABLE_FP16_KERNELS) */
             else
             {
                 ARM_COMPUTE_RETURN_ERROR_ON_MSG(
@@ -1103,7 +1137,10 @@ Status CpuGemmAssemblyDispatch::validate(
 
     if (is_data_type_quantized_per_channel(b->data_type()))
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8_SIGNED, DataType::S8);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QASYMM8, DataType::QASYMM8_SIGNED,
+                                                             DataType::S8);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::QASYMM8 && d->data_type() != DataType::QASYMM8,
+                                        "Only QASYMM8 output supported for QASYMM8 input with per-channel weights");
     }
     else if (is_fixed_format_fast_math(info.weight_format))
     {
@@ -1130,6 +1167,11 @@ Status CpuGemmAssemblyDispatch::validate(
         a->data_type() == DataType::QASYMM8 &&
             (d->data_type() != DataType::QASYMM8 && d->data_type() != DataType::S32 && d->data_type() != DataType::F32),
         "Only QASYMM8/S32/F32 output supported for QASYMM8 input");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::QASYMM8_SIGNED &&
+                                        (d->data_type() != DataType::QASYMM8_SIGNED &&
+                                         d->data_type() != DataType::S32 && d->data_type() != DataType::F32 &&
+                                         d->data_type() != DataType::F16),
+                                    "Only QASYMM8_SIGNED/S32/F32/F16 output supported for QASYMM8_SIGNED input");
     arm_compute::WeightFormat expected_weight_format = arm_compute::WeightFormat::UNSPECIFIED;
     const Status              ret = CpuGemmAssemblyDispatch::has_opt_impl(expected_weight_format, a, b, c, d, info);
     if (bool(ret) && expected_weight_format != arm_compute::WeightFormat::ANY)
@@ -1171,7 +1213,7 @@ void CpuGemmAssemblyDispatch::configure(
 #ifdef __aarch64__
         case DataType::U8:
         case DataType::QASYMM8:
-            if (b->data_type() == DataType::S8 || b->data_type() == DataType::QASYMM8_SIGNED)
+            if (is_quantized_int8_rhs(b->data_type()))
             {
                 if (d->data_type() == DataType::F32)
                 {

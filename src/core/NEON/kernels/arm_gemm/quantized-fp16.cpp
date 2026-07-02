@@ -35,7 +35,8 @@ namespace arm_gemm {
 template<>
 void dequantize_block_32<__fp16>(const DequantizeFloat &qp, unsigned int width, unsigned int height,
                                  const int32_t * in_ptr, unsigned int in_stride, __fp16 *out_ptr, unsigned int out_stride,
-                                 const __fp16 * bias_ptr, bool not_first_pass, const Activation &act)
+                                 const __fp16 * bias_ptr, bool not_first_pass, const Activation &act,
+                                 const int32_t * /*col_bias*/, const int32_t * /*row_sum*/, int32_t /*k_total*/)
 {
     const float32x4_t vscale = vdupq_n_f32(qp.scale);
     float maxval = std::numeric_limits<float>::infinity();

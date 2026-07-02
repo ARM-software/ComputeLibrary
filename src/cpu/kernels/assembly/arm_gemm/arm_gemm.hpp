@@ -240,12 +240,21 @@ public:
 struct DequantizeFloat
 {
 public:
-    float scale = 0;
+    float   scale    = 0;
+    int32_t a_offset = 0; // input quantization zero-point  (subtract from each input value)
+    int32_t b_offset = 0; // weight quantization zero-point (subtract from each weight value)
+    int32_t depth    = 0; // unrounded K depth used by zero-point cross-term
 
     DequantizeFloat() = default;
 
-    // Constructor
-    DequantizeFloat(const float scale) : scale(scale)
+    // Constructor without offset (symmetric quantization)
+    DequantizeFloat(const float scale) : scale(scale), a_offset(0), b_offset(0), depth(0)
+    {
+    }
+
+    // Constructor with asymmetric quantization offsets
+    DequantizeFloat(const float scale, int32_t a_offset, int32_t b_offset)
+        : scale(scale), a_offset(a_offset), b_offset(b_offset), depth(0)
     {
     }
 };
