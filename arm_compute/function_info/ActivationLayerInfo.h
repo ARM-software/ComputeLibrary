@@ -35,9 +35,12 @@
 #include <array>
 #include <memory>
 
-#ifdef __aarch64__
+#if defined(__aarch64__)
 #include <arm_neon.h>
-#endif // __arch64__
+#elif defined(_M_ARM64)
+#include <cstdint>
+using float16_t = uint16_t;
+#endif // __aarch64__ || _M_ARM64
 
 namespace arm_compute
 {
@@ -68,11 +71,11 @@ public:
     typedef arm_compute::ActivationFunction ActivationFunction;
 
     /** Lookup table  */
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
     // TODO (COMPMID-7511): delegate to LUTManager
     using LookupTable256   = std::array<qasymm8_t, 256>;
     using LookupTable65536 = std::array<float16_t, 65536>;
-#endif // __aarch64__
+#endif // __aarch64__ || _M_ARM64
 
     ActivationLayerInfo() = default;
     /** Default Constructor
@@ -106,7 +109,7 @@ public:
         return _enabled;
     }
 
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
     const LookupTable256 &lut() const
     {
         return _lut;
@@ -125,7 +128,7 @@ public:
     {
         _lut_fp16 = lut;
     }
-#endif // __aarch64__
+#endif // __aarch64__ || _M_ARM64
 
     // The < and == are added to be able to use this data type as an attribute for LUTInfo
     friend bool operator<(const ActivationLayerInfo &l, const ActivationLayerInfo &r)
@@ -150,10 +153,10 @@ private:
     float              _b       = {};
     bool               _enabled = {false};
 
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
     LookupTable256                    _lut = {};
     std::shared_ptr<LookupTable65536> _lut_fp16{nullptr};
-#endif // __aarch64__
+#endif // __aarch64__ || _M_ARM64
 };
 } // namespace arm_compute
 #endif // ACL_ARM_COMPUTE_FUNCTION_INFO_ACTIVATIONLAYERINFO_H

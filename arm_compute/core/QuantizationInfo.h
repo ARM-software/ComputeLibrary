@@ -699,11 +699,11 @@ inline UniformQuantizationInfo compute_requantization_scale_offset(const Uniform
     // then compute the new offset in the float domain,
     // finally we convert it back as int32_t
 
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
     constexpr RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_EVEN;
-#else  //__aarch64__
+#else  //__aarch64__ || _M_ARM64
     constexpr RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP;
-#endif //__aarch64__
+#endif //__aarch64__ || _M_ARM64
 
     offset_to_apply -=
         arm_compute::round(static_cast<float>(uqinfo_in.offset) * uqinfo_in.scale / uqinfo_out.scale, rounding_policy);

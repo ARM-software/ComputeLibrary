@@ -34,10 +34,10 @@
 
 namespace arm_compute
 {
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
 using LookupTable256   = std::array<float, 256>;
 using LookupTable65536 = std::array<float16_t, 65536>;
-#endif // __aarch64__
+#endif // __aarch64__ || _M_ARM64
 
 enum class LUTType
 {
@@ -88,7 +88,7 @@ public:
     LUTManager() = default;
 
     static LUTManager &get_instance();
-#ifdef __aarch64__
+#if defined(__aarch64__) || defined(_M_ARM64)
     template <typename T>
     std::shared_ptr<T> get_lut_table(LUTInfo info);
 
@@ -98,7 +98,7 @@ private:
 
     std::map<LUTInfo, std::weak_ptr<LookupTable256>>   map_fp32{};
     std::map<LUTInfo, std::weak_ptr<LookupTable65536>> map_fp16{};
-#endif // __aarch64__
+#endif // __aarch64__ || _M_ARM64
 };
 
 } // namespace arm_compute

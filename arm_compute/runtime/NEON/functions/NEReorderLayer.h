@@ -25,7 +25,7 @@
 #ifndef ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREORDERLAYER_H
 #define ACL_ARM_COMPUTE_RUNTIME_NEON_FUNCTIONS_NEREORDERLAYER_H
 
-#if defined(__aarch64__)
+#if defined(__aarch64__) || defined(_M_ARM64)
 
 /** @file
  * @publicapi

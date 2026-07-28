@@ -456,6 +456,8 @@ if env['os'] == 'windows':
     env['RANLIB'] = "llvm-ranlib"
     env['AS'] = env['CC']
     env['ASFLAGS'] = []
+    env['ASCOM'] = '$AS $ASFLAGS /c /Fo$TARGET $SOURCES'
+    env['ASPPCOM'] = '$AS $ASPPFLAGS $CPPFLAGS $_CPPDEFFLAGS $_CPPINCFLAGS /c /Fo$TARGET $SOURCES'
 elif env['os'] == 'android':
     # If --target is specified in the NDK, we need to relay it to the assembler
     # See https://developer.android.com/ndk/guides/other_build_systems#overview
