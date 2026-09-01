@@ -204,7 +204,9 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
         _mm_result_s32     = TensorInfo(dst->tensor_shape(), 1, DataType::S32);
     }
 #ifdef __aarch64__
-    ITensorInfo *dst_to_use = (_flip_signedness && _fuse_output_stage) ? &_signed_output : dst;
+    const bool use_signed_output_for_assembly =
+        _flip_signedness && (_fuse_output_stage || dst->data_type() == DataType::QASYMM8);
+    ITensorInfo *dst_to_use = use_signed_output_for_assembly ? &_signed_output : dst;
 
     if (!(!b->are_values_constant() &&
           b->tensor_shape().z() > 1)) // Disable batch matmul as optimized GeMM handles batching differently.
@@ -225,7 +227,7 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
                 }
                 else
                 {
-                    auto output_to_use = (_fuse_output_stage ? &_mm_result_s32 : dst);
+                    auto output_to_use = (_fuse_output_stage ? &_mm_result_s32 : dst_to_use);
                     _asm_glue->configure(a_to_use, b, nullptr, output_to_use, asm_info);
                 }
                 _assembly_path = _asm_glue->is_configured();
@@ -239,6 +241,8 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
         }
     }
 #endif /* __aarch64__ */
+    const bool use_signed_output =
+        _flip_signedness && (_fuse_output_stage || (_assembly_path && dst->data_type() == DataType::QASYMM8));
     if (!(_assembly_path || _run_vector_matrix_multiplication))
     {
         matrix_a = &_tmp_a;
@@ -295,7 +299,7 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
                 std::make_unique<kernels::CpuGemmLowpOffsetContributionOutputStageKernel>();
             _offset_contribution_output_stage_kernel->configure(
                 &_mm_result_s32, a_offset_kernel_needed ? &_vector_sum_col : nullptr,
-                b_offset_kernel_needed ? &_vector_sum_row : nullptr, c, _flip_signedness ? &_signed_output : dst,
+                b_offset_kernel_needed ? &_vector_sum_row : nullptr, c, use_signed_output ? &_signed_output : dst,
                 a->dimension(0), _a_offset, _b_offset, info.gemmlowp_output_stage());
         }
         else
@@ -318,7 +322,7 @@ void CpuGemmLowpMatrixMultiplyCore::configure(
                                                    a_to_use->dimension(0), _a_offset, _b_offset, dequantize_scale);
         }
     }
-    if (_fuse_output_stage && _flip_signedness)
+    if (use_signed_output)
     {
         _convert_from_signed_asymm = std::make_unique<kernels::CpuConvertQuantizedSignednessKernel>();
         _convert_from_signed_asymm->configure(&_signed_output, dst);
@@ -477,7 +481,8 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
         // Update matrix a
         matrix_a_info = &signed_a;
     }
-    const ITensorInfo *output_to_use = (flip_signedness && fuse_output_stage) ? &signed_output : output;
+    const bool use_signed_output = flip_signedness && (fuse_output_stage || output->data_type() == DataType::QASYMM8);
+    const ITensorInfo *output_to_use = use_signed_output ? &signed_output : output;
 
     // Offset kernel is need if offset is non-zero or it may change (i.e. dynamic).
     bool a_offset_kernel_needed = a_offset != 0 || a->quantization_info().is_dynamic();
@@ -499,7 +504,7 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
         else
         {
             run_optimised = bool(CpuGemmAssemblyDispatch::validate(
-                a_to_use, b, nullptr, fuse_output_stage ? &mm_result_s32_info : output, asm_info));
+                a_to_use, b, nullptr, fuse_output_stage ? &mm_result_s32_info : output_to_use, asm_info));
         }
     }
     auto validate_lowp_reductions = [&](const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *a_to_use,
@@ -622,7 +627,7 @@ Status CpuGemmLowpMatrixMultiplyCore::validate(const ITensorInfo *a,
             // Validate offset contribution kernel
             ARM_COMPUTE_RETURN_ON_ERROR(kernels::CpuGemmLowpOffsetContributionOutputStageKernel::validate(
                 &mm_result_s32_info, a_offset_kernel_needed ? &info_vector_sum_col : nullptr,
-                b_offset_kernel_needed ? &info_vector_sum_row : nullptr, c, flip_signedness ? &signed_output : output,
+                b_offset_kernel_needed ? &info_vector_sum_row : nullptr, c, use_signed_output ? &signed_output : output,
                 a_offset, b_offset, info.gemmlowp_output_stage()));
         }
         else
@@ -697,6 +702,9 @@ void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
         a_to_use = signed_a.get();
         matrix_a = signed_a.get();
     }
+    const bool use_signed_output =
+        _flip_signedness &&
+        (_fuse_output_stage || (_asm_glue->is_configured() && dst->info()->data_type() == DataType::QASYMM8));
 
     // Run GEMM
     if (_asm_glue->is_configured())
@@ -705,7 +713,7 @@ void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
         if (is_data_type_quantized_asymmetric(a_to_use->info()->data_type()) &&
             _gemm_info.gemmlowp_output_stage().type == GEMMLowpOutputStageType::QUANTIZE_DOWN_FIXEDPOINT)
         {
-            auto output_to_use = (_flip_signedness && _fuse_output_stage) ? signed_output.get() : dst;
+            auto output_to_use = use_signed_output ? signed_output.get() : dst;
             asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_0, a_to_use);
             asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_1, b);
             asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_2, c);
@@ -713,7 +721,8 @@ void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
         }
         else
         {
-            auto output_to_use = (_fuse_output_stage ? mm_result_s32.get() : dst);
+            auto output_to_use =
+                (_fuse_output_stage ? mm_result_s32.get() : (use_signed_output ? signed_output.get() : dst));
             asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_0, a_to_use);
             asm_glue_tensors.add_const_tensor(TensorType::ACL_SRC_1, b);
             asm_glue_tensors.add_tensor(TensorType::ACL_DST, output_to_use);
@@ -781,7 +790,7 @@ void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
             pack.add_tensor(TensorType::ACL_SRC_1, _a_offset == 0 ? nullptr : vector_sum_col.get());
             pack.add_tensor(TensorType::ACL_SRC_2, _b_offset == 0 ? nullptr : vector_sum_row.get());
             pack.add_tensor(TensorType::ACL_SRC_3, c);
-            pack.add_tensor(TensorType::ACL_DST, _flip_signedness ? signed_output.get() : dst);
+            pack.add_tensor(TensorType::ACL_DST, use_signed_output ? signed_output.get() : dst);
 
             // Run offset contribution kernel
             NEScheduler::get().schedule_op(_offset_contribution_output_stage_kernel.get(), Window::DimY,
@@ -811,7 +820,7 @@ void CpuGemmLowpMatrixMultiplyCore::run(ITensorPack &tensors)
     }
 
     // Convert QASYMM8_SIGNED->QASYMM8
-    if (_fuse_output_stage && _flip_signedness)
+    if (use_signed_output)
     {
         ITensorPack pack = {{TensorType::ACL_SRC, signed_output.get()}, {TensorType::ACL_DST, dst}};
         NEScheduler::get().schedule_op(_convert_from_signed_asymm.get(), Window::DimY,
