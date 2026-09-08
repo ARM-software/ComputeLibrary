@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Arm Limited.
+# Copyright (c) 2023-2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -136,6 +136,11 @@ else()
   message(STATUS "Using arch: ${ARM_COMPUTE_ARCH}")
 endif()
 
+# SME does not imply non-streaming SVE. SME-only wrappers built in an
+# SVE-capable target must disable compiler vectorization so ordinary C++ cannot
+# acquire an unintended non-streaming SVE dependency.
+set(ARM_COMPUTE_SME_WRAPPER_NO_VECTORIZE_FLAGS "-fno-tree-vectorize;-fno-tree-slp-vectorize")
+
 if(ARM_COMPUTE_ENABLE_OPENMP)
   find_package(OpenMP REQUIRED)
 endif()
@@ -204,6 +209,20 @@ else()
   add_library(arm_compute_sve OBJECT EXCLUDE_FROM_ALL)
 endif()
 
+if(ACL_MULTI_ISA OR ACL_BUILD_SVE)
+  add_library(arm_compute_sve_no_vectorize OBJECT)
+  set_target_properties(
+    arm_compute_sve_no_vectorize
+    PROPERTIES
+      COMPILE_OPTIONS "${ARM_COMPUTE_SVE_ARCH};${ARM_COMPUTE_COMMON_CCXX_FLAGS};${ARM_COMPUTE_SME_WRAPPER_NO_VECTORIZE_FLAGS}"
+      COMPILE_DEFINITIONS "${ARM_COMPUTE_DEFINES}"
+      INCLUDE_DIRECTORIES "${ARM_COMPUTE_SVE_COMMON_INCLUDE}"
+      LINK_LIBRARIES "${ARM_COMPUTE_LINK_LIBS}"
+  )
+else()
+  add_library(arm_compute_sve_no_vectorize OBJECT EXCLUDE_FROM_ALL)
+endif()
+
 if(ACL_MULTI_ISA OR ACL_BUILD_SVE2)
   add_library(arm_compute_sve2 OBJECT)
   set_target_properties(
@@ -257,6 +276,7 @@ if(ACL_MULTI_ISA)
     $<TARGET_OBJECTS:arm_compute_core>
     $<TARGET_OBJECTS:arm_compute_core_fp16>
     $<TARGET_OBJECTS:arm_compute_sve>
+    $<TARGET_OBJECTS:arm_compute_sve_no_vectorize>
     $<TARGET_OBJECTS:arm_compute_sve2>
   )
 else()
@@ -269,6 +289,7 @@ else()
     list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_core_fp16>)
     if(ACL_BUILD_SVE)
       list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_sve>)
+      list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_sve_no_vectorize>)
     endif()
     if(ACL_BUILD_SVE2)
       list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_sve2>)
@@ -278,6 +299,7 @@ else()
     list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_core_fp16>)
     if(ACL_BUILD_SVE)
       list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_sve>)
+      list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_sve_no_vectorize>)
     endif()
     if(ACL_BUILD_SVE2)
       list(APPEND lib_objs $<TARGET_OBJECTS:arm_compute_sve2>)
@@ -295,6 +317,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   target_compile_options(arm_compute_core PRIVATE -arch arm64)
   if(TARGET arm_compute_core_fp16)
     target_compile_options(arm_compute_core_fp16 PRIVATE -arch arm64)
+  endif()
+  if(TARGET arm_compute_sve_no_vectorize)
+    target_compile_options(arm_compute_sve_no_vectorize PRIVATE -arch arm64)
   endif()
 endif()
 
@@ -318,6 +343,9 @@ if(TARGET arm_compute_core_fp16)
 endif()
 if(TARGET arm_compute_sve)
   list(APPEND ARM_COMPUTE_TARGETS arm_compute_sve)
+endif()
+if(TARGET arm_compute_sve_no_vectorize)
+  list(APPEND ARM_COMPUTE_TARGETS arm_compute_sve_no_vectorize)
 endif()
 if(TARGET arm_compute_sve2)
   list(APPEND ARM_COMPUTE_TARGETS arm_compute_sve2)

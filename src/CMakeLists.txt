@@ -219,7 +219,6 @@ target_sources(
 	core/NEON/kernels/arm_conv/pooling/kernels/sve_u8_nhwc_max_generic_depthfirst/generic.cpp
 	core/NEON/kernels/arm_conv/pooling/kernels/sve_u8q_nhwc_avg_generic_depthfirst/generic.cpp
 	core/NEON/kernels/arm_conv/pooling/kernels/sve_u8q_nhwc_max_generic_depthfirst/generic.cpp
-	core/NEON/kernels/arm_gemm/interleave_indirect-sve.cpp
 	core/NEON/kernels/arm_gemm/kernels/sme2_gemv_bf16fp32_dot_16VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sme2_gemv_fp16fp32fp16_dot_16VL/generic.cpp
 	core/NEON/kernels/arm_gemm/kernels/sme2_gemv_fp32_mla_16VL/generic.cpp
@@ -370,6 +369,12 @@ target_sources(
 	cpu/kernels/topkv/generic/sve/integer.cpp
 	cpu/kernels/topkv/generic/sve/qasymm8.cpp
 	cpu/kernels/topkv/generic/sve/qasymm8_signed.cpp
+)
+
+target_sources(
+    arm_compute_sve_no_vectorize
+    PRIVATE
+    core/NEON/kernels/arm_gemm/interleave_indirect-sve.cpp
 )
 
 target_sources(

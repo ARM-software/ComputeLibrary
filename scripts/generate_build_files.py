@@ -36,6 +36,10 @@ import argparse
 import json
 import glob
 
+SVE_NO_VECTORIZE_FILES = [
+    "src/core/NEON/kernels/arm_gemm/interleave_indirect-sve.cpp",
+]
+
 
 def get_operator_backend_files(filelist, operators, backend='', techs=[], attrs=[], include_common=True):
     files = {"common": []}
@@ -117,7 +121,7 @@ def get_template_header():
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE."""
 
-def build_from_template_bazel(srcs_graph, srcs_sve, srcs_sve2, _srcs_core):
+def build_from_template_bazel(srcs_graph, srcs_sve, srcs_sve_no_vectorize, srcs_sve2, _srcs_core):
     # Bazel does not support targets referencing upper-levels.
     srcs_core = [path for path in _srcs_core if not path.startswith("../")]
 
@@ -153,6 +157,15 @@ filegroup(
 )
 
 filegroup(
+        name = "arm_compute_sve_no_vectorize_srcs",
+        srcs = ["{line_separator.join(srcs_sve_no_vectorize)}"]  +
+    glob(["**/*.h",
+    "**/*.hpp",
+    "**/*.inl"]),
+		visibility = ["//visibility:public"]
+)
+
+filegroup(
         name = "arm_compute_srcs",
         srcs = ["{line_separator.join(srcs_core)}"]  +
     glob(["**/*.h",
@@ -165,7 +178,7 @@ filegroup(
     return template
 
 
-def build_from_template_cmake(srcs_graph, srcs_sve, srcs_sve2, srcs_core, srcs_core_fp16):
+def build_from_template_cmake(srcs_graph, srcs_sve, srcs_sve_no_vectorize, srcs_sve2, srcs_core, srcs_core_fp16):
 
     line_separator = '\n\t'
 
@@ -181,6 +194,12 @@ target_sources(
     arm_compute_sve
     PRIVATE
     {line_separator.join(srcs_sve)}
+)
+
+target_sources(
+    arm_compute_sve_no_vectorize
+    PRIVATE
+    {line_separator.join(srcs_sve_no_vectorize)}
 )
 
 target_sources(
@@ -266,6 +285,8 @@ def gather_sources():
     # SVE files only
     lib_files_sve = cpu_files.get('sve', [])
     lib_files_sve += fp16_cpu_files.get('sve', [])
+    lib_files_sve_no_vectorize = [path for path in lib_files_sve if path in SVE_NO_VECTORIZE_FILES]
+    lib_files_sve = [path for path in lib_files_sve if path not in SVE_NO_VECTORIZE_FILES]
 
     # SVE2 files only
     lib_files_sve2 = cpu_files.get('sve2', [])
@@ -280,11 +301,12 @@ def gather_sources():
 
     graph_files = sorted([strip_prefix(path, "src/") for path in graph_files])
     lib_files_sve = sorted([strip_prefix(path, "src/") for path in lib_files_sve])
+    lib_files_sve_no_vectorize = sorted([strip_prefix(path, "src/") for path in lib_files_sve_no_vectorize])
     lib_files_sve2 = sorted([strip_prefix(path, "src/") for path in lib_files_sve2])
     lib_files = sorted([strip_prefix(path, "src/") for path in lib_files])
     lib_files_neon_fp16 = sorted([strip_prefix(path, "src/") for path in lib_files_neon_fp16])
 
-    return (graph_files, lib_files_sve, lib_files_sve2, lib_files, lib_files_neon_fp16)
+    return (graph_files, lib_files_sve, lib_files_sve_no_vectorize, lib_files_sve2, lib_files, lib_files_neon_fp16)
 
 
 if "__main__" in __name__:
@@ -294,20 +316,20 @@ if "__main__" in __name__:
     parser.add_argument("--cmake", action="store_true")
     args = parser.parse_args()
 
-    (graph_files, lib_files_sve, lib_files_sve2, lib_files, lib_files_neon_fp16) = gather_sources()
+    (graph_files, lib_files_sve, lib_files_sve_no_vectorize, lib_files_sve2, lib_files, lib_files_neon_fp16) = gather_sources()
 
     if args.bazel:
         # 8562a4ec: Remove CommonGraphOptions from Utils target and warnings
         graph_files += ["//utils:CommonGraphOptions.cpp"]
 
         bazel_build_string = build_from_template_bazel(
-            graph_files, lib_files_sve, lib_files_sve2, lib_files + lib_files_neon_fp16)
+            graph_files, lib_files_sve, lib_files_sve_no_vectorize, lib_files_sve2, lib_files + lib_files_neon_fp16)
         with open("src/BUILD.bazel", "w") as fp:
             fp.write(bazel_build_string)
 
     if args.cmake:
         cmake_build_string = build_from_template_cmake(
-            graph_files, lib_files_sve, lib_files_sve2, lib_files, lib_files_neon_fp16)
+            graph_files, lib_files_sve, lib_files_sve_no_vectorize, lib_files_sve2, lib_files, lib_files_neon_fp16)
         with open("src/CMakeLists.txt", "w") as fp:
             fp.write(cmake_build_string)
 
