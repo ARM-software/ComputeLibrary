@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Arm Limited.
+# Copyright (c) 2023-2026 Arm Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -364,6 +364,64 @@ cc_library(
 )
 
 #---------------------------------------------------------------------
+# SVE library sources that must not be compiler-vectorized
+#
+# SME does not imply non-streaming SVE. These sources still need the SVE target
+# for explicit Streaming-SVE/SME code, but ordinary C++ must not gain an
+# unintended non-streaming SVE dependency.
+
+cc_library(
+    name = "arm_compute_sve_no_vectorize",
+    srcs = ["//src:arm_compute_sve_no_vectorize_srcs"],
+    copts = [
+                "-march=armv8.2-a+sve+fp16+dotprod",
+            ] + select({
+                "//:debug_flag": [
+                    "-O0",
+                    "-g",
+                    "-gdwarf-2",
+                ],
+                "//conditions:default": ["-O3"],
+            }) +
+            [
+                "-fno-tree-vectorize",
+                "-fno-tree-slp-vectorize",
+            ] +
+            select({
+                "//:openmp_flag": ["-fopenmp"],
+                "//conditions:default": [],
+            }) +
+            select({
+                "//:Werror_flag": ["-Werror"],
+                "//conditions:default": [],
+            }),
+    includes = [
+        "src/core/NEON/kernels/arm_conv",
+        "src/core/NEON/kernels/arm_gemm",
+        "src/core/NEON/kernels/assembly",
+        "src/core/cpu/kernels/assembly",
+        "src/cpu/kernels/assembly",
+    ],
+    linkopts = select({
+        "//:openmp_flag": ["-fopenmp"],
+        "//conditions:default": [],
+    }),
+    local_defines = [
+        "ENABLE_SVE",
+        "ARM_COMPUTE_ENABLE_SVE",
+        "ARM_COMPUTE_ENABLE_BF16",
+    ],
+    deps = [
+        "//:common_defines",
+        "//arm_compute:core_headers",
+        "//arm_compute:runtime_headers",
+        "//include",
+        "//support",
+    ],
+    alwayslink = True,
+)
+
+#---------------------------------------------------------------------
 # Core and Runtime library
 
 cc_library(
@@ -426,6 +484,7 @@ cc_library(
         "@@kleidiai//:common",
         "@@kleidiai//kai/ukernels/matmul:matmul",
         "//:arm_compute_sve",
+        "//:arm_compute_sve_no_vectorize",
         "//:arm_compute_sve2"
     ],
     alwayslink = True,

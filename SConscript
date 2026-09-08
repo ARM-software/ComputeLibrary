@@ -118,6 +118,8 @@ def build_multiisa_lib_objects():
     # Build the SVE specific files
     lib_static_objs += build_obj_list(filedefs["armv8.2-a-sve"], misa_lib_files_sve, static=True)
     lib_shared_objs += build_obj_list(filedefs["armv8.2-a-sve"], misa_lib_files_sve, static=False)
+    lib_static_objs += build_obj_list(filedefs["armv8.2-a-sve-no-vectorize"], misa_lib_files_sve_no_vectorize, static=True)
+    lib_shared_objs += build_obj_list(filedefs["armv8.2-a-sve-no-vectorize"], misa_lib_files_sve_no_vectorize, static=False)
     lib_static_objs += build_obj_list(filedefs["armv8.2-a-sve"], misa_lib_files_sve_fp16, static=True)
     lib_shared_objs += build_obj_list(filedefs["armv8.2-a-sve"], misa_lib_files_sve_fp16, static=False)
 
@@ -645,10 +647,15 @@ lib_files_sve2 = []
 
 misa_lib_files = lib_files
 misa_lib_files_sve = []
+misa_lib_files_sve_no_vectorize = []
 misa_lib_files_sve2 = []
 misa_lib_files_neon_fp16 = []
 misa_lib_files_sve_fp16 = []
 misa_lib_files_sve2_fp16 = []
+
+sve_no_vectorize_files = [
+    "src/core/NEON/kernels/arm_gemm/interleave_indirect-sve.cpp",
+]
 
 arm_compute_env.Append(CPPPATH = ["src/cpu/kernels/assembly/"])
 
@@ -708,6 +715,12 @@ if env['neon']:
 
         # SVE files only minus FP16
         misa_lib_files_sve = cpu_files.get('sve', [])
+        # SME does not imply non-streaming SVE. This SME-only wrapper still
+        # needs the SVE assembler target for explicit Streaming-SVE/SME code,
+        # but ordinary compiler-generated C++ must not gain an SVE dependency.
+        sve_no_vectorize_set = set(sve_no_vectorize_files)
+        misa_lib_files_sve_no_vectorize = [f for f in misa_lib_files_sve if f in sve_no_vectorize_set]
+        misa_lib_files_sve = [f for f in misa_lib_files_sve if f not in sve_no_vectorize_set]
 
         # SVE2 files only minus FP16
         misa_lib_files_sve2 = cpu_files.get('sve2', [])
