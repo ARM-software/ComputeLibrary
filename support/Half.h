@@ -39,7 +39,7 @@
 #pragma GCC system_header
 #elif defined(__clang__)
 #pragma clang system_header
-#endif
+#endif // defined(__GNUC__) && !defined(__clang__)
 // CAUTION: All code below will be treated as system header code and will NOT be
 // subject to warnings. Consider carefully if your code belongs here or above
 // the system_header pragma.

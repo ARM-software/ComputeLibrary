@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2023-2026 Arm Limited.
+# SPDX-FileCopyrightText: 2026 Yusuf Efe
 #
 # SPDX-License-Identifier: MIT
 #
@@ -276,6 +277,7 @@ def gather_sources():
     # -------------------------------------
 
     def strip_prefix(filename, prefix = "src/"):
+        filename = filename.replace("\\", "/")
         return filename[len(prefix):] if filename.startswith(prefix) else filename
 
     graph_files = sorted([strip_prefix(path, "src/") for path in graph_files])
@@ -302,13 +304,13 @@ if "__main__" in __name__:
 
         bazel_build_string = build_from_template_bazel(
             graph_files, lib_files_sve, lib_files_sve2, lib_files + lib_files_neon_fp16)
-        with open("src/BUILD.bazel", "w") as fp:
+        with open("src/BUILD.bazel", "w", newline='\n') as fp:
             fp.write(bazel_build_string)
 
     if args.cmake:
         cmake_build_string = build_from_template_cmake(
             graph_files, lib_files_sve, lib_files_sve2, lib_files, lib_files_neon_fp16)
-        with open("src/CMakeLists.txt", "w") as fp:
+        with open("src/CMakeLists.txt", "w", newline='\n') as fp:
             fp.write(cmake_build_string)
 
     if not args.cmake and not args.bazel:

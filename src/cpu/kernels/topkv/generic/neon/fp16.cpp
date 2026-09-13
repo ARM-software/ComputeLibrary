@@ -38,11 +38,11 @@ static inline uint32_t reduce_u16x8(uint16x8_t v)
 {
 #if defined(__aarch64__)
     return vaddvq_u16(v);
-#else
+#else  // __aarch64__
     uint16x4_t s = vadd_u16(vget_low_u16(v), vget_high_u16(v));
     s            = vpadd_u16(s, s);
     return vget_lane_u16(s, 0);
-#endif
+#endif // __aarch64__
 }
 
 template <>

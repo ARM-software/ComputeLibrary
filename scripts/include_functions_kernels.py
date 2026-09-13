@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2017-2018, 2020-2021, 2023, 2025 Arm Limited.
+# SPDX-FileCopyrightText: 2026 Yusuf Efe
 #
 # SPDX-License-Identifier: MIT
 #
@@ -55,7 +56,7 @@ def read_file(file):
 
 
 def write_file(file, lines):
-    with open(file, "w") as f:
+    with open(file, "w", newline='\n') as f:
         for line in lines:
             f.write(line)
 
@@ -73,7 +74,7 @@ def add_updated_includes(lines, pos, includes):
 def create_include_list(folder):
     files_path = folder + "/*.h"
     files = glob.glob(files_path)
-    updated_files = [include_str + folder + "/" + x.rsplit('/',1)[1] + "\"\n" for x in files]
+    updated_files = [include_str + folder + "/" + os.path.basename(x) + "\"\n" for x in files]
     updated_files.sort(key=lambda x: x.lower())
     return updated_files
 

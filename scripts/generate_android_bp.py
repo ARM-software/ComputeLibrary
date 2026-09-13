@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (c) 2023-2025 Arm Limited.
+# SPDX-FileCopyrightText: 2026 Yusuf Efe
 #
 # SPDX-License-Identifier: MIT
 #
@@ -171,6 +172,7 @@ def list_all_files(repo_path):
     :param repo_path: Path of the repository
     :return: The filtered list of useful filess
     """
+    repo_path = repo_path.replace(os.sep, "/")
     if not repo_path.endswith('/'):
         repo_path = repo_path + "/"
 
@@ -178,14 +180,15 @@ def list_all_files(repo_path):
     cpp_files = []
     cl_files = []
     for path, subdirs, files in os.walk(repo_path):
+        path = path.replace(os.sep, "/")
         for file in files:
             if file.endswith(".cpp"):
-                cpp_files.append(os.path.join(path, file))
+                cpp_files.append(path + "/" + file)
             elif file.endswith(".cl"):
-                cl_files.append(os.path.join(path, file))
+                cl_files.append(path + "/" + file)
             # Include CL headers
             if "src/core/CL/cl_kernels" in path and file.endswith(".h"):
-                cl_files.append(os.path.join(path, file))
+                cl_files.append(path + "/" + file)
     # Filter out unused cpp files
     filtered_cpp_files = []
     for cpp_file in cpp_files:
@@ -212,5 +215,5 @@ if __name__ == "__main__":
     cpp_files, opencl_files = list_all_files(args.folder)
     bp_file = generate_bp_file(cpp_files, opencl_files)
 
-    with open(args.output_file, 'w') as f:
+    with open(args.output_file, 'w', encoding='utf-8', newline='\n') as f:
         f.write(bp_file)
