@@ -1,4 +1,5 @@
 # Copyright (c) 2021 Arm Limited.
+# SPDX-FileCopyrightText: 2026 Yusuf Efe
 #
 # SPDX-License-Identifier: MIT
 #
@@ -132,7 +133,7 @@ _TFLITE_TO_ACL = {
     "REDUCE_MAX": "Reduction",  # 82
     "PACK": "Stack",  # 83
     "LOGICAL_OR": "ElementwiseBinary",  # 84
-    "ONE_HOT": "Unsupported",  # 85
+    # "ONE_HOT" : "Unsupported",                        #85
     "LOGICAL_AND": "ElementwiseBinary",  # 86
     "LOGICAL_NOT": "ElementwiseUnary",  # 87
     "UNPACK": "Unstack",  # 88
@@ -263,4 +264,4 @@ def tflite_op2acl(top):
     if top in _TFLITE_TO_ACL:
         return _TFLITE_TO_ACL[top]
     else:
-        raise ValueError("Operator {} does not exist in ComputeLibrary" % top)
+        raise ValueError("Operator {} does not exist in ComputeLibrary".format(top))
