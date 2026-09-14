@@ -1051,12 +1051,16 @@ Status CpuGemmAssemblyDispatch::has_opt_impl(arm_compute::WeightFormat &expected
                     "We could not find an optimized kernel for QASYMM8_SIGNED input and F16 output");
             }
 #endif /* defined(ENABLE_FP16_KERNELS) */
-            else if (d->data_type() == DataType::QASYMM8_SIGNED)
+            else if (d->data_type() == DataType::QASYMM8_SIGNED || d->data_type() == DataType::S8)
             {
                 ARM_COMPUTE_RETURN_ERROR_ON_MSG(
                     !(arm_gemm::has_opt_gemm<int8_t, int8_t, int8_t, arm_gemm::Requantize32>(arm_gemm_expected_wf, args,
                                                                                              {})),
-                    "We could not find an optimized kernel for QASYMM8_SIGNED input and QASYMM8_SIGNED output");
+                    "We could not find an optimized kernel for S8/QASYMM8_SIGNED input and S8/QASYMM8_SIGNED output");
+            }
+            else
+            {
+                ARM_COMPUTE_RETURN_ERROR_ON_MSG(true, "Unsupported output data type for S8/QASYMM8_SIGNED input");
             }
             break;
 #endif /* __aarch64__ */
@@ -1219,7 +1223,8 @@ void CpuGemmAssemblyDispatch::configure(
         // S8/U8 case structure unchanged in this PR.
         case DataType::U8:
         case DataType::QASYMM8:
-            if (b->data_type() == DataType::QASYMM8_SIGNED && d->data_type() == DataType::F32)
+            if ((b->data_type() == DataType::S8 || b->data_type() == DataType::QASYMM8_SIGNED) &&
+                d->data_type() == DataType::F32)
             {
                 create_arm_gemm_dequant<uint8_t, int8_t, float>(_arm_gemm, a, b, c, d, act, info);
             }
@@ -1252,7 +1257,7 @@ void CpuGemmAssemblyDispatch::configure(
                 create_arm_gemm_dequant<int8_t, int8_t, float16_t>(_arm_gemm, a, b, c, d, act, info);
             }
 #endif /* defined(ENABLE_FP16_KERNELS) */
-            else if (d->data_type() == DataType::QASYMM8_SIGNED)
+            else if (d->data_type() == DataType::QASYMM8_SIGNED || d->data_type() == DataType::S8)
             {
                 create_arm_gemm_quant<int8_t, int8_t, int8_t>(_arm_gemm, a, b, c, d, act, info);
             }
