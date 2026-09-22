@@ -361,6 +361,25 @@ using NEDepthwiseConvolutionLayerVariableWeightsFixture =
 TEST_SUITE(Float)
 TEST_SUITE(F32)
 
+// Exercise the ninth input row in the SME2 planar 3x3/stride-2 padding path.
+FIXTURE_DATA_TEST_CASE_NEW(
+    Run3x3Stride2RowPadding,
+    NEDepthwiseConvolutionLayerFixture<float>,
+    framework::DatasetMode::PRECOMMIT,
+    combine(make("In", {TensorShape(8U, 8U, 64U), TensorShape(9U, 9U, 17U), TensorShape(112U, 112U, 64U)}),
+            make("Weights", Size2D(3U, 3U)),
+            make("Info",
+                 {PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR),
+                  PadStrideInfo(2, 2, 1, 1, 1, 1, DimensionRoundingType::FLOOR)}),
+            make("Dilation", Size2D(1U, 1U)),
+            make("DepthMultiplier", {1}),
+            make("DataType", DataType::F32),
+            make("DataLayout", {DataLayout::NHWC}),
+            ActivationFunctionsDataset))
+{
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+
 FIXTURE_DATA_TEST_CASE_NEW(RunActivations,
                            NEDepthwiseConvolutionLayerFixture<float>,
                            framework::DatasetMode::NIGHTLY,
