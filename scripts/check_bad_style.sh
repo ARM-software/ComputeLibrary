@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # SPDX-FileCopyrightText: 2017-2020, 2022, 2024-2025 Arm Limited
+# SPDX-FileCopyrightText: 2026 Yusuf Efe
 #
 # SPDX-License-Identifier: MIT
 #
@@ -35,7 +36,7 @@ else
     FILES=$@
 fi
 
-grep -HrnP --exclude-dir=assembly --exclude-dir=convolution --exclude_dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv "/\*\*$" $FILES | tee bad_style.log
+grep -HrnP --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv "/\*\*$" $FILES | tee bad_style.log
 if (( `cat bad_style.log | wc -l` > 0 ))
 then
     echo ""
@@ -43,7 +44,7 @@ then
     exit -1
 fi
 
-grep -Hnr --exclude-dir=assembly --exclude-dir=convolution --exclude_dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv --exclude=Doxyfile "@brief" $FILES | tee bad_style.log
+grep -Hnr --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv --exclude=Doxyfile "@brief" $FILES | tee bad_style.log
 if (( `cat bad_style.log | wc -l` > 0 ))
 then
     echo ""
@@ -51,7 +52,7 @@ then
     exit -1
 fi
 
-grep -HnRE --exclude-dir=assembly --exclude-dir=convolution --exclude_dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv "\buint " --exclude-dir=cl_kernels --exclude-dir=cs_shaders $FILES | tee bad_style.log
+grep -HnRE --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv "\buint " --exclude-dir=cl_kernels --exclude-dir=cs_shaders $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -59,7 +60,7 @@ then
     exit -1
 fi
 
-grep -HnR --exclude-dir=assembly --exclude-dir=convolution --exclude_dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv "/^float32_t/" $FILES | tee bad_style.log
+grep -HnR --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv "/^float32_t/" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -67,7 +68,7 @@ then
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude_dir=third_party  --exclude-dir=arm_gemm --exclude-dir=arm_conv "arm[_ ]\?cv" $FILES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=third_party  --exclude-dir=arm_gemm --exclude-dir=arm_conv "arm[_ ]\?cv" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -75,7 +76,7 @@ then
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude_dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv "#.*if.*defined[^(]" $FILES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv "#.*if.*defined[^(]" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -83,7 +84,7 @@ then
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude_dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv "#else$\|#endif$" $FILES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv "#else$\|#endif$" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -91,7 +92,7 @@ then
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude_dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv "ARM_COMPUTE_AARCH64_V8_2" ./tests/validation/CL | tee bad_style.log
+grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=third_party --exclude-dir=arm_gemm --exclude-dir=arm_conv "ARM_COMPUTE_AARCH64_V8_2" ./tests/validation/CL | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -100,24 +101,21 @@ then
 fi
 
 spdx_missing=0
-for f in $(find $FILES -type f)
+for f in $(find $FILES -type f -exec grep -L SPDX {} +)
 do
-    if [[ $(grep SPDX $f | wc -l) == 0 ]]
-    then
-        # List of exceptions:
-        case `basename $f` in
-            "arm_compute_version.embed");;
-            "filelist.json");;
-            ".clang-format");;
-            ".clang-tidy");;
-            "README.md");;
-            #It's an error for other files to not contain the MIT header:
-            *)
-                spdx_missing=1
-                echo $f;
-                ;;
-        esac
-    fi;
+    # List of exceptions:
+    case `basename $f` in
+        "arm_compute_version.embed");;
+        "filelist.json");;
+        ".clang-format");;
+        ".clang-tidy");;
+        "README.md");;
+        #It's an error for other files to not contain the MIT header:
+        *)
+            spdx_missing=1
+            echo $f;
+            ;;
+    esac
 done
 
 if [[ $spdx_missing > 0 ]]

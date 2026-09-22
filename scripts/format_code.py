@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (c) 2023-2025 Arm Limited.
+# SPDX-FileCopyrightText: 2026 Yusuf Efe
 #
 # SPDX-License-Identifier: MIT
 #
@@ -248,13 +249,14 @@ class GenerateAndroidBP:
         retval = 0
         self.shell = Shell()
         self.shell.save_cwd()
-        this_dir = os.path.dirname(__file__)
+        this_dir = os.path.dirname(os.path.abspath(__file__))
 
         logger.debug("Running Android.bp check")
         try:
             self.shell.cd(self.folder)
-            cmd = "%s/generate_android_bp.py --folder %s --output_file %s" % (this_dir, self.folder, self.bp_output_file)
-            output = self.shell.run_single_to_str(cmd)
+            cmd = [sys.executable, os.path.join(this_dir, "generate_android_bp.py"),
+                   "--folder", self.folder, "--output_file", self.bp_output_file]
+            output = subprocess.check_output(cmd, env=self.shell.env, stderr=subprocess.STDOUT, text=True)
             if len(output) > 0:
                 logger.info(output)
         except subprocess.CalledProcessError as e:
@@ -266,8 +268,8 @@ class GenerateAndroidBP:
         if not filecmp.cmp(self.bp_output_file, self.folder + "/Android.bp"):
             is_mismatched = True
 
-            with open(self.bp_output_file, 'r') as generated_file:
-                with open(self.folder + "/Android.bp", 'r') as review_file:
+            with open(self.bp_output_file, 'r', encoding='utf-8') as generated_file:
+                with open(self.folder + "/Android.bp", 'r', encoding='utf-8') as review_file:
                     diff = list(difflib.unified_diff(generated_file.readlines(), review_file.readlines(),
                                                      fromfile='Generated_Android.bp', tofile='Android.bp'))
 

@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: 2017-2018, 2023-2025 Arm Limited
 #
 # SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2026 Yusuf Efe
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -123,7 +124,7 @@ def main(*args):
 
         n_file += 1
 
-        with open(path,'r+', encoding="utf-8") as fd:
+        with open(path,'r+', encoding="utf-8", newline='\n') as fd:
             comment = list()
             first_param = -1
             last_param = -1

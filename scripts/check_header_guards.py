@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2023 Arm Limited.
+# SPDX-FileCopyrightText: 2026 Yusuf Efe
 #
 # SPDX-License-Identifier: MIT
 #
@@ -193,12 +194,12 @@ if __name__ == "__main__":
 
         expected_header_guard : str = find_expected_header_guard(file, prefix, add_extension, drop_outermost_subdir)
 
-        with open(file, "r") as fd:
+        with open(file, "r", encoding="utf-8") as fd:
             lines: List = fd.readlines()
 
         new_lines, guards_updated = fix_header_guard(lines, expected_header_guard, comment_style)
 
-        with open(file, "w") as fd:
+        with open(file, "w", encoding="utf-8", newline='\n') as fd:
             fd.writelines([f"{line}" for line in new_lines])
 
         if guards_updated:

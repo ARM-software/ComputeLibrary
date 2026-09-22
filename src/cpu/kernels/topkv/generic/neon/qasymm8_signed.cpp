@@ -36,13 +36,13 @@ static inline uint32_t reduce_u8_to_count(uint8x16_t m)
 #if defined(__aarch64__)
     const uint8x16_t ones = vshrq_n_u8(m, 7);
     return vaddvq_u8(ones);
-#else
+#else  // __aarch64__
     const uint8x16_t ones = vshrq_n_u8(m, 7);
     uint16x8_t       s16  = vpaddlq_u8(ones);
     uint32x4_t       s32  = vpaddlq_u16(s16);
     uint64x2_t       s64  = vpaddlq_u32(s32);
     return static_cast<uint32_t>(vgetq_lane_u64(s64, 0) + vgetq_lane_u64(s64, 1));
-#endif
+#endif // __aarch64__
 }
 
 template <>

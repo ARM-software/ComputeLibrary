@@ -1,4 +1,5 @@
 # Copyright (c) 2023-2026 Arm Limited.
+# SPDX-FileCopyrightText: 2026 Yusuf Efe
 #
 # SPDX-License-Identifier: MIT
 #
@@ -96,7 +97,9 @@ repos:
         name: Commit Message Check
         language: python
         always_run: true
-        entry: bash -c "pip install -q commitizen && git log -1 --pretty=%s | cz check"
+        additional_dependencies: ['commitizen==4.18.0']
+        entry: bash -c "git log -1 --pretty=%s | cz check"
+        pass_filenames: false
         stages: [pre-push]
       - id: check-signoff
         name: Check Signed-off-by
@@ -104,6 +107,7 @@ repos:
           bash -c 'git log -1 --pretty=%B |
           grep -qiE "^Signed-off-by: .+ <.+@.+>$"'
         always_run: true
+        pass_filenames: false
         language: system
         stages: [pre-push]
   - repo: https://github.com/pre-commit/mirrors-clang-format
