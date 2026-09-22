@@ -49,6 +49,31 @@ TensorAllocator *Tensor::allocator()
     return &_allocator;
 }
 
+std::unique_ptr<SparseTensor> Tensor::to_sparse(size_t dim) const
+{
+    return to_coo_sparse(dim);
+}
+
+std::unique_ptr<COOTensor> Tensor::to_coo_sparse(size_t dim) const
+{
+    return std::unique_ptr<COOTensor>(new COOTensor(this, dim));
+}
+
+std::unique_ptr<COOTensor> Tensor::to_coo_sparse() const
+{
+    return std::unique_ptr<COOTensor>(new COOTensor(this));
+}
+
+std::unique_ptr<CSRTensor> Tensor::to_csr_sparse(size_t dim) const
+{
+    return std::unique_ptr<CSRTensor>(new CSRTensor(this, dim));
+}
+
+std::unique_ptr<CSRTensor> Tensor::to_csr_sparse() const
+{
+    return std::unique_ptr<CSRTensor>(new CSRTensor(this));
+}
+
 void Tensor::associate_memory_group(IMemoryGroup *memory_group)
 {
     _allocator.set_associated_memory_group(memory_group);

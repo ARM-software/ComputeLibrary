@@ -34,6 +34,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/SparseTensor.h"
 
 #include <array>
 #include <cstddef>
@@ -124,6 +125,42 @@ private:
     };
 
     std::array<Dimension, Coordinates::num_max_dimensions> _dims;
+};
+
+class SparseIterator
+{
+public:
+    /** Create an iterator for the metadata and allocation contained in the SparseTensor
+     *
+     * @param[in] tensor A reference to the tensor to associate to the iterator.
+     */
+    SparseIterator(const SparseTensor &tensor);
+
+    /** Returns true if there is at least one more element to iterate */
+    bool has_next() const;
+
+    /** Move to the next non-zero element */
+    void next();
+
+    /** Get the coordinates of the current non-zero element */
+    Coordinates coordinates() const;
+
+    /** Get the value of the current non-zero element */
+    const uint8_t *value() const;
+
+    /** Reset iterator to the beginning */
+    void reset();
+
+    /** Get current index (nth non-zero) */
+    size_t index() const;
+
+    /** Get the number of non-zero elements that are left to iterate */
+    size_t num_left() const;
+
+private:
+    const SparseTensor &_tensor;
+    size_t              _index;
+    size_t              _nnz;
 };
 
 /** Iterate through the passed window, automatically adjusting the iterators and calling the lambda_functino for each element.
