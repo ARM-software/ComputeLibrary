@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025 Arm Limited.
+ * Copyright (c) 2017-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -106,6 +106,9 @@ public:
     /** Static function that queries whether there exists fixed-format kernel and if it exists it will return in the first argument in what format
      * weights are expected to be reshaped as defined by WeightFormat class. Apart from the first argument the rest of the arguments are the same
      * as in @ref NEGEMM::validate() except that all arguments are required.
+     *
+     * @deprecated S8 and U8 will not supported through this API call. Please use QASYMM8, QASYMM8_SIGNED, QSYMM8,
+     * QSYMM8_PER_CHANNEL, QSYMM16 depending on the quantization properties.
      *
      * @return a status
      */

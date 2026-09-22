@@ -189,6 +189,9 @@ public:
      * Notice that a GEMM configured with a WeightFormat other than
      * UNSPECIFIED will run GEMM with variable weights mode.
      *
+     * @deprecated S8 and U8 will not supported through this API call. Please use QASYMM8, QASYMM8_SIGNED, QSYMM8,
+     * QSYMM8_PER_CHANNEL, QSYMM16 depending on the quantization properties.
+     *
      * @param[out] expected_weight_format The arm_compute::WeightFormat expected by the kernel.
      * @param[in]  src                    Source tensor info.
      * @param[in]  weights                Weights tensor info.

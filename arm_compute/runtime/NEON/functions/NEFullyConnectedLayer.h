@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025 Arm Limited.
+ * Copyright (c) 2017-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -150,6 +150,9 @@ public:
                            const WeightsInfo      &weights_info = WeightsInfo());
 
     /** Static function that queries whether fixed-format kernel exists for a given problem description
+     *
+     * @deprecated S8 and U8 will not supported through this API call. Please use QASYMM8, QASYMM8_SIGNED, QSYMM8,
+     * QSYMM8_PER_CHANNEL, QSYMM16 depending on the quantization properties.
      *
      * @param[out] expected_weight_format Format in which weights should be for found fixed format kernel
      * @param[in]  input                  Source tensor
