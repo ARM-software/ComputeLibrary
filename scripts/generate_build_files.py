@@ -298,10 +298,10 @@ if "__main__" in __name__:
 
     if args.bazel:
         # 8562a4ec: Remove CommonGraphOptions from Utils target and warnings
-        graph_files += ["//utils:CommonGraphOptions.cpp"]
+        bazel_graph_files = graph_files + ["//utils:CommonGraphOptions.cpp"]
 
         bazel_build_string = build_from_template_bazel(
-            graph_files, lib_files_sve, lib_files_sve2, lib_files + lib_files_neon_fp16)
+            bazel_graph_files, lib_files_sve, lib_files_sve2, lib_files + lib_files_neon_fp16)
         with open("src/BUILD.bazel", "w") as fp:
             fp.write(bazel_build_string)
 
