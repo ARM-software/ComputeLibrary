@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2017-2018 Arm Limited.
+ * SPDX-FileCopyrightText: 2026 Yusuf Efe
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_UTILS_LISTOPTION
-#define ARM_COMPUTE_UTILS_LISTOPTION
+#ifndef ACL_UTILS_COMMAND_LINE_LISTOPTION_H
+#define ACL_UTILS_COMMAND_LINE_LISTOPTION_H
 
 #include "Option.h"
 #include <initializer_list>
@@ -101,6 +102,28 @@ bool ListOption<T>::parse(std::string value)
     }
 }
 
+template <>
+inline bool ListOption<std::string>::parse(std::string value)
+{
+    _is_set = true;
+    std::stringstream stream{value};
+    std::string       item;
+
+    while (std::getline(stream, item, ','))
+    {
+        if (item.empty())
+        {
+            _is_set = false;
+        }
+        else
+        {
+            _values.emplace_back(std::move(item));
+        }
+    }
+
+    return _is_set;
+}
+
 template <typename T>
 inline std::string ListOption<T>::help() const
 {
@@ -114,4 +137,4 @@ inline const std::vector<T> &ListOption<T>::value() const
 }
 } // namespace utils
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_UTILS_LISTOPTION */
+#endif // ACL_UTILS_COMMAND_LINE_LISTOPTION_H
