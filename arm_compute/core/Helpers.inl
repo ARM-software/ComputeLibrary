@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021, 2023, 2025 Arm Limited.
+ * Copyright (c) 2016-2021, 2023, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,21 +95,6 @@ inline void execute_window_loop(const Window &w, L &&lambda_function, Ts &&...it
 
 inline constexpr Iterator::Iterator() : _ptr(nullptr), _dims()
 {
-}
-
-inline Iterator::Iterator(const ITensor *tensor, const Window &win) : Iterator()
-{
-    ARM_COMPUTE_ERROR_ON(tensor == nullptr);
-    ARM_COMPUTE_ERROR_ON(tensor->info() == nullptr);
-
-    initialize(tensor->info()->num_dimensions(), tensor->info()->strides_in_bytes(), tensor->buffer(),
-               tensor->info()->offset_first_element_in_bytes(), win);
-}
-
-inline Iterator::Iterator(size_t num_dims, const Strides &strides, uint8_t *buffer, size_t offset, const Window &win)
-    : Iterator()
-{
-    initialize(num_dims, strides, buffer, offset, win);
 }
 
 inline void

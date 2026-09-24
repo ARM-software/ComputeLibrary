@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited.
+ * Copyright (c) 2016-2021, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,24 @@
 
 namespace arm_compute
 {
+// Keep these constructors in a baseline-ISA translation unit. Multi-ISA builds compile callers with
+// ISA-specific flags, and emitting inline copies there can leak unsupported instructions into baseline callers
+// through COMDAT coalescing.
+Iterator::Iterator(const ITensor *tensor, const Window &win) : Iterator()
+{
+    ARM_COMPUTE_ERROR_ON(tensor == nullptr);
+    ARM_COMPUTE_ERROR_ON(tensor->info() == nullptr);
+
+    initialize(tensor->info()->num_dimensions(), tensor->info()->strides_in_bytes(), tensor->buffer(),
+               tensor->info()->offset_first_element_in_bytes(), win);
+}
+
+Iterator::Iterator(size_t num_dims, const Strides &strides, uint8_t *buffer, size_t offset, const Window &win)
+    : Iterator()
+{
+    initialize(num_dims, strides, buffer, offset, win);
+}
+
 ValidRegion calculate_valid_region_scale(const ITensorInfo  &src_info,
                                          const TensorShape  &dst_shape,
                                          InterpolationPolicy interpolate_policy,
