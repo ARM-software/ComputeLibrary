@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <array>
+#include <vector>
 #include <functional>
 #include <limits>
 #include <numeric>
@@ -56,6 +57,15 @@ public:
     template <typename... Ts>
     explicit Dimensions(Ts... dims) : _id{{static_cast<T>(dims)...}}, _num_dimensions{sizeof...(dims)}
     {
+    }
+
+    /** Constructor to initialize the tensor shape with a list of dim values.
+     *
+     * @param[in] dims Vector of values to initialize the dimensions.
+     */
+    explicit Dimensions(std::vector<T> dims) : _id(), _num_dimensions{dims.size()}
+    {
+        std::copy_n(dims.begin(), std::min(num_max_dimensions, dims.size()), _id.begin());
     }
 
     /** Allow instances of this class to be copy constructed */
