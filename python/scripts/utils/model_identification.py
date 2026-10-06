@@ -1,4 +1,5 @@
 # Copyright (c) 2021 Arm Limited.
+# SPDX-FileCopyrightText: 2026 Yusuf Efe
 #
 # SPDX-License-Identifier: MIT
 #
@@ -64,13 +65,13 @@ def identify_model_type(model_path):
     """
 
     if not os.path.exists(model_path):
-        logging.warn(f"Provided model {model_path} does not exist!")
+        logging.warning(f"Provided model {model_path} does not exist!")
         return None
 
     if is_tflite_model(model_path):
         model_type = "tflite"
     else:
-        logging.warn(logging.warn(f"Provided model {model_path} is not of supported type!"))
+        logging.warning(f"Provided model {model_path} is not of supported type!")
         model_type = None
 
     return model_type

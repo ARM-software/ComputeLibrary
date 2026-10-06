@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) 2021 Arm Limited.
+# SPDX-FileCopyrightText: 2026 Yusuf Efe
 #
 # SPDX-License-Identifier: MIT
 #
@@ -178,6 +179,8 @@ if __name__ == "__main__":
         logger.debug(f"Starting analyzing {model} model")
 
         model_type = identify_model_type(model)
+        if model_type not in SUPPORTED_MODEL_TYPES:
+            parser.error(f"Cannot analyze model '{model}': expected a readable TFLite model file")
         supported_model_ops, unsupported_mode_ops, supported_model_dts, unsupported_model_dts = extract_model_meta(model, model_type)
         final_supported_ops.update(supported_model_ops)
         final_unsupported_ops.update(unsupported_mode_ops)
