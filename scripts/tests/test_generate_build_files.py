@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Yusuf Efe
+# SPDX-FileCopyrightText: Copyright 2026 Yusuf Efe
 #
 # SPDX-License-Identifier: MIT
 
