@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, 2024 Arm Limited.
+ * Copyright (c) 2021-2022, 2024, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -375,9 +375,8 @@ inline void scale_vector_q16x8(bool               exclude_padding,
 
 template <typename T>
 auto load16_boundary_aware(
-    int srcw, int srch, int pad_l, int pad_r, int pad_t, int pad_b, int x, int y, const T *ptr, T fval)
+    int srcw, int srch, int pad_l, int pad_r, int pad_t, int pad_b, int x, int y, const T *ptr, T fval, bool is_avg)
 {
-    ARM_COMPUTE_UNUSED(pad_b, pad_r);
     T vec[16];
     //handle reading a row out of the tensor
     const bool row_in_bounds((y >= pad_t) && (y < (srch + pad_t)));
@@ -386,6 +385,11 @@ auto load16_boundary_aware(
         if (row_in_bounds && (x + i >= pad_l) && (x + i < (srcw + pad_l)))
         {
             vec[i] = *(ptr + i);
+        }
+        else if (is_avg && (x + i >= srcw + pad_l + pad_r || y >= srch + pad_t + pad_b))
+        {
+            // Partial CEIL windows exclude samples beyond the explicitly padded input.
+            vec[i] = T(0);
         }
         else
         {
@@ -478,7 +482,9 @@ void pooling2_quantized_neon_nchw(const ITensor    *src,
     const int                     src_h         = src->info()->dimension(1);
     const int                     dst_w         = dst0->info()->dimension(0);
 
-    const T fill_value = (pool_info.pool_type == PoolingType::MAX) ? std::numeric_limits<T>::min() : T(0);
+    const T fill_value = (pool_info.pool_type == PoolingType::MAX)
+                             ? std::numeric_limits<T>::min()
+                             : (pool_info.exclude_padding ? T(0) : static_cast<T>(src_qinfo.offset));
 
     execute_window_loop(
         window,
@@ -490,10 +496,12 @@ void pooling2_quantized_neon_nchw(const ITensor    *src,
 
             auto top_data =
                 load16_boundary_aware(src_w, src_h, pool_pad_left, pool_pad_right, pool_pad_top, pool_pad_bottom, x_val,
-                                      y_val_0, reinterpret_cast<const T *>(src_top_ptr + in.offset()), fill_value);
+                                      y_val_0, reinterpret_cast<const T *>(src_top_ptr + in.offset()), fill_value,
+                                      pool_info.pool_type == PoolingType::AVG);
             auto bottom_data =
                 load16_boundary_aware(src_w, src_h, pool_pad_left, pool_pad_right, pool_pad_top, pool_pad_bottom, x_val,
-                                      y_val_1, reinterpret_cast<const T *>(src_bottom_ptr + in.offset()), fill_value);
+                                      y_val_1, reinterpret_cast<const T *>(src_bottom_ptr + in.offset()), fill_value,
+                                      pool_info.pool_type == PoolingType::AVG);
 
             q8x8_t lower_res = {};
             q8x8_t upper_res = {};
@@ -622,7 +630,9 @@ void pooling3_quantized_neon_nchw(const ITensor    *src,
 
     const int src_w      = src->info()->dimension(0);
     const int src_h      = src->info()->dimension(1);
-    const T   fill_value = (pool_info.pool_type == PoolingType::AVG) ? T(0) : std::numeric_limits<T>::min();
+    const T   fill_value = (pool_info.pool_type == PoolingType::MAX)
+                               ? std::numeric_limits<T>::min()
+                               : (pool_info.exclude_padding ? T(0) : static_cast<T>(src_qinfo.offset));
     const int dst_w      = dst0->info()->dimension(0);
 
     execute_window_loop(
@@ -636,13 +646,16 @@ void pooling3_quantized_neon_nchw(const ITensor    *src,
 
             auto top_data =
                 load16_boundary_aware(src_w, src_h, pool_pad_left, pool_pad_right, pool_pad_top, pool_pad_bottom, x_val,
-                                      y_val_0, reinterpret_cast<const T *>(src_top_ptr + in.offset()), fill_value);
+                                      y_val_0, reinterpret_cast<const T *>(src_top_ptr + in.offset()), fill_value,
+                                      pool_info.pool_type == PoolingType::AVG);
             auto middle_data =
                 load16_boundary_aware(src_w, src_h, pool_pad_left, pool_pad_right, pool_pad_top, pool_pad_bottom, x_val,
-                                      y_val_1, reinterpret_cast<const T *>(src_middle_ptr + in.offset()), fill_value);
+                                      y_val_1, reinterpret_cast<const T *>(src_middle_ptr + in.offset()), fill_value,
+                                      pool_info.pool_type == PoolingType::AVG);
             auto bottom_data =
                 load16_boundary_aware(src_w, src_h, pool_pad_left, pool_pad_right, pool_pad_top, pool_pad_bottom, x_val,
-                                      y_val_2, reinterpret_cast<const T *>(src_bottom_ptr + in.offset()), fill_value);
+                                      y_val_2, reinterpret_cast<const T *>(src_bottom_ptr + in.offset()), fill_value,
+                                      pool_info.pool_type == PoolingType::AVG);
 
             q8x8_t  fres  = {};
             q8x16_t fqres = {};
@@ -772,7 +785,11 @@ void poolingMxN_quantized_neon_nchw(const ITensor    *src,
     const UniformQuantizationInfo &dst_qinfo = dst0->info()->quantization_info().uniform();
     const int                      src_w     = src->info()->dimension(0);
     const int                      src_h     = src->info()->dimension(1);
-    const T   fill_value       = (pool_info.pool_type == PoolingType::AVG) ? T(0) : std::numeric_limits<T>::min();
+
+    const T fill_value = (pool_info.pool_type == PoolingType::MAX)
+                             ? std::numeric_limits<T>::min()
+                             : (pool_info.exclude_padding ? T(0) : static_cast<T>(src_qinfo.offset));
+
     const int stridex_in_bytes = static_cast<int>(src->info()->strides_in_bytes().x());
     const int stridey_in_bytes = static_cast<int>(src->info()->strides_in_bytes().y());
 
@@ -802,7 +819,7 @@ void poolingMxN_quantized_neon_nchw(const ITensor    *src,
                         const int idx  = x + id.x() * pool_stride_x - pool_pad_left;
                         const int idy  = y + id.y() * pool_stride_y - pool_pad_top;
                         const T   data = (idx < 0 || idy < 0 || idx >= src_w || idy >= src_h) ? fill_value : *in_ptr;
-                        sres += data;
+                        sres += (idx < src_w + pool_pad_right && idy < src_h + pool_pad_bottom) ? data : T(0);
                     }
                 }
                 // Divide by scale
