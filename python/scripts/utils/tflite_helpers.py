@@ -1,4 +1,5 @@
 # Copyright (c) 2021 Arm Limited.
+# SPDX-FileCopyrightText: Copyright 2026 Yusuf Efe
 #
 # SPDX-License-Identifier: MIT
 #
@@ -260,7 +261,7 @@ def tflite_op2acl(top):
     ValueError
         If operator cannot be mapped
     """
-    if top in _TFLITE_TO_ACL:
+    if top in _TFLITE_TO_ACL and _TFLITE_TO_ACL[top] != "Unsupported":
         return _TFLITE_TO_ACL[top]
     else:
-        raise ValueError("Operator {} does not exist in ComputeLibrary" % top)
+        raise ValueError("Operator {} does not exist in ComputeLibrary".format(top))
