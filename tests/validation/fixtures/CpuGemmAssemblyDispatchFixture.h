@@ -44,7 +44,7 @@
 
 #ifndef BARE_METAL
 #include <thread>
-#endif
+#endif // BARE_METAL
 
 namespace arm_compute
 {
