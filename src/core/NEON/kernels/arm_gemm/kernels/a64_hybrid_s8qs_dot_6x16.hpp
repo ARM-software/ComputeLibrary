@@ -83,6 +83,10 @@ public:
                     return { 27.5482 };
                 case CPUModel::V1:
                     return { 52.09 };
+                case CPUModel::V2:
+                    return { 49.03 };
+                case CPUModel::V3:
+                    return { 55.22 };
             }
         }
 

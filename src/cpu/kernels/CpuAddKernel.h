@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited.
+ * Copyright (c) 2016-2022, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,6 +103,7 @@ private:
     AddKernelPtr  _run_method{nullptr};
     std::string   _name{};
     size_t        _split_dimension{Window::DimY};
+    DataType      _data_type{DataType::UNKNOWN};
 };
 } // namespace kernels
 } // namespace cpu
