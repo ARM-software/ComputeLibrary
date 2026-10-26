@@ -80,6 +80,10 @@ public:
                     return { 27.99 };
                 case CPUModel::V1:
                     return { 62.26 };
+                case CPUModel::V2:
+                    return { 58.99 };
+                case CPUModel::V3:
+                    return { 74.81 };
             }
         }
 

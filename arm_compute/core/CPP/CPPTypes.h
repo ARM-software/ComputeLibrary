@@ -54,7 +54,11 @@ struct CpuIsaInfo;
     X(X1)                          \
     X(V1)                          \
     X(A64FX)                       \
-    X(N1)
+    X(N1)                          \
+    X(V2)                          \
+    X(V3)                          \
+    X(N2)                          \
+    X(N3)
 
 /** CPU models types
  *
