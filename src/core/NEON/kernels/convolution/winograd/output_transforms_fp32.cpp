@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ void arm_fp32_1x2_1x7(unsigned int, const float *, const size_t, const float *, 
 static const TransformImplementation<float> transforms_fp32[] = {
 #if defined(__aarch64__)
 #if defined(ARM_COMPUTE_ENABLE_SME)
-  { IMPL(4, 4, 3, 3, sme_fp32_mopa_4x4_3x3, Unpadded), MethodConstraints::RequiresSME },
+  { IMPL(4, 4, 3, 3, sme_fp32_mopa_4x4_3x3, Unpadded), MethodConstraints::RequiresSME | MethodConstraints::RequiresSME512 },
 #endif  // defined(ARM_COMPUTE_ENABLE_SME)
 #endif  // defined(__aarch64__)
   { IMPL(4, 4, 3, 3, arm_fp32_4x4_3x3, Unpadded), MethodConstraints::LargerShape },

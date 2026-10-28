@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Arm Limited.
+ * Copyright (c) 2022-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #pragma once
 
 #include "winograd.hpp"
+#include "src/cpu/kernels/assembly/arm_common/internal/utils.hpp"
 #include <memory>
 #include <string>
 
@@ -39,6 +40,7 @@ enum class MethodConstraints
   RequiresSME  = 0x4,
   RequiresSME2 = 0x8,
   LargerShape  = 0x10, // Input tensor shape is larger than the output transform tile shape.
+  RequiresSME512 = 0x20, // The transform requires exactly 512-bit streaming vectors.
 };
 
 constexpr inline bool operator!(const MethodConstraints &c)
@@ -58,6 +60,17 @@ constexpr inline MethodConstraints operator&(const MethodConstraints &a, const M
 
 inline bool constraints_met(const MethodConstraints &c, const CPUInfo *ci, const ConvolutionArgs &, const WinogradConfig *)
 {
+  if (!!(c & MethodConstraints::RequiresSME512))
+  {
+#if defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SME)
+    if (!ci->has_sme() || arm_gemm::utils::sme::get_vector_length<float>() != 16)
+    {
+      return false;
+    }
+#else
+    return false;
+#endif
+  }
   return (
     (!(c & MethodConstraints::RequiresSVE) || (ci->has_sve())) &&
     (!(c & MethodConstraints::RequiresSVE2) || (ci->has_sve2())) &&
