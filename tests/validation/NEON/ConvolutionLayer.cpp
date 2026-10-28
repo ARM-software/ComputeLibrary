@@ -31,6 +31,8 @@
 
 #include "src/core/CPP/Validate.h"
 #include "src/core/helpers/MemoryHelpers.h"
+#include "src/core/NEON/kernels/assembly/winograd.hpp"
+#include "src/cpu/kernels/assembly/arm_common/internal/utils.hpp"
 #include "src/cpu/operators/CpuGemmConv2d.h"
 #include "src/cpu/operators/CpuGemmDirectConv2d.h"
 #include "src/cpu/operators/CpuWinogradConv2d.h"
@@ -878,6 +880,42 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
 TEST_SUITE_END() // Conv1x7
 
 TEST_SUITE(Conv3x3)
+#if defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SME)
+TEST_CASE(ValidateSMEOutputTransformVectorLength, framework::DatasetMode::ALL)
+{
+    const auto                        &cpu_info = CPUInfo::get();
+    const arm_conv::ConvolutionArgs    args(1, {8, 8}, 16, 1, 1, {8, 8}, 8, {3, 3});
+    arm_conv::winograd::WinogradConfig config;
+    config.output_transform_filter = "sme_fp32_mopa_4x4_3x3";
+    arm_conv::winograd::WinogradImpl implementation{};
+
+    const bool expected = cpu_info.has_sme() && arm_gemm::utils::sme::get_vector_length<float>() == 16;
+    const bool supported =
+        arm_conv::winograd::get_implementation<float>(implementation, &cpu_info, args, 1, false, &config, nullptr);
+    ARM_COMPUTE_EXPECT(supported == expected, framework::LogLevel::ERRORS);
+}
+#endif // defined(__aarch64__) && defined(ARM_COMPUTE_ENABLE_SME)
+
+// Exercise complete output tiles, channel tails and partial tiles at each streaming vector length.
+// At SME256 the 512-bit-only output transform used to repeat columns 0/1 at columns 2/3.
+FIXTURE_DATA_TEST_CASE(
+    RunSpatiallyDistinctOutput,
+    NEWinogradConvolutionLayerFixture<float>,
+    framework::DatasetMode::PRECOMMIT,
+    combine(zip(make("Input", {TensorShape(8U, 8U, 16U), TensorShape(8U, 8U, 16U), TensorShape(9U, 7U, 16U)}),
+                make("Weight",
+                     {TensorShape(3U, 3U, 16U, 8U), TensorShape(3U, 3U, 16U, 17U), TensorShape(3U, 3U, 16U, 4U)}),
+                make("Bias", {TensorShape(8U), TensorShape(17U), TensorShape(4U)}),
+                make("Output", {TensorShape(8U, 8U, 8U), TensorShape(8U, 8U, 17U), TensorShape(9U, 7U, 4U)})),
+            make("PadStrideInfo", PadStrideInfo(1, 1, 1, 1)),
+            make("Dilation", Size2D(1U, 1U)),
+            make("DataType", DataType::F32),
+            make("ActivationInfo", ActivationLayerInfo()),
+            make("DataLayout", DataLayout::NHWC)))
+{
+    validate(Accessor(_target), _reference, abs_tolerance_f32);
+}
+
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEWinogradConvolutionLayerFixture<float>,
                        framework::DatasetMode::PRECOMMIT,
