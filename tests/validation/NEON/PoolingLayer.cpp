@@ -497,6 +497,47 @@ TEST_SUITE_END() // Float
 
 TEST_SUITE(Quantized)
 
+DATA_TEST_CASE(AvgPaddingNCHW,
+               framework::DatasetMode::PRECOMMIT,
+               combine(make("DataType", {DataType::QASYMM8, DataType::QASYMM8_SIGNED}),
+                       make("Requantize", {false, true}),
+                       make("PoolingSize", {Size2D(2, 2), Size2D(3, 3), Size2D(3, 2)}),
+                       make("PadStride",
+                            {PadStrideInfo(1, 1, 1, 1), PadStrideInfo(2, 2, 1, 1, DimensionRoundingType::CEIL),
+                             PadStrideInfo(2, 2, 1, 0, 1, 0, DimensionRoundingType::CEIL)}),
+                       make("ExcludePadding", {false, true})),
+               data_type,
+               requantize,
+               pool_size,
+               pad_stride,
+               exclude_padding)
+{
+    const int  input_offset = (data_type == DataType::QASYMM8) ? 128 : -64;
+    const auto input_qinfo  = QuantizationInfo(0.25f, input_offset);
+    const auto output_qinfo = requantize ? QuantizationInfo(0.5f, input_offset / 2) : input_qinfo;
+    const auto pool_info = PoolingLayerInfo(PoolingType::AVG, pool_size, DataLayout::NCHW, pad_stride, exclude_padding);
+    // Exercise multiple vectors and the final partial vector in each NCHW kernel.
+    Tensor     input = create_tensor<Tensor>(TensorShape(30U, 6U, 2U), data_type, 1, input_qinfo, DataLayout::NCHW);
+    const auto output_shape = misc::shape_calculator::compute_pool_shape(*input.info(), pool_info);
+    Tensor     output       = create_tensor<Tensor>(output_shape, data_type, 1, output_qinfo, DataLayout::NCHW);
+
+    NEPoolingLayer pool;
+    pool.configure(&input, &output, pool_info);
+    input.allocator()->allocate();
+    output.allocator()->allocate();
+    library->fill_static_values(Accessor(input), std::vector<int>{input_offset});
+    pool.run();
+
+    // Real zero must remain zero, including at the padded edges.
+    const uint8_t expected = static_cast<uint8_t>(output_qinfo.uniform().offset);
+    Window        window;
+    window.use_tensor_dimensions(output.info()->tensor_shape());
+    execute_window_loop(window,
+                        [&](const Coordinates &id) {
+                            ARM_COMPUTE_EXPECT_EQUAL(*output.ptr_to_element(id), expected, framework::LogLevel::ERRORS);
+                        });
+}
+
 template <typename T>
 using NEPoolingLayerQuantizedFixture = PoolingLayerValidationQuantizedFixture<Tensor, Accessor, NEPoolingLayer, T>;
 template <typename T>
