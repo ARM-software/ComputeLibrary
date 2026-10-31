@@ -32,7 +32,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <unordered_map>
+#include <vector>
 
 namespace arm_compute
 {
@@ -114,7 +114,17 @@ public:
     bool empty() const;
 
 private:
-    std::unordered_map<int, PackElement> _pack{}; /**< Container with the packed tensors */
+    /** Find the element registered with the given id, or nullptr */
+    PackElement *find(int id);
+    /** Insert or overwrite the element with the id stored in @p e */
+    void set(const PackElement &e);
+
+    // Typical packs hold well under 16 tensors, so they live inline and a pack never touches the heap.
+    // Anything beyond that spills into _overflow (an empty vector does not allocate).
+    static constexpr size_t  _inline_capacity{16};
+    PackElement              _inline[_inline_capacity]{}; /**< Inline storage for the packed tensors */
+    size_t                   _inline_size{0};             /**< Number of valid entries in _inline */
+    std::vector<PackElement> _overflow{};                 /**< Entries beyond _inline_capacity */
 };
 } // namespace arm_compute
 #endif // ACL_ARM_COMPUTE_CORE_ITENSORPACK_H
