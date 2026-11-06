@@ -302,6 +302,7 @@ void ClGemm::configure_reshaped(const CLCompileContext &compile_context,
     kernel_info.reinterpret_input_as_3d = false;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
+    kernel_info.fp_mixed_precision      = gemm_info.fp_mixed_precision();
 
     // Set the target for the kernels
     _reshape_lhs_kernel->set_target(gpu_target);
@@ -515,6 +516,7 @@ Status ClGemm::validate_reshaped(const ITensorInfo *a,
     kernel_info.reinterpret_input_as_3d = false;
     kernel_info.broadcast_bias          = broadcast_bias;
     kernel_info.activation_info         = gemm_info.activation_info();
+    kernel_info.fp_mixed_precision      = gemm_info.fp_mixed_precision();
 
     GEMMLHSMatrixInfo lhs_info;
     GEMMRHSMatrixInfo rhs_info;
