@@ -354,11 +354,11 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_mmul_fp16(
 {
 #if(N0 != 2 && N0 != 4 && N0 != 8 && N0 != 16)
 #error "N0 can only be 2,4,8,16"
-#endif
+#endif // (N0 != 2 && N0 != 4 && N0 != 8 && N0 != 16)
 
 #if(K0 != 1)
 #error "K0 can only be 1"
-#endif
+#endif // (K0 != 1)
 
 #define MMUL_BLOCK_SIZE (MMUL_N0 * MMUL_M0)
 
@@ -426,19 +426,19 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_mmul_fp16(
         {
 #if N0 == 2
             c[m0].v = arm_matrix_multiply_af0(a[m0].v, b[0].v, c[m0].v);
-#endif
+#endif // N0 == 2
 
 #if N0 == 4
             c[m0].v.s01 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s01, c[m0].v.s01);
             c[m0].v.s23 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s23, c[m0].v.s23);
-#endif
+#endif // N0 == 4
 
 #if N0 == 8
             c[m0].v.s01 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s01, c[m0].v.s01);
             c[m0].v.s23 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s23, c[m0].v.s23);
             c[m0].v.s45 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s45, c[m0].v.s45);
             c[m0].v.s67 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s67, c[m0].v.s67);
-#endif
+#endif // N0 == 8
 
 #if N0 == 16
             c[m0].v.s01 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s01, c[m0].v.s01);
@@ -449,7 +449,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_mmul_fp16(
             c[m0].v.sab = arm_matrix_multiply_af0(a[m0].v, b[0].v.sab, c[m0].v.sab);
             c[m0].v.scd = arm_matrix_multiply_af0(a[m0].v, b[0].v.scd, c[m0].v.scd);
             c[m0].v.sef = arm_matrix_multiply_af0(a[m0].v, b[0].v.sef, c[m0].v.sef);
-#endif
+#endif // N0 == 16
 
         })
         lhs_offset_first_element_in_bytes += MMUL_K0 * sizeof(DATA_TYPE);
@@ -914,11 +914,11 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_mmul_texture_fp16(
 {
 #if(N0 != 2 && N0 != 4 && N0 != 8 && N0 != 16)
 #error "N0 can only be 2,4,8,16"
-#endif
+#endif // (N0 != 2 && N0 != 4 && N0 != 8 && N0 != 16)
 
 #if(K0 != 1)
 #error "K0 can only be 1"
-#endif
+#endif // (K0 != 1)
 
 #define MMUL_BLOCK_SIZE (MMUL_N0 * MMUL_M0)
 
@@ -985,19 +985,19 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_mmul_texture_fp16(
         {
 #if N0 == 2
             c[m0].v = arm_matrix_multiply_af0(a[m0].v, b[0].v, c[m0].v);
-#endif
+#endif // N0 == 2
 
 #if N0 == 4
             c[m0].v.s01 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s01, c[m0].v.s01);
             c[m0].v.s23 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s23, c[m0].v.s23);
-#endif
+#endif // N0 == 4
 
 #if N0 == 8
             c[m0].v.s01 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s01, c[m0].v.s01);
             c[m0].v.s23 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s23, c[m0].v.s23);
             c[m0].v.s45 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s45, c[m0].v.s45);
             c[m0].v.s67 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s67, c[m0].v.s67);
-#endif
+#endif // N0 == 8
 
 #if N0 == 16
             c[m0].v.s01 = arm_matrix_multiply_af0(a[m0].v, b[0].v.s01, c[m0].v.s01);
@@ -1008,7 +1008,7 @@ __kernel void gemm_mm_reshaped_only_rhs_nt_mmul_texture_fp16(
             c[m0].v.sab = arm_matrix_multiply_af0(a[m0].v, b[0].v.sab, c[m0].v.sab);
             c[m0].v.scd = arm_matrix_multiply_af0(a[m0].v, b[0].v.scd, c[m0].v.scd);
             c[m0].v.sef = arm_matrix_multiply_af0(a[m0].v, b[0].v.sef, c[m0].v.sef);
-#endif
+#endif // N0 == 16
 
         })
         lhs_offset_first_element_in_bytes += MMUL_K0 * sizeof(DATA_TYPE);

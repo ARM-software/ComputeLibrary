@@ -328,7 +328,7 @@ const auto QuantizedActivationFunctionsDataset = make("ActivationFunction",
                                                           ActivationLayerInfo::ActivationFunction::LEAKY_RELU,
 #ifdef __aarch64__
                                                           ActivationLayerInfo::ActivationFunction::GELU,
-#endif
+#endif // __aarch64__
                                                       });
 
 const auto QuantizedActivationDataset =

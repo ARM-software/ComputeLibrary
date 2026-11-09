@@ -46,7 +46,7 @@
 #ifdef ARM_COMPUTE_CL
 #include "tests/framework/instruments/OpenCLTimer.h"
 using namespace arm_compute::test::framework;
-#endif
+#endif // ARM_COMPUTE_CL
 
 PERFETTO_DEFINE_CATEGORIES(
     perfetto::Category(ARM_COMPUTE_PROF_CAT_NONE).SetTags("verbose").SetDescription("No Category"),
@@ -74,7 +74,7 @@ public:
 #ifdef ARM_COMPUTE_CL
     void openclTraceBegin();
     void openclTraceEnd();
-#endif
+#endif // ARM_COMPUTE_CL
 
 private:
     std::unique_ptr<perfetto::TracingSession> tracing_session;
@@ -82,7 +82,7 @@ private:
 #ifdef ARM_COMPUTE_CL
     std::unique_ptr<OpenCLClock<true>> opencl_clock;
     bool                               opencl_tracing_enabled;
-#endif
+#endif // ARM_COMPUTE_CL
 };
 
 // 👇 Singleton accessor declaration
@@ -116,17 +116,17 @@ private:
 #ifdef ARM_COMPUTE_CL
 #define ARM_COMPUTE_TRACE_OPENCL_BEGIN() arm_compute::profile::get_profiler().openclTraceBegin()
 #define ARM_COMPUTE_TRACE_OPENCL_SYNC()  arm_compute::profile::get_profiler().openclTraceEnd()
-#else
+#else // ARM_COMPUTE_CL
 #define ARM_COMPUTE_TRACE_OPENCL_BEGIN() (void)0
 #define ARM_COMPUTE_TRACE_OPENCL_SYNC()  (void)0
-#endif
+#endif // ARM_COMPUTE_CL
 
 // This is useful to postprocess and recreate spans that did not happen on real time.
 // Typical use of this is to redraw GPU spans in the CPU timeline view.
 // Once we collect the GPU timestamps, we can use them to create spans in the CPU timeline.
 #if ACL_PROFILE_LEVEL >= 1
 #define USE_CUSTOM_TIMESTAMP
-#endif
+#endif // ACL_PROFILE_LEVEL >= 1
 
 #define ARM_COMPUTE_TRACE_CUSTOM_EVENT(category, level, timestamp_ns, duration_ns, name, arg)                 \
     do                                                                                                        \
@@ -174,7 +174,7 @@ private:
     uint64_t __ts_##__COUNTER__ = arm_compute::profile::get_profiler().getTsNs(); \
     TRACE_EVENT_BEGIN(ARM_COMPUTE_PROF_CAT_NONE, name, __ts_##__COUNTER__);       \
     arm_compute::profile::ScopedPerfettoTrace __trace_scope_##__COUNTER__(__ts_##__COUNTER__);
-#endif
+#endif // ACL_PROFILE_LEVEL >= 0
 #define ARM_COMPUTE_TRACE_EVENT_BEGIN(category, level, name)                                             \
     do                                                                                                   \
     {                                                                                                    \
@@ -202,11 +202,11 @@ private:
         if ((int)(level) <= ACL_PROFILE_LEVEL)                                                              \
             TRACE_COUNTER(category, name, (uint64_t)arm_compute::profile::get_profiler().getTsNs(), value); \
     } while (0)
-#else
+#else // USE_CUSTOM_TIMESTAMP
 
 #if ACL_PROFILE_LEVEL >= 0
 #define _ARM_COMPUTE_TRACE_EVENT_L0(category, name) TRACE_EVENT(category, name)
-#endif
+#endif // ACL_PROFILE_LEVEL >= 0
 
 #define ARM_COMPUTE_TRACE_EVENT_BEGIN(category, level, name) \
     do                                                       \
@@ -235,21 +235,21 @@ private:
         if ((int)(level) <= ACL_PROFILE_LEVEL)                  \
             TRACE_COUNTER(category, name, value);               \
     } while (0)
-#endif
+#endif // USE_CUSTOM_TIMESTAMP
 
 #if ACL_PROFILE_LEVEL >= 1
 #define _ARM_COMPUTE_TRACE_EVENT_L1(category, name) _ARM_COMPUTE_TRACE_EVENT_L0(category, name)
-#else
+#else // ACL_PROFILE_LEVEL >= 1
 #define _ARM_COMPUTE_TRACE_EVENT_L1(category, name)
-#endif
+#endif // ACL_PROFILE_LEVEL >= 1
 
 #if ACL_PROFILE_LEVEL >= 2
 #define _ARM_COMPUTE_TRACE_EVENT_L2(category, name) _ARM_COMPUTE_TRACE_EVENT_L1(category, name)
-#else
+#else // ACL_PROFILE_LEVEL >= 2
 #define _ARM_COMPUTE_TRACE_EVENT_L2(category, name)
-#endif
+#endif // ACL_PROFILE_LEVEL >= 2
 
-#else
+#else // defined(ACL_PROFILE_ENABLE) && (ACL_PROFILE_BACKEND == PERFETTO)
 // Stub PROFILE macros to do nothing
 #define ARM_COMPUTE_TRACE_OPENCL_BEGIN() (void)0
 #define ARM_COMPUTE_TRACE_OPENCL_SYNC()  (void)0

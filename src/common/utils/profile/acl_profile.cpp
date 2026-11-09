@@ -39,8 +39,8 @@ PerfettoProfiler::PerfettoProfiler()
       ,
       opencl_clock(nullptr),
       opencl_tracing_enabled(false)
-#else
-#endif
+#else  // ARM_COMPUTE_CL
+#endif // ARM_COMPUTE_CL
 {
     perfetto::TracingInitArgs args;
     args.backends = perfetto::ACL_PROFILE_MODE;
@@ -79,7 +79,7 @@ void PerfettoProfiler::openclTraceBegin()
         {
             std::cerr << "Failed to create OpenCLClock instance." << std::endl;
         }
-#endif
+#endif // ARM_COMPUTE_CL
         opencl_clock->test_start();
         opencl_clock->start();
         opencl_tracing_enabled = true;
@@ -104,7 +104,7 @@ void PerfettoProfiler::openclTraceEnd()
     {
         std::cout << instrument.first << ": " << instrument.second << std::endl;
     }
-#endif
+#endif // (ACL_PROFILE_LEVEL > 1)
 
     // The difference between the instrument map and this map is that.
     // MeasurementsMap elements does have an awareness of the timestamps in other GPU stages.
@@ -178,7 +178,7 @@ void PerfettoProfiler::openclTraceEnd()
         std::cout << "Start: " << instrument.second[2] << " ns" << std::endl;
         std::cout << "End: " << instrument.second[3] << " ns" << std::endl;
         std::cout << std::endl;
-#endif
+#endif // (ACL_PROFILE_LEVEL > 1)
 
         ARM_COMPUTE_TRACE_CUSTOM_EVENT(ARM_COMPUTE_PROF_CAT_GPU, ARM_COMPUTE_PROF_LVL_GPU, instrument.second[0],
                                        instrument.second[1] - instrument.second[0], "GPU::Queue",
@@ -193,7 +193,7 @@ void PerfettoProfiler::openclTraceEnd()
     opencl_clock.reset();
     opencl_tracing_enabled = false;
 }
-#endif
+#endif // ARM_COMPUTE_CL
 uint64_t PerfettoProfiler::getTsNs() const
 {
     return perfetto::TrackEvent::GetTraceTimeNs() - trace_start_ns;
@@ -209,4 +209,4 @@ PerfettoProfiler &get_profiler()
 } // namespace profile
 } // namespace arm_compute
 
-#endif
+#endif // defined(ACL_PROFILE_ENABLE) && (ACL_PROFILE_BACKEND == PERFETTO)
