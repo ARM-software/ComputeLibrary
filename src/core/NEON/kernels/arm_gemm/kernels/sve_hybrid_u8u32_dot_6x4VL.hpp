@@ -96,6 +96,10 @@ public:
                     return { 48.09, 16.24, 0.83 };
                 case CPUModel::A64FX:
                     return { 101.62, 3.15, 0.42 };
+                case CPUModel::V2:
+                    return { 50.64, 19.86, 1.22 };
+                case CPUModel::V3:
+                    return { 58.99, 19.90, 1.12 };
             }
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, 2024-2025 Arm Limited.
+ * Copyright (c) 2021-2022, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,14 +35,6 @@
 #include "src/cpu/kernels/add/list.h"
 
 #include <array>
-
-#if defined(ENABLE_FP32_KERNELS)
-namespace
-{
-static constexpr size_t default_mws_N1_fp32_neon = 24536;
-static constexpr size_t default_mws_V1_fp32_neon = 40510;
-} // namespace
-#endif /* ENABLE_FP32_KERNELS */
 
 namespace arm_compute
 {
@@ -185,6 +177,7 @@ void CpuAddKernel::configure(const ITensorInfo *src0, const ITensorInfo *src1, I
     _policy     = policy;
     _run_method = uk->ukernel;
     _name       = std::string("CpuAddKernel").append("/").append(uk->name);
+    _data_type  = src0->data_type();
 
     // Auto initialize dst if not initialized
     const TensorShape &out_shape = TensorShape::broadcast_shape(src0->tensor_shape(), src1->tensor_shape());
@@ -235,45 +228,76 @@ const std::vector<CpuAddKernel::AddKernel> &CpuAddKernel::get_available_kernels(
     return available_kernels;
 }
 
+namespace
+{
+/** Minimum workload sizes (in elements along the split dimension) below which
+ *  splitting an addition across threads costs more than it saves. Measured
+ *  with NEArithmeticAddition on 1D tensors, so they apply to the NEON, SVE and
+ *  SVE2 variants alike. A value of 0 means no tuned value for that data type.
+ */
+struct AddMws
+{
+    size_t fp32;
+    size_t fp16;
+    size_t q8;
+};
+
+AddMws get_add_mws(CPUModel model)
+{
+    switch (model)
+    {
+        case CPUModel::N1:
+            return {24536, 0, 0};
+        case CPUModel::V1:
+            return {40510, 56049, 24910};
+        case CPUModel::V2:
+            return {37366, 56049, 24910};
+        case CPUModel::V3:
+            return {24910, 56049, 16607};
+        default:
+            return {0, 0, 0};
+    }
+}
+} // namespace
+
 size_t CpuAddKernel::get_mws(const CPUInfo &platform, size_t thread_count) const
 {
     ARM_COMPUTE_UNUSED(thread_count);
 
-#if defined(ENABLE_FP32_KERNELS)
-    if (this->_run_method == &add_fp32_neon)
+    const AddMws table = get_add_mws(platform.get_cpu_model());
+    size_t       mws   = 0;
+    switch (_data_type)
     {
-        size_t mws = ICPPKernel::default_mws;
-        if (platform.get_cpu_model() == CPUModel::N1)
-        {
-            mws = default_mws_N1_fp32_neon;
-        }
-        else if (platform.get_cpu_model() == CPUModel::V1)
-        {
-            mws = default_mws_V1_fp32_neon;
-        }
-        else
-        {
-            return ICPPKernel::default_mws;
-        }
-
-        // tensor is 1D or was re-interpreted as 1D
-        if (this->window().shape().num_dimensions() == 1)
-        {
-            return mws;
-        }
-        else
-        {
-            // scale mws down by the number of elements along all the dimensions (x, z, w, etc) except the one
-            // that we parallelize along (the y dimension). This allows for parallelization when the Y_SIZE is small
-            // but the other sizes are large, which boosts performance.
-            mws = static_cast<size_t>(mws / (this->window().num_iterations_total() / this->window().num_iterations(1)));
-            return std::max(static_cast<size_t>(1), mws);
-        }
+        case DataType::F32:
+            mws = table.fp32;
+            break;
+        case DataType::F16:
+            mws = table.fp16;
+            break;
+        case DataType::QASYMM8:
+        case DataType::QASYMM8_SIGNED:
+            mws = table.q8;
+            break;
+        default:
+            break;
     }
-#else  /* ENABLE_FP32_KERNELS */
-    ARM_COMPUTE_UNUSED(platform);
-#endif /* ENABLE_FP32_KERNELS */
-    return ICPPKernel::default_mws;
+
+    if (mws == 0)
+    {
+        return ICPPKernel::default_mws;
+    }
+
+    // tensor is 1D or was re-interpreted as 1D
+    if (this->window().shape().num_dimensions() == 1)
+    {
+        return mws;
+    }
+
+    // scale mws down by the number of elements along all the dimensions (x, z, w, etc) except the one
+    // that we parallelize along (the y dimension). This allows for parallelization when the Y_SIZE is small
+    // but the other sizes are large, which boosts performance.
+    mws = static_cast<size_t>(mws / (this->window().num_iterations_total() / this->window().num_iterations(1)));
+    return std::max(static_cast<size_t>(1), mws);
 }
 
 } // namespace kernels
