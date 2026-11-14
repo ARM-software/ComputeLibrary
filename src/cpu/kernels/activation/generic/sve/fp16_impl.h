@@ -44,11 +44,12 @@ void dispatch_sve_fp16_activation_function(ActivationLayerInfo::ActivationFuncti
                                            const ActivationLayerInfo              &act_info,
                                            F                                     &&fn)
 {
-    const auto const_1     = svdup_n_f16(1.f);
-    const auto const_0     = svdup_n_f16(0.f);
-    const auto const_6     = svdup_n_f16(6.f);
-    const auto const_3     = svdup_n_f16(3.f);
-    const auto const_inv_6 = svdup_n_f16(0.166666667f);
+    const auto const_1          = svdup_n_f16(1.f);
+    const auto const_0          = svdup_n_f16(0.f);
+    const auto const_6          = svdup_n_f16(6.f);
+    const auto const_3          = svdup_n_f16(3.f);
+    const auto const_inv_6      = svdup_n_f16(0.166666667f);
+    const auto soft_relu_thresh = svdup_n_f16(11.f);
 
     const auto va = svdup_n_f16(act_info.a());
     const auto vb = svdup_n_f16(act_info.b());
@@ -82,7 +83,12 @@ void dispatch_sve_fp16_activation_function(ActivationLayerInfo::ActivationFuncti
                 });
             break;
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-            fn([&](auto vin, svbool_t pg) { return svlog_f16_z(pg, svadd_f16_z(pg, const_1, svexp_f16_z(pg, vin))); });
+            fn(
+                [&](auto vin, svbool_t pg)
+                {
+                    return svsel_f16(svcmpgt_f16(pg, vin, soft_relu_thresh), vin,
+                                     svlog_f16_z(pg, svadd_f16_z(pg, const_1, svexp_f16_z(pg, vin))));
+                });
             break;
         case ActivationLayerInfo::ActivationFunction::ELU:
             fn(

@@ -30,6 +30,9 @@
 #include "arm_compute/function_info/ActivationLayerInfo.h"
 
 #include "src/core/NEON/wrapper/wrapper.h"
+
+#include <type_traits>
+
 namespace arm_compute
 {
 namespace cpu
@@ -78,7 +81,7 @@ void dispatch_fp_neon_activation_function(ActivationLayerInfo::ActivationFunctio
     const auto      const_6           = wrapper::vdup_n(static_cast<T>(6.f), ExactTagType{});
     const auto      const_3           = wrapper::vdup_n(static_cast<T>(3.f), ExactTagType{});
     const auto      const_inv_6       = wrapper::vdup_n(static_cast<T>(0.166666667f), ExactTagType{});
-    constexpr float soft_relu_thresh  = 12.f;
+    constexpr float soft_relu_thresh  = std::is_same<T, float>::value ? 12.f : 11.f;
     const auto      vsoft_relu_thresh = wrapper::vdup_n(static_cast<T>(soft_relu_thresh), ExactTagType{});
     const auto      va                = wrapper::vdup_n(static_cast<T>(act_info.a()), ExactTagType{});
     const auto      vb                = wrapper::vdup_n(static_cast<T>(act_info.b()), ExactTagType{});

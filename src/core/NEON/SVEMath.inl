@@ -205,7 +205,7 @@ inline svfloat16_t svtanh_f16_z(svbool_t pg, svfloat16_t val)
     return tanh;
 }
 
-inline svfloat32_t svlog_f32_z(svbool_t pg, svfloat32_t x)
+inline svfloat32_t svlog_f32_legacy_z(svbool_t pg, svfloat32_t x)
 {
     /** Logarithm polynomial coefficients */
     const svfloat32_t log_tab_1 = svdup_n_f32(-2.29561495781f);
@@ -230,6 +230,80 @@ inline svfloat32_t svlog_f32_z(svbool_t pg, svfloat32_t x)
 
     // Reconstruct
     poly = svmla_f32_z(pg, poly, svcvt_f32_s32_z(pg, m), CONST_LN2);
+
+    return poly;
+}
+
+inline svfloat32_t svlog_f32_z(svbool_t pg, svfloat32_t x)
+{
+    /** Logarithm polynomial coefficients */
+    const svfloat32_t log_tab_1 = svdup_n_f32(-2.29561495781f);
+    const svfloat32_t log_tab_2 = svdup_n_f32(-2.47071170807f);
+    const svfloat32_t log_tab_3 = svdup_n_f32(-5.68692588806f);
+    const svfloat32_t log_tab_4 = svdup_n_f32(-0.165253549814f);
+    const svfloat32_t log_tab_5 = svdup_n_f32(5.17591238022f);
+    const svfloat32_t log_tab_6 = svdup_n_f32(0.844007015228f);
+    const svfloat32_t log_tab_7 = svdup_n_f32(4.58445882797f);
+    const svfloat32_t log_tab_8 = svdup_n_f32(0.0141278216615f);
+
+    const svuint32_t  ABS_MASK  = svdup_n_u32(0x7FFFFFFFu);
+    const svuint32_t  MANT_MASK = svdup_n_u32(0x007FFFFFu);
+    const svuint32_t  SIGN_BIT  = svdup_n_u32(0x80000000u);
+    const svuint32_t  ONE_BITS  = svdup_n_u32(0x3F800000u); // 1.0f
+    const svuint32_t  INF_BITS  = svdup_n_u32(0x7F800000u);
+    const svuint32_t  ZERO      = svdup_n_u32(0u);
+    const svint32_t   CONST_127 = svdup_n_s32(127);
+    const svint32_t   CONST_8   = svdup_n_s32(8);
+    const svfloat32_t CONST_LN2 = svdup_n_f32(0.6931471805f); // ln(2)
+
+    const svuint32_t ix     = svreinterpret_u32_f32(x);
+    const svuint32_t sign   = svand_u32_z(pg, ix, SIGN_BIT);
+    const svuint32_t abs_ix = svand_u32_z(pg, ix, ABS_MASK);
+    const svuint32_t exp    = svlsr_n_u32_z(pg, abs_ix, 23); // logical shift on |x| bits
+
+    // Integer classification -> svbool_t predicates; combine with the _b_z predicate family.
+    const svbool_t is_zero = svcmpeq_u32(pg, abs_ix, ZERO);
+    const svbool_t is_sub  = svand_b_z(pg, svcmpeq_u32(pg, exp, ZERO), svnot_b_z(pg, is_zero));
+    const svbool_t is_inf  = svcmpeq_u32(pg, abs_ix, INF_BITS);
+    const svbool_t is_nan  = svcmpgt_u32(pg, abs_ix, INF_BITS);
+    const svbool_t is_neg  = svcmpeq_u32(pg, sign, SIGN_BIT);
+    const svbool_t fin_pos = svand_b_z(pg, svand_b_z(pg, svnot_b_z(pg, is_zero), svcmpgt_u32(pg, INF_BITS, abs_ix)),
+                                       svcmpeq_u32(pg, sign, ZERO));
+
+    // Positive-normal path: bit-identical to the original (val = mantissa | 0x3F800000, m = exp - 127).
+    const svfloat32_t val_norm = svreinterpret_f32_u32(svorr_u32_z(pg, svand_u32_z(pg, abs_ix, MANT_MASK), ONE_BITS));
+    const svint32_t   m_norm   = svsub_s32_z(pg, svreinterpret_s32_u32(exp), CONST_127);
+
+    // Positive-subnormal path: x = M * 2^-149, M = abs_ix. s = clz(M) - 8 in [1,23]; significand
+    // sigma = 0x3F800000 | ((M << s) & 0x7FFFFF) in [1,2); true exponent = -126 - s. The variable
+    // shift count operand is svuint32_t; non-subnormal lanes yield discarded values.
+    const svint32_t   s       = svsub_s32_z(pg, svreinterpret_s32_u32(svclz_u32_z(pg, abs_ix)), CONST_8);
+    const svuint32_t  shifted = svlsl_u32_z(pg, abs_ix, svreinterpret_u32_s32(s));
+    const svfloat32_t val_sub = svreinterpret_f32_u32(svorr_u32_z(pg, ONE_BITS, svand_u32_z(pg, shifted, MANT_MASK)));
+    const svint32_t   m_sub   = svsub_s32_z(pg, svdup_n_s32(-126), s);
+
+    svfloat32_t val = svsel_f32(is_sub, val_sub, val_norm);
+    svint32_t   m   = svsel_s32(is_sub, m_sub, m_norm);
+
+    // Sanitize exceptional lanes to val=1.0, m=0 BEFORE any FP arithmetic.
+    val = svsel_f32(fin_pos, val, svreinterpret_f32_u32(ONE_BITS));
+    m   = svsel_s32(fin_pos, m, svdup_n_s32(0));
+
+    // Polynomial Approximation (unchanged)
+    svfloat32_t poly = svtaylor_poly_f32_z(pg, val, log_tab_1, log_tab_2, log_tab_3, log_tab_4, log_tab_5, log_tab_6,
+                                           log_tab_7, log_tab_8);
+
+    // Reconstruct
+    poly = svmla_f32_z(pg, poly, svcvt_f32_s32_z(pg, m), CONST_LN2);
+
+    // IEEE exceptional results via predicated selects (no FP arithmetic on exceptional inputs).
+    const svfloat32_t POS_INF = svreinterpret_f32_u32(INF_BITS);
+    const svfloat32_t NEG_INF = svreinterpret_f32_u32(svdup_n_u32(0xFF800000u));
+    const svfloat32_t QNAN    = svreinterpret_f32_u32(svdup_n_u32(0x7FC00000u));
+    poly                      = svsel_f32(is_inf, POS_INF, poly);                // +inf -> +inf
+    poly                      = svsel_f32(is_zero, NEG_INF, poly);               // +/-0 -> -inf
+    poly = svsel_f32(svand_b_z(pg, is_neg, svnot_b_z(pg, is_zero)), QNAN, poly); // negative finite / -inf -> qNaN
+    poly = svsel_f32(is_nan, QNAN, poly);                                        // qNaN/sNaN -> qNaN
 
     return poly;
 }
@@ -313,7 +387,7 @@ inline svfloat16_t svsin_f16_z(svbool_t pg, svfloat16_t val)
 
 inline svfloat32_t svpow_f32_z(svbool_t pg, svfloat32_t a, svfloat32_t b)
 {
-    return svexp_f32_z(pg, svmul_z(pg, b, svlog_f32_z(pg, a)));
+    return svexp_f32_z(pg, svmul_z(pg, b, svlog_f32_legacy_z(pg, a)));
 }
 
 inline svfloat16_t svpow_f16_z(svbool_t pg, svfloat16_t a, svfloat16_t b)
