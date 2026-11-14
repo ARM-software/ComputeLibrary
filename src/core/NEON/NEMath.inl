@@ -292,7 +292,7 @@ inline float32x4_t verfq_f32(float32x4_t x)
 }
 #endif // #ifdef __aarch64__
 
-inline float32x4_t vlogq_f32(float32x4_t x)
+inline float32x4_t vlogq_f32_legacy(float32x4_t x)
 {
     static const int32x4_t   CONST_127 = vdupq_n_s32(127);           // 127
     static const float32x4_t CONST_LN2 = vdupq_n_f32(0.6931471805f); // ln(2)
@@ -306,6 +306,71 @@ inline float32x4_t vlogq_f32(float32x4_t x)
 
     // Reconstruct
     poly = vmlaq_f32(poly, vcvtq_f32_s32(m), CONST_LN2);
+
+    return poly;
+}
+
+inline float32x4_t vlogq_f32(float32x4_t x)
+{
+    static const uint32x4_t  ABS_MASK  = vdupq_n_u32(0x7FFFFFFFu);
+    static const uint32x4_t  MANT_MASK = vdupq_n_u32(0x007FFFFFu);
+    static const uint32x4_t  SIGN_BIT  = vdupq_n_u32(0x80000000u);
+    static const uint32x4_t  ONE_BITS  = vdupq_n_u32(0x3F800000u); // 1.0f
+    static const uint32x4_t  INF_BITS  = vdupq_n_u32(0x7F800000u);
+    static const uint32x4_t  ZERO      = vdupq_n_u32(0u);
+    static const int32x4_t   CONST_127 = vdupq_n_s32(127);
+    static const int32x4_t   CONST_8   = vdupq_n_s32(8);
+    static const float32x4_t CONST_LN2 = vdupq_n_f32(0.6931471805f); // ln(2)
+
+    const uint32x4_t ix     = vreinterpretq_u32_f32(x);
+    const uint32x4_t sign   = vandq_u32(ix, SIGN_BIT);
+    const uint32x4_t abs_ix = vandq_u32(ix, ABS_MASK);
+    const uint32x4_t exp    = vshrq_n_u32(abs_ix, 23);
+
+    // Integer classification (all-ones masks); avoids FP compares that would signal on sNaN.
+    const uint32x4_t is_zero = vceqq_u32(abs_ix, ZERO);
+    const uint32x4_t is_sub  = vandq_u32(vceqq_u32(exp, ZERO), vmvnq_u32(is_zero));
+    const uint32x4_t is_inf  = vceqq_u32(abs_ix, INF_BITS);
+    const uint32x4_t is_nan  = vcgtq_u32(abs_ix, INF_BITS);
+    const uint32x4_t is_neg  = vceqq_u32(sign, SIGN_BIT);
+    // Finite and positive: nonzero, below +inf bit pattern (excludes inf/NaN), sign clear.
+    const uint32x4_t fin_pos =
+        vandq_u32(vandq_u32(vmvnq_u32(is_zero), vcgtq_u32(INF_BITS, abs_ix)), vceqq_u32(sign, ZERO));
+
+    // Positive-normal path: bit-identical to the original (val = mantissa | 0x3F800000, m = exp - 127).
+    const float32x4_t val_norm = vreinterpretq_f32_u32(vorrq_u32(vandq_u32(abs_ix, MANT_MASK), ONE_BITS));
+    const int32x4_t   m_norm   = vsubq_s32(vreinterpretq_s32_u32(exp), CONST_127);
+
+    // Positive-subnormal path: x = M * 2^-149 with M = abs_ix. Let s = clz(M) - 8, then the
+    // significand sigma = M / 2^(23-s) lies in [1,2) and the true exponent is -126 - s.
+    // The shift count is in [1,23] for subnormals; other lanes produce discarded values.
+    const int32x4_t   s       = vsubq_s32(vreinterpretq_s32_u32(vclzq_u32(abs_ix)), CONST_8);
+    const uint32x4_t  shifted = vshlq_u32(abs_ix, s);
+    const float32x4_t val_sub = vreinterpretq_f32_u32(vorrq_u32(ONE_BITS, vandq_u32(shifted, MANT_MASK)));
+    const int32x4_t   m_sub   = vsubq_s32(vdupq_n_s32(-126), s);
+
+    float32x4_t val = vbslq_f32(is_sub, val_sub, val_norm);
+    int32x4_t   m   = vbslq_s32(is_sub, m_sub, m_norm);
+
+    // Sanitize exceptional lanes to val=1.0, m=0 BEFORE any FP arithmetic so the polynomial
+    // never sees zero, infinity, NaN or raw subnormals.
+    val = vbslq_f32(fin_pos, val, vreinterpretq_f32_u32(ONE_BITS));
+    m   = vbslq_s32(fin_pos, m, vdupq_n_s32(0));
+
+    // Polynomial Approximation (unchanged)
+    float32x4_t poly = vtaylor_polyq_f32(val, log_tab);
+
+    // Reconstruct
+    poly = vmlaq_f32(poly, vcvtq_f32_s32(m), CONST_LN2);
+
+    // IEEE exceptional results, selected with integer-classified masks (no FP arithmetic).
+    static const float32x4_t POS_INF = vreinterpretq_f32_u32(INF_BITS);
+    static const float32x4_t NEG_INF = vreinterpretq_f32_u32(vdupq_n_u32(0xFF800000u));
+    static const float32x4_t QNAN    = vreinterpretq_f32_u32(vdupq_n_u32(0x7FC00000u));
+    poly                             = vbslq_f32(is_inf, POS_INF, poly);  // +inf -> +inf
+    poly                             = vbslq_f32(is_zero, NEG_INF, poly); // +/-0 -> -inf
+    poly = vbslq_f32(vandq_u32(is_neg, vmvnq_u32(is_zero)), QNAN, poly);  // negative finite / -inf -> qNaN
+    poly = vbslq_f32(is_nan, QNAN, poly);                                 // qNaN/sNaN -> qNaN
 
     return poly;
 }
@@ -332,7 +397,7 @@ inline float32x4_t vtanhq_f32(float32x4_t val)
 
 inline float32x4_t vpowq_f32(float32x4_t val, float32x4_t n)
 {
-    return vexpq_f32(vmulq_f32(n, vlogq_f32(val)));
+    return vexpq_f32(vmulq_f32(n, vlogq_f32_legacy(val)));
 }
 
 inline float32x4_t vsinq_f32(float32x4_t val)
@@ -732,8 +797,8 @@ inline float16x8_t vpowq_f16(float16x8_t val, float16x8_t n)
     float32x4_t val0_f32 = vcvt_f32_f16(vget_low_f16(val));
     float32x4_t val1_f32 = vcvt_f32_f16(vget_high_f16(val));
 
-    float32x4_t res0_f32 = vexpq_f32(vmulq_f32(n0_f32, vlogq_f32(val0_f32)));
-    float32x4_t res1_f32 = vexpq_f32(vmulq_f32(n1_f32, vlogq_f32(val1_f32)));
+    float32x4_t res0_f32 = vexpq_f32(vmulq_f32(n0_f32, vlogq_f32_legacy(val0_f32)));
+    float32x4_t res1_f32 = vexpq_f32(vmulq_f32(n1_f32, vlogq_f32_legacy(val1_f32)));
 
     return vcombine_f16(vcvt_f16_f32(res0_f32), vcvt_f16_f32(res1_f32));
 }
