@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025 Arm Limited.
+ * Copyright (c) 2017-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,7 +55,8 @@ template <typename TensorType,
           bool reinterpret_output_as_3d = false,
           bool pretranspose_a           = false,
           bool pretranspose_b           = false,
-          bool run_twice                = false>
+          bool run_twice                = false,
+          bool fp_mixed_precision       = false>
 class GEMMGenericValidationFixture : public framework::Fixture
 {
 public:
@@ -147,12 +148,18 @@ protected:
         // The GEMMinfo includes the values of the depth in case of reinterpreted 3d output.
         // If the output shape has the same number of dimensions of the input the method called is a 2D matrix multiplication (depth_output_reinterpreted_as_3D = 0),
         // in the other case we have to use the reinterpreted version of GEMM (depth_output_reinterpreted_as_3D = depth of the 3D output).
-        gemm.configure(&a, &b, (disable_c) ? nullptr : &c, &dst, alpha, beta,
-                       GEMMInfo(false, false, constant_b_and_c, (reinterpret_output_as_3d ? output_shape[2] : 0),
-                                reinterpret_input_as_3d, false, GEMMLowpOutputStageInfo(), false, false,
-                                (reinterpret_input_as_3d || reinterpret_output_as_3d),
-                                arm_compute::ActivationLayerInfo(), false /* fixed_format */,
-                                arm_compute::WeightFormat::UNSPECIFIED, false /* pretranspose_B */, accumulate));
+        const GEMMInfo gemm_info(false, false, constant_b_and_c, (reinterpret_output_as_3d ? output_shape[2] : 0),
+                                 reinterpret_input_as_3d, false, GEMMLowpOutputStageInfo(), fp_mixed_precision, false,
+                                 (reinterpret_input_as_3d || reinterpret_output_as_3d),
+                                 arm_compute::ActivationLayerInfo(), false /* fixed_format */,
+                                 arm_compute::WeightFormat::UNSPECIFIED, false /* pretranspose_B */, accumulate);
+        if (fp_mixed_precision)
+        {
+            // The flag must not make the configuration invalid for any data type
+            ARM_COMPUTE_ASSERT(bool(FunctionType::validate(a.info(), b.info(), (disable_c) ? nullptr : c.info(),
+                                                           dst.info(), alpha, beta, gemm_info)));
+        }
+        gemm.configure(&a, &b, (disable_c) ? nullptr : &c, &dst, alpha, beta, gemm_info);
 
         if (dynamic)
         {
@@ -328,6 +335,13 @@ protected:
                                           alpha, disable_c ? 0.f : beta, dst);
             return dst;
         }
+        else if (fp_mixed_precision && std::is_same<T, half>::value)
+        {
+            // Mixed precision: F16 multiplications with F32 accumulators
+            return reference::gemm_mixed_precision<T>((pretranspose_a) ? a_transposed : a,
+                                                      (pretranspose_b) ? b_transposed : b, c, alpha,
+                                                      disable_c ? 0.f : beta);
+        }
         else
         {
             return reference::gemm<T>((pretranspose_a) ? a_transposed : a, (pretranspose_b) ? b_transposed : b, c,
@@ -378,6 +392,38 @@ public:
                                      run_twice>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta,
                                                        pretranspose, data_type, false /*accumulate*/, dynamic,
                                                        constant_b_and_c, vector_bias);
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class GEMMMixedPrecisionValidationFixture : protected GEMMGenericValidationFixture<TensorType,
+                                                                                   AccessorType,
+                                                                                   FunctionType,
+                                                                                   T,
+                                                                                   false /* disable_c */,
+                                                                                   false /* reinterpret_input_as_3d */,
+                                                                                   false /* reinterpret_output_as_3d */,
+                                                                                   false /* pretranspose_a */,
+                                                                                   false /* pretranspose_b */,
+                                                                                   false /* run_twice */,
+                                                                                   true /* fp_mixed_precision */>
+{
+public:
+    void setup(TensorShape shape_a,
+               TensorShape shape_b,
+               TensorShape shape_c,
+               TensorShape output_shape,
+               float       alpha,
+               float       beta,
+               bool        pretranspose,
+               DataType    data_type,
+               bool        constant_b_and_c)
+    {
+        // Constant B and C let the function select the reshaped kernels, the ones that implement mixed precision
+        GEMMGenericValidationFixture<TensorType, AccessorType, FunctionType, T, false, false, false, false, false, false,
+                                     true>::setup(shape_a, shape_b, shape_c, output_shape, alpha, beta, pretranspose,
+                                                  data_type, false /* accumulate */, false /* dynamic */,
+                                                  constant_b_and_c, false /* vector_bias */);
     }
 };
 
