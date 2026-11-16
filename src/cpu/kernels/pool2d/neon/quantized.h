@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2021-2022, 2024, 2026 Arm Limited.
+ * Copyright (c) 2021-2022, 2024 Arm Limited.
+ * SPDX-FileCopyrightText: Copyright 2026 Donmakino LLC dba ChipLab
  *
  * SPDX-License-Identifier: MIT
  *
