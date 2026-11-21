@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2025 Arm Limited.
+ * Copyright (c) 2017-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -114,6 +114,9 @@ template <typename T>
 using CLGEMMFixture = GEMMValidationFixture<CLTensor, CLAccessor, CLGEMM, T>;
 
 template <typename T>
+using CLGEMMMixedPrecisionFixture = GEMMMixedPrecisionValidationFixture<CLTensor, CLAccessor, CLGEMM, T>;
+
+template <typename T>
 using CLGEMMOutput3DFixture = GEMMValidationFixture<CLTensor, CLAccessor, CLGEMM, T, false, false, true>;
 
 template <typename T>
@@ -170,6 +173,43 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
+
+TEST_SUITE(MixedPrecision)
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLGEMMMixedPrecisionFixture<half>,
+                       framework::DatasetMode::ALL,
+                       combine(datasets::SmallGEMMDataset(),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F16),
+                               make("ConstantB", {true, false})))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
+}
+TEST_SUITE_END() // FP16
+
+TEST_SUITE(FP32)
+// The mixed precision flag only applies to F16, F32 must keep its normal behaviour when it is set
+FIXTURE_DATA_TEST_CASE(RunSmall,
+                       CLGEMMMixedPrecisionFixture<float>,
+                       framework::DatasetMode::ALL,
+                       combine(concat(datasets::SmallGEMMDataset(),
+                                      zip(make("A", TensorShape(1024U, 7U)),
+                                          make("B", TensorShape(5U, 1024U)),
+                                          make("C", TensorShape(5U, 7U)),
+                                          make("Dst", TensorShape(5U, 7U)),
+                                          make("Alpha", 1.0f),
+                                          make("Beta", 1.0f))),
+                               make("ReshapeWeights", {true}),
+                               make("DataType", DataType::F32),
+                               make("ConstantB", {true, false})))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
+}
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // MixedPrecision
 
 TEST_SUITE(INPUT_OUTPUT_3D)
 TEST_SUITE(Float)
