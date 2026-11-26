@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2025 Arm Limited.
+ * Copyright (c) 2021, 2025-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,11 @@
  */
 #include "src/cpu/CpuContext.h"
 #include "tests/validation/fixtures/UNIT/ContextFixture.h"
+
+#if defined(__aarch64__) && defined(__APPLE__)
+#include <sys/sysctl.h>
+#include <sys/types.h>
+#endif // defined(__aarch64__) && defined(__APPLE__)
 
 namespace arm_compute
 {
@@ -107,6 +112,18 @@ TEST_CASE(CpuCapabilities, framework::DatasetMode::ALL)
     arm_compute::cpu::CpuContext ctx_legacy(nullptr);
     ARM_COMPUTE_ASSERT(ctx_legacy.capabilities().cpu_info.has_neon() == true);
 }
+
+#if defined(__aarch64__) && defined(__APPLE__)
+TEST_CASE(FhmMatchesSystemCapability, framework::DatasetMode::ALL)
+{
+    int        fhm       = 0;
+    size_t     size      = sizeof(fhm);
+    const bool supported = sysctlbyname("hw.optional.arm.FEAT_FHM", &fhm, &size, nullptr, 0) == 0 && fhm != 0;
+
+    const cpu::CpuContext ctx(nullptr);
+    ARM_COMPUTE_EXPECT_EQUAL(ctx.capabilities().cpu_info.has_fhm(), supported, framework::LogLevel::ERRORS);
+}
+#endif // defined(__aarch64__) && defined(__APPLE__)
 
 TEST_SUITE_END() // Context
 TEST_SUITE_END() // UNIT

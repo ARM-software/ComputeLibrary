@@ -482,6 +482,7 @@ CpuInfo CpuInfo::build()
     isainfo.dot        = get_hw_capability("hw.optional.arm.FEAT_DotProd");
     isainfo.bf16       = get_hw_capability("hw.optional.arm.FEAT_BF16");
     isainfo.i8mm       = get_hw_capability("hw.optional.arm.FEAT_I8MM");
+    isainfo.fhm        = get_hw_capability("hw.optional.arm.FEAT_FHM");
     isainfo.sme        = get_hw_capability("hw.optional.arm.FEAT_SME");
     isainfo.sme_f32f32 = get_hw_capability("hw.optional.arm.SME_F32F32");
     isainfo.sme_b16f32 = get_hw_capability("hw.optional.arm.SME_B16F32");
