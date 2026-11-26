@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, 2022, 2024-2025 Arm Limited.
+ * Copyright (c) 2019, 2022, 2024-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,8 @@
 
 #include "arm_compute/core/Types.h"
 
+#include <cmath>
+
 namespace arm_compute
 {
 namespace test
@@ -33,6 +35,34 @@ namespace validation
 {
 namespace reference
 {
+namespace
+{
+/** Normalises one row in double precision, with the variance computed from centred values */
+template <typename T>
+void mean_std_normalize_row(const T *src, T *dst, int cols, float epsilon)
+{
+    double sum = 0.0;
+    for (int j = 0; j < cols; ++j)
+    {
+        sum += static_cast<double>(src[j]);
+    }
+    const double mean = sum / cols;
+
+    double sum_sq = 0.0;
+    for (int j = 0; j < cols; ++j)
+    {
+        const double centred = static_cast<double>(src[j]) - mean;
+        sum_sq += centred * centred;
+    }
+    const double stddev_inv = 1.0 / std::sqrt(sum_sq / cols + epsilon);
+
+    for (int j = 0; j < cols; ++j)
+    {
+        dst[j] = static_cast<T>((static_cast<double>(src[j]) - mean) * stddev_inv);
+    }
+}
+} // namespace
+
 template <typename T>
 SimpleTensor<T> mean_std_normalization_layer(const SimpleTensor<T> &src, float epsilon, const QuantizationInfo &oq_info)
 {
@@ -43,22 +73,7 @@ SimpleTensor<T> mean_std_normalization_layer(const SimpleTensor<T> &src, float e
     const int       batch_size = src.shape()[1];
     for (int i = 0; i < batch_size; ++i)
     {
-        float sum    = static_cast<T>(0.f);
-        float sum_sq = static_cast<T>(0.f);
-        for (int j = 0; j < cols; ++j)
-        {
-            const T value = src[j + i * cols];
-            sum += value;
-            sum_sq += value * value;
-        }
-        const float mean       = sum / cols;
-        const float var        = (((sum_sq / cols) - (mean * mean)) + epsilon);
-        const float stddev_inv = 1.f / std::sqrt(var);
-        for (int j = 0; j < cols; ++j)
-        {
-            const float res   = (src[j + i * cols] - mean) * stddev_inv;
-            dst[j + i * cols] = static_cast<T>(res);
-        }
+        mean_std_normalize_row(src.data() + i * cols, dst.data() + i * cols, cols, epsilon);
     }
     return dst;
 }

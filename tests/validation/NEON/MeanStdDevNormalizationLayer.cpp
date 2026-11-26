@@ -52,6 +52,11 @@ RelativeTolerance<half> tolerance_f16(half(0.2f));
 #endif /* ARM_COMPUTE_ENABLE_FP16 */
 RelativeTolerance<float>   tolerance_f32(0.001f);
 RelativeTolerance<uint8_t> tolerance_qasymm8(1);
+
+/** Rows shorter than a vector, rows with a tail after full vectors (4 lanes in FP32, 8 in FP16) and a hidden size */
+const auto LargeMeanShapes = make("Shape",
+                                  {TensorShape(3U, 4U), TensorShape(7U, 3U), TensorShape(9U, 3U), TensorShape(17U, 3U),
+                                   TensorShape(33U, 2U), TensorShape(768U, 2U)});
 } // namespace
 
 TEST_SUITE(NEON)
@@ -80,6 +85,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(
 template <typename T>
 using NEMeanStdDevNormalizationLayerFixture =
     MeanStdDevNormalizationLayerValidationFixture<Tensor, Accessor, NEMeanStdDevNormalizationLayer, T>;
+template <typename T>
+using NEMeanStdDevNormalizationLayerOffsetFixture =
+    MeanStdDevNormalizationLayerOffsetValidationFixture<Tensor, Accessor, NEMeanStdDevNormalizationLayer, T>;
 
 TEST_SUITE(Float)
 #ifdef ARM_COMPUTE_ENABLE_FP16
@@ -122,6 +130,27 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
         framework::ARM_COMPUTE_PRINT_WARNING();
     }
 }
+// Large mean compared with the spread, constant rows and nearly constant rows
+FIXTURE_DATA_TEST_CASE(RunLargeMean,
+                       NEMeanStdDevNormalizationLayerOffsetFixture<half>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(LargeMeanShapes,
+                               make("DataType", DataType::F16),
+                               make("InPlace", {false, true}),
+                               make("Epsilon", {1e-8f}),
+                               zip(make("Offset", {100.f, 100.1f, 100.f}), make("Spread", {1.f, 0.f, 0.1f}))))
+{
+    if (CPUInfo::get().has_fp16())
+    {
+        // Validate output
+        validate(Accessor(_target), _reference, tolerance_f16);
+    }
+    else
+    {
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
+    }
+}
 TEST_SUITE_END() // FP16
 #endif           /* ARM_COMPUTE_ENABLE_FP16 */
 
@@ -144,6 +173,19 @@ FIXTURE_DATA_TEST_CASE(RunLarge,
                                make("DataType", DataType::F32),
                                make("InPlace", {false, true}),
                                make("Epsilon", {1e-8})))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
+// Large mean compared with the spread, constant rows and nearly constant rows
+FIXTURE_DATA_TEST_CASE(RunLargeMean,
+                       NEMeanStdDevNormalizationLayerOffsetFixture<float>,
+                       framework::DatasetMode::PRECOMMIT,
+                       combine(LargeMeanShapes,
+                               make("DataType", DataType::F32),
+                               make("InPlace", {false, true}),
+                               make("Epsilon", {1e-8f}),
+                               zip(make("Offset", {1e4f, 1000.1f, 1000.1f}), make("Spread", {1.f, 0.f, 1e-3f}))))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
