@@ -45,6 +45,9 @@
 #include "tests/validation/helpers/ActivationHelpers.h"
 #include "tests/validation/Validation.h"
 
+#include <cmath>
+#include <type_traits>
+
 namespace arm_compute
 {
 namespace test
@@ -112,6 +115,60 @@ void test_float_sqrt_boundary_value()
     auto reference_dst = reference::activation_layer<T>(reference_src, info);
 
     validate(Accessor(src), reference_dst, tolerance_float_sqrt);
+}
+
+template <typename T, ARM_COMPUTE_REQUIRES_TA(arm_compute::utils::traits::is_floating_point<T>::value)>
+void test_float_soft_relu_overflow_boundary()
+{
+    constexpr auto vector_size = uint32_t{16};
+
+    auto data_type = DataType::F32;
+#ifdef ARM_COMPUTE_ENABLE_FP16
+    data_type = std::is_same<T, half>::value ? DataType::F16 : data_type;
+#endif /* ARM_COMPUTE_ENABLE_FP16 */
+
+    if (data_type == DataType::F16 && !CPUInfo::get().has_fp16())
+    {
+        ARM_COMPUTE_TEST_WARNING("Device does not support fp16 vector operations. Test SKIPPED.");
+        framework::ARM_COMPUTE_PRINT_WARNING();
+
+        return;
+    }
+
+    const auto boundary_values =
+        std::vector<T>{T(11.f), T(11.015625f), T(11.078125f), T(11.09375f), T(11.5f), T(12.f), T(20.f), T(40.f)};
+
+    // One extra element ensures the partially predicated SVE tail and the NEON scalar tail are exercised.
+    const auto shape = TensorShape{vector_size + boundary_values.size() + 1};
+    const auto info  = ActivationLayerInfo{ActivationLayerInfo::ActivationFunction::SOFT_RELU};
+
+    auto src = create_tensor<Tensor>(shape, data_type);
+    auto act = NEActivationLayer{};
+    act.configure(&src, nullptr, info);
+    src.allocator()->allocate();
+    library->fill_static_values(Accessor(src), boundary_values);
+    act.run();
+
+    auto reference_src = SimpleTensor<T>{shape, data_type};
+    library->fill_static_values(reference_src, boundary_values);
+    const auto reference_dst = reference::activation_layer<T>(reference_src, info);
+
+    const auto tolerance =
+        std::is_same<T, float>::value ? RelativeTolerance<float>(0.00001f) : RelativeTolerance<float>(0.001f);
+    validate(Accessor(src), reference_dst, tolerance, 0.f, 0.f);
+
+    auto        out       = Accessor{src};
+    const float threshold = std::is_same<T, float>::value ? 12.f : 11.f;
+    for (size_t i = 0; i < shape.total_size(); ++i)
+    {
+        const auto input = static_cast<float>(boundary_values[i % boundary_values.size()]);
+        const auto value = static_cast<float>(*static_cast<const T *>(out(Coordinates(static_cast<int>(i)))));
+        ARM_COMPUTE_EXPECT(std::isfinite(value), framework::LogLevel::ERRORS);
+        if (input > threshold)
+        {
+            ARM_COMPUTE_EXPECT(value == input, framework::LogLevel::ERRORS);
+        }
+    }
 }
 } // namespace
 
@@ -199,6 +256,10 @@ TEST_CASE(SqrtBoundaryValue, framework::DatasetMode::ALL)
 {
     test_float_sqrt_boundary_value<half>();
 }
+TEST_CASE(SoftReluOverflowBoundary, framework::DatasetMode::ALL)
+{
+    test_float_soft_relu_overflow_boundary<half>();
+}
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEActivationLayerFixture<half>,
                        framework::DatasetMode::ALL,
@@ -243,6 +304,10 @@ TEST_SUITE(FP32)
 TEST_CASE(SqrtBoundaryValue, framework::DatasetMode::ALL)
 {
     test_float_sqrt_boundary_value<float>();
+}
+TEST_CASE(SoftReluOverflowBoundary, framework::DatasetMode::ALL)
+{
+    test_float_soft_relu_overflow_boundary<float>();
 }
 FIXTURE_DATA_TEST_CASE(RunSmall,
                        NEActivationLayerFixture<float>,
