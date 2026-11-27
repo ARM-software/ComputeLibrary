@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Arm Limited.
+ * Copyright (c) 2022-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,8 @@
 #include "src/cpu/CpuTypes.h"
 #include "src/cpu/kernels/meanstddevnorm/generic/neon/impl.h"
 
+#include <algorithm>
+
 namespace arm_compute
 {
 namespace cpu
@@ -54,50 +56,73 @@ void mean_stddev_normalization<float16_t, 8>(ITensor *input, ITensor *output, fl
             auto in_ptr  = reinterpret_cast<const float16_t *>(input_itr.ptr());
             auto out_ptr = reinterpret_cast<float16_t *>(output_itr.ptr());
 
+            // First pass: the mean, accumulated in f32
             float32x4x2_t sum_vec = {vdupq_n_f32(0.0f), vdupq_n_f32(0.0f)};
-
-            float32x4_t sum_sq_vec = vdupq_n_f32(0.0f);
-
             for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
                 float16x8_t data = vld1q_f16(in_ptr + x);
-                float32x4_t dl   = vcvt_f32_f16(vget_low_f16(data));
-                float32x4_t dh   = vcvt_f32_f16(vget_high_f16(data));
-                sum_vec.val[0]   = vaddq_f32(sum_vec.val[0], dl);
-                sum_vec.val[1]   = vaddq_f32(sum_vec.val[1], dh);
-                sum_sq_vec       = vaddq_f32(sum_sq_vec, vmulq_f32(dl, dl));
-                sum_sq_vec       = vaddq_f32(sum_sq_vec, vmulq_f32(dh, dh));
+                sum_vec.val[0]   = vaddq_f32(sum_vec.val[0], vcvt_f32_f16(vget_low_f16(data)));
+                sum_vec.val[1]   = vaddq_f32(sum_vec.val[1], vcvt_f32_f16(vget_high_f16(data)));
             }
-
-            float32x4_t sum_carry_res = vpaddq_f32(sum_vec.val[0], sum_vec.val[1]);
-            float       sum           = vaddvq_f32(sum_carry_res);
-            float       sum_sq        = vaddvq_f32(sum_sq_vec);
+            float sum = vaddvq_f32(vpaddq_f32(sum_vec.val[0], sum_vec.val[1]));
 
             // Compute left-over elements
             for (; x < window_end_x; ++x)
             {
-                const float fdata = static_cast<float>(*(in_ptr + x));
-                sum += fdata;
-                sum_sq += fdata * fdata;
+                sum += static_cast<float>(*(in_ptr + x));
+            }
+            const float mean = sum / input->info()->dimension(0);
+
+            // Second pass: sums of the centred values d = x - mean in f32 (corrected two-pass algorithm). Sum(d^2) gives
+            // the variance without the cancellation of E[x^2] - mean^2, and sum(d) corrects the rounding error of the
+            // mean, which would otherwise be added to the variance and leak into the output, e.g. for constant rows.
+            // The mean stays in f32: rounded to f16 it is off by up to half an f16 step, more than many variances.
+            const float32x4_t mean_vec   = vdupq_n_f32(mean);
+            float32x4x2_t     sum_d_vec  = {vdupq_n_f32(0.0f), vdupq_n_f32(0.0f)};
+            float32x4x2_t     sum_sq_vec = {vdupq_n_f32(0.0f), vdupq_n_f32(0.0f)};
+            for (x = window_start_x; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                float16x8_t data  = vld1q_f16(in_ptr + x);
+                float32x4_t dl    = vsubq_f32(vcvt_f32_f16(vget_low_f16(data)), mean_vec);
+                float32x4_t dh    = vsubq_f32(vcvt_f32_f16(vget_high_f16(data)), mean_vec);
+                sum_d_vec.val[0]  = vaddq_f32(sum_d_vec.val[0], dl);
+                sum_d_vec.val[1]  = vaddq_f32(sum_d_vec.val[1], dh);
+                sum_sq_vec.val[0] = vfmaq_f32(sum_sq_vec.val[0], dl, dl);
+                sum_sq_vec.val[1] = vfmaq_f32(sum_sq_vec.val[1], dh, dh);
+            }
+            float sum_d  = vaddvq_f32(vaddq_f32(sum_d_vec.val[0], sum_d_vec.val[1]));
+            float sum_sq = vaddvq_f32(vaddq_f32(sum_sq_vec.val[0], sum_sq_vec.val[1]));
+
+            // Compute left-over elements
+            for (; x < window_end_x; ++x)
+            {
+                const float centred = static_cast<float>(*(in_ptr + x)) - mean;
+                sum_d += centred;
+                sum_sq += centred * centred;
             }
 
-            float16_t mean       = static_cast<float16_t>(sum / input->info()->dimension(0));
-            float     var        = (sum_sq / input->info()->dimension(0)) - (mean * mean);
-            float16_t stddev_inv = static_cast<float16_t>(1.f / sqrt(var + epsilon));
+            // shift is the rounding error of the mean; the clamp keeps rounding from making a zero variance negative
+            const float shift      = sum_d / input->info()->dimension(0);
+            const float var        = std::max(sum_sq / input->info()->dimension(0) - shift * shift, 0.f);
+            const float stddev_inv = 1.f / sqrt(var + epsilon);
 
-            float16x8_t mean_vec       = vdupq_n_f16(mean);
-            float16x8_t stddev_inv_vec = vdupq_n_f16(stddev_inv);
-
+            // Normalise in f32 and convert once when storing
+            const float32x4_t shift_vec      = vdupq_n_f32(shift);
+            const float32x4_t stddev_inv_vec = vdupq_n_f32(stddev_inv);
             for (x = window_start_x; x <= (window_end_x - window_step_x); x += window_step_x)
             {
                 float16x8_t data = vld1q_f16(in_ptr + x);
-                float16x8_t res  = vmulq_f16(vsubq_f16(data, mean_vec), stddev_inv_vec);
+                float32x4_t dl   = vsubq_f32(vsubq_f32(vcvt_f32_f16(vget_low_f16(data)), mean_vec), shift_vec);
+                float32x4_t dh   = vsubq_f32(vsubq_f32(vcvt_f32_f16(vget_high_f16(data)), mean_vec), shift_vec);
+                float16x8_t res  = vcombine_f16(vcvt_f16_f32(vmulq_f32(dl, stddev_inv_vec)),
+                                                vcvt_f16_f32(vmulq_f32(dh, stddev_inv_vec)));
                 // Store results
                 vst1q_f16(out_ptr + x, res);
             }
             for (; x < window_end_x; ++x)
             {
-                *(out_ptr + x) = (*(in_ptr + x) - mean) * stddev_inv;
+                const float centred = (static_cast<float>(*(in_ptr + x)) - mean) - shift;
+                *(out_ptr + x)      = static_cast<float16_t>(centred * stddev_inv);
             }
         },
         input_itr, output_itr);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023 Arm Limited.
+ * Copyright (c) 2019-2023, 2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,8 @@
 
 #include "src/core/NEON/wrapper/wrapper.h"
 
+#include <algorithm>
+
 namespace arm_compute
 {
 namespace cpu
@@ -46,6 +48,17 @@ void mean_stddev_normalization(ITensor *input, ITensor *output, float epsilon, c
     Iterator input_itr(input, win);
     Iterator output_itr(output, win);
 
+    // Sum of the lanes of a vector, added pairwise
+    const auto add_lanes = [](const auto &vec)
+    {
+        auto res = wrapper::vpadd(wrapper::vgethigh(vec), wrapper::vgetlow(vec));
+        for (int i = 0; i < size / 4; ++i)
+        {
+            res = wrapper::vpadd(res, res);
+        }
+        return wrapper::vgetlane(res, 0);
+    };
+
     execute_window_loop(
         win,
         [&](const Coordinates &)
@@ -54,51 +67,61 @@ void mean_stddev_normalization(ITensor *input, ITensor *output, float epsilon, c
             auto in_ptr  = reinterpret_cast<const ScalarType *>(input_itr.ptr());
             auto out_ptr = reinterpret_cast<ScalarType *>(output_itr.ptr());
 
-            auto sum_vec    = wrapper::vdup_n(static_cast<ScalarType>(0.f), ExactTagType{});
-            auto sum_sq_vec = wrapper::vdup_n(static_cast<ScalarType>(0.f), ExactTagType{});
-
+            // First pass: the mean
+            auto sum_vec = wrapper::vdup_n(static_cast<ScalarType>(0.f), ExactTagType{});
             for (; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                auto data  = wrapper::vloadq(in_ptr + x);
-                sum_vec    = wrapper::vadd(sum_vec, data);
-                sum_sq_vec = wrapper::vadd(sum_sq_vec, wrapper::vmul(data, data));
+                sum_vec = wrapper::vadd(sum_vec, wrapper::vloadq(in_ptr + x));
             }
-
-            auto sum_carry_res    = wrapper::vpadd(wrapper::vgethigh(sum_vec), wrapper::vgetlow(sum_vec));
-            auto sum_sq_carry_res = wrapper::vpadd(wrapper::vgethigh(sum_sq_vec), wrapper::vgetlow(sum_sq_vec));
-            for (int i = 0; i < size / 4; ++i)
-            {
-                sum_carry_res    = wrapper::vpadd(sum_carry_res, sum_carry_res);
-                sum_sq_carry_res = wrapper::vpadd(sum_sq_carry_res, sum_sq_carry_res);
-            }
-
-            auto sum    = wrapper::vgetlane(sum_carry_res, 0);
-            auto sum_sq = wrapper::vgetlane(sum_sq_carry_res, 0);
+            auto sum = add_lanes(sum_vec);
 
             // Compute left-over elements
             for (; x < window_end_x; ++x)
             {
-                ScalarType data = *(in_ptr + x);
-                sum += data;
-                sum_sq += data * data;
+                sum += *(in_ptr + x);
             }
+            const ScalarType mean     = sum / input->info()->dimension(0);
+            const auto       mean_vec = wrapper::vdup_n(mean, ExactTagType{});
 
-            ScalarType mean       = sum / input->info()->dimension(0);
-            ScalarType var        = (sum_sq / input->info()->dimension(0)) - (mean * mean);
-            ScalarType stddev_inv = 1.f / sqrt(var + epsilon);
-
-            auto mean_vec       = wrapper::vdup_n(mean, ExactTagType{});
-            auto stddev_inv_vec = wrapper::vdup_n(stddev_inv, ExactTagType{});
+            // Second pass: sums of the centred values d = x - mean (corrected two-pass algorithm). Sum(d^2) gives the
+            // variance without the cancellation of E[x^2] - mean^2, and sum(d) corrects the rounding error of the mean,
+            // which would otherwise be added to the variance and leak into the output, e.g. for constant rows.
+            auto sum_d_vec  = wrapper::vdup_n(static_cast<ScalarType>(0.f), ExactTagType{});
+            auto sum_sq_vec = wrapper::vdup_n(static_cast<ScalarType>(0.f), ExactTagType{});
             for (x = window_start_x; x <= (window_end_x - window_step_x); x += window_step_x)
             {
-                auto data = wrapper::vloadq(in_ptr + x);
-                auto res  = wrapper::vmul(wrapper::vsub(data, mean_vec), stddev_inv_vec);
+                const auto centred = wrapper::vsub(wrapper::vloadq(in_ptr + x), mean_vec);
+                sum_d_vec          = wrapper::vadd(sum_d_vec, centred);
+                sum_sq_vec         = wrapper::vadd(sum_sq_vec, wrapper::vmul(centred, centred));
+            }
+            auto sum_d  = add_lanes(sum_d_vec);
+            auto sum_sq = add_lanes(sum_sq_vec);
+
+            // Compute left-over elements
+            for (; x < window_end_x; ++x)
+            {
+                const ScalarType centred = *(in_ptr + x) - mean;
+                sum_d += centred;
+                sum_sq += centred * centred;
+            }
+
+            // shift is the rounding error of the mean; the clamp keeps rounding from making a zero variance negative
+            const ScalarType shift = sum_d / input->info()->dimension(0);
+            const ScalarType var =
+                std::max(sum_sq / input->info()->dimension(0) - shift * shift, static_cast<ScalarType>(0.f));
+            const ScalarType stddev_inv = 1.f / sqrt(var + epsilon);
+
+            const auto shift_vec      = wrapper::vdup_n(shift, ExactTagType{});
+            const auto stddev_inv_vec = wrapper::vdup_n(stddev_inv, ExactTagType{});
+            for (x = window_start_x; x <= (window_end_x - window_step_x); x += window_step_x)
+            {
+                auto centred = wrapper::vsub(wrapper::vsub(wrapper::vloadq(in_ptr + x), mean_vec), shift_vec);
                 // Store results
-                wrapper::vstore(out_ptr + x, res);
+                wrapper::vstore(out_ptr + x, wrapper::vmul(centred, stddev_inv_vec));
             }
             for (; x < window_end_x; ++x)
             {
-                *(out_ptr + x) = (*(in_ptr + x) - mean) * stddev_inv;
+                *(out_ptr + x) = ((*(in_ptr + x) - mean) - shift) * stddev_inv;
             }
         },
         input_itr, output_itr);

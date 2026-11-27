@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2025 Arm Limited.
+ * Copyright (c) 2019-2026 Arm Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,7 +65,7 @@ protected:
     {
         if (is_data_type_float(_data_type))
         {
-            std::uniform_real_distribution<> distribution{-1.0f, 1.0f};
+            std::uniform_real_distribution<> distribution{_offset - _spread, _offset + _spread};
             library->fill(tensor, distribution, 0);
         }
         else
@@ -130,6 +130,23 @@ protected:
     TensorType      _target{};
     SimpleTensor<T> _reference{};
     DataType        _data_type{};
+    double          _offset{0.0}; // float inputs are uniform in [_offset - _spread, _offset + _spread]
+    double          _spread{1.0};
+};
+
+/** Float inputs around @p offset, for rows whose mean is large compared with their spread (0 gives constant rows) */
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class MeanStdDevNormalizationLayerOffsetValidationFixture
+    : public MeanStdDevNormalizationLayerValidationFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    void setup(TensorShape shape, DataType dt, bool in_place, float epsilon, float offset, float spread)
+    {
+        this->_offset = offset;
+        this->_spread = spread;
+        MeanStdDevNormalizationLayerValidationFixture<TensorType, AccessorType, FunctionType, T>::setup(
+            shape, dt, in_place, epsilon);
+    }
 };
 
 } // namespace validation
