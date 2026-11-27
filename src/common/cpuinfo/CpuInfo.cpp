@@ -316,7 +316,7 @@ uint32_t not_little_num_cpus_internal()
 
     std::vector<uint32_t>::iterator result       = std::max_element(cpus_all.begin(), cpus_all.end());
     uint32_t                        max_capacity = *result;
-    uint32_t                        threshold    = max_capacity / 2;
+    uint32_t                        threshold    = max_capacity / 3;
     for (unsigned int i = 0; i < cpus_all.size(); i++)
     {
         if (!(cpus_all[i] < threshold))
