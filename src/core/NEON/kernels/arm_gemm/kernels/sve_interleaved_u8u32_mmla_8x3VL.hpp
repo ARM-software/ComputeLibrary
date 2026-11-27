@@ -86,6 +86,10 @@ public:
                     return { 38.02, 1.85, 0.28 };
                 case CPUModel::V1:
                     return { 95.28, 7.99, 0.79 };
+                case CPUModel::V2:
+                    return { 90.14, 8.78, 3.81 };
+                case CPUModel::V3:
+                    return { 106.55, 8.95, 4.04 };
             }
         }
 
