@@ -35,11 +35,11 @@ static inline uint32_t reduce_u32x4(uint32x4_t v)
 {
 #if defined(__aarch64__)
     return vaddvq_u32(v);
-#else
+#else  // __aarch64__
     uint32x2_t s = vadd_u32(vget_low_u32(v), vget_high_u32(v));
     s            = vpadd_u32(s, s);
     return vget_lane_u32(s, 0);
-#endif
+#endif // __aarch64__
 }
 
 template <>
