@@ -22,6 +22,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "tests/validation/reference/PoolingLayer.h"
+
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEPoolingLayer.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -330,6 +332,97 @@ TEST_CASE(SimpleIntegerAvgPooling, framework::DatasetMode::ALL)
         const int8_t ref    = values[i];
         const int8_t target = reinterpret_cast<int8_t *>(output.buffer())[i];
         ARM_COMPUTE_EXPECT(ref == target, framework::LogLevel::ERRORS);
+    }
+}
+
+DATA_TEST_CASE(AvgPoolingDifferentQuantizationInfo,
+               framework::DatasetMode::ALL,
+               combine(make("DataType", {DataType::QASYMM8, DataType::QASYMM8_SIGNED}),
+                       make("PoolSize", {2, 3, 4}),
+                       make("Stride", {1, 2}),
+                       make("Padding", {0, 1})),
+               data_type,
+               pool_size,
+               stride,
+               padding)
+{
+    const auto shape         = TensorShape(19U, 7U, 2U);
+    const int  input_offset  = data_type == DataType::QASYMM8 ? 128 : -3;
+    const int  output_offset = data_type == DataType::QASYMM8 ? 128 : 5;
+    const auto input_qinfo   = QuantizationInfo(0.25f, input_offset);
+    const auto output_qinfo  = QuantizationInfo(1.f / 128.f, output_offset);
+    const auto pool_info     = PoolingLayerInfo(PoolingType::AVG, pool_size, DataLayout::NCHW,
+                                                PadStrideInfo(stride, stride, padding, padding), true);
+
+    SimpleTensor<float> reference_input(shape, DataType::F32);
+    library->fill_static_values(reference_input, std::vector<float>{0.f, -0.25f});
+    const auto expected = reference::pooling_layer(reference_input, pool_info, QuantizationInfo(), nullptr);
+
+    Tensor input  = create_tensor<Tensor>(shape, data_type, 1, input_qinfo, DataLayout::NCHW);
+    Tensor output = create_tensor<Tensor>(expected.shape(), data_type, 1, output_qinfo, DataLayout::NCHW);
+
+    NEPoolingLayer pool;
+    pool.configure(&input, &output, pool_info);
+    input.allocator()->allocate();
+    output.allocator()->allocate();
+
+    // Alternate zero and -0.25 so the mean needs fractional input codes.
+    library->fill_static_values(Accessor(input), std::vector<int>{input_offset, input_offset - 1});
+
+    pool.run();
+
+    for (int i = 0; i < expected.num_elements(); ++i)
+    {
+        const auto coords = index2coord(expected.shape(), i);
+        const int  target = data_type == DataType::QASYMM8 ? *output.ptr_to_element(coords)
+                                                           : *reinterpret_cast<int8_t *>(output.ptr_to_element(coords));
+        const int  ref    = data_type == DataType::QASYMM8 ? quantize_qasymm8(expected[i], output_qinfo)
+                                                           : quantize_qasymm8_signed(expected[i], output_qinfo);
+        ARM_COMPUTE_EXPECT_EQUAL(target, ref, framework::LogLevel::ERRORS);
+    }
+}
+
+DATA_TEST_CASE(PoolingDifferentQuantizationInfoSaturates,
+               framework::DatasetMode::ALL,
+               combine(make("DataType", {DataType::QASYMM8, DataType::QASYMM8_SIGNED}),
+                       make("PoolType", {PoolingType::AVG, PoolingType::MAX}),
+                       make("PoolSize", {2, 3, 4}),
+                       make("Positive", {true, false})),
+               data_type,
+               pool_type,
+               pool_size,
+               positive)
+{
+    // value / output scale is far outside the int range, so the result must saturate.
+    const bool is_signed    = data_type == DataType::QASYMM8_SIGNED;
+    const int  input_offset = (is_signed || positive) ? 0 : 255;
+    const int  input_value  = positive ? 64 : (is_signed ? -128 : 0);
+    const int  expected     = positive ? (is_signed ? 127 : 255) : (is_signed ? -128 : 0);
+    const auto shape        = TensorShape(19U, 7U, 2U);
+    const auto dst_shape    = TensorShape(20U - pool_size, 8U - pool_size, 2U);
+    const auto pool_info =
+        PoolingLayerInfo(pool_type, pool_size, DataLayout::NCHW, PadStrideInfo(1, 1, 0, 0), true);
+
+    Tensor input  = create_tensor<Tensor>(shape, data_type, 1, QuantizationInfo(0.25f, input_offset), DataLayout::NCHW);
+    Tensor output = create_tensor<Tensor>(dst_shape, data_type, 1, QuantizationInfo(1.f / (1 << 27), 0),
+                                          DataLayout::NCHW);
+
+    ARM_COMPUTE_EXPECT(bool(NEPoolingLayer::validate(input.info(), output.info(), pool_info)),
+                       framework::LogLevel::ERRORS);
+    NEPoolingLayer pool;
+    pool.configure(&input, &output, pool_info);
+    input.allocator()->allocate();
+    output.allocator()->allocate();
+    library->fill_static_values(Accessor(input), std::vector<int>{input_value});
+
+    pool.run();
+
+    for (unsigned int i = 0; i < dst_shape.total_size(); ++i)
+    {
+        const auto coords = index2coord(dst_shape, i);
+        const int  target = is_signed ? *reinterpret_cast<int8_t *>(output.ptr_to_element(coords))
+                                      : *output.ptr_to_element(coords);
+        ARM_COMPUTE_EXPECT_EQUAL(target, expected, framework::LogLevel::ERRORS);
     }
 }
 

@@ -318,19 +318,35 @@ void poolingMxN_q8_neon_nhwc(const ITensor    *src,
 }
 
 #if defined(ENABLE_NCHW_KERNELS)
+/** Quantize to an 8-bit asymmetric value, clamping in float before the integer conversion.
+ *
+ * Saturates like the vector requantization paths when value / scale is outside the int range.
+ */
+template <typename T>
+inline T quantize_saturating(float value, const UniformQuantizationInfo &qinfo)
+{
+    ARM_COMPUTE_ERROR_ON(qinfo.scale == 0);
+    const float lower = static_cast<float>(std::numeric_limits<T>::lowest()) - qinfo.offset;
+    const float upper = static_cast<float>(std::numeric_limits<T>::max()) - qinfo.offset;
+    const float q     = std::max(lower, std::min(value / qinfo.scale, upper));
+    return static_cast<T>(support::cpp11::lround(q) + qinfo.offset);
+}
+
 template <typename T, typename TVec>
-inline void scale_vector_q16x8(bool               exclude_padding,
-                               TVec              &v,
-                               const Coordinates &id,
-                               int                id_offset,
-                               int                step,
-                               const int          pool_size,
-                               const int          upper_bound_w,
-                               const int          upper_bound_h,
-                               const int          pad_x,
-                               const int          pad_y,
-                               const int          stride_x,
-                               const int          stride_y)
+inline void scale_vector_q16x8(bool                           exclude_padding,
+                               TVec                          &v,
+                               const Coordinates             &id,
+                               int                            id_offset,
+                               int                            step,
+                               const int                      pool_size,
+                               const int                      upper_bound_w,
+                               const int                      upper_bound_h,
+                               const int                      pad_x,
+                               const int                      pad_y,
+                               const int                      stride_x,
+                               const int                      stride_y,
+                               const UniformQuantizationInfo &src_qinfo,
+                               const UniformQuantizationInfo &dst_qinfo)
 {
     int       start_x = (id.x() + id_offset) * stride_x - pad_x;
     int       start_y = id.y() * stride_y - pad_y;
@@ -340,7 +356,8 @@ inline void scale_vector_q16x8(bool               exclude_padding,
         start_y = std::max(0, start_y);
     }
 
-    std::array<T, 8> elems = {{
+    using q16_t                = typename wrapper::traits::promote_t<T>;
+    std::array<q16_t, 8> elems = {{
         wrapper::vgetlane(v, 0),
         wrapper::vgetlane(v, 1),
         wrapper::vgetlane(v, 2),
@@ -360,7 +377,15 @@ inline void scale_vector_q16x8(bool               exclude_padding,
             c_start_x = std::max(0, c_start_x);
         }
         float scale = 1.f / ((end_y - start_y) * (end_x - c_start_x));
-        el *= scale;
+        if (src_qinfo != dst_qinfo)
+        {
+            const float res = (el * scale - src_qinfo.offset) * src_qinfo.scale;
+            el              = quantize_saturating<T>(res, dst_qinfo);
+        }
+        else
+        {
+            el *= scale;
+        }
         start_x += step * stride_x;
     }
 
@@ -527,9 +552,9 @@ void pooling2_quantized_neon_nchw(const ITensor    *src,
                 q16x8_t res_lower = wrapper::vcombine(vpsum_1, vpsum_2);
 
                 // Scale lower result
-                scale_vector_q16x8<q16_t, q16x8_t>(pool_info.exclude_padding, res_lower, id, 0, scale_step_x, pool_size,
-                                                   upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top,
-                                                   pool_stride_x, pool_stride_y);
+                scale_vector_q16x8<T, q16x8_t>(pool_info.exclude_padding, res_lower, id, 0, scale_step_x, pool_size,
+                                               upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                               pool_stride_y, src_qinfo, dst_qinfo);
                 lower_res = wrapper::vmovn(res_lower);
 
                 // Compute upper result for stride_x == 1
@@ -546,9 +571,9 @@ void pooling2_quantized_neon_nchw(const ITensor    *src,
                                        wrapper::vgethigh(vrsum_shifted.val[1])));
 
                     // Scale upper result
-                    scale_vector_q16x8<q16_t, q16x8_t>(pool_info.exclude_padding, res_upper, id, 1, 2, pool_size,
-                                                       upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top,
-                                                       pool_stride_x, pool_stride_y);
+                    scale_vector_q16x8<T, q16x8_t>(pool_info.exclude_padding, res_upper, id, 1, 2, pool_size,
+                                                   upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top,
+                                                   pool_stride_x, pool_stride_y, src_qinfo, dst_qinfo);
                     upper_res = wrapper::vmovn(res_upper);
                 }
             }
@@ -563,7 +588,7 @@ void pooling2_quantized_neon_nchw(const ITensor    *src,
                 }
             }
 
-            if (have_different_qinfo)
+            if (have_different_qinfo && pool_info.pool_type == PoolingType::MAX)
             {
                 const auto requantized_dst = vrequantize_pooling<q8x8_t, q8x16_t>(lower_res, upper_res, requant_qinfo);
                 lower_res                  = wrapper::vgetlow(requantized_dst);
@@ -694,21 +719,21 @@ void pooling3_quantized_neon_nchw(const ITensor    *src,
                         wrapper::vgetlane(final_sum.val[1], 4), wrapper::vgetlane(final_sum.val[1], 6),
                     };
 
-                    scale_vector_q16x8<q16_t, q16x8_t>(pool_info.exclude_padding, res, id, 0, 1, pool_size,
-                                                       upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top,
-                                                       pool_stride_x, pool_stride_y);
+                    scale_vector_q16x8<T, q16x8_t>(pool_info.exclude_padding, res, id, 0, 1, pool_size, upper_bound_w,
+                                                   upper_bound_h, pool_pad_left, pool_pad_top, pool_stride_x,
+                                                   pool_stride_y, src_qinfo, dst_qinfo);
                     fres = wrapper::vmovn(res);
                 }
                 else
                 {
                     // Scale lower result
-                    scale_vector_q16x8<q16_t, q16x8_t>(pool_info.exclude_padding, final_sum.val[0], id, 0, 1, pool_size,
-                                                       upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top,
-                                                       pool_stride_x, pool_stride_y);
+                    scale_vector_q16x8<T, q16x8_t>(pool_info.exclude_padding, final_sum.val[0], id, 0, 1, pool_size,
+                                                   upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top,
+                                                   pool_stride_x, pool_stride_y, src_qinfo, dst_qinfo);
                     // Scale lower result
-                    scale_vector_q16x8<q16_t, q16x8_t>(pool_info.exclude_padding, final_sum.val[1], id, 8, 1, pool_size,
-                                                       upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top,
-                                                       pool_stride_x, pool_stride_y);
+                    scale_vector_q16x8<T, q16x8_t>(pool_info.exclude_padding, final_sum.val[1], id, 8, 1, pool_size,
+                                                   upper_bound_w, upper_bound_h, pool_pad_left, pool_pad_top,
+                                                   pool_stride_x, pool_stride_y, src_qinfo, dst_qinfo);
                     fqres = wrapper::vcombine(wrapper::vmovn(final_sum.val[0]), wrapper::vmovn(final_sum.val[1]));
                 }
             }
@@ -734,7 +759,7 @@ void pooling3_quantized_neon_nchw(const ITensor    *src,
             // Store result
             if (pool_stride_x == 1)
             {
-                if (src_qinfo != dst_qinfo)
+                if (src_qinfo != dst_qinfo && pool_info.pool_type == PoolingType::MAX)
                 {
                     fqres = vrequantize_pooling<q8x8_t, q8x16_t>(wrapper::vgetlow(fqres), wrapper::vgethigh(fqres),
                                                                  requant_qinfo);
@@ -744,7 +769,7 @@ void pooling3_quantized_neon_nchw(const ITensor    *src,
             }
             else
             {
-                if (src_qinfo != dst_qinfo)
+                if (src_qinfo != dst_qinfo && pool_info.pool_type == PoolingType::MAX)
                 {
                     fres = vrequantize_pooling<q8x8_t>(fres, requant_qinfo);
                 }
@@ -824,7 +849,15 @@ void poolingMxN_quantized_neon_nchw(const ITensor    *src,
                     }
                 }
                 // Divide by scale
-                res = static_cast<T>(support::cpp11::round(sres * scale));
+                if (src_qinfo != dst_qinfo)
+                {
+                    const float res_f = (sres * scale - src_qinfo.offset) * src_qinfo.scale;
+                    res               = quantize_saturating<T>(res_f, dst_qinfo);
+                }
+                else
+                {
+                    res = static_cast<T>(support::cpp11::round(sres * scale));
+                }
             }
             else
             {
@@ -842,10 +875,11 @@ void poolingMxN_quantized_neon_nchw(const ITensor    *src,
                     }
                 }
             }
+            if (pool_info.pool_type == PoolingType::MAX && src_qinfo != dst_qinfo)
+            {
+                res = quantize_saturating<T>(Qasymm8QuantizationHelper<T>::dequantize(res, src_qinfo), dst_qinfo);
+            }
             // Store result
-            res                                 = (src_qinfo != dst_qinfo) ? Qasymm8QuantizationHelper<T>::quantize(
-                                                                                 Qasymm8QuantizationHelper<T>::dequantize(res, src_qinfo), dst_qinfo)
-                                                                           : res;
             *(reinterpret_cast<T *>(out.ptr())) = res;
         },
         in, out);
